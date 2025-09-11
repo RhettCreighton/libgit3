@@ -45,7 +45,7 @@
  * that you need.  It should be the only thing you need to include in order
  * to compile properly and get all the libgit2 API.
  */
-#include "git2.h"
+#include "git3.h"
 
 static void oid_parsing(git_oid *out);
 static void object_database(git_repository *repo, git_oid *oid);
@@ -86,7 +86,7 @@ int lg2_general(git_repository *repo, int argc, char** argv)
 	 * Initialize the library, this will set up any global state which libgit2 needs
 	 * including threading and crypto
 	 */
-	git_libgit2_init();
+	git_libgit3_init();
 
 	/**
 	 * ### Opening the Repository

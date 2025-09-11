@@ -1,3 +1,3 @@
-#include <git2.h>
+#include <git3.h>
 
 #include "common.h"

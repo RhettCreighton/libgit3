@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "git2.h"
+#include "git3.h"
 
 #include "standalone_driver.h"
 #include "fuzzer_utils.h"
@@ -24,10 +24,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	if (git_libgit2_init() < 0)
+	if (git_libgit3_init() < 0)
 		abort();
 
-	if (git_libgit2_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
+	if (git_libgit3_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
 		abort();
 
 	repo = fuzzer_repo_init();

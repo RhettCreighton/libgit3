@@ -25,8 +25,8 @@ if(USE_AUTH_NTLM STREQUAL "builtin")
 	endif()
 
         add_subdirectory("${PROJECT_SOURCE_DIR}/deps/ntlmclient" "${PROJECT_BINARY_DIR}/deps/ntlmclient")
-        list(APPEND LIBGIT2_DEPENDENCY_INCLUDES "${PROJECT_SOURCE_DIR}/deps/ntlmclient")
-        list(APPEND LIBGIT2_DEPENDENCY_OBJECTS "$<TARGET_OBJECTS:ntlmclient>")
+        list(APPEND LIBGIT3_DEPENDENCY_INCLUDES "${PROJECT_SOURCE_DIR}/deps/ntlmclient")
+        list(APPEND LIBGIT3_DEPENDENCY_OBJECTS "$<TARGET_OBJECTS:ntlmclient>")
 
 	set(GIT_AUTH_NTLM 1)
 	set(GIT_AUTH_NTLM_BUILTIN 1)

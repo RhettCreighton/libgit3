@@ -1,4 +1,5 @@
-# libgit2: the cross-platform, linkable library implementation of git.
+# Copyright (c) 2025 Rhett Creighton
+# libgit3: the cross-platform, linkable library implementation of git with SHA3.
 # See `README.md` for build instructions.
 #
 # This top-level CMakeLists.txt sets up configuration options and

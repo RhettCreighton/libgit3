@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "git2.h"
-#include "git2/sys/transport.h"
+#include "git3.h"
+#include "git3/sys/transport.h"
 #include "futils.h"
 
 #include "standalone_driver.h"
@@ -163,10 +163,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	if (git_libgit2_init() < 0)
+	if (git_libgit3_init() < 0)
 		abort();
 
-	if (git_libgit2_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
+	if (git_libgit3_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
 		abort();
 
 	repo = fuzzer_repo_init();

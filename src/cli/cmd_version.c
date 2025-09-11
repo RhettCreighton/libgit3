@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <git2.h>
+#include <git3.h>
 #include "common.h"
 #include "cmd.h"
 
@@ -82,10 +82,10 @@ int cmd_version(int argc, char **argv)
 	printf("%s version %s\n", PROGRAM_NAME, LIBGIT2_VERSION);
 
 	if (build_options) {
-		supported_features = git_libgit2_features();
+		supported_features = git_libgit3_features();
 
 		for (i = buildinfo_names; i->key; i++) {
-			const char *value = git_libgit2_buildinfo(i->key);
+			const char *value = git_libgit3_buildinfo(i->key);
 
 			if (value && *value)
 				printf("%s: %s\n", i->name, value);
@@ -98,7 +98,7 @@ int cmd_version(int argc, char **argv)
 			if (!(supported_features & i->key))
 				continue;
 
-			backend = git_libgit2_feature_backend(i->key);
+			backend = git_libgit3_feature_backend(i->key);
 			printf("backend-%s: %s\n", i->name, backend);
 		}
 	}

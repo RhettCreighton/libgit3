@@ -9,7 +9,7 @@
 #define INCLUDE_errors_h__
 
 #include "git2_util.h"
-#include "git2/sys/errors.h"
+#include "git3/sys/errors.h"
 
 /* Initialize the error thread-state. */
 int git_error_global_init(void);

@@ -49,9 +49,9 @@ if(USE_HTTPS)
 			message(FATAL_ERROR "Cannot use SecureTransport backend, SSLCreateContext not supported")
 		endif()
 
-		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${SECURITY_INCLUDE_DIR})
-		list(APPEND LIBGIT2_SYSTEM_LIBS ${COREFOUNDATION_LDFLAGS} ${SECURITY_LDFLAGS})
-		list(APPEND LIBGIT2_PC_LIBS ${COREFOUNDATION_LDFLAGS} ${SECURITY_LDFLAGS})
+		list(APPEND LIBGIT3_SYSTEM_INCLUDES ${SECURITY_INCLUDE_DIR})
+		list(APPEND LIBGIT3_SYSTEM_LIBS ${COREFOUNDATION_LDFLAGS} ${SECURITY_LDFLAGS})
+		list(APPEND LIBGIT3_PC_LIBS ${COREFOUNDATION_LDFLAGS} ${SECURITY_LDFLAGS})
 
 		set(GIT_HTTPS_SECURETRANSPORT 1)
 		add_feature_info("HTTPS" ON "using SecureTransport")
@@ -60,16 +60,16 @@ if(USE_HTTPS)
 			message(FATAL_ERROR "Asked for OpenSSL TLS backend, but it wasn't found")
 		endif()
 
-		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${OPENSSL_INCLUDE_DIR})
-		list(APPEND LIBGIT2_SYSTEM_LIBS ${OPENSSL_LIBRARIES})
+		list(APPEND LIBGIT3_SYSTEM_INCLUDES ${OPENSSL_INCLUDE_DIR})
+		list(APPEND LIBGIT3_SYSTEM_LIBS ${OPENSSL_LIBRARIES})
 
 		# Static OpenSSL (lib crypto.a) requires libdl, include it explicitly
 		if(LINK_WITH_STATIC_LIBRARIES STREQUAL ON)
-			list(APPEND LIBGIT2_SYSTEM_LIBS ${CMAKE_DL_LIBS})
+			list(APPEND LIBGIT3_SYSTEM_LIBS ${CMAKE_DL_LIBS})
 		endif()
 
-		list(APPEND LIBGIT2_PC_LIBS ${OPENSSL_LDFLAGS})
-		list(APPEND LIBGIT2_PC_REQUIRES "openssl")
+		list(APPEND LIBGIT3_PC_LIBS ${OPENSSL_LDFLAGS})
+		list(APPEND LIBGIT3_PC_REQUIRES "openssl")
 
 		set(GIT_HTTPS_OPENSSL 1)
 		add_feature_info("HTTPS" ON "using OpenSSL")
@@ -114,12 +114,12 @@ if(USE_HTTPS)
 			add_definitions(-DGIT_DEFAULT_CERT_LOCATION="${CERT_LOCATION}")
 		endif()
 
-		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${MBEDTLS_INCLUDE_DIR})
-		list(APPEND LIBGIT2_SYSTEM_LIBS ${MBEDTLS_LIBRARIES})
+		list(APPEND LIBGIT3_SYSTEM_INCLUDES ${MBEDTLS_INCLUDE_DIR})
+		list(APPEND LIBGIT3_SYSTEM_LIBS ${MBEDTLS_LIBRARIES})
 		# mbedTLS has no pkgconfig file, hence we can't require it
 		# https://github.com/ARMmbed/mbedtls/issues/228
 		# For now, pass its link flags as our own
-		list(APPEND LIBGIT2_PC_LIBS ${MBEDTLS_LIBRARIES})
+		list(APPEND LIBGIT3_PC_LIBS ${MBEDTLS_LIBRARIES})
 
 		set(GIT_HTTPS_MBEDTLS 1)
 
@@ -129,8 +129,8 @@ if(USE_HTTPS)
 			add_feature_info("HTTPS" ON "using mbedTLS")
 		endif()
 	elseif(USE_HTTPS STREQUAL "schannel")
-		list(APPEND LIBGIT2_SYSTEM_LIBS "rpcrt4" "crypt32" "ole32")
-		list(APPEND LIBGIT2_PC_LIBS "-lrpcrt4" "-lcrypt32" "-lole32")
+		list(APPEND LIBGIT3_SYSTEM_LIBS "rpcrt4" "crypt32" "ole32")
+		list(APPEND LIBGIT3_PC_LIBS "-lrpcrt4" "-lcrypt32" "-lole32")
 
 		set(GIT_HTTPS_SCHANNEL 1)
 		add_feature_info("HTTPS" ON "using Schannel")
@@ -139,20 +139,20 @@ if(USE_HTTPS)
 		# we have to include a private header and generate our own import library
 		if(MINGW)
 			add_subdirectory("${PROJECT_SOURCE_DIR}/deps/winhttp" "${PROJECT_BINARY_DIR}/deps/winhttp")
-			list(APPEND LIBGIT2_SYSTEM_LIBS winhttp)
-			list(APPEND LIBGIT2_DEPENDENCY_INCLUDES "${PROJECT_SOURCE_DIR}/deps/winhttp")
+			list(APPEND LIBGIT3_SYSTEM_LIBS winhttp)
+			list(APPEND LIBGIT3_DEPENDENCY_INCLUDES "${PROJECT_SOURCE_DIR}/deps/winhttp")
 		else()
-			list(APPEND LIBGIT2_SYSTEM_LIBS "winhttp")
-			list(APPEND LIBGIT2_PC_LIBS "-lwinhttp")
+			list(APPEND LIBGIT3_SYSTEM_LIBS "winhttp")
+			list(APPEND LIBGIT3_PC_LIBS "-lwinhttp")
 		endif()
 
-		list(APPEND LIBGIT2_SYSTEM_LIBS "rpcrt4" "crypt32" "ole32")
-		list(APPEND LIBGIT2_PC_LIBS "-lrpcrt4" "-lcrypt32" "-lole32")
+		list(APPEND LIBGIT3_SYSTEM_LIBS "rpcrt4" "crypt32" "ole32")
+		list(APPEND LIBGIT3_PC_LIBS "-lrpcrt4" "-lcrypt32" "-lole32")
 
 		set(GIT_HTTPS_WINHTTP 1)
 		add_feature_info("HTTPS" ON "using WinHTTP")
 	elseif(USE_HTTPS STREQUAL "openssl-dynamic")
-		list(APPEND LIBGIT2_SYSTEM_LIBS dl)
+		list(APPEND LIBGIT3_SYSTEM_LIBS dl)
 
 		set(GIT_HTTPS_OPENSSL_DYNAMIC 1)
 		add_feature_info("HTTPS" ON "using OpenSSL-Dynamic")

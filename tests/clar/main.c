@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 
 	clar_test_init(argc, argv);
 
-	res = git_libgit2_init();
+	res = git_libgit3_init();
 	if (res < 0) {
 		const git_error *err = git_error_last();
 		const char *msg = err ? err->message : "unknown failure";
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	clar_test_shutdown();
 
 	cl_global_trace_disable();
-	git_libgit2_shutdown();
+	git_libgit3_shutdown();
 
 #ifdef GIT_DEBUG_LEAKCHECK_WIN32
 	if (git_win32_leakcheck_has_leaks())

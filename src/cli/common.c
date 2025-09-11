@@ -5,8 +5,8 @@
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include <git2.h>
-#include <git2/sys/config.h>
+#include <git3.h>
+#include <git3/sys/config.h>
 
 #include "git2_util.h"
 #include "vector.h"

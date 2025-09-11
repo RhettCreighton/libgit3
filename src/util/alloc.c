@@ -13,7 +13,7 @@
 #include "allocators/failalloc.h"
 #include "allocators/win32_leakcheck.h"
 
-/* Fail any allocation until git_libgit2_init is called. */
+/* Fail any allocation until git_libgit3_init is called. */
 git_allocator git__allocator = {
 	git_failalloc_malloc,
 	git_failalloc_realloc,

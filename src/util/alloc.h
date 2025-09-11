@@ -8,7 +8,7 @@
 #ifndef INCLUDE_alloc_h__
 #define INCLUDE_alloc_h__
 
-#include "git2/sys/alloc.h"
+#include "git3/sys/alloc.h"
 
 #include "git2_util.h"
 

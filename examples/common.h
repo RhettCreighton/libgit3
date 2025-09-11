@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <git2.h>
+#include <git3.h>
 #include <fcntl.h>
 
 #ifdef _WIN32

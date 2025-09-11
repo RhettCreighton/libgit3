@@ -9,8 +9,8 @@
 
 #include <stdio.h>
 
-#include "git2.h"
-#include "git2/sys/mempack.h"
+#include "git3.h"
+#include "git3/sys/mempack.h"
 #include "common.h"
 #include "str.h"
 
@@ -28,11 +28,11 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 	GIT_UNUSED(argc);
 	GIT_UNUSED(argv);
 
-	if (git_libgit2_init() < 0) {
+	if (git_libgit3_init() < 0) {
 		fprintf(stderr, "Failed to initialize libgit2\n");
 		abort();
 	}
-	if (git_libgit2_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0) {
+	if (git_libgit3_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0) {
 		fprintf(stderr, "Failed to limit maximum pack object count\n");
 		abort();
 	}

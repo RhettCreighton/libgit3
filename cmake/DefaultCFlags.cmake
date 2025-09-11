@@ -65,7 +65,7 @@ if(MSVC)
 	# /NXCOMPAT - Data execution prevention (DEP)
 	# /LARGEADDRESSAWARE - >2GB user address space on x86
 	# /VERSION - Embed version information in PE header
-	set(CMAKE_EXE_LINKER_FLAGS "/DYNAMICBASE /NXCOMPAT /LARGEADDRESSAWARE /VERSION:${libgit2_VERSION_MAJOR}.${libgit2_VERSION_MINOR}")
+	set(CMAKE_EXE_LINKER_FLAGS "/DYNAMICBASE /NXCOMPAT /LARGEADDRESSAWARE /VERSION:${libgit3_VERSION_MAJOR}.${libgit3_VERSION_MINOR}")
 
 	if(NOT (MSVC_VERSION LESS 1900))
 		# /GUARD:CF - Enable Control Flow Guard

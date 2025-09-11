@@ -1,4 +1,5 @@
-# util: the unit tests for libgit2's utility library
+# Copyright (c) 2025 Rhett Creighton
+# util: the unit tests for libgit3's utility library
 
 if(NOT "${CMAKE_VERSION}" VERSION_LESS 3.27)
 	cmake_policy(SET CMP0148 OLD)
@@ -12,11 +13,11 @@ if(NOT PYTHONINTERP_FOUND)
 	                     "Make sure python is available, or pass -DBUILD_TESTS=OFF to skip building the tests")
 ENDIF()
 
-set(CLAR_PATH "${libgit2_SOURCE_DIR}/tests/clar")
-set(CLAR_FIXTURES "${libgit2_SOURCE_DIR}/tests/resources/")
+set(CLAR_PATH "${libgit3_SOURCE_DIR}/tests/clar")
+set(CLAR_FIXTURES "${libgit3_SOURCE_DIR}/tests/resources/")
 set(TEST_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 add_definitions(-DCLAR_FIXTURE_PATH=\"${CLAR_FIXTURES}\")
-add_definitions(-DCLAR_TMPDIR=\"libgit2_tests\")
+add_definitions(-DCLAR_TMPDIR=\"libgit3_tests\")
 add_definitions(-DCLAR_WIN32_LONGPATHS)
 add_definitions(-DCLAR_HAS_REALPATH)
 add_definitions(-D_FILE_OFFSET_BITS=64)
@@ -44,7 +45,7 @@ set_source_files_properties(
 
 add_executable(util_tests ${SRC_CLAR} ${SRC_TEST} ${LIBGIT2_OBJECTS})
 
-set_target_properties(util_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit2_BINARY_DIR})
+set_target_properties(util_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit3_BINARY_DIR})
 
 target_include_directories(util_tests PRIVATE ${TEST_INCLUDES} ${LIBGIT2_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES})
 target_include_directories(util_tests SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})

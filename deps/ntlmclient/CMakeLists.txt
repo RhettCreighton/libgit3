@@ -33,7 +33,7 @@ elseif(USE_HTTPS STREQUAL "mbedtls")
 	include_directories(${MBEDTLS_INCLUDE_DIR})
 	set(SRC_NTLMCLIENT_CRYPTO "crypt_mbedtls.c" "crypt_mbedtls.h" "crypt_builtin_md4.c")
 else()
-	message(FATAL_ERROR "Unable to use libgit2's HTTPS backend (${USE_HTTPS}) for NTLM crypto")
+	message(FATAL_ERROR "Unable to use libgit3's HTTPS backend (${USE_HTTPS}) for NTLM crypto")
 endif()
 
 add_library(ntlmclient OBJECT ${SRC_NTLMCLIENT} ${SRC_NTLMCLIENT_UNICODE} ${SRC_NTLMCLIENT_CRYPTO})

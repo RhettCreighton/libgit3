@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 	if (argc < 2)
 		usage(argv[0]);
 
-	git_libgit2_init();
+	git_libgit3_init();
 
 	for (args.pos = 1; args.pos < args.argc; ++args.pos) {
 		char *a = args.argv[args.pos];
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
 shutdown:
 	git_repository_free(repo);
-	git_libgit2_shutdown();
+	git_libgit3_shutdown();
 
 	return return_code;
 }

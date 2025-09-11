@@ -1,9 +1,9 @@
-# Experimental feature support for libgit2 - developers can opt in to
+# Experimental feature support for libgit3 - developers can opt in to
 # experimental functionality, like sha256 support. When experimental
 # functionality is enabled, we set both a cmake flag *and* a compile
 # definition. The cmake flag is used to generate `experimental.h`,
 # which will be installed by a `make install`. But the compile definition
-# is used by the libgit2 sources to detect the functionality at library
+# is used by the libgit3 sources to detect the functionality at library
 # build time. This allows us to have an in-tree `experimental.h` with
 # *no* experiments enabled. This lets us support users who build without
 # cmake and cannot generate the `experimental.h` file.
@@ -19,5 +19,5 @@ else()
 endif()
 
 if(EXPERIMENTAL)
-	set(LIBGIT2_FILENAME "${LIBGIT2_FILENAME}-experimental")
+	set(LIBGIT3_FILENAME "${LIBGIT3_FILENAME}-experimental")
 endif()

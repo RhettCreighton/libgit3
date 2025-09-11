@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <git2.h>
+#include <git3.h>
 #include "common.h"
 #include "cmd.h"
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	cli_opt opt;
 	int ret = 0;
 
-	if (git_libgit2_init() < 0) {
+	if (git_libgit3_init() < 0) {
 		cli_error("failed to initialize libgit2");
 		exit(CLI_EXIT_GIT);
 	}
@@ -137,6 +137,6 @@ int main(int argc, char **argv)
 	ret = cmd->fn(argc - 1, &argv[1]);
 
 done:
-	git_libgit2_shutdown();
+	git_libgit3_shutdown();
 	return ret;
 }

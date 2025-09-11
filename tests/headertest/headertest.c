@@ -5,7 +5,7 @@
  * header files to make sure that they can be used with stricter compiler
  * settings than the libgit2 source files generally supports.
  */
-#include "git2.h"
+#include "git3.h"
 
 int main(void)
 {

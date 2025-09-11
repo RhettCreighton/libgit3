@@ -8,7 +8,7 @@
 #ifndef CLI_progress_h__
 #define CLI_progress_h__
 
-#include <git2.h>
+#include <git3.h>
 #include "str.h"
 
 /*

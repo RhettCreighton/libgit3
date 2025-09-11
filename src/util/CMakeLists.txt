@@ -1,4 +1,5 @@
-# util: a shared library for common utility functions for libgit2 projects
+# Copyright (c) 2025 Rhett Creighton
+# util: a shared library for common utility functions for libgit3 projects
 
 add_library(util OBJECT)
 
@@ -81,5 +82,5 @@ list(SORT UTIL_SRC_SHA3)
 target_sources(util PRIVATE ${UTIL_SRC} ${UTIL_SRC_OS} ${UTIL_SRC_SHA1} ${UTIL_SRC_SHA256} ${UTIL_SRC_SHA3})
 ide_split_sources(util)
 
-target_include_directories(util PRIVATE ${UTIL_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES} PUBLIC ${libgit2_SOURCE_DIR}/include)
+target_include_directories(util PRIVATE ${UTIL_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES} PUBLIC ${libgit3_SOURCE_DIR}/include)
 target_include_directories(util SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})

@@ -412,7 +412,7 @@ static void dump_summary(const char *label)
 
 /**
  * Initialize our memory leak tracking and de-dup data structures.
- * This should ONLY be called by git_libgit2_init().
+ * This should ONLY be called by git_libgit3_init().
  */
 void git_win32_leakcheck_stacktrace_init(void)
 {
@@ -498,7 +498,7 @@ int git_win32_leakcheck_stacktrace_dump(
 
 /**
  * Shutdown our memory leak tracking and dump summary data.
- * This should ONLY be called by git_libgit2_shutdown().
+ * This should ONLY be called by git_libgit3_shutdown().
  *
  * We explicitly call _CrtDumpMemoryLeaks() during here so
  * that we can compute summary data for the leaks. We print

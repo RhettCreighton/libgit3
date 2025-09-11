@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <git2.h>
+#include <git3.h>
 
 #include "git2_util.h"
 #include "vector.h"

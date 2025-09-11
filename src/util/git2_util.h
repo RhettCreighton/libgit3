@@ -11,8 +11,8 @@
 # include "git2_features.h"
 #endif
 
-#include "git2/common.h"
-#include "git2/sys/errors.h"
+#include "git3/common.h"
+#include "git3/sys/errors.h"
 #include "cc-compat.h"
 
 typedef struct git_str git_str;
@@ -102,8 +102,8 @@ typedef struct git_str git_str;
 
 #endif
 
-#include "git2/types.h"
-#include "git2/errors.h"
+#include "git3/types.h"
+#include "git3/errors.h"
 #include "thread.h"
 #include "integer.h"
 #include "assert_safe.h"

@@ -1,5 +1,6 @@
-# The main libgit2 source tree: this CMakeLists.txt identifies platform
-# support and includes the subprojects that make up core libgit2 support.
+# Copyright (c) 2025 Rhett Creighton
+# The main libgit3 source tree: this CMakeLists.txt identifies platform
+# support and includes the subprojects that make up core libgit3 support.
 
 #
 # Optional build configuration settings
@@ -153,7 +154,7 @@ execute_process(COMMAND git rev-parse HEAD
 # Include child projects
 #
 
-add_subdirectory(libgit2)
+add_subdirectory(libgit3)
 add_subdirectory(util)
 
 if(BUILD_CLI AND NOT CMAKE_SYSTEM_NAME MATCHES "iOS")
@@ -162,9 +163,9 @@ endif()
 
 # re-export these to the root so that peer projects (tests, fuzzers,
 # examples) can use them
-set(LIBGIT2_INCLUDES ${LIBGIT2_INCLUDES} PARENT_SCOPE)
-set(LIBGIT2_OBJECTS ${LIBGIT2_OBJECTS} PARENT_SCOPE)
-set(LIBGIT2_DEPENDENCY_INCLUDES ${LIBGIT2_DEPENDENCY_INCLUDES} PARENT_SCOPE)
-set(LIBGIT2_DEPENDENCY_OBJECTS ${LIBGIT2_DEPENDENCY_OBJECTS} PARENT_SCOPE)
-set(LIBGIT2_SYSTEM_INCLUDES ${LIBGIT2_SYSTEM_INCLUDES} PARENT_SCOPE)
-set(LIBGIT2_SYSTEM_LIBS ${LIBGIT2_SYSTEM_LIBS} PARENT_SCOPE)
+set(LIBGIT3_INCLUDES ${LIBGIT3_INCLUDES} PARENT_SCOPE)
+set(LIBGIT3_OBJECTS ${LIBGIT3_OBJECTS} PARENT_SCOPE)
+set(LIBGIT3_DEPENDENCY_INCLUDES ${LIBGIT3_DEPENDENCY_INCLUDES} PARENT_SCOPE)
+set(LIBGIT3_DEPENDENCY_OBJECTS ${LIBGIT3_DEPENDENCY_OBJECTS} PARENT_SCOPE)
+set(LIBGIT3_SYSTEM_INCLUDES ${LIBGIT3_SYSTEM_INCLUDES} PARENT_SCOPE)
+set(LIBGIT3_SYSTEM_LIBS ${LIBGIT3_SYSTEM_LIBS} PARENT_SCOPE)

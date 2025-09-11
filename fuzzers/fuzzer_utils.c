@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "git2.h"
+#include "git3.h"
 #include "futils.h"
 
 #include "fuzzer_utils.h"

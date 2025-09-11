@@ -18,4 +18,4 @@
  #include "win32/thread.h"
 #endif
 
-#include "git2.h"
+#include "git3.h"

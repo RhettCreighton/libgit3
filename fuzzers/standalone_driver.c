@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-#include "git2.h"
+#include "git3.h"
 #include "futils.h"
 #include "path.h"
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 	unsigned i = 0;
 	int error = 0;
 
-	if (git_libgit2_init() < 0) {
+	if (git_libgit3_init() < 0) {
 		fprintf(stderr, "Failed to initialize libgit2\n");
 		abort();
 	}
@@ -68,6 +68,6 @@ int main(int argc, char **argv)
 
 exit:
 	git_vector_dispose_deep(&corpus_files);
-	git_libgit2_shutdown();
+	git_libgit3_shutdown();
 	return error;
 }

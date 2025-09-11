@@ -3,7 +3,7 @@
 
 #include "clar.h"
 #include "common.h"
-#include "git2/sys/alloc.h"
+#include "git3/sys/alloc.h"
 
 void cl_alloc_limit(size_t bytes);
 void cl_alloc_reset(void);

@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <git2.h>
+#include <git3.h>
 #include "common.h"
 #include "cmd.h"
 #include "error.h"

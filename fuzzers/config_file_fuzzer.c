@@ -7,7 +7,7 @@
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2.h"
+#include "git3.h"
 #include "config_backend.h"
 
 #include "standalone_driver.h"
@@ -27,7 +27,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	if (git_libgit2_init() < 0)
+	if (git_libgit3_init() < 0)
 		abort();
 
 	return 0;

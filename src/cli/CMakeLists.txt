@@ -1,11 +1,12 @@
+# Copyright (c) 2025 Rhett Creighton
 set(CLI_INCLUDES
-	"${libgit2_BINARY_DIR}/src/util"
-	"${libgit2_BINARY_DIR}/include"
-	"${libgit2_SOURCE_DIR}/src/util"
-	"${libgit2_SOURCE_DIR}/src/cli"
-	"${libgit2_SOURCE_DIR}/include"
-	"${LIBGIT2_DEPENDENCY_INCLUDES}"
-	"${LIBGIT2_SYSTEM_INCLUDES}")
+	"${libgit3_BINARY_DIR}/src/util"
+	"${libgit3_BINARY_DIR}/include"
+	"${libgit3_SOURCE_DIR}/src/util"
+	"${libgit3_SOURCE_DIR}/src/cli"
+	"${libgit3_SOURCE_DIR}/include"
+	"${LIBGIT3_DEPENDENCY_INCLUDES}"
+	"${LIBGIT3_SYSTEM_INCLUDES}")
 
 if(WIN32 AND NOT CYGWIN)
 	file(GLOB CLI_SRC_OS win32/*.c)
@@ -19,15 +20,15 @@ file(GLOB CLI_SRC_C *.c *.h)
 list(SORT CLI_SRC_C)
 
 #
-# The CLI currently needs to be statically linked against libgit2 because
-# the utility library uses libgit2's thread-local error buffers.  TODO:
-# remove this dependency and allow us to dynamically link against libgit2.
+# The CLI currently needs to be statically linked against libgit3 because
+# the utility library uses libgit3's thread-local error buffers.  TODO:
+# remove this dependency and allow us to dynamically link against libgit3.
 #
 
 if(BUILD_CLI STREQUAL "dynamic")
-	set(CLI_LIBGIT2_LIBRARY libgit2package)
+	set(CLI_LIBGIT2_LIBRARY libgit3package)
 else()
-	set(CLI_LIBGIT2_OBJECTS $<TARGET_OBJECTS:libgit2>)
+	set(CLI_LIBGIT2_OBJECTS $<TARGET_OBJECTS:libgit3>)
 endif()
 
 #
@@ -40,7 +41,7 @@ add_executable(git2_cli ${CLI_SRC_C} ${CLI_SRC_OS} ${CLI_OBJECTS}
 	${LIBGIT2_DEPENDENCY_OBJECTS})
 target_link_libraries(git2_cli ${CLI_LIBGIT2_LIBRARY} ${LIBGIT2_SYSTEM_LIBS})
 
-set_target_properties(git2_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit2_BINARY_DIR})
+set_target_properties(git2_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit3_BINARY_DIR})
 set_target_properties(git2_cli PROPERTIES OUTPUT_NAME ${LIBGIT2_FILENAME})
 
 ide_split_sources(git2_cli)

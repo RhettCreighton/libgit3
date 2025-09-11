@@ -1,4 +1,5 @@
-# examples: code usage examples of libgit2
+# Copyright (c) 2025 Rhett Creighton
+# examples: code usage examples of libgit3
 
 file(GLOB SRC_EXAMPLES *.c *.h)
 
@@ -11,7 +12,7 @@ target_include_directories(lg2 PRIVATE ${LIBGIT2_INCLUDES} ${LIBGIT2_DEPENDENCY_
 target_include_directories(lg2 SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})
 
 if(WIN32 OR ANDROID)
-	target_link_libraries(lg2 libgit2package)
+	target_link_libraries(lg2 libgit3package)
 else()
-	target_link_libraries(lg2 libgit2package pthread)
+	target_link_libraries(lg2 libgit3package pthread)
 endif()

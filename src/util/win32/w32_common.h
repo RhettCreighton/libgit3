@@ -8,7 +8,7 @@
 #ifndef INCLUDE_win32_w32_common_h__
 #define INCLUDE_win32_w32_common_h__
 
-#include <git2/common.h>
+#include <git3/common.h>
 
 /*
  * 4096 is the max allowed Git path. `MAX_PATH` (260) is the typical max allowed
