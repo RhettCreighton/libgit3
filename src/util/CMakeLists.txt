@@ -70,11 +70,15 @@ endif()
 
 list(SORT UTIL_SRC_SHA256)
 
+# SHA3 sources
+file(GLOB UTIL_SRC_SHA3 hash/sha3.* hash/sha3/block/*)
+list(SORT UTIL_SRC_SHA3)
+
 #
 # Build the library
 #
 
-target_sources(util PRIVATE ${UTIL_SRC} ${UTIL_SRC_OS} ${UTIL_SRC_SHA1} ${UTIL_SRC_SHA256})
+target_sources(util PRIVATE ${UTIL_SRC} ${UTIL_SRC_OS} ${UTIL_SRC_SHA1} ${UTIL_SRC_SHA256} ${UTIL_SRC_SHA3})
 ide_split_sources(util)
 
 target_include_directories(util PRIVATE ${UTIL_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES} PUBLIC ${libgit2_SOURCE_DIR}/include)

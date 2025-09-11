@@ -11,6 +11,7 @@
 #include "git2_util.h"
 
 #include "hash/sha.h"
+#include "hash/sha3.h"
 
 typedef struct {
 	void *data;
@@ -20,7 +21,8 @@ typedef struct {
 typedef enum {
 	GIT_HASH_ALGORITHM_NONE = 0,
 	GIT_HASH_ALGORITHM_SHA1,
-	GIT_HASH_ALGORITHM_SHA256
+	GIT_HASH_ALGORITHM_SHA256,
+	GIT_HASH_ALGORITHM_SHA3_256
 } git_hash_algorithm_t;
 
 #define GIT_HASH_MAX_SIZE GIT_HASH_SHA256_SIZE
@@ -29,6 +31,7 @@ typedef struct git_hash_ctx {
 	union {
 		git_hash_sha1_ctx sha1;
 		git_hash_sha256_ctx sha256;
+		git_hash_sha3_ctx sha3;
 	} ctx;
 	git_hash_algorithm_t algorithm;
 } git_hash_ctx;
@@ -53,6 +56,8 @@ GIT_INLINE(size_t) git_hash_size(git_hash_algorithm_t algorithm) {
 			return GIT_HASH_SHA1_SIZE;
 		case GIT_HASH_ALGORITHM_SHA256:
 			return GIT_HASH_SHA256_SIZE;
+		case GIT_HASH_ALGORITHM_SHA3_256:
+			return GIT_HASH_SHA3_SIZE;
 		default:
 			return 0;
 	}

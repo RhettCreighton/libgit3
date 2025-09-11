@@ -1,32 +1,34 @@
-libgit2 - the Git linkable library
-==================================
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/9609/badge)](https://www.bestpractices.dev/projects/9609)
+libgit3 - the Git3 linkable library
+====================================
 
-| Build Status | |
-| ------------ | - |
-| **main** branch builds | [![CI Build](https://github.com/libgit2/libgit2/actions/workflows/main.yml/badge.svg?branch=main&event=push)](https://github.com/libgit2/libgit2/actions/workflows/main.yml?query=event%3Apush+branch%3Amain) [![Experimental Features](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml/badge.svg?branch=main)](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml?query=event%3Apush+branch%3Amain) |
-| **v1.9 branch** builds | [![CI Build](https://github.com/libgit2/libgit2/actions/workflows/main.yml/badge.svg?branch=maint%2Fv1.9&event=push)](https://github.com/libgit2/libgit2/actions/workflows/main.yml?query=event%3Apush+branch%3Amaint%2Fv1.9) [![Experimental Features](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml/badge.svg?branch=maint%2Fv1.9)](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml?query=event%3Apush+branch%3Amaint%2Fv1.9) |
-| **v1.8 branch** builds | [![CI Build](https://github.com/libgit2/libgit2/actions/workflows/main.yml/badge.svg?branch=maint%2Fv1.8&event=push)](https://github.com/libgit2/libgit2/actions/workflows/main.yml?query=event%3Apush+branch%3Amaint%2Fv1.8) [![Experimental Features](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml/badge.svg?branch=maint%2Fv1.8)](https://github.com/libgit2/libgit2/actions/workflows/experimental.yml?query=event%3Apush+branch%3Amaint%2Fv1.8) |
-| **Nightly** builds | [![Nightly Build](https://github.com/libgit2/libgit2/actions/workflows/nightly.yml/badge.svg?branch=main&event=schedule)](https://github.com/libgit2/libgit2/actions/workflows/nightly.yml) [![Coverity Scan Status](https://scan.coverity.com/projects/639/badge.svg)](https://scan.coverity.com/projects/639) |
+**A fork of libgit2 modified to work with Git3 repositories**
 
-`libgit2` is a portable, pure C implementation of the Git core methods
-provided as a linkable library with a solid API, allowing to build Git
+`libgit3` is a portable, pure C implementation of the Git3 core methods
+provided as a linkable library with a solid API, allowing to build Git3
 functionality into your application.
 
-`libgit2` is used in a variety of places, from GUI clients to hosting
-providers ("forges") and countless utilities and applications in
-between. Because it's written in C, it can be made available to any
-other programming language through "bindings", so you can use it in
-[Ruby](https://github.com/libgit2/rugged),
-[.NET](https://github.com/libgit2/libgit2sharp),
-[Python](http://www.pygit2.org/),
-[Node.js](http://nodegit.org),
-[Rust](https://github.com/rust-lang/git2-rs), and more.
+## What is Git3?
 
-`libgit2` is licensed under a **very permissive license** (GPLv2 with
+Git3 is a modified version of Git that uses:
+- **SHA3-256 hashing** instead of SHA1/SHA256
+- **Proof-of-work** for all commits (blockchain-like security)
+- **`.git3` directories** instead of `.git`
+- **Repository format version 3**
+
+This provides enhanced security and tamper-resistance through cryptographic proof-of-work.
+
+## Key Modifications from libgit2
+
+This fork includes the following modifications by Rhett Creighton (2025):
+- **SHA3-256 support**: Full implementation of SHA3-256 (Keccak) hashing
+- **Repository detection**: Changed to look for `.git3` directories
+- **Library naming**: Changed from `libgit2` to `libgit3`
+- **Build system**: Updated CMake configuration for libgit3
+
+`libgit3` is licensed under a **very permissive license** (GPLv2 with
 a special Linking Exception). This means that you can link against
 the library with any kind of software without making that software
-fall under the GPL. Changes to libgit2 would still be covered under
+fall under the GPL. Changes to libgit3 would still be covered under
 its GPL license.
 
 Table of Contents
@@ -134,9 +136,10 @@ Please have a look at SECURITY.md.
 What It Can Do
 ==============
 
-libgit2 provides you with the ability to manage Git repositories in the
-programming language of your choice.  It's used in production to power many
-applications including GitHub.com, Plastic SCM and Azure DevOps.
+libgit3 provides you with the ability to manage Git3 repositories in the
+programming language of your choice. It is specifically designed to work
+with Git3's enhanced security features including SHA3-256 hashing and
+proof-of-work validation.
 
 It does not aim to replace the git tool or its user-facing commands. Some
 APIs resemble the plumbing commands as those align closely with the

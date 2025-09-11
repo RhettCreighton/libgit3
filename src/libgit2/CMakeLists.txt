@@ -69,8 +69,8 @@ set_target_properties(libgit2package PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${PROJE
 ide_split_sources(libgit2package)
 
 if(SONAME)
-	set_target_properties(libgit2package PROPERTIES VERSION ${libgit2_VERSION})
-	set_target_properties(libgit2package PROPERTIES SOVERSION "${libgit2_VERSION_MAJOR}.${libgit2_VERSION_MINOR}")
+	set_target_properties(libgit2package PROPERTIES VERSION ${PROJECT_VERSION})
+	set_target_properties(libgit2package PROPERTIES SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 	if(LIBGIT2_FILENAME)
 		target_compile_definitions(libgit2package PRIVATE LIBGIT2_FILENAME=\"${LIBGIT2_FILENAME}\")
 		set_target_properties(libgit2package PROPERTIES OUTPUT_NAME ${LIBGIT2_FILENAME})
@@ -80,8 +80,8 @@ if(SONAME)
 endif()
 
 pkg_build_config(NAME "lib${LIBGIT2_FILENAME}"
-	VERSION ${libgit2_VERSION}
-	DESCRIPTION "The git library, take 2"
+	VERSION ${PROJECT_VERSION}
+	DESCRIPTION "The git3 library with SHA3-256 and proof-of-work"
 	LIBS_SELF ${LIBGIT2_FILENAME}
 	PRIVATE_LIBS ${LIBGIT2_PC_LIBS}
 	REQUIRES ${LIBGIT2_PC_REQUIRES})

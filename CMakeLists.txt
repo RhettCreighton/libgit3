@@ -6,7 +6,7 @@
 
 cmake_minimum_required(VERSION 3.5.1)
 
-project(libgit2 VERSION "1.9.0" LANGUAGES C)
+project(libgit3 VERSION "1.9.0" LANGUAGES C)
 
 # Add find modules to the path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
@@ -53,7 +53,7 @@ option(DEBUG_STRICT_OPEN       "Enable path validation in open"                 
 
 # Output options
 option(SONAME                  "Set the (SO)VERSION of the target"                      ON)
-   set(LIBGIT2_FILENAME        "git2" CACHE STRING "Name of the produced binary")
+   set(LIBGIT2_FILENAME        "git3" CACHE STRING "Name of the produced binary")
 option(DEPRECATE_HARD          "Do not include deprecated functions in the library"    OFF)
 
 # Compilation options
