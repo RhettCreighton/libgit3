@@ -101,12 +101,12 @@ int git_oid_fromstrn(
 
 int git_oid_fromstrp(git_oid *out, const char *str)
 {
-	return git_oid_from_prefix(out, str, strlen(str), GIT_OID_SHA1);
+	return git_oid_from_prefix(out, str, strlen(str), GIT_OID_SHA3_256);
 }
 
 int git_oid_fromstr(git_oid *out, const char *str)
 {
-	return git_oid_from_prefix(out, str, GIT_OID_SHA1_HEXSIZE, GIT_OID_SHA1);
+	return git_oid_from_prefix(out, str, GIT_OID_SHA3_256_HEXSIZE, GIT_OID_SHA3_256);
 }
 
 int git_oid_nfmt(char *str, size_t n, const git_oid *oid)
@@ -458,7 +458,7 @@ int git_oid_shorten_add(git_oid_shorten *os, const char *text_oid)
 	idx = 0;
 	is_leaf = false;
 
-	for (i = 0; i < GIT_OID_SHA1_HEXSIZE; ++i) {
+	for (i = 0; i < GIT_OID_SHA3_256_HEXSIZE; ++i) {
 		int c = git__fromhex(text_oid[i]);
 		trie_node *node;
 

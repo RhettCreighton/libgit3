@@ -94,10 +94,12 @@ struct entry_common {
 typedef entry_short(GIT_OID_SHA1_SIZE) index_entry_short_sha1;
 typedef entry_long(GIT_OID_SHA1_SIZE) index_entry_long_sha1;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+typedef entry_short(GIT_OID_SHA3_256_SIZE) index_entry_short_sha3_256;
+typedef entry_long(GIT_OID_SHA3_256_SIZE) index_entry_long_sha3_256;
+
+/* Aliases for compatibility */
 typedef entry_short(GIT_OID_SHA256_SIZE) index_entry_short_sha256;
 typedef entry_long(GIT_OID_SHA256_SIZE) index_entry_long_sha256;
-#endif
 
 #undef entry_short
 #undef entry_long
@@ -2938,12 +2940,11 @@ static int write_disk_entry(
 		git_oid_raw_cpy(ondisk_sha1.oid, entry->id.id, GIT_OID_SHA1_SIZE);
 		ondisk_sha1.flags = htons(entry->flags);
 		break;
-#ifdef GIT_EXPERIMENTAL_SHA256
-	case GIT_OID_SHA256:
-		git_oid_raw_cpy(ondisk_sha256.oid, entry->id.id, GIT_OID_SHA256_SIZE);
+	case GIT_OID_SHA3_256:
+	case GIT_OID_SHA256:  /* Alias for SHA3-256 */
+		git_oid_raw_cpy(ondisk_sha256.oid, entry->id.id, GIT_OID_SHA3_256_SIZE);
 		ondisk_sha256.flags = htons(entry->flags);
 		break;
-#endif
 	default:
 		GIT_ASSERT(!"invalid oid type");
 	}

@@ -249,7 +249,7 @@ int git_object_lookup_prefix(
 		git_oid_clear(&short_oid, repo->oid_type);
 		git_oid__cpy_prefix(&short_oid, id, len);
 
-		/* If len < GIT_OID_SHA1_HEXSIZE (a strict short oid was given), we have
+		/* If len < GIT_OID_MAX_HEXSIZE (a strict short oid was given), we have
 		 * 2 options :
 		 * - We always search in the cache first. If we find that short oid is
 		 *	ambiguous, we can stop. But in all the other cases, we must then

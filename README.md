@@ -326,19 +326,19 @@ Once built, you can run the tests from the `build` directory with the command
 
 Alternatively you can run the test suite directly using,
 
-	$ ./libgit2_tests
+	$ ./libgit3_tests
 
 Invoking the test suite directly is useful because it allows you to execute
 individual tests, or groups of tests using the `-s` flag.  For example, to
 run the index tests:
 
-	$ ./libgit2_tests -sindex
+	$ ./libgit3_tests -sindex
 
 To run a single test named `index::racy::diff`, which corresponds to
 the test function
 [`test_index_racy__diff`](https://github.com/libgit2/libgit2/blob/main/tests/libgit2/index/racy.c#L22):
 
-	$ ./libgit2_tests -sindex::racy::diff
+	$ ./libgit3_tests -sindex::racy::diff
 
 The test suite will print a `.` for every passing test, and an `F` for any
 failing test.  An `S` indicates that a test was skipped because it is not

@@ -907,14 +907,12 @@ typedef git_trace_cb git_trace_callback;
  */
 /**@{*/
 
-#ifndef GIT_EXPERIMENTAL_SHA256
-/** Deprecated OID "raw size" definition */
-# define GIT_OID_RAWSZ    GIT_OID_SHA1_SIZE
-/** Deprecated OID "hex size" definition */
-# define GIT_OID_HEXSZ    GIT_OID_SHA1_HEXSIZE
-/** Deprecated OID "hex zero" definition */
-# define GIT_OID_HEX_ZERO GIT_OID_SHA1_HEXZERO
-#endif
+/** Deprecated OID "raw size" definition - now uses SHA3-256 */
+# define GIT_OID_RAWSZ    GIT_OID_SHA3_256_SIZE
+/** Deprecated OID "hex size" definition - now uses SHA3-256 */
+# define GIT_OID_HEXSZ    GIT_OID_SHA3_256_HEXSIZE
+/** Deprecated OID "hex zero" definition - now uses SHA3-256 */
+# define GIT_OID_HEX_ZERO GIT_OID_SHA3_256_HEXZERO
 
 GIT_EXTERN(int) git_oid_iszero(const git_oid *id);
 
