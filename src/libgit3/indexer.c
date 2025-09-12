@@ -144,6 +144,8 @@ GIT_INLINE(git_hash_algorithm_t) indexer_hash_algorithm(git_indexer *idx)
 	switch (idx->oid_type) {
 		case GIT_OID_SHA1:
 			return GIT_HASH_ALGORITHM_SHA1;
+		case GIT_OID_SHA3_256:
+			return GIT_HASH_ALGORITHM_SHA3_256;
 #ifdef GIT_EXPERIMENTAL_SHA256
 		case GIT_OID_SHA256:
 			return GIT_HASH_ALGORITHM_SHA256;

@@ -40,6 +40,9 @@ GIT_INLINE(size_t) git_oid_size(git_oid_t type)
 	case GIT_OID_SHA1:
 		return GIT_OID_SHA1_SIZE;
 
+	case GIT_OID_SHA3_256:
+		return GIT_OID_SHA3_256_SIZE;
+
 #ifdef GIT_EXPERIMENTAL_SHA256
 	case GIT_OID_SHA256:
 		return GIT_OID_SHA256_SIZE;
@@ -56,6 +59,9 @@ GIT_INLINE(size_t) git_oid_hexsize(git_oid_t type)
 	case GIT_OID_SHA1:
 		return GIT_OID_SHA1_HEXSIZE;
 
+	case GIT_OID_SHA3_256:
+		return GIT_OID_SHA3_256_HEXSIZE;
+
 #ifdef GIT_EXPERIMENTAL_SHA256
 	case GIT_OID_SHA256:
 		return GIT_OID_SHA256_HEXSIZE;
@@ -69,6 +75,7 @@ GIT_INLINE(size_t) git_oid_hexsize(git_oid_t type)
 GIT_INLINE(bool) git_oid_type_is_valid(git_oid_t type)
 {
 	return (type == GIT_OID_SHA1
+	     || type == GIT_OID_SHA3_256
 #ifdef GIT_EXPERIMENTAL_SHA256
 	     || type == GIT_OID_SHA256
 #endif
@@ -80,6 +87,9 @@ GIT_INLINE(const char *) git_oid_type_name(git_oid_t type)
 	switch (type) {
 	case GIT_OID_SHA1:
 		return "sha1";
+
+	case GIT_OID_SHA3_256:
+		return "sha3-256";
 
 #ifdef GIT_EXPERIMENTAL_SHA256
 	case GIT_OID_SHA256:
@@ -95,6 +105,9 @@ GIT_INLINE(git_oid_t) git_oid_type_fromstr(const char *name)
 	if (strcmp(name, "sha1") == 0)
 		return GIT_OID_SHA1;
 
+	if (strcmp(name, "sha3-256") == 0)
+		return GIT_OID_SHA3_256;
+
 #ifdef GIT_EXPERIMENTAL_SHA256
 	if (strcmp(name, "sha256") == 0)
 		return GIT_OID_SHA256;
@@ -107,6 +120,9 @@ GIT_INLINE(git_oid_t) git_oid_type_fromstrn(const char *name, size_t len)
 {
 	if (len == CONST_STRLEN("sha1") && strncmp(name, "sha1", len) == 0)
 		return GIT_OID_SHA1;
+
+	if (len == CONST_STRLEN("sha3-256") && strncmp(name, "sha3-256", len) == 0)
+		return GIT_OID_SHA3_256;
 
 #ifdef GIT_EXPERIMENTAL_SHA256
 	if (len == CONST_STRLEN("sha256") && strncmp(name, "sha256", len) == 0)
@@ -121,6 +137,9 @@ GIT_INLINE(git_hash_algorithm_t) git_oid_algorithm(git_oid_t type)
 	switch (type) {
 	case GIT_OID_SHA1:
 		return GIT_HASH_ALGORITHM_SHA1;
+
+	case GIT_OID_SHA3_256:
+		return GIT_HASH_ALGORITHM_SHA3_256;
 
 #ifdef GIT_EXPERIMENTAL_SHA256
 	case GIT_OID_SHA256:

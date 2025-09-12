@@ -2873,14 +2873,15 @@ static int write_disk_entry(
 
 	index_entry_short_sha1 ondisk_sha1;
 	index_entry_long_sha1 ondisk_ext_sha1;
-#ifdef GIT_EXPERIMENTAL_SHA256
 	index_entry_short_sha256 ondisk_sha256;
 	index_entry_long_sha256 ondisk_ext_sha256;
-#endif
 
 	switch (index->oid_type) {
 	case GIT_OID_SHA1:
 		ondisk_common = &ondisk_sha1.common;
+		break;
+	case GIT_OID_SHA3_256:
+		ondisk_common = &ondisk_sha256.common;
 		break;
 #ifdef GIT_EXPERIMENTAL_SHA256
 	case GIT_OID_SHA256:
@@ -2941,10 +2942,15 @@ static int write_disk_entry(
 		ondisk_sha1.flags = htons(entry->flags);
 		break;
 	case GIT_OID_SHA3_256:
-	case GIT_OID_SHA256:  /* Alias for SHA3-256 */
 		git_oid_raw_cpy(ondisk_sha256.oid, entry->id.id, GIT_OID_SHA3_256_SIZE);
 		ondisk_sha256.flags = htons(entry->flags);
 		break;
+#ifdef GIT_EXPERIMENTAL_SHA256
+	case GIT_OID_SHA256:
+		git_oid_raw_cpy(ondisk_sha256.oid, entry->id.id, GIT_OID_SHA256_SIZE);
+		ondisk_sha256.flags = htons(entry->flags);
+		break;
+#endif
 	default:
 		GIT_ASSERT(!"invalid oid type");
 	}

@@ -96,7 +96,8 @@ int git_oid_fromstrn(
 	const char *str,
 	size_t length)
 {
-	return git_oid_from_prefix(out, str, length, GIT_OID_SHA1);
+	/* For QED/libgit3: Use SHA3-256 by default, not SHA1 */
+	return git_oid_from_prefix(out, str, length, GIT_OID_SHA3_256);
 }
 
 int git_oid_fromstrp(git_oid *out, const char *str)

@@ -1007,12 +1007,17 @@ static int obtain_config_and_set_oid_type(
 	if ((error = check_extensions(config, version)) < 0)
 		goto out;
 
+	/* For QED/libgit3: ALWAYS use SHA3-256 regardless of version */
+	repo->oid_type = GIT_OID_SHA3_256;
+	
+	/* Original code disabled - always use SHA3-256 for QED
 	if (version > 0) {
 		if ((error = load_objectformat(repo, config)) < 0)
 			goto out;
 	} else {
 		repo->oid_type = GIT_OID_DEFAULT;
 	}
+	*/
 
 out:
 	*config_ptr = config;
@@ -1935,28 +1940,10 @@ static int check_extensions(git_config *config, int version)
 
 static int load_objectformat(git_repository *repo, git_config *config)
 {
-	git_config_entry *entry = NULL;
-	int error;
-
-	if ((error = git_config_get_entry(&entry, config, "extensions.objectformat")) < 0) {
-		if (error == GIT_ENOTFOUND) {
-			repo->oid_type = GIT_OID_DEFAULT;
-			git_error_clear();
-			error = 0;
-		}
-
-		goto done;
-	}
-
-	if ((repo->oid_type = git_oid_type_fromstr(entry->value)) == 0) {
-		git_error_set(GIT_ERROR_REPOSITORY,
-			"unknown object format '%s'", entry->value);
-		error = GIT_EINVALID;
-	}
-
-done:
-	git_config_entry_free(entry);
-	return error;
+	/* For QED/libgit3: ALWAYS use SHA3-256, ignore config */
+	(void)config; /* unused parameter */
+	repo->oid_type = GIT_OID_SHA3_256;
+	return 0;
 }
 
 int git_repository__set_objectformat(
