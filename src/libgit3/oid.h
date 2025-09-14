@@ -26,12 +26,8 @@ extern const git_oid git_oid__empty_tree_sha1;
 
 GIT_INLINE(git_oid_t) git_oid_type(const git_oid *oid)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always use the type field for proper SHA3-256 support */
 	return oid->type;
-#else
-	GIT_UNUSED(oid);
-	return GIT_OID_SHA1;
-#endif
 }
 
 GIT_INLINE(size_t) git_oid_size(git_oid_t type)

@@ -78,7 +78,7 @@ static int load_objectformat(git_repository *repo, git_config *config);
 #define GIT_BRANCH_DEFAULT "master"
 
 #define GIT_REPO_VERSION_DEFAULT 0
-#define GIT_REPO_VERSION_MAX 1
+#define GIT_REPO_VERSION_MAX 3  /* Support Git3 repositories with SHA3-256 */
 
 git_str git_repository__reserved_names_win32[] = {
 	{ DOT_GIT, 0, CONST_STRLEN(DOT_GIT) },

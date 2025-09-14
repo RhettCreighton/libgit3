@@ -140,9 +140,8 @@ int git_odb__hashobj(git_oid *id, git_rawobj *obj, git_oid_t oid_type)
 	vec[1].data = obj->data;
 	vec[1].len = obj->len;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	id->type = oid_type;
-#endif
 
 	return git_hash_vec(id->id, vec, 2, algorithm);
 }
@@ -258,9 +257,8 @@ int git_odb__hashfd(
 
 	error = git_hash_final(out->id, &ctx);
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	out->type = oid_type;
-#endif
 
 done:
 	git_hash_ctx_cleanup(&ctx);

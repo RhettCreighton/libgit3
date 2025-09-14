@@ -17,7 +17,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 #
 
 # Experimental features
-option(EXPERIMENTAL_SHA256     "Enable experimental SHA256 support (for R&D/testing)"  OFF)
+option(EXPERIMENTAL_SHA256     "Enable experimental SHA256 support (for R&D/testing)"   ON)
 
 # Optional subsystems
 option(BUILD_SHARED_LIBS       "Build Shared Library (OFF for Static)"                  ON)

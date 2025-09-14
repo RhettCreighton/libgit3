@@ -45,9 +45,8 @@ int git_oid_from_prefix(git_oid *out, const char *str, size_t len, git_oid_t typ
 	if (len > git_oid_hexsize(type))
 		return oid_error_invalid("too long");
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	out->type = type;
-#endif
 	memset(out->id, 0, size);
 
 	for (p = 0; p < len; p++) {
@@ -84,9 +83,8 @@ int git_oid_from_raw(git_oid *out, const unsigned char *raw, git_oid_t type)
 	if (!(size = git_oid_size(type)))
 		return oid_error_invalid("unknown type");
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	out->type = type;
-#endif
 	memcpy(out->id, raw, size);
 	return 0;
 }
@@ -235,9 +233,8 @@ int git_oid_cpy(git_oid *out, const git_oid *src)
 	if (!(size = git_oid_size(git_oid_type(src))))
 		return oid_error_invalid("unknown type");
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	out->type = src->type;
-#endif
 
 	return git_oid_raw_cpy(out->id, src->id, size);
 }
@@ -254,10 +251,9 @@ int git_oid_equal(const git_oid *a, const git_oid *b)
 
 int git_oid_ncmp(const git_oid *oid_a, const git_oid *oid_b, size_t len)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always check the type field for proper SHA3-256 support */
 	if (oid_a->type != oid_b->type)
 		return oid_a->type - oid_b->type;
-#endif
 
 	return git_oid_raw_ncmp(oid_a->id, oid_b->id, len);
 }
@@ -295,12 +291,11 @@ int git_oid_is_zero(const git_oid *oid_a)
 	const unsigned char *a = oid_a->id;
 	size_t size = git_oid_size(git_oid_type(oid_a)), i;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+	/* For QED/libgit3: Always check the type field for proper SHA3-256 support */
 	if (!oid_a->type)
 		return 1;
 	else if (!size)
 		return 0;
-#endif
 
 	for (i = 0; i < size; ++i, ++a)
 		if (*a != 0)
