@@ -1,10 +1,10 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "refs.h"
 #include "path.h"
 
-static git_repository *repo;
-static git_commit *target;
-static git_reference *branch;
+static git3_repository *repo;
+static git3_commit *target;
+static git3_reference *branch;
 
 void test_refs_branches_create__initialize(void)
 {
@@ -15,26 +15,26 @@ void test_refs_branches_create__initialize(void)
 
 void test_refs_branches_create__cleanup(void)
 {
-	git_reference_free(branch);
+	git3_reference_free(branch);
 	branch = NULL;
 
-	git_commit_free(target);
+	git3_commit_free(target);
 	target = NULL;
 
 	cl_git_sandbox_cleanup();
 	repo = NULL;
 }
 
-static void retrieve_target_from_oid(git_commit **out, git_repository *repo, const char *sha)
+static void retrieve_target_from_oid(git3_commit **out, git3_repository *repo, const char *sha)
 {
-	git_object *obj;
+	git3_object *obj;
 
-	cl_git_pass(git_revparse_single(&obj, repo, sha));
-	cl_git_pass(git_commit_lookup(out, repo, git_object_id(obj)));
-	git_object_free(obj);
+	cl_git_pass(git3_revparse_single(&obj, repo, sha));
+	cl_git_pass(git3_commit_lookup(out, repo, git3_object_id(obj)));
+	git3_object_free(obj);
 }
 
-static void retrieve_known_commit(git_commit **commit, git_repository *repo)
+static void retrieve_known_commit(git3_commit **commit, git3_repository *repo)
 {
 	retrieve_target_from_oid(commit, repo, "e90810b8df3");
 }
@@ -45,94 +45,94 @@ void test_refs_branches_create__can_create_a_local_branch(void)
 {
 	retrieve_known_commit(&target, repo);
 
-	cl_git_pass(git_branch_create(&branch, repo, NEW_BRANCH_NAME, target, 0));
-	cl_git_pass(git_oid_cmp(git_reference_target(branch), git_commit_id(target)));
+	cl_git_pass(git3_branch_create(&branch, repo, NEW_BRANCH_NAME, target, 0));
+	cl_git_pass(git3_oid_cmp(git3_reference_target(branch), git3_commit_id(target)));
 }
 
 void test_refs_branches_create__can_not_create_a_branch_if_its_name_collide_with_an_existing_one(void)
 {
 	retrieve_known_commit(&target, repo);
 
-	cl_assert_equal_i(GIT_EEXISTS, git_branch_create(&branch, repo, "br2", target, 0));
+	cl_assert_equal_i(GIT3_EEXISTS, git3_branch_create(&branch, repo, "br2", target, 0));
 }
 
 void test_refs_branches_create__can_force_create_over_an_existing_branch(void)
 {
 	retrieve_known_commit(&target, repo);
 
-	cl_git_pass(git_branch_create(&branch, repo, "br2", target, 1));
-	cl_git_pass(git_oid_cmp(git_reference_target(branch), git_commit_id(target)));
-	cl_assert_equal_s("refs/heads/br2", git_reference_name(branch));
+	cl_git_pass(git3_branch_create(&branch, repo, "br2", target, 1));
+	cl_git_pass(git3_oid_cmp(git3_reference_target(branch), git3_commit_id(target)));
+	cl_assert_equal_s("refs/heads/br2", git3_reference_name(branch));
 }
 
 void test_refs_branches_create__cannot_force_create_over_current_branch_in_nonbare_repo(void)
 {
-	const git_oid *oid;
-	git_reference *branch2;
+	const git3_oid *oid;
+	git3_reference *branch2;
 
 	/* Default repo for these tests is a bare repo, but this test requires a non-bare one */
 	cl_git_sandbox_cleanup();
 	repo = cl_git_sandbox_init("testrepo");
 	retrieve_known_commit(&target, repo);
 
-	cl_git_pass(git_branch_lookup(&branch2, repo, "master", GIT_BRANCH_LOCAL));
-	cl_assert_equal_s("refs/heads/master", git_reference_name(branch2));
-	cl_assert_equal_i(true, git_branch_is_head(branch2));
-	oid = git_reference_target(branch2);
+	cl_git_pass(git3_branch_lookup(&branch2, repo, "master", GIT3_BRANCH_LOCAL));
+	cl_assert_equal_s("refs/heads/master", git3_reference_name(branch2));
+	cl_assert_equal_i(true, git3_branch_is_head(branch2));
+	oid = git3_reference_target(branch2);
 
-	cl_git_fail_with(-1, git_branch_create(&branch, repo, "master", target, 1));
+	cl_git_fail_with(-1, git3_branch_create(&branch, repo, "master", target, 1));
 	branch = NULL;
-	cl_git_pass(git_branch_lookup(&branch, repo, "master", GIT_BRANCH_LOCAL));
-	cl_assert_equal_s("refs/heads/master", git_reference_name(branch));
-	cl_git_pass(git_oid_cmp(git_reference_target(branch), oid));
-	git_reference_free(branch2);
+	cl_git_pass(git3_branch_lookup(&branch, repo, "master", GIT3_BRANCH_LOCAL));
+	cl_assert_equal_s("refs/heads/master", git3_reference_name(branch));
+	cl_git_pass(git3_oid_cmp(git3_reference_target(branch), oid));
+	git3_reference_free(branch2);
 }
 
 void test_refs_branches_create__can_force_create_over_current_branch_in_bare_repo(void)
 {
-	const git_oid *oid;
-	git_reference *branch2;
+	const git3_oid *oid;
+	git3_reference *branch2;
 	retrieve_known_commit(&target, repo);
 
-	cl_git_pass(git_branch_lookup(&branch2, repo, "master", GIT_BRANCH_LOCAL));
-	cl_assert_equal_s("refs/heads/master", git_reference_name(branch2));
-	cl_assert_equal_i(true, git_branch_is_head(branch2));
-	oid = git_commit_id(target);
+	cl_git_pass(git3_branch_lookup(&branch2, repo, "master", GIT3_BRANCH_LOCAL));
+	cl_assert_equal_s("refs/heads/master", git3_reference_name(branch2));
+	cl_assert_equal_i(true, git3_branch_is_head(branch2));
+	oid = git3_commit_id(target);
 
-	cl_git_pass(git_branch_create(&branch, repo, "master", target, 1));
-	git_reference_free(branch);
+	cl_git_pass(git3_branch_create(&branch, repo, "master", target, 1));
+	git3_reference_free(branch);
 	branch = NULL;
-	cl_git_pass(git_branch_lookup(&branch, repo, "master", GIT_BRANCH_LOCAL));
-	cl_assert_equal_s("refs/heads/master", git_reference_name(branch));
-	cl_git_pass(git_oid_cmp(git_reference_target(branch), oid));
-	git_reference_free(branch2);
+	cl_git_pass(git3_branch_lookup(&branch, repo, "master", GIT3_BRANCH_LOCAL));
+	cl_assert_equal_s("refs/heads/master", git3_reference_name(branch));
+	cl_git_pass(git3_oid_cmp(git3_reference_target(branch), oid));
+	git3_reference_free(branch2);
 }
 
 void test_refs_branches_create__creating_a_branch_with_an_invalid_name_returns_EINVALIDSPEC(void)
 {
 	retrieve_known_commit(&target, repo);
 
-	cl_assert_equal_i(GIT_EINVALIDSPEC,
-		git_branch_create(&branch, repo, "inv@{id", target, 0));
+	cl_assert_equal_i(GIT3_EINVALIDSPEC,
+		git3_branch_create(&branch, repo, "inv@{id", target, 0));
 }
 
 static void assert_branch_matches_name(
 	const char *expected, const char *lookup_as)
 {
-	git_reference *ref;
-	git_str b = GIT_STR_INIT;
+	git3_reference *ref;
+	git3_str b = GIT3_STR_INIT;
 
-	cl_git_pass(git_branch_lookup(&ref, repo, lookup_as, GIT_BRANCH_LOCAL));
+	cl_git_pass(git3_branch_lookup(&ref, repo, lookup_as, GIT3_BRANCH_LOCAL));
 
-	cl_git_pass(git_str_sets(&b, "refs/heads/"));
-	cl_git_pass(git_str_puts(&b, expected));
-	cl_assert_equal_s(b.ptr, git_reference_name(ref));
+	cl_git_pass(git3_str_sets(&b, "refs/heads/"));
+	cl_git_pass(git3_str_puts(&b, expected));
+	cl_assert_equal_s(b.ptr, git3_reference_name(ref));
 
 	cl_git_pass(
-		git_oid_cmp(git_reference_target(ref), git_commit_id(target)));
+		git3_oid_cmp(git3_reference_target(ref), git3_commit_id(target)));
 
-	git_reference_free(ref);
-	git_str_dispose(&b);
+	git3_reference_free(ref);
+	git3_str_dispose(&b);
 }
 
 void test_refs_branches_create__can_create_branch_with_unicode(void)
@@ -145,7 +145,7 @@ void test_refs_branches_create__can_create_branch_with_unicode(void)
 	const char *expected[] = { nfc, nfd, emoji };
 	unsigned int i;
 	bool fs_decompose_unicode =
-		git_fs_path_does_decompose_unicode(git_repository_path(repo));
+		git3_fs_path_does_decompose_unicode(git3_repository_path(repo));
 
 	retrieve_known_commit(&target, repo);
 
@@ -157,19 +157,19 @@ void test_refs_branches_create__can_create_branch_with_unicode(void)
 
 	for (i = 0; i < ARRAY_SIZE(names); ++i) {
 		const char *name;
-		cl_git_pass(git_branch_create(
+		cl_git_pass(git3_branch_create(
 			&branch, repo, names[i], target, 0));
-		cl_git_pass(git_oid_cmp(
-			git_reference_target(branch), git_commit_id(target)));
+		cl_git_pass(git3_oid_cmp(
+			git3_reference_target(branch), git3_commit_id(target)));
 
-		cl_git_pass(git_branch_name(&name, branch));
+		cl_git_pass(git3_branch_name(&name, branch));
 		cl_assert_equal_s(expected[i], name);
 		assert_branch_matches_name(expected[i], names[i]);
 		if (fs_decompose_unicode && alt[i])
 			assert_branch_matches_name(expected[i], alt[i]);
 
-		cl_git_pass(git_branch_delete(branch));
-		git_reference_free(branch);
+		cl_git_pass(git3_branch_delete(branch));
+		git3_reference_free(branch);
 		branch = NULL;
 	}
 }
@@ -216,17 +216,17 @@ void test_refs_branches_create__name_vs_namespace(void)
 	retrieve_known_commit(&target, repo);
 
 	for (p=item; p->first; p++) {
-		cl_git_pass(git_branch_create(&branch, repo, p->first, target, 0));
-		cl_git_pass(git_oid_cmp(git_reference_target(branch), git_commit_id(target)));
-		cl_git_pass(git_branch_name(&name, branch));
+		cl_git_pass(git3_branch_create(&branch, repo, p->first, target, 0));
+		cl_git_pass(git3_oid_cmp(git3_reference_target(branch), git3_commit_id(target)));
+		cl_git_pass(git3_branch_name(&name, branch));
 		cl_assert_equal_s(name, p->first);
 
-		cl_git_pass(git_branch_delete(branch));
-		git_reference_free(branch);
+		cl_git_pass(git3_branch_delete(branch));
+		git3_reference_free(branch);
 		branch = NULL;
 
-		cl_git_pass(git_branch_create(&branch, repo, p->second, target, 0));
-		git_reference_free(branch);
+		cl_git_pass(git3_branch_create(&branch, repo, p->second, target, 0));
+		git3_reference_free(branch);
 		branch = NULL;
 	}
 }
@@ -254,26 +254,26 @@ void test_refs_branches_create__name_vs_namespace_fail(void)
 	retrieve_known_commit(&target, repo);
 
 	for (p=item; p->first; p++) {
-		cl_git_pass(git_branch_create(&branch, repo, p->first, target, 0));
-		cl_git_pass(git_oid_cmp(git_reference_target(branch), git_commit_id(target)));
-		cl_git_pass(git_branch_name(&name, branch));
+		cl_git_pass(git3_branch_create(&branch, repo, p->first, target, 0));
+		cl_git_pass(git3_oid_cmp(git3_reference_target(branch), git3_commit_id(target)));
+		cl_git_pass(git3_branch_name(&name, branch));
 		cl_assert_equal_s(name, p->first);
 
-		cl_git_pass(git_branch_delete(branch));
-		git_reference_free(branch);
+		cl_git_pass(git3_branch_delete(branch));
+		git3_reference_free(branch);
 		branch = NULL;
 
-		cl_git_pass(git_branch_create(&branch, repo, p->first_alternate, target, 0));
-		cl_git_pass(git_oid_cmp(git_reference_target(branch), git_commit_id(target)));
-		cl_git_pass(git_branch_name(&name, branch));
+		cl_git_pass(git3_branch_create(&branch, repo, p->first_alternate, target, 0));
+		cl_git_pass(git3_oid_cmp(git3_reference_target(branch), git3_commit_id(target)));
+		cl_git_pass(git3_branch_name(&name, branch));
 		cl_assert_equal_s(name, p->first_alternate);
 
 		/* we do not delete the alternate. */
-		git_reference_free(branch);
+		git3_reference_free(branch);
 		branch = NULL;
 
-		cl_git_fail(git_branch_create(&branch, repo, p->second, target, 0));
-		git_reference_free(branch);
+		cl_git_fail(git3_branch_create(&branch, repo, p->second, target, 0));
+		git3_reference_free(branch);
 		branch = NULL;
 	}
 }
@@ -282,6 +282,6 @@ void test_refs_branches_create__error_when_create_branch_with_invalid_name(void)
 {
 	retrieve_known_commit(&target, repo);
 
-	cl_git_fail(git_branch_create(&branch, repo, "HEAD", target, 0));
-	cl_git_fail(git_branch_create(&branch, repo, "-dash", target, 0));
+	cl_git_fail(git3_branch_create(&branch, repo, "HEAD", target, 0));
+	cl_git_fail(git3_branch_create(&branch, repo, "-dash", target, 0));
 }

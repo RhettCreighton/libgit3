@@ -1,12 +1,12 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "stash_helpers.h"
 
-void setup_stash(git_repository *repo, git_signature *signature)
+void setup_stash(git3_repository *repo, git3_signature *signature)
 {
-	git_index *index;
+	git3_index *index;
 
-	cl_git_pass(git_repository_index(&index, repo));
+	cl_git_pass(git3_repository_index(&index, repo));
 
 	cl_git_mkfile("stash/what", "hello\n");		/* ce013625030ba8dba906f756967f9e9ca394464a */
 	cl_git_mkfile("stash/how", "small\n");		/* ac790413e2d7a26c3767e78c57bb28716686eebc */
@@ -16,10 +16,10 @@ void setup_stash(git_repository *repo, git_signature *signature)
 
 	cl_git_mkfile("stash/.gitignore", "*.ignore\n");
 
-	cl_git_pass(git_index_add_bypath(index, "what"));
-	cl_git_pass(git_index_add_bypath(index, "how"));
-	cl_git_pass(git_index_add_bypath(index, "who"));
-	cl_git_pass(git_index_add_bypath(index, ".gitignore"));
+	cl_git_pass(git3_index_add_bypath(index, "what"));
+	cl_git_pass(git3_index_add_bypath(index, "how"));
+	cl_git_pass(git3_index_add_bypath(index, "who"));
+	cl_git_pass(git3_index_add_bypath(index, ".gitignore"));
 
 	cl_repo_commit_from_index(NULL, repo, signature, 0, "Initial commit");
 
@@ -29,29 +29,29 @@ void setup_stash(git_repository *repo, git_signature *signature)
 	cl_git_mkfile("stash/why", "would anybody use stash?\n"); /* 88c2533e21f098b89c91a431d8075cbde422a51 */
 	cl_git_mkfile("stash/where", "????\n");					/* e08f7fbb9a42a0c5367cf8b349f1f08c3d56bd72 */
 
-	cl_git_pass(git_index_add_bypath(index, "what"));
-	cl_git_pass(git_index_add_bypath(index, "how"));
-	cl_git_pass(git_index_add_bypath(index, "why"));
-	cl_git_pass(git_index_add_bypath(index, "where"));
-	cl_git_pass(git_index_write(index));
+	cl_git_pass(git3_index_add_bypath(index, "what"));
+	cl_git_pass(git3_index_add_bypath(index, "how"));
+	cl_git_pass(git3_index_add_bypath(index, "why"));
+	cl_git_pass(git3_index_add_bypath(index, "where"));
+	cl_git_pass(git3_index_write(index));
 
 	cl_git_rewritefile("stash/what", "see you later\n");	/* bc99dc98b3eba0e9157e94769cd4d49cb49de449 */
 	cl_git_mkfile("stash/where", "....\n");					/* e3d6434ec12eb76af8dfa843a64ba6ab91014a0b */
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void assert_status(
-	git_repository *repo,
+	git3_repository *repo,
 	const char *path,
 	int status_flags)
 {
 	unsigned int status;
 
 	if (status_flags < 0)
-		cl_assert_equal_i(status_flags, git_status_file(&status, repo, path));
+		cl_assert_equal_i(status_flags, git3_status_file(&status, repo, path));
 	else {
-		cl_git_pass(git_status_file(&status, repo, path));
+		cl_git_pass(git3_status_file(&status, repo, path));
 		cl_assert_equal_i((unsigned int)status_flags, status);
 	}
 }

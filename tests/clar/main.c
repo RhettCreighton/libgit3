@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
-#include "clar_libgit2_trace.h"
+#include "clar_libgit3.h"
+#include "clar_libgit3_trace.h"
 
-#ifdef GIT_DEBUG_LEAKCHECK_WIN32
+#ifdef GIT3_DEBUG_LEAKCHECK_WIN32
 # include "win32/w32_leakcheck.h"
 #endif
 
@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
 
 	clar_test_init(argc, argv);
 
-	res = git_libgit3_init();
+	res = git3_libgit3_init();
 	if (res < 0) {
-		const git_error *err = git_error_last();
+		const git3_error *err = git3_error_last();
 		const char *msg = err ? err->message : "unknown failure";
-		fprintf(stderr, "failed to init libgit2: %s\n", msg);
+		fprintf(stderr, "failed to init libgit3: %s\n", msg);
 		return res;
 	}
 
@@ -35,10 +35,10 @@ int main(int argc, char *argv[])
 	clar_test_shutdown();
 
 	cl_global_trace_disable();
-	git_libgit3_shutdown();
+	git3_libgit3_shutdown();
 
-#ifdef GIT_DEBUG_LEAKCHECK_WIN32
-	if (git_win32_leakcheck_has_leaks())
+#ifdef GIT3_DEBUG_LEAKCHECK_WIN32
+	if (git3_win32_leakcheck_has_leaks())
 		res = res || 1;
 #endif
 

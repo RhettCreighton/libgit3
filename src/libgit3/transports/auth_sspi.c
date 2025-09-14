@@ -1,14 +1,14 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "auth_ntlm.h"
 #include "auth_negotiate.h"
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 
 #define SECURITY_WIN32
 
@@ -20,7 +20,7 @@
 #include <security.h>
 
 typedef struct {
-	git_http_auth_context parent;
+	git3_http_auth_context parent;
 	wchar_t *target;
 
 	const char *package_name;
@@ -35,15 +35,15 @@ typedef struct {
 	    has_credentials : 1,
 	    has_context : 1,
 	    complete : 1;
-	git_str challenge;
+	git3_str challenge;
 } http_auth_sspi_context;
 
 static void sspi_reset_context(http_auth_sspi_context *ctx)
 {
 	if (ctx->has_identity) {
-		git__free(ctx->identity.User);
-		git__free(ctx->identity.Domain);
-		git__free(ctx->identity.Password);
+		git3__free(ctx->identity.User);
+		git3__free(ctx->identity.Domain);
+		git3__free(ctx->identity.Password);
 
 		memset(&ctx->identity, 0, sizeof(SEC_WINNT_AUTH_IDENTITY_W));
 
@@ -66,20 +66,20 @@ static void sspi_reset_context(http_auth_sspi_context *ctx)
 
 	ctx->complete = 0;
 
-	git_str_dispose(&ctx->challenge);
+	git3_str_dispose(&ctx->challenge);
 }
 
 static int sspi_set_challenge(
-	git_http_auth_context *c,
+	git3_http_auth_context *c,
 	const char *challenge)
 {
 	http_auth_sspi_context *ctx = (http_auth_sspi_context *)c;
 	size_t challenge_len = strlen(challenge);
 
-	git_str_clear(&ctx->challenge);
+	git3_str_clear(&ctx->challenge);
 
 	if (strncmp(challenge, ctx->package_name, ctx->package_name_len) != 0) {
-		git_error_set(GIT_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
+		git3_error_set(GIT3_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
 		return -1;
 	}
 
@@ -90,60 +90,60 @@ static int sspi_set_challenge(
 	if (challenge[ctx->package_name_len] == 0) {
 		return 0;
 	} else if (challenge[ctx->package_name_len] != ' ') {
-		git_error_set(GIT_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
+		git3_error_set(GIT3_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
 		return -1;
 	}
 
-	if (git_str_decode_base64(&ctx->challenge,
+	if (git3_str_decode_base64(&ctx->challenge,
 	                          challenge + (ctx->package_name_len + 1),
 	                          challenge_len - (ctx->package_name_len + 1)) < 0) {
-		git_error_set(GIT_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
+		git3_error_set(GIT3_ERROR_NET, "invalid %s challenge from server", ctx->package_name);
 		return -1;
 	}
 
-	GIT_ASSERT(ctx->challenge.size <= ULONG_MAX);
+	GIT3_ASSERT(ctx->challenge.size <= ULONG_MAX);
 	return 0;
 }
 
 static int create_identity(
 	SEC_WINNT_AUTH_IDENTITY_W **out,
 	http_auth_sspi_context *ctx,
-	git_credential *cred)
+	git3_credential *cred)
 {
-	git_credential_userpass_plaintext *userpass;
+	git3_credential_userpass_plaintext *userpass;
 	wchar_t *username = NULL, *domain = NULL, *password = NULL;
 	int username_len = 0, domain_len = 0, password_len = 0;
 	const char *sep;
 
-	if (cred->credtype == GIT_CREDENTIAL_DEFAULT) {
+	if (cred->credtype == GIT3_CREDENTIAL_DEFAULT) {
 		*out = NULL;
 		return 0;
 	}
 
-	if (cred->credtype != GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
-		git_error_set(GIT_ERROR_NET, "unknown credential type: %d", cred->credtype);
+	if (cred->credtype != GIT3_CREDENTIAL_USERPASS_PLAINTEXT) {
+		git3_error_set(GIT3_ERROR_NET, "unknown credential type: %d", cred->credtype);
 		return -1;
 	}
 
-	userpass = (git_credential_userpass_plaintext *)cred;
+	userpass = (git3_credential_userpass_plaintext *)cred;
 
 	if ((sep = strchr(userpass->username, '\\')) != NULL) {
-		GIT_ASSERT(sep - userpass->username < INT_MAX);
+		GIT3_ASSERT(sep - userpass->username < INT_MAX);
 
-		username_len = git_utf8_to_16_alloc(&username, sep + 1);
-		domain_len = git_utf8_to_16_alloc_with_len(&domain,
+		username_len = git3_utf8_to_16_alloc(&username, sep + 1);
+		domain_len = git3_utf8_to_16_alloc_with_len(&domain,
 			userpass->username, (int)(sep - userpass->username));
 	} else {
-		username_len = git_utf8_to_16_alloc(&username,
+		username_len = git3_utf8_to_16_alloc(&username,
 			userpass->username);
 	}
 
-	password_len = git_utf8_to_16_alloc(&password, userpass->password);
+	password_len = git3_utf8_to_16_alloc(&password, userpass->password);
 
 	if (username_len < 0 || domain_len < 0 || password_len < 0) {
-		git__free(username);
-		git__free(domain);
-		git__free(password);
+		git3__free(username);
+		git3__free(domain);
+		git3__free(password);
 		return -1;
 	}
 
@@ -163,9 +163,9 @@ static int create_identity(
 }
 
 static int sspi_next_token(
-	git_str *buf,
-	git_http_auth_context *c,
-	git_credential *cred)
+	git3_str *buf,
+	git3_http_auth_context *c,
+	git3_credential *cred)
 {
 	http_auth_sspi_context *ctx = (http_auth_sspi_context *)c;
 	SEC_WINNT_AUTH_IDENTITY_W *identity = NULL;
@@ -189,7 +189,7 @@ static int sspi_next_token(
 				NULL, &ctx->cred, &timestamp);
 
 		if (status != SEC_E_OK) {
-			git_error_set(GIT_ERROR_OS, "could not acquire credentials");
+			git3_error_set(GIT3_ERROR_OS, "could not acquire credentials");
 			return -1;
 		}
 
@@ -226,88 +226,88 @@ static int sspi_next_token(
 	if (status == SEC_E_OK) {
 		ctx->complete = 1;
 	} else if (status != SEC_I_CONTINUE_NEEDED) {
-		git_error_set(GIT_ERROR_OS, "could not initialize security context");
+		git3_error_set(GIT3_ERROR_OS, "could not initialize security context");
 		return -1;
 	}
 
 	ctx->has_context = 1;
-	git_str_clear(&ctx->challenge);
+	git3_str_clear(&ctx->challenge);
 
 	if (output_buf.cbBuffer > 0) {
-		git_str_put(buf, ctx->package_name, ctx->package_name_len);
-		git_str_putc(buf, ' ');
-		git_str_encode_base64(buf, output_buf.pvBuffer, output_buf.cbBuffer);
+		git3_str_put(buf, ctx->package_name, ctx->package_name_len);
+		git3_str_putc(buf, ' ');
+		git3_str_encode_base64(buf, output_buf.pvBuffer, output_buf.cbBuffer);
 
 		FreeContextBuffer(output_buf.pvBuffer);
 
-		if (git_str_oom(buf))
+		if (git3_str_oom(buf))
 			return -1;
 	}
 
 	return 0;
 }
 
-static int sspi_is_complete(git_http_auth_context *c)
+static int sspi_is_complete(git3_http_auth_context *c)
 {
 	http_auth_sspi_context *ctx = (http_auth_sspi_context *)c;
 
 	return ctx->complete;
 }
 
-static void sspi_context_free(git_http_auth_context *c)
+static void sspi_context_free(git3_http_auth_context *c)
 {
 	http_auth_sspi_context *ctx = (http_auth_sspi_context *)c;
 
 	sspi_reset_context(ctx);
 
 	FreeContextBuffer(ctx->package_info);
-	git__free(ctx->target);
-	git__free(ctx);
+	git3__free(ctx->target);
+	git3__free(ctx);
 }
 
 static int sspi_init_context(
-	git_http_auth_context **out,
-	git_http_auth_t type,
-	const git_net_url *url)
+	git3_http_auth_context **out,
+	git3_http_auth_t type,
+	const git3_net_url *url)
 {
 	http_auth_sspi_context *ctx;
-	git_str target = GIT_STR_INIT;
+	git3_str target = GIT3_STR_INIT;
 
 	*out = NULL;
 
-	ctx = git__calloc(1, sizeof(http_auth_sspi_context));
-	GIT_ERROR_CHECK_ALLOC(ctx);
+	ctx = git3__calloc(1, sizeof(http_auth_sspi_context));
+	GIT3_ERROR_CHECK_ALLOC(ctx);
 
 	switch (type) {
-	case GIT_HTTP_AUTH_NTLM:
+	case GIT3_HTTP_AUTH_NTLM:
 		ctx->package_name = "NTLM";
 		ctx->package_name_len = CONST_STRLEN("NTLM");
 		ctx->package_name_w = L"NTLM";
-		ctx->parent.credtypes = GIT_CREDENTIAL_USERPASS_PLAINTEXT |
-	                                GIT_CREDENTIAL_DEFAULT;
+		ctx->parent.credtypes = GIT3_CREDENTIAL_USERPASS_PLAINTEXT |
+	                                GIT3_CREDENTIAL_DEFAULT;
 		break;
-	case GIT_HTTP_AUTH_NEGOTIATE:
+	case GIT3_HTTP_AUTH_NEGOTIATE:
 		ctx->package_name = "Negotiate";
 		ctx->package_name_len = CONST_STRLEN("Negotiate");
 		ctx->package_name_w = L"Negotiate";
-		ctx->parent.credtypes = GIT_CREDENTIAL_DEFAULT;
+		ctx->parent.credtypes = GIT3_CREDENTIAL_DEFAULT;
 		break;
 	default:
-		git_error_set(GIT_ERROR_NET, "unknown SSPI auth type: %d", ctx->parent.type);
-		git__free(ctx);
+		git3_error_set(GIT3_ERROR_NET, "unknown SSPI auth type: %d", ctx->parent.type);
+		git3__free(ctx);
 		return -1;
 	}
 
 	if (QuerySecurityPackageInfoW(ctx->package_name_w, &ctx->package_info) != SEC_E_OK) {
-		git_error_set(GIT_ERROR_OS, "could not query security package");
-		git__free(ctx);
+		git3_error_set(GIT3_ERROR_OS, "could not query security package");
+		git3__free(ctx);
 		return -1;
 	}
 
-	if (git_str_printf(&target, "http/%s", url->host) < 0 ||
-	    git_utf8_to_16_alloc(&ctx->target, target.ptr) < 0) {
+	if (git3_str_printf(&target, "http/%s", url->host) < 0 ||
+	    git3_utf8_to_16_alloc(&ctx->target, target.ptr) < 0) {
 		FreeContextBuffer(ctx->package_info);
-		git__free(ctx);
+		git3__free(ctx);
 		return -1;
 	}
 
@@ -318,28 +318,28 @@ static int sspi_init_context(
 	ctx->parent.is_complete = sspi_is_complete;
 	ctx->parent.free = sspi_context_free;
 
-	*out = (git_http_auth_context *)ctx;
+	*out = (git3_http_auth_context *)ctx;
 
-	git_str_dispose(&target);
+	git3_str_dispose(&target);
 	return 0;
 }
 
-#ifdef GIT_AUTH_NEGOTIATE
-int git_http_auth_negotiate(
-	git_http_auth_context **out,
-	const git_net_url *url)
+#ifdef GIT3_AUTH_NEGOTIATE
+int git3_http_auth_negotiate(
+	git3_http_auth_context **out,
+	const git3_net_url *url)
 {
-	return sspi_init_context(out, GIT_HTTP_AUTH_NEGOTIATE, url);
+	return sspi_init_context(out, GIT3_HTTP_AUTH_NEGOTIATE, url);
 }
 #endif
 
-#ifdef GIT_AUTH_NTLM
-int git_http_auth_ntlm(
-	git_http_auth_context **out,
-	const git_net_url *url)
+#ifdef GIT3_AUTH_NTLM
+int git3_http_auth_ntlm(
+	git3_http_auth_context **out,
+	const git3_net_url *url)
 {
-	return sspi_init_context(out, GIT_HTTP_AUTH_NTLM, url);
+	return sspi_init_context(out, GIT3_HTTP_AUTH_NTLM, url);
 }
 #endif
 
-#endif /* GIT_WIN32 */
+#endif /* GIT3_WIN32 */

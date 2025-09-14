@@ -1,10 +1,10 @@
 # Header file validation project: ensure that we do not publish any sloppy
-# definitions in our headers and that a consumer can include <git2.dll>
+# definitions in our headers and that a consumer can include <git3.dll>
 # even when they have aggressive C90 warnings enabled.
 
 add_executable(headertest headertest.c)
 
-target_include_directories(headertest PRIVATE ${LIBGIT2_INCLUDES})
+target_include_directories(headertest PRIVATE ${LIBGIT3_INCLUDES})
 
 if (MSVC)
 	target_compile_options(headertest PUBLIC /W4 /WX)

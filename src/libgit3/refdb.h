@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_refdb_h__
@@ -12,22 +12,22 @@
 #include "git3/refdb.h"
 #include "repository.h"
 
-struct git_refdb {
-	git_refcount rc;
-	git_repository *repo;
-	git_refdb_backend *backend;
+struct git3_refdb {
+	git3_refcount rc;
+	git3_repository *repo;
+	git3_refdb_backend *backend;
 };
 
-void git_refdb__free(git_refdb *db);
+void git3_refdb__free(git3_refdb *db);
 
-int git_refdb_exists(
+int git3_refdb_exists(
 	int *exists,
-	git_refdb *refdb,
+	git3_refdb *refdb,
 	const char *ref_name);
 
-int git_refdb_lookup(
-	git_reference **out,
-	git_refdb *refdb,
+int git3_refdb_lookup(
+	git3_reference **out,
+	git3_refdb *refdb,
 	const char *ref_name);
 
 /**
@@ -49,31 +49,31 @@ int git_refdb_lookup(
  * @param max_nesting The maximum nesting depth.
  * @return `0` on success, a negative error code otherwise.
  */
-int git_refdb_resolve(
-	git_reference **out,
-	git_refdb *db,
+int git3_refdb_resolve(
+	git3_reference **out,
+	git3_refdb *db,
 	const char *ref_name,
 	int max_nesting);
 
-int git_refdb_rename(
-	git_reference **out,
-	git_refdb *db,
+int git3_refdb_rename(
+	git3_reference **out,
+	git3_refdb *db,
 	const char *old_name,
 	const char *new_name,
 	int force,
-	const git_signature *who,
+	const git3_signature *who,
 	const char *message);
 
-int git_refdb_iterator(git_reference_iterator **out, git_refdb *db, const char *glob);
-int git_refdb_iterator_next(git_reference **out, git_reference_iterator *iter);
-int git_refdb_iterator_next_name(const char **out, git_reference_iterator *iter);
-void git_refdb_iterator_free(git_reference_iterator *iter);
+int git3_refdb_iterator(git3_reference_iterator **out, git3_refdb *db, const char *glob);
+int git3_refdb_iterator_next(git3_reference **out, git3_reference_iterator *iter);
+int git3_refdb_iterator_next_name(const char **out, git3_reference_iterator *iter);
+void git3_refdb_iterator_free(git3_reference_iterator *iter);
 
-int git_refdb_write(git_refdb *refdb, git_reference *ref, int force, const git_signature *who, const char *message, const git_oid *old_id, const char *old_target);
-int git_refdb_delete(git_refdb *refdb, const char *ref_name, const git_oid *old_id, const char *old_target);
+int git3_refdb_write(git3_refdb *refdb, git3_reference *ref, int force, const git3_signature *who, const char *message, const git3_oid *old_id, const char *old_target);
+int git3_refdb_delete(git3_refdb *refdb, const char *ref_name, const git3_oid *old_id, const char *old_target);
 
-int git_refdb_reflog_read(git_reflog **out, git_refdb *db,  const char *name);
-int git_refdb_reflog_write(git_reflog *reflog);
+int git3_refdb_reflog_read(git3_reflog **out, git3_refdb *db,  const char *name);
+int git3_refdb_reflog_write(git3_reflog *reflog);
 
 /**
  * Determine whether a reflog entry should be created for the given reference.
@@ -101,7 +101,7 @@ int git_refdb_reflog_write(git_reflog *reflog);
  * @param ref The reference one wants to check.
  * @return `0` on success, a negative error code otherwise.
  */
-int git_refdb_should_write_reflog(int *out, git_refdb *db, const git_reference *ref);
+int git3_refdb_should_write_reflog(int *out, git3_refdb *db, const git3_reference *ref);
 
 /**
  * Determine whether a reflog entry should be created for HEAD if creating one
@@ -117,12 +117,12 @@ int git_refdb_should_write_reflog(int *out, git_refdb *db, const git_reference *
  * @param ref The reference one wants to check.
  * @return `0` on success, a negative error code otherwise.
  */
-int git_refdb_should_write_head_reflog(int *out, git_refdb *db, const git_reference *ref);
+int git3_refdb_should_write_head_reflog(int *out, git3_refdb *db, const git3_reference *ref);
 
-int git_refdb_has_log(git_refdb *db, const char *refname);
-int git_refdb_ensure_log(git_refdb *refdb, const char *refname);
+int git3_refdb_has_log(git3_refdb *db, const char *refname);
+int git3_refdb_ensure_log(git3_refdb *refdb, const char *refname);
 
-int git_refdb_lock(void **payload, git_refdb *db, const char *refname);
-int git_refdb_unlock(git_refdb *db, void *payload, int success, int update_reflog, const git_reference *ref, const git_signature *sig, const char *message);
+int git3_refdb_lock(void **payload, git3_refdb *db, const char *refname);
+int git3_refdb_unlock(git3_refdb *db, void *payload, int success, int update_reflog, const git3_reference *ref, const git3_signature *sig, const char *message);
 
 #endif

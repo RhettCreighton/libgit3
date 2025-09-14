@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "apply_helpers.h"
 #include "../merge/merge_helpers.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-recursive"
 
@@ -19,12 +19,12 @@ void test_apply_tree__cleanup(void)
 
 void test_apply_tree__one(void)
 {
-	git_oid a_oid, b_oid;
-	git_commit *a_commit, *b_commit;
-	git_tree *a_tree, *b_tree;
-	git_diff *diff;
-	git_index *index = NULL;
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
+	git3_oid a_oid, b_oid;
+	git3_commit *a_commit, *b_commit;
+	git3_tree *a_tree, *b_tree;
+	git3_diff *diff;
+	git3_index *index = NULL;
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
 
 	struct merge_index_entry expected[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -35,35 +35,35 @@ void test_apply_tree__one(void)
 		{ 0100644, "a7b066537e6be7109abfe4ff97b675d4e077da20", 0, "veal.txt" },
 	};
 
-	git_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT_OID_SHA1);
-	git_oid_from_string(&b_oid, "7c7bf85e978f1d18c0566f702d2cb7766b9c8d4f", GIT_OID_SHA1);
+	git3_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT3_OID_SHA1);
+	git3_oid_from_string(&b_oid, "7c7bf85e978f1d18c0566f702d2cb7766b9c8d4f", GIT3_OID_SHA1);
 
-	cl_git_pass(git_commit_lookup(&a_commit, repo, &a_oid));
-	cl_git_pass(git_commit_lookup(&b_commit, repo, &b_oid));
+	cl_git_pass(git3_commit_lookup(&a_commit, repo, &a_oid));
+	cl_git_pass(git3_commit_lookup(&b_commit, repo, &b_oid));
 
-	cl_git_pass(git_commit_tree(&a_tree, a_commit));
-	cl_git_pass(git_commit_tree(&b_tree, b_commit));
+	cl_git_pass(git3_commit_tree(&a_tree, a_commit));
+	cl_git_pass(git3_commit_tree(&b_tree, b_commit));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, repo, a_tree, b_tree, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, repo, a_tree, b_tree, &opts));
 
-	cl_git_pass(git_apply_to_tree(&index, repo, a_tree, diff, NULL));
+	cl_git_pass(git3_apply_to_tree(&index, repo, a_tree, diff, NULL));
 	merge_test_index(index, expected, 6);
 
-	git_index_free(index);
-	git_diff_free(diff);
-	git_tree_free(a_tree);
-	git_tree_free(b_tree);
-	git_commit_free(a_commit);
-	git_commit_free(b_commit);
+	git3_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(a_tree);
+	git3_tree_free(b_tree);
+	git3_commit_free(a_commit);
+	git3_commit_free(b_commit);
 }
 
 void test_apply_tree__adds_file(void)
 {
-	git_oid a_oid;
-	git_commit *a_commit;
-	git_tree *a_tree;
-	git_diff *diff;
-	git_index *index = NULL;
+	git3_oid a_oid;
+	git3_commit *a_commit;
+	git3_tree *a_tree;
+	git3_diff *diff;
+	git3_index *index = NULL;
 
 	struct merge_index_entry expected[] = {
 		{ 0100644, "f51658077d85f2264fa179b4d0848268cb3475c3", 0, "asparagus.txt" },
@@ -75,20 +75,20 @@ void test_apply_tree__adds_file(void)
 		{ 0100644, "94d2c01087f48213bd157222d54edfefd77c9bba", 0, "veal.txt" },
 	};
 
-	git_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT_OID_SHA1);
+	git3_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT3_OID_SHA1);
 
-	cl_git_pass(git_commit_lookup(&a_commit, repo, &a_oid));
+	cl_git_pass(git3_commit_lookup(&a_commit, repo, &a_oid));
 
-	cl_git_pass(git_commit_tree(&a_tree, a_commit));
+	cl_git_pass(git3_commit_tree(&a_tree, a_commit));
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_ADD_FILE, strlen(DIFF_ADD_FILE)));
 
-	cl_git_pass(git_apply_to_tree(&index, repo, a_tree, diff, NULL));
+	cl_git_pass(git3_apply_to_tree(&index, repo, a_tree, diff, NULL));
 	merge_test_index(index, expected, 7);
 
-	git_index_free(index);
-	git_diff_free(diff);
-	git_tree_free(a_tree);
-	git_commit_free(a_commit);
+	git3_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(a_tree);
+	git3_commit_free(a_commit);
 }

@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/blame.h"
 #include "mailmap.h"
 #include "mailmap_testdata.h"
 
-static git_repository *g_repo;
-static git_blame *g_blame;
+static git3_repository *g_repo;
+static git3_blame *g_blame;
 
 void test_mailmap_blame__initialize(void)
 {
@@ -15,25 +15,25 @@ void test_mailmap_blame__initialize(void)
 
 void test_mailmap_blame__cleanup(void)
 {
-	git_blame_free(g_blame);
+	git3_blame_free(g_blame);
 	cl_git_sandbox_cleanup();
 }
 
 void test_mailmap_blame__hunks(void)
 {
 	size_t idx = 0;
-	const git_blame_hunk *hunk = NULL;
-	git_blame_options opts = GIT_BLAME_OPTIONS_INIT;
+	const git3_blame_hunk *hunk = NULL;
+	git3_blame_options opts = GIT3_BLAME_OPTIONS_INIT;
 
 	g_repo = cl_git_sandbox_init("mailmap");
 
-	opts.flags |= GIT_BLAME_USE_MAILMAP;
+	opts.flags |= GIT3_BLAME_USE_MAILMAP;
 
-	cl_git_pass(git_blame_file(&g_blame, g_repo, "file.txt", &opts));
+	cl_git_pass(git3_blame_file(&g_blame, g_repo, "file.txt", &opts));
 	cl_assert(g_blame);
 
 	for (idx = 0; idx < ARRAY_SIZE(resolved); ++idx) {
-		hunk = git_blame_hunk_byline(g_blame, idx + 1);
+		hunk = git3_blame_hunk_byline(g_blame, idx + 1);
 
 		cl_assert(hunk->final_signature != NULL);
 		cl_assert(hunk->orig_signature != NULL);
@@ -45,16 +45,16 @@ void test_mailmap_blame__hunks(void)
 void test_mailmap_blame__hunks_no_mailmap(void)
 {
 	size_t idx = 0;
-	const git_blame_hunk *hunk = NULL;
-	git_blame_options opts = GIT_BLAME_OPTIONS_INIT;
+	const git3_blame_hunk *hunk = NULL;
+	git3_blame_options opts = GIT3_BLAME_OPTIONS_INIT;
 
 	g_repo = cl_git_sandbox_init("mailmap");
 
-	cl_git_pass(git_blame_file(&g_blame, g_repo, "file.txt", &opts));
+	cl_git_pass(git3_blame_file(&g_blame, g_repo, "file.txt", &opts));
 	cl_assert(g_blame);
 
 	for (idx = 0; idx < ARRAY_SIZE(resolved); ++idx) {
-		hunk = git_blame_hunk_byline(g_blame, idx + 1);
+		hunk = git3_blame_hunk_byline(g_blame, idx + 1);
 
 		cl_assert(hunk->final_signature != NULL);
 		cl_assert(hunk->orig_signature != NULL);

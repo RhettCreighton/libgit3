@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_proxy_h__
@@ -13,12 +13,12 @@
 #include "credential.h"
 
 /**
- * @file git2/proxy.h
+ * @file git3/proxy.h
  * @brief TLS proxies
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * The type of proxy to use.
@@ -30,16 +30,16 @@ typedef enum {
 	 * If built against libcurl, it itself may attempt to connect
 	 * to a proxy if the environment variables specify it.
 	 */
-	GIT_PROXY_NONE,
+	GIT3_PROXY_NONE,
 	/**
 	 * Try to auto-detect the proxy from the git configuration.
 	 */
-	GIT_PROXY_AUTO,
+	GIT3_PROXY_AUTO,
 	/**
 	 * Connect via the URL given in the options
 	 */
-	GIT_PROXY_SPECIFIED
-} git_proxy_t;
+	GIT3_PROXY_SPECIFIED
+} git3_proxy_t;
 
 /**
  * Options for connecting through a proxy
@@ -53,7 +53,7 @@ typedef struct {
 	/**
 	 * The type of proxy to use, by URL, auto-detect.
 	 */
-	git_proxy_t type;
+	git3_proxy_t type;
 
 	/**
 	 * The URL of the proxy.
@@ -64,10 +64,10 @@ typedef struct {
 	 * This will be called if the remote host requires
 	 * authentication in order to connect to it.
 	 *
-	 * Returning GIT_PASSTHROUGH will make libgit2 behave as
+	 * Returning GIT3_PASSTHROUGH will make libgit3 behave as
 	 * though this field isn't set.
 	 */
-	git_credential_acquire_cb credentials;
+	git3_credential_acquire_cb credentials;
 
 	/**
 	 * If cert verification fails, this will be called to let the
@@ -75,34 +75,34 @@ typedef struct {
 	 * connection to proceed. Returns 0 to allow the connection
 	 * or a negative value to indicate an error.
 	 */
-	git_transport_certificate_check_cb certificate_check;
+	git3_transport_certificate_check_cb certificate_check;
 
 	/**
 	 * Payload to be provided to the credentials and certificate
 	 * check callbacks.
 	 */
 	void *payload;
-} git_proxy_options;
+} git3_proxy_options;
 
-/** Current version for the `git_proxy_options` structure */
-#define GIT_PROXY_OPTIONS_VERSION 1
+/** Current version for the `git3_proxy_options` structure */
+#define GIT3_PROXY_OPTIONS_VERSION 1
 
-/** Static constructor for `git_proxy_options` */
-#define GIT_PROXY_OPTIONS_INIT {GIT_PROXY_OPTIONS_VERSION}
+/** Static constructor for `git3_proxy_options` */
+#define GIT3_PROXY_OPTIONS_INIT {GIT3_PROXY_OPTIONS_VERSION}
 
 /**
- * Initialize git_proxy_options structure
+ * Initialize git3_proxy_options structure
  *
- * Initializes a `git_proxy_options` with default values. Equivalent to
- * creating an instance with `GIT_PROXY_OPTIONS_INIT`.
+ * Initializes a `git3_proxy_options` with default values. Equivalent to
+ * creating an instance with `GIT3_PROXY_OPTIONS_INIT`.
  *
- * @param opts The `git_proxy_options` struct to initialize.
- * @param version The struct version; pass `GIT_PROXY_OPTIONS_VERSION`.
+ * @param opts The `git3_proxy_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_PROXY_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_proxy_options_init(git_proxy_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_proxy_options_init(git3_proxy_options *opts, unsigned int version);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/odb_backend.h"
 
 #include "futils.h"
@@ -12,7 +12,7 @@ typedef struct object_data {
 
 static const char *odb_dir = "test-objects";
 
-void test_body(object_data *d, git_rawobj *o);
+void test_body(object_data *d, git3_rawobj *o);
 
 
 
@@ -25,25 +25,25 @@ static void remove_object_files(object_data *d)
    cl_git_pass(p_rmdir(odb_dir) < 0);
 }
 
-static void streaming_write(git_oid *oid, git_odb *odb, git_rawobj *raw)
+static void streaming_write(git3_oid *oid, git3_odb *odb, git3_rawobj *raw)
 {
-   git_odb_stream *stream;
+   git3_odb_stream *stream;
    int error;
 
-   cl_git_pass(git_odb_open_wstream(&stream, odb, raw->len, raw->type));
-   git_odb_stream_write(stream, raw->data, raw->len);
-   error = git_odb_stream_finalize_write(oid, stream);
-   git_odb_stream_free(stream);
+   cl_git_pass(git3_odb_open_wstream(&stream, odb, raw->len, raw->type));
+   git3_odb_stream_write(stream, raw->data, raw->len);
+   error = git3_odb_stream_finalize_write(oid, stream);
+   git3_odb_stream_free(stream);
    cl_git_pass(error);
 }
 
 static void check_object_files(object_data *d)
 {
-   cl_assert(git_fs_path_exists(d->dir));
-   cl_assert(git_fs_path_exists(d->file));
+   cl_assert(git3_fs_path_exists(d->dir));
+   cl_assert(git3_fs_path_exists(d->file));
 }
 
-static void cmp_objects(git_rawobj *o1, git_rawobj *o2)
+static void cmp_objects(git3_rawobj *o1, git3_rawobj *o2)
 {
    cl_assert(o1->type == o2->type);
    cl_assert(o1->len == o2->len);
@@ -53,27 +53,27 @@ static void cmp_objects(git_rawobj *o1, git_rawobj *o2)
 
 static void make_odb_dir(void)
 {
-	cl_git_pass(p_mkdir(odb_dir, GIT_OBJECT_DIR_MODE));
+	cl_git_pass(p_mkdir(odb_dir, GIT3_OBJECT_DIR_MODE));
 }
 
 
 /* Standard test form */
-void test_body(object_data *d, git_rawobj *o)
+void test_body(object_data *d, git3_rawobj *o)
 {
-   git_odb *db;
-   git_oid id1, id2;
-   git_odb_object *obj;
-   git_rawobj tmp;
+   git3_odb *db;
+   git3_oid id1, id2;
+   git3_odb_object *obj;
+   git3_rawobj tmp;
 
    make_odb_dir();
-   cl_git_pass(git_odb_open_ext(&db, odb_dir, NULL));
-   cl_git_pass(git_oid_from_string(&id1, d->id, GIT_OID_SHA1));
+   cl_git_pass(git3_odb_open_ext(&db, odb_dir, NULL));
+   cl_git_pass(git3_oid_from_string(&id1, d->id, GIT3_OID_SHA1));
 
    streaming_write(&id2, db, o);
-   cl_assert(git_oid_cmp(&id1, &id2) == 0);
+   cl_assert(git3_oid_cmp(&id1, &id2) == 0);
    check_object_files(d);
 
-   cl_git_pass(git_odb_read(&obj, db, &id1));
+   cl_git_pass(git3_odb_read(&obj, db, &id1));
 
    tmp.data = obj->buffer;
    tmp.len = obj->cached.size;
@@ -81,8 +81,8 @@ void test_body(object_data *d, git_rawobj *o)
 
    cmp_objects(&tmp, o);
 
-   git_odb_object_free(obj);
-   git_odb_free(db);
+   git3_odb_object_free(obj);
+   git3_odb_free(db);
    remove_object_files(d);
 }
 
@@ -143,10 +143,10 @@ void test_object_raw_write__loose_object(void)
       0x3e, 0x0a,
    };
 
-   git_rawobj commit_obj = {
+   git3_rawobj commit_obj = {
       commit_data,
       sizeof(commit_data),
-      GIT_OBJECT_COMMIT
+      GIT3_OBJECT_COMMIT
    };
 
    test_body(&commit, &commit_obj);
@@ -179,10 +179,10 @@ void test_object_raw_write__loose_tree(void)
       0xd8, 0xc2, 0xe4, 0x8c, 0x53, 0x91,
    };
 
-   static git_rawobj tree_obj = {
+   static git3_rawobj tree_obj = {
       tree_data,
       sizeof(tree_data),
-      GIT_OBJECT_TREE
+      GIT3_OBJECT_TREE
    };
 
    test_body(&tree, &tree_obj);
@@ -221,10 +221,10 @@ void test_object_raw_write__loose_tag(void)
       0x2e, 0x30, 0x2e, 0x31, 0x0a,
    };
 
-   static git_rawobj tag_obj = {
+   static git3_rawobj tag_obj = {
       tag_data,
       sizeof(tag_data),
-      GIT_OBJECT_TAG
+      GIT3_OBJECT_TAG
    };
 
 
@@ -243,10 +243,10 @@ void test_object_raw_write__zero_length(void)
       0x00  /* dummy data */
    };
 
-   static git_rawobj zero_obj = {
+   static git3_rawobj zero_obj = {
       zero_data,
       0,
-      GIT_OBJECT_BLOB
+      GIT3_OBJECT_BLOB
    };
 
    test_body(&zero, &zero_obj);
@@ -264,10 +264,10 @@ void test_object_raw_write__one_byte(void)
       0x0a,
    };
 
-   static git_rawobj one_obj = {
+   static git3_rawobj one_obj = {
       one_data,
       sizeof(one_data),
-      GIT_OBJECT_BLOB
+      GIT3_OBJECT_BLOB
    };
 
    test_body(&one, &one_obj);
@@ -285,10 +285,10 @@ void test_object_raw_write__two_byte(void)
       0x61, 0x0a,
    };
 
-   static git_rawobj two_obj = {
+   static git3_rawobj two_obj = {
       two_data,
       sizeof(two_data),
-      GIT_OBJECT_BLOB
+      GIT3_OBJECT_BLOB
    };
 
    test_body(&two, &two_obj);
@@ -452,10 +452,10 @@ void test_object_raw_write__several_bytes(void)
       0x0a,
    };
 
-   static git_rawobj some_obj = {
+   static git3_rawobj some_obj = {
       some_data,
       sizeof(some_data),
-      GIT_OBJECT_BLOB
+      GIT3_OBJECT_BLOB
    };
 
    test_body(&some, &some_obj);

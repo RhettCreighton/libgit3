@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -65,38 +65,38 @@ static int strintlen(size_t n)
 	return len;
 }
 
-static int fmt_date(git_str *out, git_time_t time, int offset)
+static int fmt_date(git3_str *out, git3_time_t time, int offset)
 {
 	time_t t;
 	struct tm gmt;
 
-	GIT_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(out);
 
 	t = (time_t)(time + offset * 60);
 
 	if (p_gmtime_r(&t, &gmt) == NULL)
 		return -1;
 
-	return git_str_printf(out, "%.4u-%02u-%02u %02u:%02u:%02u %+03d%02d",
+	return git3_str_printf(out, "%.4u-%02u-%02u %02u:%02u:%02u %+03d%02d",
 		gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
 		gmt.tm_hour, gmt.tm_min, gmt.tm_sec,
 		offset / 60, offset % 60);
 }
 
-static int print_standard(git_blame *blame)
+static int print_standard(git3_blame *blame)
 {
 	size_t max_line_number = 0;
 	int max_lineno_len, max_line_len, max_author_len = 0, max_path_len = 0;
 	const char *last_path = NULL;
-	const git_blame_line *line;
+	const git3_blame_line *line;
 	bool paths_differ = false;
-	git_str date_str = GIT_STR_INIT;
+	git3_str date_str = GIT3_STR_INIT;
 	size_t i;
 	int ret = 0;
 
 	/* Compute the maximum size of things */
-	for (i = 0; i < git_blame_hunkcount(blame); i++) {
-		const git_blame_hunk *hunk = git_blame_hunk_byindex(blame, i);
+	for (i = 0; i < git3_blame_hunkcount(blame); i++) {
+		const git3_blame_hunk *hunk = git3_blame_hunk_byindex(blame, i);
 		size_t hunk_author_len = strlen(hunk->orig_signature->name);
 		size_t hunk_path_len = strlen(hunk->orig_path);
 		size_t hunk_max_line_number =
@@ -127,8 +127,8 @@ static int print_standard(git_blame *blame)
 
 	max_author_len--;
 
-	for (i = 1; i < git_blame_linecount(blame); i++) {
-		const git_blame_hunk *hunk = git_blame_hunk_byline(blame, i);
+	for (i = 1; i < git3_blame_linecount(blame); i++) {
+		const git3_blame_hunk *hunk = git3_blame_hunk_byline(blame, i);
 		int oid_abbrev;
 
 		if (!hunk)
@@ -136,12 +136,12 @@ static int print_standard(git_blame *blame)
 
 		oid_abbrev = hunk->boundary ? 7 : 8;
 		printf("%s%.*s ", hunk->boundary ? "^" : "",
-			oid_abbrev, git_oid_tostr_s(&hunk->orig_commit_id));
+			oid_abbrev, git3_oid_tostr_s(&hunk->orig_commit_id));
 
 		if (paths_differ)
 			printf("%-*.*s ", max_path_len, max_path_len, hunk->orig_path);
 
-		git_str_clear(&date_str);
+		git3_str_clear(&date_str);
 		if (fmt_date(&date_str,
 				hunk->orig_signature->when.time,
 				hunk->orig_signature->when.offset) < 0) {
@@ -149,7 +149,7 @@ static int print_standard(git_blame *blame)
 			goto done;
 		}
 
-		if ((line = git_blame_line_byindex(blame, i)) == NULL) {
+		if ((line = git3_blame_line_byindex(blame, i)) == NULL) {
 			ret = cli_error_git();
 			goto done;
 		}
@@ -165,34 +165,34 @@ static int print_standard(git_blame *blame)
 	}
 
 done:
-	git_str_dispose(&date_str);
+	git3_str_dispose(&date_str);
 	return ret;
 }
 
-GIT_INLINE(uint32_t) oid_hashcode(const git_oid *oid)
+GIT3_INLINE(uint32_t) oid_hashcode(const git3_oid *oid)
 {
 	uint32_t hash;
 	memcpy(&hash, oid->id, sizeof(uint32_t));
 	return hash;
 }
 
-GIT_HASHSET_SETUP(git_blame_commitmap, const git_oid *, oid_hashcode, git_oid_equal);
+GIT3_HASHSET_SETUP(git3_blame_commitmap, const git3_oid *, oid_hashcode, git3_oid_equal);
 
-static int print_porcelain(git_blame *blame)
+static int print_porcelain(git3_blame *blame)
 {
-	git_blame_commitmap seen_ids = GIT_HASHSET_INIT;
+	git3_blame_commitmap seen_ids = GIT3_HASHSET_INIT;
 	size_t i, j;
 
-	for (i = 0; i < git_blame_hunkcount(blame); i++) {
-		const git_blame_line *line;
-		const git_blame_hunk *hunk = git_blame_hunk_byindex(blame, i);
+	for (i = 0; i < git3_blame_hunkcount(blame); i++) {
+		const git3_blame_line *line;
+		const git3_blame_hunk *hunk = git3_blame_hunk_byindex(blame, i);
 
 		for (j = 0; j < hunk->lines_in_hunk; j++) {
 			size_t line_number = hunk->final_start_line_number + j;
-			bool seen = git_blame_commitmap_contains(&seen_ids, &hunk->orig_commit_id);
+			bool seen = git3_blame_commitmap_contains(&seen_ids, &hunk->orig_commit_id);
 
 			printf("%s %" PRIuZ " %" PRIuZ,
-				git_oid_tostr_s(&hunk->orig_commit_id),
+				git3_oid_tostr_s(&hunk->orig_commit_id),
 				hunk->orig_start_line_number + j,
 				hunk->final_start_line_number + j);
 
@@ -223,32 +223,32 @@ static int print_porcelain(git_blame *blame)
 				printf("filename %s\n", hunk->orig_path);
 			}
 
-			if ((line = git_blame_line_byindex(blame, line_number)) == NULL)
+			if ((line = git3_blame_line_byindex(blame, line_number)) == NULL)
 				return cli_error_git();
 
 			printf("\t%.*s\n", (int)min(line->len, INT_MAX),
 				line->ptr);
 
 			if (!seen)
-				git_blame_commitmap_add(&seen_ids, &hunk->orig_commit_id);
+				git3_blame_commitmap_add(&seen_ids, &hunk->orig_commit_id);
 		}
 	}
 
-	git_blame_commitmap_dispose(&seen_ids);
+	git3_blame_commitmap_dispose(&seen_ids);
 	return 0;
 }
 
 int cmd_blame(int argc, char **argv)
 {
 	cli_repository_open_options open_opts = { argv + 1, argc - 1 };
-	git_blame_options blame_opts = GIT_BLAME_OPTIONS_INIT;
-	git_repository *repo = NULL;
-	git_str workdir_path = GIT_STR_INIT;
-	git_blame *blame = NULL;
+	git3_blame_options blame_opts = GIT3_BLAME_OPTIONS_INIT;
+	git3_repository *repo = NULL;
+	git3_str workdir_path = GIT3_STR_INIT;
+	git3_blame *blame = NULL;
 	cli_opt invalid_opt;
 	int ret = 0;
 
-	blame_opts.flags |= GIT_BLAME_USE_MAILMAP;
+	blame_opts.flags |= GIT3_BLAME_USE_MAILMAP;
 
 	if (cli_opt_parse(&invalid_opt, opts, argv + 1, argc - 1, CLI_OPT_PARSE_GNU))
 		return cli_opt_usage_error(COMMAND_NAME, opts, &invalid_opt);
@@ -269,7 +269,7 @@ int cmd_blame(int argc, char **argv)
 	if ((ret = cli_resolve_path(&workdir_path, repo, file)) != 0)
 		goto done;
 
-	if (git_blame_file(&blame, repo, workdir_path.ptr, &blame_opts) < 0) {
+	if (git3_blame_file(&blame, repo, workdir_path.ptr, &blame_opts) < 0) {
 		ret = cli_error_git();
 		goto done;
 	}
@@ -280,8 +280,8 @@ int cmd_blame(int argc, char **argv)
 		ret = print_standard(blame);
 
 done:
-	git_str_dispose(&workdir_path);
-	git_blame_free(blame);
-	git_repository_free(repo);
+	git3_str_dispose(&workdir_path);
+	git3_blame_free(blame);
+	git3_repository_free(repo);
 	return ret;
 }

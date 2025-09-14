@@ -1,23 +1,23 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_win32_posix_h__
 #define INCLUDE_win32_posix_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 #include "../posix.h"
 #include "win32-compat.h"
 #include "path_w32.h"
 #include "utf-conv.h"
 #include "dir.h"
 
-extern unsigned long git_win32__createfile_sharemode;
-extern int git_win32__retries;
+extern unsigned long git3_win32__createfile_sharemode;
+extern int git3_win32__retries;
 
-typedef SOCKET GIT_SOCKET;
+typedef SOCKET GIT3_SOCKET;
 
 #define p_lseek(f,n,w) _lseeki64(f, n, w)
 
@@ -36,12 +36,12 @@ extern int p_mkdir(const char *path, mode_t mode);
 extern int p_fsync(int fd);
 extern char *p_realpath(const char *orig_path, char *buffer);
 
-extern int p_recv(GIT_SOCKET socket, void *buffer, size_t length, int flags);
-extern int p_send(GIT_SOCKET socket, const void *buffer, size_t length, int flags);
+extern int p_recv(GIT3_SOCKET socket, void *buffer, size_t length, int flags);
+extern int p_send(GIT3_SOCKET socket, const void *buffer, size_t length, int flags);
 extern int p_inet_pton(int af, const char *src, void* dst);
 
 extern int p_vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
-extern int p_snprintf(char *buffer, size_t count, const char *format, ...) GIT_FORMAT_PRINTF(3, 4);
+extern int p_snprintf(char *buffer, size_t count, const char *format, ...) GIT3_FORMAT_PRINTF(3, 4);
 extern int p_chdir(const char *path);
 extern int p_chmod(const char *path, mode_t mode);
 extern int p_rmdir(const char *path);

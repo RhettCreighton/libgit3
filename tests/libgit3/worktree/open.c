@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "repository.h"
 #include "worktree.h"
 #include "worktree_helpers.h"
@@ -9,7 +9,7 @@
 static worktree_fixture fixture =
 	WORKTREE_FIXTURE_INIT(COMMON_REPO, WORKTREE_REPO);
 
-static void assert_worktree_valid(git_repository *wt, const char *parentdir, const char *wtdir)
+static void assert_worktree_valid(git3_repository *wt, const char *parentdir, const char *wtdir)
 {
 	cl_assert(wt->is_worktree);
 
@@ -35,58 +35,58 @@ void test_worktree_open__repository(void)
 
 void test_worktree_open__repository_through_workdir(void)
 {
-	git_repository *wt;
+	git3_repository *wt;
 
-	cl_git_pass(git_repository_open(&wt, WORKTREE_REPO));
+	cl_git_pass(git3_repository_open(&wt, WORKTREE_REPO));
 	assert_worktree_valid(wt, COMMON_REPO, WORKTREE_REPO);
 
-	git_repository_free(wt);
+	git3_repository_free(wt);
 }
 
 void test_worktree_open__repository_through_gitlink(void)
 {
-	git_repository *wt;
+	git3_repository *wt;
 
-	cl_git_pass(git_repository_open(&wt, WORKTREE_REPO "/.git"));
+	cl_git_pass(git3_repository_open(&wt, WORKTREE_REPO "/.git"));
 	assert_worktree_valid(wt, COMMON_REPO, WORKTREE_REPO);
 
-	git_repository_free(wt);
+	git3_repository_free(wt);
 }
 
 void test_worktree_open__repository_through_gitdir(void)
 {
-	git_str gitdir_path = GIT_STR_INIT;
-	git_repository *wt;
+	git3_str gitdir_path = GIT3_STR_INIT;
+	git3_repository *wt;
 
-	cl_git_pass(git_str_joinpath(&gitdir_path, COMMON_REPO, ".git"));
-	cl_git_pass(git_str_joinpath(&gitdir_path, gitdir_path.ptr, "worktrees"));
-	cl_git_pass(git_str_joinpath(&gitdir_path, gitdir_path.ptr, "testrepo-worktree"));
+	cl_git_pass(git3_str_joinpath(&gitdir_path, COMMON_REPO, ".git"));
+	cl_git_pass(git3_str_joinpath(&gitdir_path, gitdir_path.ptr, "worktrees"));
+	cl_git_pass(git3_str_joinpath(&gitdir_path, gitdir_path.ptr, "testrepo-worktree"));
 
-	cl_git_pass(git_repository_open(&wt, gitdir_path.ptr));
+	cl_git_pass(git3_repository_open(&wt, gitdir_path.ptr));
 	assert_worktree_valid(wt, COMMON_REPO, WORKTREE_REPO);
 
-	git_str_dispose(&gitdir_path);
-	git_repository_free(wt);
+	git3_str_dispose(&gitdir_path);
+	git3_repository_free(wt);
 }
 
 void test_worktree_open__open_discovered_worktree(void)
 {
-	git_buf path = GIT_BUF_INIT;
-	git_repository *repo;
+	git3_buf path = GIT3_BUF_INIT;
+	git3_repository *repo;
 
-	cl_git_pass(git_repository_discover(&path,
-		git_repository_workdir(fixture.worktree), false, NULL));
-	cl_git_pass(git_repository_open(&repo, path.ptr));
-	cl_assert_equal_s(git_repository_workdir(fixture.worktree),
-		git_repository_workdir(repo));
+	cl_git_pass(git3_repository_discover(&path,
+		git3_repository_workdir(fixture.worktree), false, NULL));
+	cl_git_pass(git3_repository_open(&repo, path.ptr));
+	cl_assert_equal_s(git3_repository_workdir(fixture.worktree),
+		git3_repository_workdir(repo));
 
-	git_buf_dispose(&path);
-	git_repository_free(repo);
+	git3_buf_dispose(&path);
+	git3_repository_free(repo);
 }
 
 void test_worktree_open__repository_with_nonexistent_parent(void)
 {
-	git_repository *repo;
+	git3_repository *repo;
 
 	cleanup_fixture_worktree(&fixture);
 
@@ -95,17 +95,17 @@ void test_worktree_open__repository_with_nonexistent_parent(void)
 	cl_git_pass(cl_rename(".gitted", ".git"));
 	cl_git_pass(p_chdir(".."));
 
-	cl_git_fail(git_repository_open(&repo, WORKTREE_REPO));
+	cl_git_fail(git3_repository_open(&repo, WORKTREE_REPO));
 
 	cl_fixture_cleanup(WORKTREE_REPO);
 }
 
 void test_worktree_open__open_from_repository(void)
 {
-	git_worktree *opened, *lookedup;
+	git3_worktree *opened, *lookedup;
 
-	cl_git_pass(git_worktree_open_from_repository(&opened, fixture.worktree));
-	cl_git_pass(git_worktree_lookup(&lookedup, fixture.repo, WORKTREE_REPO));
+	cl_git_pass(git3_worktree_open_from_repository(&opened, fixture.worktree));
+	cl_git_pass(git3_worktree_lookup(&lookedup, fixture.repo, WORKTREE_REPO));
 
 	cl_assert_equal_s(opened->name, lookedup->name);
 	cl_assert_equal_s(opened->gitdir_path, lookedup->gitdir_path);
@@ -114,13 +114,13 @@ void test_worktree_open__open_from_repository(void)
 	cl_assert_equal_s(opened->commondir_path, lookedup->commondir_path);
 	cl_assert_equal_i(opened->locked, lookedup->locked);
 
-	git_worktree_free(opened);
-	git_worktree_free(lookedup);
+	git3_worktree_free(opened);
+	git3_worktree_free(lookedup);
 }
 
 void test_worktree_open__open_from_nonworktree_fails(void)
 {
-	git_worktree *wt;
+	git3_worktree *wt;
 
-	cl_git_fail(git_worktree_open_from_repository(&wt, fixture.repo));
+	cl_git_fail(git3_worktree_open_from_repository(&wt, fixture.repo));
 }

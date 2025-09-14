@@ -1,23 +1,23 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 
-static git_repository *repo;
-static git_strarray ref_list;
+static git3_repository *repo;
+static git3_strarray ref_list;
 
 static void ensure_no_refname_starts_with_a_forward_slash(const char *path)
 {
 	size_t i;
 
-	cl_git_pass(git_repository_open(&repo, path));
-	cl_git_pass(git_reference_list(&ref_list, repo));
+	cl_git_pass(git3_repository_open(&repo, path));
+	cl_git_pass(git3_reference_list(&ref_list, repo));
 
 	cl_assert(ref_list.count > 0);
 
 	for (i = 0; i < ref_list.count; i++)
-		cl_assert(git__prefixcmp(ref_list.strings[i], "/") != 0);
+		cl_assert(git3__prefixcmp(ref_list.strings[i], "/") != 0);
 
-	git_strarray_dispose(&ref_list);
-	git_repository_free(repo);
+	git3_strarray_dispose(&ref_list);
+	git3_repository_free(repo);
 }
 
 void test_refs_listall__from_repository_opened_through_workdir_path(void)
@@ -37,11 +37,11 @@ void test_refs_listall__from_repository_opened_through_gitdir_path(void)
 
 void test_refs_listall__from_repository_with_no_trailing_newline(void)
 {
-	cl_git_pass(git_repository_open(&repo, cl_fixture("bad_tag.git")));
-	cl_git_pass(git_reference_list(&ref_list, repo));
+	cl_git_pass(git3_repository_open(&repo, cl_fixture("bad_tag.git")));
+	cl_git_pass(git3_reference_list(&ref_list, repo));
 
 	cl_assert(ref_list.count > 0);
 
-	git_strarray_dispose(&ref_list);
-	git_repository_free(repo);
+	git3_strarray_dispose(&ref_list);
+	git3_repository_free(repo);
 }

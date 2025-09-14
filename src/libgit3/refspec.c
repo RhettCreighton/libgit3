@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -13,7 +13,7 @@
 #include "vector.h"
 #include "wildmatch.h"
 
-int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
+int git3_refspec__parse(git3_refspec *refspec, const char *input, bool is_fetch)
 {
 	/* Ported from https://github.com/git/git/blob/f06d47e7e0d9db709ee204ed13a8a7486149f494/remote.c#L518-636 */
 
@@ -24,10 +24,10 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 	unsigned int flags;
 	bool is_neg_refspec = false;
 
-	GIT_ASSERT_ARG(refspec);
-	GIT_ASSERT_ARG(input);
+	GIT3_ASSERT_ARG(refspec);
+	GIT3_ASSERT_ARG(input);
 
-	memset(refspec, 0x0, sizeof(git_refspec));
+	memset(refspec, 0x0, sizeof(git3_refspec));
 	refspec->push = !is_fetch;
 
 	lhs = input;
@@ -47,12 +47,12 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 	 */
 	if (!is_fetch && rhs == lhs && rhs[1] == '\0') {
 		refspec->matching = 1;
-		refspec->string = git__strdup(input);
-		GIT_ERROR_CHECK_ALLOC(refspec->string);
-		refspec->src = git__strdup("");
-		GIT_ERROR_CHECK_ALLOC(refspec->src);
-		refspec->dst = git__strdup("");
-		GIT_ERROR_CHECK_ALLOC(refspec->dst);
+		refspec->string = git3__strdup(input);
+		GIT3_ERROR_CHECK_ALLOC(refspec->string);
+		refspec->src = git3__strdup("");
+		GIT3_ERROR_CHECK_ALLOC(refspec->src);
+		refspec->dst = git3__strdup("");
+		GIT3_ERROR_CHECK_ALLOC(refspec->dst);
 		return 0;
 	}
 
@@ -60,7 +60,7 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 		size_t rlen = strlen(++rhs);
 		if (rlen || !is_fetch) {
 			is_glob = (1 <= rlen && strchr(rhs, '*'));
-			refspec->dst = git__strndup(rhs, rlen);
+			refspec->dst = git3__strndup(rhs, rlen);
 		}
 	}
 
@@ -80,10 +80,10 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 		goto invalid;
 
 	refspec->pattern = is_glob;
-	refspec->src = git__strndup(lhs, llen);
-	flags = GIT_REFERENCE_FORMAT_ALLOW_ONELEVEL |
-		GIT_REFERENCE_FORMAT_REFSPEC_SHORTHAND |
-		(is_glob ? GIT_REFERENCE_FORMAT_REFSPEC_PATTERN : 0);
+	refspec->src = git3__strndup(lhs, llen);
+	flags = GIT3_REFERENCE_FORMAT_ALLOW_ONELEVEL |
+		GIT3_REFERENCE_FORMAT_REFSPEC_SHORTHAND |
+		(is_glob ? GIT3_REFERENCE_FORMAT_REFSPEC_PATTERN : 0);
 
 	if (is_fetch) {
 		/*
@@ -93,7 +93,7 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 		 */
 		if (!*refspec->src)
 			; /* empty is ok */
-		else if (git_reference__name_is_valid(&valid, refspec->src, flags) < 0)
+		else if (git3_reference__name_is_valid(&valid, refspec->src, flags) < 0)
 			goto on_error;
 		else if (!valid)
 			goto invalid;
@@ -108,7 +108,7 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 			; /* ok */
 		else if (!*refspec->dst)
 			; /* ok */
-		else if (git_reference__name_is_valid(&valid, refspec->dst, flags) < 0)
+		else if (git3_reference__name_is_valid(&valid, refspec->dst, flags) < 0)
 			goto on_error;
 		else if (!valid)
 			goto invalid;
@@ -123,7 +123,7 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 		if (!*refspec->src)
 			; /* empty is ok */
 		else if (is_glob) {
-			if (git_reference__name_is_valid(&valid, refspec->src, flags) < 0)
+			if (git3_reference__name_is_valid(&valid, refspec->src, flags) < 0)
 				goto on_error;
 			else if (!valid)
 				goto invalid;
@@ -140,14 +140,14 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 		 * - otherwise it must be a valid looking ref.
 		 */
 		if (!refspec->dst) {
-			if (git_reference__name_is_valid(&valid, refspec->src, flags) < 0)
+			if (git3_reference__name_is_valid(&valid, refspec->src, flags) < 0)
 				goto on_error;
 			else if (!valid)
 				goto invalid;
 		} else if (!*refspec->dst) {
 			goto invalid;
 		} else {
-			if (git_reference__name_is_valid(&valid, refspec->dst, flags) < 0)
+			if (git3_reference__name_is_valid(&valid, refspec->dst, flags) < 0)
 				goto on_error;
 			else if (!valid)
 				goto invalid;
@@ -155,52 +155,52 @@ int git_refspec__parse(git_refspec *refspec, const char *input, bool is_fetch)
 
 		/* if the RHS is empty, then it's a copy of the LHS */
 		if (!refspec->dst) {
-			refspec->dst = git__strdup(refspec->src);
-			GIT_ERROR_CHECK_ALLOC(refspec->dst);
+			refspec->dst = git3__strdup(refspec->src);
+			GIT3_ERROR_CHECK_ALLOC(refspec->dst);
 		}
 	}
 
-	refspec->string = git__strdup(input);
-	GIT_ERROR_CHECK_ALLOC(refspec->string);
+	refspec->string = git3__strdup(input);
+	GIT3_ERROR_CHECK_ALLOC(refspec->string);
 
 	return 0;
 
 invalid:
-	git_error_set(GIT_ERROR_INVALID,
+	git3_error_set(GIT3_ERROR_INVALID,
 	              "'%s' is not a valid refspec.", input);
-	git_refspec__dispose(refspec);
-	return GIT_EINVALIDSPEC;
+	git3_refspec__dispose(refspec);
+	return GIT3_EINVALIDSPEC;
 
 on_error:
-	git_refspec__dispose(refspec);
+	git3_refspec__dispose(refspec);
 	return -1;
 }
 
-void git_refspec__dispose(git_refspec *refspec)
+void git3_refspec__dispose(git3_refspec *refspec)
 {
 	if (refspec == NULL)
 		return;
 
-	git__free(refspec->src);
-	git__free(refspec->dst);
-	git__free(refspec->string);
+	git3__free(refspec->src);
+	git3__free(refspec->dst);
+	git3__free(refspec->string);
 
-	memset(refspec, 0x0, sizeof(git_refspec));
+	memset(refspec, 0x0, sizeof(git3_refspec));
 }
 
-int git_refspec_parse(git_refspec **out_refspec, const char *input, int is_fetch)
+int git3_refspec_parse(git3_refspec **out_refspec, const char *input, int is_fetch)
 {
-	git_refspec *refspec;
-	GIT_ASSERT_ARG(out_refspec);
-	GIT_ASSERT_ARG(input);
+	git3_refspec *refspec;
+	GIT3_ASSERT_ARG(out_refspec);
+	GIT3_ASSERT_ARG(input);
 
 	*out_refspec = NULL;
 
-	refspec = git__malloc(sizeof(git_refspec));
-	GIT_ERROR_CHECK_ALLOC(refspec);
+	refspec = git3__malloc(sizeof(git3_refspec));
+	GIT3_ERROR_CHECK_ALLOC(refspec);
 
-	if (git_refspec__parse(refspec, input, !!is_fetch) != 0) {
-		git__free(refspec);
+	if (git3_refspec__parse(refspec, input, !!is_fetch) != 0) {
+		git3__free(refspec);
 		return -1;
 	}
 
@@ -208,43 +208,43 @@ int git_refspec_parse(git_refspec **out_refspec, const char *input, int is_fetch
 	return 0;
 }
 
-void git_refspec_free(git_refspec *refspec)
+void git3_refspec_free(git3_refspec *refspec)
 {
-	git_refspec__dispose(refspec);
-	git__free(refspec);
+	git3_refspec__dispose(refspec);
+	git3__free(refspec);
 }
 
-const char *git_refspec_src(const git_refspec *refspec)
+const char *git3_refspec_src(const git3_refspec *refspec)
 {
 	return refspec == NULL ? NULL : refspec->src;
 }
 
-const char *git_refspec_dst(const git_refspec *refspec)
+const char *git3_refspec_dst(const git3_refspec *refspec)
 {
 	return refspec == NULL ? NULL : refspec->dst;
 }
 
-const char *git_refspec_string(const git_refspec *refspec)
+const char *git3_refspec_string(const git3_refspec *refspec)
 {
 	return refspec == NULL ? NULL : refspec->string;
 }
 
-int git_refspec_force(const git_refspec *refspec)
+int git3_refspec_force(const git3_refspec *refspec)
 {
-	GIT_ASSERT_ARG(refspec);
+	GIT3_ASSERT_ARG(refspec);
 
 	return refspec->force;
 }
 
-int git_refspec_src_matches_negative(const git_refspec *refspec, const char *refname)
+int git3_refspec_src_matches_negative(const git3_refspec *refspec, const char *refname)
 {
-	if (refspec == NULL || refspec->src == NULL || !git_refspec_is_negative(refspec))
+	if (refspec == NULL || refspec->src == NULL || !git3_refspec_is_negative(refspec))
 		return false;
 
 	return (wildmatch(refspec->src + 1, refname, 0) == 0);
 }
 
-int git_refspec_src_matches(const git_refspec *refspec, const char *refname)
+int git3_refspec_src_matches(const git3_refspec *refspec, const char *refname)
 {
 	if (refspec == NULL || refspec->src == NULL)
 		return false;
@@ -252,7 +252,7 @@ int git_refspec_src_matches(const git_refspec *refspec, const char *refname)
 	return (wildmatch(refspec->src, refname, 0) == 0);
 }
 
-int git_refspec_dst_matches(const git_refspec *refspec, const char *refname)
+int git3_refspec_dst_matches(const git3_refspec *refspec, const char *refname)
 {
 	if (refspec == NULL || refspec->dst == NULL)
 		return false;
@@ -261,12 +261,12 @@ int git_refspec_dst_matches(const git_refspec *refspec, const char *refname)
 }
 
 static int refspec_transform(
-	git_str *out, const char *from, const char *to, const char *name)
+	git3_str *out, const char *from, const char *to, const char *name)
 {
 	const char *from_star, *to_star;
 	size_t replacement_len, star_offset;
 
-	git_str_clear(out);
+	git3_str_clear(out);
 
 	/*
 	 * There are two parts to each side of a refspec, the bit
@@ -277,171 +277,171 @@ static int refspec_transform(
 	from_star = strchr(from, '*');
 	to_star = strchr(to, '*');
 
-	GIT_ASSERT(from_star && to_star);
+	GIT3_ASSERT(from_star && to_star);
 
 	/* star offset, both in 'from' and in 'name' */
 	star_offset = from_star - from;
 
 	/* the first half is copied over */
-	git_str_put(out, to, to_star - to);
+	git3_str_put(out, to, to_star - to);
 
 	/*
 	 * Copy over the name, but exclude the trailing part in "from" starting
 	 * after the glob
 	 */
 	replacement_len = strlen(name + star_offset) - strlen(from_star + 1);
-	git_str_put(out, name + star_offset, replacement_len);
+	git3_str_put(out, name + star_offset, replacement_len);
 
-	return git_str_puts(out, to_star + 1);
+	return git3_str_puts(out, to_star + 1);
 }
 
-int git_refspec_transform(git_buf *out, const git_refspec *spec, const char *name)
+int git3_refspec_transform(git3_buf *out, const git3_refspec *spec, const char *name)
 {
-	GIT_BUF_WRAP_PRIVATE(out, git_refspec__transform, spec, name);
+	GIT3_BUF_WRAP_PRIVATE(out, git3_refspec__transform, spec, name);
 }
 
-int git_refspec__transform(git_str *out, const git_refspec *spec, const char *name)
+int git3_refspec__transform(git3_str *out, const git3_refspec *spec, const char *name)
 {
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(spec);
-	GIT_ASSERT_ARG(name);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(name);
 
-	if (!git_refspec_src_matches(spec, name)) {
-		git_error_set(GIT_ERROR_INVALID, "ref '%s' doesn't match the source", name);
+	if (!git3_refspec_src_matches(spec, name)) {
+		git3_error_set(GIT3_ERROR_INVALID, "ref '%s' doesn't match the source", name);
 		return -1;
 	}
 
 	if (!spec->pattern)
-		return git_str_puts(out, spec->dst ? spec->dst : "");
+		return git3_str_puts(out, spec->dst ? spec->dst : "");
 
 	return refspec_transform(out, spec->src, spec->dst, name);
 }
 
-int git_refspec_rtransform(git_buf *out, const git_refspec *spec, const char *name)
+int git3_refspec_rtransform(git3_buf *out, const git3_refspec *spec, const char *name)
 {
-	GIT_BUF_WRAP_PRIVATE(out, git_refspec__rtransform, spec, name);
+	GIT3_BUF_WRAP_PRIVATE(out, git3_refspec__rtransform, spec, name);
 }
 
-int git_refspec__rtransform(git_str *out, const git_refspec *spec, const char *name)
+int git3_refspec__rtransform(git3_str *out, const git3_refspec *spec, const char *name)
 {
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(spec);
-	GIT_ASSERT_ARG(name);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(name);
 
-	if (!git_refspec_dst_matches(spec, name)) {
-		git_error_set(GIT_ERROR_INVALID, "ref '%s' doesn't match the destination", name);
+	if (!git3_refspec_dst_matches(spec, name)) {
+		git3_error_set(GIT3_ERROR_INVALID, "ref '%s' doesn't match the destination", name);
 		return -1;
 	}
 
 	if (!spec->pattern)
-		return git_str_puts(out, spec->src);
+		return git3_str_puts(out, spec->src);
 
 	return refspec_transform(out, spec->dst, spec->src, name);
 }
 
-int git_refspec__serialize(git_str *out, const git_refspec *refspec)
+int git3_refspec__serialize(git3_str *out, const git3_refspec *refspec)
 {
 	if (refspec->force)
-		git_str_putc(out, '+');
+		git3_str_putc(out, '+');
 
-	git_str_printf(out, "%s:%s",
+	git3_str_printf(out, "%s:%s",
 		refspec->src != NULL ? refspec->src : "",
 		refspec->dst != NULL ? refspec->dst : "");
 
-	return git_str_oom(out) == false;
+	return git3_str_oom(out) == false;
 }
 
-int git_refspec_is_wildcard(const git_refspec *spec)
+int git3_refspec_is_wildcard(const git3_refspec *spec)
 {
-	GIT_ASSERT_ARG(spec);
-	GIT_ASSERT_ARG(spec->src);
+	GIT3_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(spec->src);
 
 	return (spec->src[strlen(spec->src) - 1] == '*');
 }
 
-int git_refspec_is_negative(const git_refspec *spec)
+int git3_refspec_is_negative(const git3_refspec *spec)
 {
-	GIT_ASSERT_ARG(spec);
-	GIT_ASSERT_ARG(spec->src);
+	GIT3_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(spec->src);
 
 	return (spec->src[0] == '^' && spec->dst == NULL);
 }
 
-git_direction git_refspec_direction(const git_refspec *spec)
+git3_direction git3_refspec_direction(const git3_refspec *spec)
 {
-	GIT_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(spec);
 
 	return spec->push;
 }
 
-int git_refspec__dwim_one(git_vector *out, git_refspec *spec, git_vector *refs)
+int git3_refspec__dwim_one(git3_vector *out, git3_refspec *spec, git3_vector *refs)
 {
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 	size_t j, pos;
-	git_remote_head key;
-	git_refspec *cur;
+	git3_remote_head key;
+	git3_refspec *cur;
 
 	const char *formatters[] = {
-		GIT_REFS_DIR "%s",
-		GIT_REFS_TAGS_DIR "%s",
-		GIT_REFS_HEADS_DIR "%s",
+		GIT3_REFS_DIR "%s",
+		GIT3_REFS_TAGS_DIR "%s",
+		GIT3_REFS_HEADS_DIR "%s",
 		NULL
 	};
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(spec);
-	GIT_ASSERT_ARG(refs);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(spec);
+	GIT3_ASSERT_ARG(refs);
 
-	cur = git__calloc(1, sizeof(git_refspec));
-	GIT_ERROR_CHECK_ALLOC(cur);
+	cur = git3__calloc(1, sizeof(git3_refspec));
+	GIT3_ERROR_CHECK_ALLOC(cur);
 
 	cur->force = spec->force;
 	cur->push = spec->push;
 	cur->pattern = spec->pattern;
 	cur->matching = spec->matching;
-	cur->string = git__strdup(spec->string);
+	cur->string = git3__strdup(spec->string);
 
 	/* shorthand on the lhs */
-	if (git__prefixcmp(spec->src, GIT_REFS_DIR)) {
+	if (git3__prefixcmp(spec->src, GIT3_REFS_DIR)) {
 		for (j = 0; formatters[j]; j++) {
-			git_str_clear(&buf);
-			git_str_printf(&buf, formatters[j], spec->src);
-			GIT_ERROR_CHECK_ALLOC_STR(&buf);
+			git3_str_clear(&buf);
+			git3_str_printf(&buf, formatters[j], spec->src);
+			GIT3_ERROR_CHECK_ALLOC_STR(&buf);
 
-			key.name = (char *) git_str_cstr(&buf);
-			if (!git_vector_search(&pos, refs, &key)) {
+			key.name = (char *) git3_str_cstr(&buf);
+			if (!git3_vector_search(&pos, refs, &key)) {
 				/* we found something to match the shorthand, set src to that */
-				cur->src = git_str_detach(&buf);
+				cur->src = git3_str_detach(&buf);
 			}
 		}
 	}
 
 	/* No shorthands found, copy over the name */
 	if (cur->src == NULL && spec->src != NULL) {
-		cur->src = git__strdup(spec->src);
-		GIT_ERROR_CHECK_ALLOC(cur->src);
+		cur->src = git3__strdup(spec->src);
+		GIT3_ERROR_CHECK_ALLOC(cur->src);
 	}
 
-	if (spec->dst && git__prefixcmp(spec->dst, GIT_REFS_DIR)) {
+	if (spec->dst && git3__prefixcmp(spec->dst, GIT3_REFS_DIR)) {
 		/* if it starts with "remotes" then we just prepend "refs/" */
-		if (!git__prefixcmp(spec->dst, "remotes/")) {
-			git_str_puts(&buf, GIT_REFS_DIR);
+		if (!git3__prefixcmp(spec->dst, "remotes/")) {
+			git3_str_puts(&buf, GIT3_REFS_DIR);
 		} else {
-			git_str_puts(&buf, GIT_REFS_HEADS_DIR);
+			git3_str_puts(&buf, GIT3_REFS_HEADS_DIR);
 		}
 
-		git_str_puts(&buf, spec->dst);
-		GIT_ERROR_CHECK_ALLOC_STR(&buf);
+		git3_str_puts(&buf, spec->dst);
+		GIT3_ERROR_CHECK_ALLOC_STR(&buf);
 
-		cur->dst = git_str_detach(&buf);
+		cur->dst = git3_str_detach(&buf);
 	}
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
 	if (cur->dst == NULL && spec->dst != NULL) {
-		cur->dst = git__strdup(spec->dst);
-		GIT_ERROR_CHECK_ALLOC(cur->dst);
+		cur->dst = git3__strdup(spec->dst);
+		GIT3_ERROR_CHECK_ALLOC(cur->dst);
 	}
 
-	return git_vector_insert(out, cur);
+	return git3_vector_insert(out, cur);
 }

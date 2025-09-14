@@ -1,78 +1,78 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/odb_backend.h"
 
 #include "pack_data_one256.h"
 #include "pack.h"
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-static git_odb *_odb;
+#ifdef GIT3_EXPERIMENTAL_SHA256
+static git3_odb *_odb;
 #endif
 
 void test_odb_packedone256__initialize(void)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
-	git_odb_backend *backend = NULL;
-	git_odb_options odb_opts = GIT_ODB_OPTIONS_INIT;
-	git_odb_backend_pack_options backend_opts = GIT_ODB_BACKEND_PACK_OPTIONS_INIT;
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	git3_odb_backend *backend = NULL;
+	git3_odb_options odb_opts = GIT3_ODB_OPTIONS_INIT;
+	git3_odb_backend_pack_options backend_opts = GIT3_ODB_BACKEND_PACK_OPTIONS_INIT;
 
-	odb_opts.oid_type = GIT_OID_SHA256;
-	backend_opts.oid_type = GIT_OID_SHA256;
+	odb_opts.oid_type = GIT3_OID_SHA256;
+	backend_opts.oid_type = GIT3_OID_SHA256;
 
-	cl_git_pass(git_odb_new_ext(&_odb, &odb_opts));
-	cl_git_pass(git_odb_backend_one_pack(
+	cl_git_pass(git3_odb_new_ext(&_odb, &odb_opts));
+	cl_git_pass(git3_odb_backend_one_pack(
 		&backend,
 		cl_fixture("testrepo_256.git/objects/pack/pack-e2f07f30db7e480ea84a0e64ee791b9b270067124b2609019b74f33f256f33fa.idx"),
 		&backend_opts));
-	cl_git_pass(git_odb_add_backend(_odb, backend, 1));
+	cl_git_pass(git3_odb_add_backend(_odb, backend, 1));
 #endif
 }
 
 void test_odb_packedone256__cleanup(void)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
-	git_odb_free(_odb);
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	git3_odb_free(_odb);
 	_odb = NULL;
 #endif
 }
 
 void test_odb_packedone256__mass_read(void)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(packed_objects_one256); ++i) {
-		git_oid id;
-		git_odb_object *obj;
+		git3_oid id;
+		git3_odb_object *obj;
 
-		cl_git_pass(git_oid_from_string(&id, packed_objects_one256[i], GIT_OID_SHA256));
-		cl_assert(git_odb_exists(_odb, &id) == 1);
-		cl_git_pass(git_odb_read(&obj, _odb, &id));
+		cl_git_pass(git3_oid_from_string(&id, packed_objects_one256[i], GIT3_OID_SHA256));
+		cl_assert(git3_odb_exists(_odb, &id) == 1);
+		cl_git_pass(git3_odb_read(&obj, _odb, &id));
 
-		git_odb_object_free(obj);
+		git3_odb_object_free(obj);
 	}
 #endif
 }
 
 void test_odb_packedone256__read_header_0(void)
 {
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(packed_objects_one256); ++i) {
-		git_oid id;
-		git_odb_object *obj;
+		git3_oid id;
+		git3_odb_object *obj;
 		size_t len;
-		git_object_t type;
+		git3_object_t type;
 
-		cl_git_pass(git_oid_from_string(&id, packed_objects_one256[i], GIT_OID_SHA256));
+		cl_git_pass(git3_oid_from_string(&id, packed_objects_one256[i], GIT3_OID_SHA256));
 
-		cl_git_pass(git_odb_read(&obj, _odb, &id));
-		cl_git_pass(git_odb_read_header(&len, &type, _odb, &id));
+		cl_git_pass(git3_odb_read(&obj, _odb, &id));
+		cl_git_pass(git3_odb_read_header(&len, &type, _odb, &id));
 
 		cl_assert(obj->cached.size == len);
 		cl_assert(obj->cached.type == type);
 
-		git_odb_object_free(obj);
+		git3_odb_object_free(obj);
 	}
 #endif
 }

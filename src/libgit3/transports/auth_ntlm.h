@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -11,19 +11,19 @@
 #include "auth.h"
 
 /* NTLM requires a full request/challenge/response */
-#define GIT_AUTH_STEPS_NTLM 2
+#define GIT3_AUTH_STEPS_NTLM 2
 
-#if defined(GIT_AUTH_NTLM)
+#if defined(GIT3_AUTH_NTLM)
 
-extern int git_http_auth_ntlm(
-	git_http_auth_context **out,
-	const git_net_url *url);
+extern int git3_http_auth_ntlm(
+	git3_http_auth_context **out,
+	const git3_net_url *url);
 
 #else
 
-#define git_http_auth_ntlm git_http_auth_dummy
+#define git3_http_auth_ntlm git3_http_auth_dummy
 
-#endif /* GIT_AUTH_NTLM */
+#endif /* GIT3_AUTH_NTLM */
 
 #endif
 

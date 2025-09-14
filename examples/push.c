@@ -1,7 +1,7 @@
 /*
- * libgit2 "push" example - shows how to push to remote
+ * libgit3 "push" example - shows how to push to remote
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,7 +15,7 @@
 #include "common.h"
 
 /**
- * This example demonstrates the libgit2 push API to roughly
+ * This example demonstrates the libgit3 push API to roughly
  * simulate `git push`.
  *
  * This does not have:
@@ -30,12 +30,12 @@
  */
 
 /** Entry point for this command */
-int lg2_push(git_repository *repo, int argc, char **argv) {
-	git_push_options options;
-	git_remote_callbacks callbacks;
-	git_remote* remote = NULL;
+int lg2_push(git3_repository *repo, int argc, char **argv) {
+	git3_push_options options;
+	git3_remote_callbacks callbacks;
+	git3_remote* remote = NULL;
 	char *refspec = "refs/heads/master";
-	const git_strarray refspecs = {
+	const git3_strarray refspecs = {
 		&refspec,
 		1
 	};
@@ -46,15 +46,15 @@ int lg2_push(git_repository *repo, int argc, char **argv) {
 		return -1;
 	}
 
-	check_lg2(git_remote_lookup(&remote, repo, "origin" ), "Unable to lookup remote", NULL);
+	check_lg2(git3_remote_lookup(&remote, repo, "origin" ), "Unable to lookup remote", NULL);
 	
-	check_lg2(git_remote_init_callbacks(&callbacks, GIT_REMOTE_CALLBACKS_VERSION), "Error initializing remote callbacks", NULL);
+	check_lg2(git3_remote_init_callbacks(&callbacks, GIT3_REMOTE_CALLBACKS_VERSION), "Error initializing remote callbacks", NULL);
 	callbacks.credentials = cred_acquire_cb;
 
-	check_lg2(git_push_options_init(&options, GIT_PUSH_OPTIONS_VERSION ), "Error initializing push", NULL);
+	check_lg2(git3_push_options_init(&options, GIT3_PUSH_OPTIONS_VERSION ), "Error initializing push", NULL);
 	options.callbacks = callbacks;
 
-	check_lg2(git_remote_push(remote, &refspecs, &options), "Error pushing", NULL);
+	check_lg2(git3_remote_push(remote, &refspecs, &options), "Error pushing", NULL);
 
 	printf("pushed\n");
 	return 0;

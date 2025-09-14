@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -18,7 +18,7 @@
 
 #define COMMAND_NAME "init"
 
-static char *branch, *git_dir, *template_dir, *path;
+static char *branch, *git3_dir, *template_dir, *path;
 static int quiet, bare;
 
 static const cli_opt_spec opts[] = {
@@ -30,7 +30,7 @@ static const cli_opt_spec opts[] = {
 	  CLI_OPT_USAGE_DEFAULT,   NULL,             "don't create a working directory" },
 	{ CLI_OPT_TYPE_VALUE,     "initial-branch",  'b', &branch,      0,
 	  CLI_OPT_USAGE_DEFAULT,  "name",            "initial branch name" },
-	{ CLI_OPT_TYPE_VALUE,     "separate-git-dir", 0, &git_dir,      0,
+	{ CLI_OPT_TYPE_VALUE,     "separate-git-dir", 0, &git3_dir,      0,
 	  CLI_OPT_USAGE_DEFAULT,  "git-dir",         "path to separate git directory" },
 	{ CLI_OPT_TYPE_VALUE,     "template",         0, &template_dir, 0,
 	  CLI_OPT_USAGE_DEFAULT,  "template-dir",    "path to git directory templates" },
@@ -55,8 +55,8 @@ static void print_help(void)
 
 int cmd_init(int argc, char **argv)
 {
-	git_repository *repo = NULL;
-	git_repository_init_options init_opts = GIT_REPOSITORY_INIT_OPTIONS_INIT;
+	git3_repository *repo = NULL;
+	git3_repository_init_options init_opts = GIT3_REPOSITORY_INIT_OPTIONS_INIT;
 	cli_opt invalid_opt;
 	const char *repo_path;
 	int ret = 0;
@@ -69,32 +69,32 @@ int cmd_init(int argc, char **argv)
 		return 0;
 	}
 
-	init_opts.flags |= GIT_REPOSITORY_INIT_MKPATH |
-	                   GIT_REPOSITORY_INIT_EXTERNAL_TEMPLATE;
+	init_opts.flags |= GIT3_REPOSITORY_INIT_MKPATH |
+	                   GIT3_REPOSITORY_INIT_EXTERNAL_TEMPLATE;
 
-	if (bare && git_dir)
+	if (bare && git3_dir)
 		return cli_error_usage("the '--bare' and '--separate-git-dir' options cannot be used together");
 
 	if (bare)
-		init_opts.flags |= GIT_REPOSITORY_INIT_BARE;
+		init_opts.flags |= GIT3_REPOSITORY_INIT_BARE;
 
 	init_opts.template_path = template_dir;
 	init_opts.initial_head = branch;
 
-	if (git_dir) {
+	if (git3_dir) {
 		init_opts.workdir_path = path;
-		repo_path = git_dir;
+		repo_path = git3_dir;
 	} else {
 		repo_path = path;
 	}
 
-	if (git_repository_init_ext(&repo, repo_path, &init_opts) < 0) {
+	if (git3_repository_init_ext(&repo, repo_path, &init_opts) < 0) {
 		ret = cli_error_git();
 	} else if (!quiet) {
 		printf("Initialized empty Git repository in %s\n",
-			git_repository_path(repo));
+			git3_repository_path(repo));
 	}
 
-	git_repository_free(repo);
+	git3_repository_free(repo);
 	return ret;
 }

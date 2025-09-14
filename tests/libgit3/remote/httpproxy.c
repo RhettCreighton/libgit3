@@ -1,10 +1,10 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "net.h"
 #include "remote.h"
 
-static git_repository *repo;
-static git_net_url url = GIT_NET_URL_INIT;
+static git3_repository *repo;
+static git3_net_url url = GIT3_NET_URL_INIT;
 
 static char *orig_http_proxy = NULL;
 static char *orig_https_proxy = NULL;
@@ -12,13 +12,13 @@ static char *orig_no_proxy = NULL;
 
 void test_remote_httpproxy__initialize(void)
 {
-	git_remote *remote;
+	git3_remote *remote;
 
 	repo = cl_git_sandbox_init("testrepo");
-	cl_git_pass(git_remote_create(&remote, repo, "lg2", "https://github.com/libgit2/libgit2"));
-	cl_git_pass(git_net_url_parse(&url, "https://github.com/libgit2/libgit2"));
+	cl_git_pass(git3_remote_create(&remote, repo, "lg2", "https://github.com/libgit3/libgit3"));
+	cl_git_pass(git3_net_url_parse(&url, "https://github.com/libgit3/libgit3"));
 
-	git_remote_free(remote);
+	git3_remote_free(remote);
 
 	/* Clear everything for a fresh start */
 	orig_http_proxy = cl_getenv("HTTP_PROXY");
@@ -36,49 +36,49 @@ void test_remote_httpproxy__cleanup(void)
 	cl_setenv("HTTPS_PROXY", orig_https_proxy);
 	cl_setenv("NO_PROXY", orig_no_proxy);
 
-	git__free(orig_http_proxy);
-	git__free(orig_https_proxy);
-	git__free(orig_no_proxy);
+	git3__free(orig_http_proxy);
+	git3__free(orig_https_proxy);
+	git3__free(orig_no_proxy);
 
-	git_net_url_dispose(&url);
+	git3_net_url_dispose(&url);
 	cl_git_sandbox_cleanup();
 }
 
 static void assert_proxy_is(const char *expected)
 {
-	git_remote *remote;
+	git3_remote *remote;
 	char *proxy;
 
-	cl_git_pass(git_remote_lookup(&remote, repo, "lg2"));
-	cl_git_pass(git_remote__http_proxy(&proxy, remote, &url));
+	cl_git_pass(git3_remote_lookup(&remote, repo, "lg2"));
+	cl_git_pass(git3_remote__http_proxy(&proxy, remote, &url));
 
 	if (expected)
 		cl_assert_equal_s(proxy, expected);
 	else
 		cl_assert_equal_p(proxy, expected);
 
-	git_remote_free(remote);
-	git__free(proxy);
+	git3_remote_free(remote);
+	git3__free(proxy);
 }
 
 static void assert_config_match(const char *config, const char *expected)
 {
-	git_remote *remote;
+	git3_remote *remote;
 	char *proxy;
 
 	if (config)
 		cl_repo_set_string(repo, config, expected);
 
-	cl_git_pass(git_remote_lookup(&remote, repo, "lg2"));
-	cl_git_pass(git_remote__http_proxy(&proxy, remote, &url));
+	cl_git_pass(git3_remote_lookup(&remote, repo, "lg2"));
+	cl_git_pass(git3_remote__http_proxy(&proxy, remote, &url));
 
 	if (expected)
 		cl_assert_equal_s(proxy, expected);
 	else
 		cl_assert_equal_p(proxy, expected);
 
-	git_remote_free(remote);
-	git__free(proxy);
+	git3_remote_free(remote);
+	git3__free(proxy);
 }
 
 void test_remote_httpproxy__config_overrides(void)
@@ -92,9 +92,9 @@ void test_remote_httpproxy__config_overrides(void)
 	assert_config_match("http.proxy", "http://localhost:1/");
 	assert_config_match("http.https://github.com.proxy", "http://localhost:2/");
 	assert_config_match("http.https://github.com/.proxy", "http://localhost:3/");
-	assert_config_match("http.https://github.com/libgit2.proxy", "http://localhost:4/");
-	assert_config_match("http.https://github.com/libgit2/.proxy", "http://localhost:5/");
-	assert_config_match("http.https://github.com/libgit2/libgit2.proxy", "http://localhost:6/");
+	assert_config_match("http.https://github.com/libgit3.proxy", "http://localhost:4/");
+	assert_config_match("http.https://github.com/libgit3/.proxy", "http://localhost:5/");
+	assert_config_match("http.https://github.com/libgit3/libgit3.proxy", "http://localhost:6/");
 	assert_config_match("remote.lg2.proxy", "http://localhost:7/");
 }
 
@@ -106,32 +106,32 @@ void test_remote_httpproxy__config_empty_overrides(void)
 	 */
 	assert_config_match("http.proxy", "http://localhost:1/");
 	assert_config_match("http.https://github.com.proxy", "");
-	assert_config_match("http.https://github.com/libgit2/libgit2.proxy", "http://localhost:2/");
+	assert_config_match("http.https://github.com/libgit3/libgit3.proxy", "http://localhost:2/");
 	assert_config_match("remote.lg2.proxy", "");
 }
 
 static void assert_global_config_match(const char *config, const char *expected)
 {
-	git_remote *remote;
+	git3_remote *remote;
 	char *proxy;
-	git_config* cfg;
+	git3_config* cfg;
 
 	if (config) {
-		cl_git_pass(git_config_open_default(&cfg));
-		git_config_set_string(cfg, config, expected);
-		git_config_free(cfg);
+		cl_git_pass(git3_config_open_default(&cfg));
+		git3_config_set_string(cfg, config, expected);
+		git3_config_free(cfg);
 	}
 
-	cl_git_pass(git_remote_create_detached(&remote, "https://github.com/libgit2/libgit2"));
-	cl_git_pass(git_remote__http_proxy(&proxy, remote, &url));
+	cl_git_pass(git3_remote_create_detached(&remote, "https://github.com/libgit3/libgit3"));
+	cl_git_pass(git3_remote__http_proxy(&proxy, remote, &url));
 
 	if (expected)
 		cl_assert_equal_s(proxy, expected);
 	else
 		cl_assert_equal_p(proxy, expected);
 
-	git_remote_free(remote);
-	git__free(proxy);
+	git3_remote_free(remote);
+	git3__free(proxy);
 }
 
 void test_remote_httpproxy__config_overrides_detached_remote(void)
@@ -142,9 +142,9 @@ void test_remote_httpproxy__config_overrides_detached_remote(void)
 	assert_global_config_match("http.proxy", "http://localhost:1/");
 	assert_global_config_match("http.https://github.com.proxy", "http://localhost:2/");
 	assert_global_config_match("http.https://github.com/.proxy", "http://localhost:3/");
-	assert_global_config_match("http.https://github.com/libgit2.proxy", "http://localhost:4/");
-	assert_global_config_match("http.https://github.com/libgit2/.proxy", "http://localhost:5/");
-	assert_global_config_match("http.https://github.com/libgit2/libgit2.proxy", "http://localhost:6/");
+	assert_global_config_match("http.https://github.com/libgit3.proxy", "http://localhost:4/");
+	assert_global_config_match("http.https://github.com/libgit3/.proxy", "http://localhost:5/");
+	assert_global_config_match("http.https://github.com/libgit3/libgit3.proxy", "http://localhost:6/");
 }
 
 void test_remote_httpproxy__env(void)

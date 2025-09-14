@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -10,7 +10,7 @@
 
 #define PROGRAM_NAME "git2"
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include "error.h"
 #include "opt.h"
@@ -52,12 +52,12 @@ typedef struct {
 } cli_repository_open_options;
 
 extern int cli_repository_open(
-	git_repository **out,
+	git3_repository **out,
 	cli_repository_open_options *opts);
 
 extern int cli_resolve_path(
-	git_str *out,
-	git_repository *repo,
+	git3_str *out,
+	git3_repository *repo,
 	const char *given_path);
 
 #endif /* CLI_common_h__ */

@@ -1,38 +1,38 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "refspec.h"
 #include "remote.h"
 
 static void assert_refspec(unsigned int direction, const char *input, bool is_expected_to_be_valid)
 {
-	git_refspec refspec;
+	git3_refspec refspec;
 	int error;
 
-	error = git_refspec__parse(&refspec, input, direction == GIT_DIRECTION_FETCH);
-	git_refspec__dispose(&refspec);
+	error = git3_refspec__parse(&refspec, input, direction == GIT3_DIRECTION_FETCH);
+	git3_refspec__dispose(&refspec);
 
 	if (is_expected_to_be_valid)
 		cl_assert_equal_i(0, error);
 	else
-		cl_assert_equal_i(GIT_EINVALIDSPEC, error);
+		cl_assert_equal_i(GIT3_EINVALIDSPEC, error);
 }
 
 void test_network_refspecs__parsing(void)
 {
 	/* Ported from https://github.com/git/git/blob/abd2bde78bd994166900290434a2048e660dabed/t/t5511-refspec.sh */
 
-	assert_refspec(GIT_DIRECTION_PUSH, "", false);
-	assert_refspec(GIT_DIRECTION_PUSH, ":", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "::", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "+:", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, ":", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "::", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "+:", true);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "", true);
-	assert_refspec(GIT_DIRECTION_PUSH, ":", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "::", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, ":", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "::", false);
 
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*:refs/remotes/frotz/*", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*:refs/remotes/frotz", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads:refs/remotes/frotz/*", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/master:refs/remotes/frotz/xyzzy", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*:refs/remotes/frotz/*", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*:refs/remotes/frotz", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads:refs/remotes/frotz/*", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/master:refs/remotes/frotz/xyzzy", true);
 
 	/*
 	 * These have invalid LHS, but we do not have a formal "valid sha-1
@@ -40,68 +40,68 @@ void test_network_refspecs__parsing(void)
 	 * code.  They will be caught downstream anyway, but we may want to
 	 * have tighter check later...
 	 */
-	/*assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/master::refs/remotes/frotz/xyzzy", false); */
-	/*assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/maste :refs/remotes/frotz/xyzzy", false); */
+	/*assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/master::refs/remotes/frotz/xyzzy", false); */
+	/*assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/maste :refs/remotes/frotz/xyzzy", false); */
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*:refs/remotes/frotz/*", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*:refs/remotes/frotz", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads:refs/remotes/frotz/*", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/master:refs/remotes/frotz/xyzzy", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/master::refs/remotes/frotz/xyzzy", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/maste :refs/remotes/frotz/xyzzy", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*:refs/remotes/frotz/*", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*:refs/remotes/frotz", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads:refs/remotes/frotz/*", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/master:refs/remotes/frotz/xyzzy", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/master::refs/remotes/frotz/xyzzy", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/maste :refs/remotes/frotz/xyzzy", false);
 
-	assert_refspec(GIT_DIRECTION_PUSH, "master~1:refs/remotes/frotz/backup", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "master~1:refs/remotes/frotz/backup", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "HEAD~4:refs/remotes/frotz/new", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "HEAD~4:refs/remotes/frotz/new", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "master~1:refs/remotes/frotz/backup", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "master~1:refs/remotes/frotz/backup", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "HEAD~4:refs/remotes/frotz/new", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "HEAD~4:refs/remotes/frotz/new", false);
 
-	assert_refspec(GIT_DIRECTION_PUSH, "HEAD", true);
-	assert_refspec(GIT_DIRECTION_FETCH, "HEAD", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/ nitfol", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/ nitfol", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "HEAD", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "HEAD", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/ nitfol", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/ nitfol", false);
 
-	assert_refspec(GIT_DIRECTION_PUSH, "HEAD:", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "HEAD:", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/ nitfol:", false);
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/ nitfol:", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "HEAD:", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "HEAD:", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/ nitfol:", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/ nitfol:", false);
 
-	assert_refspec(GIT_DIRECTION_PUSH, ":refs/remotes/frotz/deleteme", true);
-	assert_refspec(GIT_DIRECTION_FETCH, ":refs/remotes/frotz/HEAD-to-me", true);
-	assert_refspec(GIT_DIRECTION_PUSH, ":refs/remotes/frotz/delete me", false);
-	assert_refspec(GIT_DIRECTION_FETCH, ":refs/remotes/frotz/HEAD to me", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, ":refs/remotes/frotz/deleteme", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, ":refs/remotes/frotz/HEAD-to-me", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, ":refs/remotes/frotz/delete me", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, ":refs/remotes/frotz/HEAD to me", false);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*/for-linus:refs/remotes/mine/*-blah", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*/for-linus:refs/remotes/mine/*-blah", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*/for-linus:refs/remotes/mine/*-blah", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*/for-linus:refs/remotes/mine/*-blah", true);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads*/for-linus:refs/remotes/mine/*", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads*/for-linus:refs/remotes/mine/*", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads*/for-linus:refs/remotes/mine/*", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads*/for-linus:refs/remotes/mine/*", true);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*/*/for-linus:refs/remotes/mine/*", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*/*/for-linus:refs/remotes/mine/*", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*/*/for-linus:refs/remotes/mine/*", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*/*/for-linus:refs/remotes/mine/*", false);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*g*/for-linus:refs/remotes/mine/*", false);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*g*/for-linus:refs/remotes/mine/*", false);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*g*/for-linus:refs/remotes/mine/*", false);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*g*/for-linus:refs/remotes/mine/*", false);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/heads/*/for-linus:refs/remotes/mine/*", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "refs/heads/*/for-linus:refs/remotes/mine/*", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/heads/*/for-linus:refs/remotes/mine/*", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "refs/heads/*/for-linus:refs/remotes/mine/*", true);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "master", true);
-	assert_refspec(GIT_DIRECTION_PUSH, "master", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "master", true);
+	assert_refspec(GIT3_DIRECTION_PUSH, "master", true);
 
-	assert_refspec(GIT_DIRECTION_FETCH, "refs/pull/*/head:refs/remotes/origin/pr/*", true);
+	assert_refspec(GIT3_DIRECTION_FETCH, "refs/pull/*/head:refs/remotes/origin/pr/*", true);
 }
 
 static void assert_valid_transform(const char *refspec, const char *name, const char *result)
 {
-	git_refspec spec;
-	git_buf buf = GIT_BUF_INIT;
+	git3_refspec spec;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	cl_git_pass(git_refspec__parse(&spec, refspec, true));
-	cl_git_pass(git_refspec_transform(&buf, &spec, name));
+	cl_git_pass(git3_refspec__parse(&spec, refspec, true));
+	cl_git_pass(git3_refspec_transform(&buf, &spec, name));
 	cl_assert_equal_s(result, buf.ptr);
 
-	git_buf_dispose(&buf);
-	git_refspec__dispose(&spec);
+	git3_buf_dispose(&buf);
+	git3_refspec__dispose(&spec);
 }
 
 void test_network_refspecs__transform_mid_star(void)
@@ -132,14 +132,14 @@ void test_network_refspecs__no_dst(void)
 
 static void assert_invalid_transform(const char *refspec, const char *name)
 {
-	git_refspec spec;
-	git_buf buf = GIT_BUF_INIT;
+	git3_refspec spec;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	git_refspec__parse(&spec, refspec, true);
-	cl_git_fail(git_refspec_transform(&buf, &spec, name));
+	git3_refspec__parse(&spec, refspec, true);
+	cl_git_fail(git3_refspec_transform(&buf, &spec, name));
 
-	git_buf_dispose(&buf);
-	git_refspec__dispose(&spec);
+	git3_buf_dispose(&buf);
+	git3_refspec__dispose(&spec);
 }
 
 void test_network_refspecs__invalid(void)
@@ -150,14 +150,14 @@ void test_network_refspecs__invalid(void)
 
 static void assert_invalid_rtransform(const char *refspec, const char *name)
 {
-	git_refspec spec;
-	git_buf buf = GIT_BUF_INIT;
+	git3_refspec spec;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	cl_git_pass(git_refspec__parse(&spec, refspec, true));
-	cl_git_fail(git_refspec_rtransform(&buf, &spec, name));
+	cl_git_pass(git3_refspec__parse(&spec, refspec, true));
+	cl_git_fail(git3_refspec_rtransform(&buf, &spec, name));
 
-	git_buf_dispose(&buf);
-	git_refspec__dispose(&spec);
+	git3_buf_dispose(&buf);
+	git3_refspec__dispose(&spec);
 }
 
 void test_network_refspecs__invalid_reverse(void)
@@ -168,24 +168,24 @@ void test_network_refspecs__invalid_reverse(void)
 
 void test_network_refspecs__matching(void)
 {
-	git_refspec spec;
+	git3_refspec spec;
 
-	cl_git_pass(git_refspec__parse(&spec, ":", false));
+	cl_git_pass(git3_refspec__parse(&spec, ":", false));
 	cl_assert_equal_s(":", spec.string);
 	cl_assert_equal_s("", spec.src);
 	cl_assert_equal_s("", spec.dst);
 
-	git_refspec__dispose(&spec);
+	git3_refspec__dispose(&spec);
 }
 
 void test_network_refspecs__parse_free(void)
 {
-	git_refspec *spec = NULL;
+	git3_refspec *spec = NULL;
 
-	cl_git_fail(git_refspec_parse(&spec, "", 0));
-	cl_git_fail(git_refspec_parse(&spec, ":::", 0));
-	cl_git_pass(git_refspec_parse(&spec, "HEAD:", 1));
+	cl_git_fail(git3_refspec_parse(&spec, "", 0));
+	cl_git_fail(git3_refspec_parse(&spec, ":::", 0));
+	cl_git_pass(git3_refspec_parse(&spec, "HEAD:", 1));
 
 	cl_assert(spec != NULL);
-	git_refspec_free(spec);
+	git3_refspec_free(spec);
 }

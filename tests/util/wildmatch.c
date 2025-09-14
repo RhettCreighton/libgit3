@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "wildmatch.h"
 

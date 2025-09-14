@@ -1,7 +1,7 @@
 /*
- * libgit2 "config" example - shows how to use the config API
+ * libgit3 "config" example - shows how to use the config API
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -14,41 +14,41 @@
 
 #include "common.h"
 
-static int config_get(git_config *cfg, const char *key)
+static int config_get(git3_config *cfg, const char *key)
 {
-	git_config_entry *entry;
+	git3_config_entry *entry;
 	int error;
 
-	if ((error = git_config_get_entry(&entry, cfg, key)) < 0) {
-		if (error != GIT_ENOTFOUND)
-			printf("Unable to get configuration: %s\n", git_error_last()->message);
+	if ((error = git3_config_get_entry(&entry, cfg, key)) < 0) {
+		if (error != GIT3_ENOTFOUND)
+			printf("Unable to get configuration: %s\n", git3_error_last()->message);
 		return 1;
 	}
 
 	puts(entry->value);
 
-	/* Free the git_config_entry after use with `git_config_entry_free()`. */
-	git_config_entry_free(entry);
+	/* Free the git3_config_entry after use with `git3_config_entry_free()`. */
+	git3_config_entry_free(entry);
 
 	return 0;
 }
 
-static int config_set(git_config *cfg, const char *key, const char *value)
+static int config_set(git3_config *cfg, const char *key, const char *value)
 {
-	if (git_config_set_string(cfg, key, value) < 0) {
-		printf("Unable to set configuration: %s\n", git_error_last()->message);
+	if (git3_config_set_string(cfg, key, value) < 0) {
+		printf("Unable to set configuration: %s\n", git3_error_last()->message);
 		return 1;
 	}
 	return 0;
 }
 
-int lg2_config(git_repository *repo, int argc, char **argv)
+int lg2_config(git3_repository *repo, int argc, char **argv)
 {
-	git_config *cfg;
+	git3_config *cfg;
 	int error;
 
-	if ((error = git_repository_config(&cfg, repo)) < 0) {
-		printf("Unable to obtain repository config: %s\n", git_error_last()->message);
+	if ((error = git3_repository_config(&cfg, repo)) < 0) {
+		printf("Unable to obtain repository config: %s\n", git3_error_last()->message);
 		goto out;
 	}
 
@@ -65,7 +65,7 @@ int lg2_config(git_repository *repo, int argc, char **argv)
 	 * The configuration file must be freed once it's no longer
 	 * being used by the user.
 	*/
-	git_config_free(cfg);
+	git3_config_free(cfg);
 out:
 	return error;
 }

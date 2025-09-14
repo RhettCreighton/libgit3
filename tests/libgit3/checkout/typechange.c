@@ -1,26 +1,26 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_generate.h"
 #include "git3/checkout.h"
 #include "path.h"
 #include "posix.h"
 #include "futils.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 /*
 From the test repo used for this test:
 --------------------------------------
 
-This is a test repo for libgit2 where tree entries have type changes
+This is a test repo for libgit3 where tree entries have type changes
 
 The key types that could be found in tree entries are:
 
-1 - GIT_FILEMODE_NEW             = 0000000
-2 - GIT_FILEMODE_TREE            = 0040000
-3 - GIT_FILEMODE_BLOB            = 0100644
-4 - GIT_FILEMODE_BLOB_EXECUTABLE = 0100755
-5 - GIT_FILEMODE_LINK            = 0120000
-6 - GIT_FILEMODE_COMMIT          = 0160000
+1 - GIT3_FILEMODE_NEW             = 0000000
+2 - GIT3_FILEMODE_TREE            = 0040000
+3 - GIT3_FILEMODE_BLOB            = 0100644
+4 - GIT3_FILEMODE_BLOB_EXECUTABLE = 0100755
+5 - GIT3_FILEMODE_LINK            = 0120000
+6 - GIT3_FILEMODE_COMMIT          = 0160000
 
 I will try to have every type of transition somewhere in the history
 of this repo.
@@ -76,57 +76,57 @@ void test_checkout_typechange__cleanup(void)
 
 static void assert_file_exists(const char *path)
 {
-	cl_assert_(git_fs_path_isfile(path), path);
+	cl_assert_(git3_fs_path_isfile(path), path);
 }
 
 static void assert_dir_exists(const char *path)
 {
-	cl_assert_(git_fs_path_isdir(path), path);
+	cl_assert_(git3_fs_path_isdir(path), path);
 }
 
 static void assert_workdir_matches_tree(
-	git_repository *repo, const git_oid *id, const char *root, bool recurse)
+	git3_repository *repo, const git3_oid *id, const char *root, bool recurse)
 {
-	git_object *obj;
-	git_tree *tree;
+	git3_object *obj;
+	git3_tree *tree;
 	size_t i, max_i;
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
 	if (!root)
-		root = git_repository_workdir(repo);
+		root = git3_repository_workdir(repo);
 	cl_assert(root);
 
-	cl_git_pass(git_object_lookup(&obj, repo, id, GIT_OBJECT_ANY));
-	cl_git_pass(git_object_peel((git_object **)&tree, obj, GIT_OBJECT_TREE));
-	git_object_free(obj);
+	cl_git_pass(git3_object_lookup(&obj, repo, id, GIT3_OBJECT_ANY));
+	cl_git_pass(git3_object_peel((git3_object **)&tree, obj, GIT3_OBJECT_TREE));
+	git3_object_free(obj);
 
-	max_i = git_tree_entrycount(tree);
+	max_i = git3_tree_entrycount(tree);
 
 	for (i = 0; i < max_i; ++i) {
-		const git_tree_entry *te = git_tree_entry_byindex(tree, i);
+		const git3_tree_entry *te = git3_tree_entry_byindex(tree, i);
 		cl_assert(te);
 
-		cl_git_pass(git_str_joinpath(&path, root, git_tree_entry_name(te)));
+		cl_git_pass(git3_str_joinpath(&path, root, git3_tree_entry_name(te)));
 
-		switch (git_tree_entry_type(te)) {
-		case GIT_OBJECT_COMMIT:
+		switch (git3_tree_entry_type(te)) {
+		case GIT3_OBJECT_COMMIT:
 			assert_dir_exists(path.ptr);
 			break;
-		case GIT_OBJECT_TREE:
+		case GIT3_OBJECT_TREE:
 			assert_dir_exists(path.ptr);
 			if (recurse)
 				assert_workdir_matches_tree(
-					repo, git_tree_entry_id(te), path.ptr, true);
+					repo, git3_tree_entry_id(te), path.ptr, true);
 			break;
-		case GIT_OBJECT_BLOB:
-			switch (git_tree_entry_filemode(te)) {
-			case GIT_FILEMODE_BLOB:
-			case GIT_FILEMODE_BLOB_EXECUTABLE:
+		case GIT3_OBJECT_BLOB:
+			switch (git3_tree_entry_filemode(te)) {
+			case GIT3_FILEMODE_BLOB:
+			case GIT3_FILEMODE_BLOB_EXECUTABLE:
 				assert_file_exists(path.ptr);
 				/* because of cross-platform, don't confirm exec bit yet */
 				break;
-			case GIT_FILEMODE_LINK:
-				cl_assert_(git_fs_path_exists(path.ptr), path.ptr);
+			case GIT3_FILEMODE_LINK:
+				cl_assert_(git3_fs_path_exists(path.ptr), path.ptr);
 				/* because of cross-platform, don't confirm link yet */
 				break;
 			default:
@@ -138,44 +138,44 @@ static void assert_workdir_matches_tree(
 		}
 	}
 
-	git_tree_free(tree);
-	git_str_dispose(&path);
+	git3_tree_free(tree);
+	git3_str_dispose(&path);
 }
 
 void test_checkout_typechange__checkout_typechanges_safe(void)
 {
 	int i;
-	git_object *obj;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_object *obj;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	for (i = 0; g_typechange_oids[i] != NULL; ++i) {
-		cl_git_pass(git_revparse_single(&obj, g_repo, g_typechange_oids[i]));
+		cl_git_pass(git3_revparse_single(&obj, g_repo, g_typechange_oids[i]));
 
-		opts.checkout_strategy = !i ? GIT_CHECKOUT_FORCE : GIT_CHECKOUT_SAFE;
+		opts.checkout_strategy = !i ? GIT3_CHECKOUT_FORCE : GIT3_CHECKOUT_SAFE;
 
-		cl_git_pass(git_checkout_tree(g_repo, obj, &opts));
+		cl_git_pass(git3_checkout_tree(g_repo, obj, &opts));
 
 		cl_git_pass(
-			git_repository_set_head_detached(g_repo, git_object_id(obj)));
+			git3_repository_set_head_detached(g_repo, git3_object_id(obj)));
 
-		assert_workdir_matches_tree(g_repo, git_object_id(obj), NULL, true);
+		assert_workdir_matches_tree(g_repo, git3_object_id(obj), NULL, true);
 
-		git_object_free(obj);
+		git3_object_free(obj);
 
 		if (!g_typechange_empty[i]) {
-			cl_assert(git_fs_path_isdir("typechanges"));
-			cl_assert(git_fs_path_exists("typechanges/a"));
-			cl_assert(git_fs_path_exists("typechanges/b"));
-			cl_assert(git_fs_path_exists("typechanges/c"));
-			cl_assert(git_fs_path_exists("typechanges/d"));
-			cl_assert(git_fs_path_exists("typechanges/e"));
+			cl_assert(git3_fs_path_isdir("typechanges"));
+			cl_assert(git3_fs_path_exists("typechanges/a"));
+			cl_assert(git3_fs_path_exists("typechanges/b"));
+			cl_assert(git3_fs_path_exists("typechanges/c"));
+			cl_assert(git3_fs_path_exists("typechanges/d"));
+			cl_assert(git3_fs_path_exists("typechanges/e"));
 		} else {
-			cl_assert(git_fs_path_isdir("typechanges"));
-			cl_assert(!git_fs_path_exists("typechanges/a"));
-			cl_assert(!git_fs_path_exists("typechanges/b"));
-			cl_assert(!git_fs_path_exists("typechanges/c"));
-			cl_assert(!git_fs_path_exists("typechanges/d"));
-			cl_assert(!git_fs_path_exists("typechanges/e"));
+			cl_assert(git3_fs_path_isdir("typechanges"));
+			cl_assert(!git3_fs_path_exists("typechanges/a"));
+			cl_assert(!git3_fs_path_exists("typechanges/b"));
+			cl_assert(!git3_fs_path_exists("typechanges/c"));
+			cl_assert(!git3_fs_path_exists("typechanges/d"));
+			cl_assert(!git3_fs_path_exists("typechanges/e"));
 		}
 	}
 }
@@ -189,26 +189,26 @@ typedef struct {
 } notify_counts;
 
 static int notify_counter(
-	git_checkout_notify_t why,
+	git3_checkout_notify_t why,
 	const char *path,
-	const git_diff_file *baseline,
-	const git_diff_file *target,
-	const git_diff_file *workdir,
+	const git3_diff_file *baseline,
+	const git3_diff_file *target,
+	const git3_diff_file *workdir,
 	void *payload)
 {
 	notify_counts *cts = payload;
 
-	GIT_UNUSED(path);
-	GIT_UNUSED(baseline);
-	GIT_UNUSED(target);
-	GIT_UNUSED(workdir);
+	GIT3_UNUSED(path);
+	GIT3_UNUSED(baseline);
+	GIT3_UNUSED(target);
+	GIT3_UNUSED(workdir);
 
 	switch (why) {
-	case GIT_CHECKOUT_NOTIFY_CONFLICT:  cts->conflicts++; break;
-	case GIT_CHECKOUT_NOTIFY_DIRTY:     cts->dirty++;     break;
-	case GIT_CHECKOUT_NOTIFY_UPDATED:   cts->updates++;   break;
-	case GIT_CHECKOUT_NOTIFY_UNTRACKED: cts->untracked++; break;
-	case GIT_CHECKOUT_NOTIFY_IGNORED:   cts->ignored++;   break;
+	case GIT3_CHECKOUT_NOTIFY_CONFLICT:  cts->conflicts++; break;
+	case GIT3_CHECKOUT_NOTIFY_DIRTY:     cts->dirty++;     break;
+	case GIT3_CHECKOUT_NOTIFY_UPDATED:   cts->updates++;   break;
+	case GIT3_CHECKOUT_NOTIFY_UNTRACKED: cts->untracked++; break;
+	case GIT3_CHECKOUT_NOTIFY_IGNORED:   cts->ignored++;   break;
 	default: break;
 	}
 
@@ -217,41 +217,41 @@ static int notify_counter(
 
 static void force_create_file(const char *file)
 {
-	int error = git_futils_rmdir_r(file, NULL,
-		GIT_RMDIR_REMOVE_FILES | GIT_RMDIR_REMOVE_BLOCKERS);
-	cl_assert(!error || error == GIT_ENOTFOUND);
-	cl_git_pass(git_futils_mkpath2file(file, 0777));
+	int error = git3_futils_rmdir_r(file, NULL,
+		GIT3_RMDIR_REMOVE_FILES | GIT3_RMDIR_REMOVE_BLOCKERS);
+	cl_assert(!error || error == GIT3_ENOTFOUND);
+	cl_git_pass(git3_futils_mkpath2file(file, 0777));
 	cl_git_rewritefile(file, "yowza!!");
 }
 
-static int make_submodule_dirty(git_submodule *sm, const char *name, void *payload)
+static int make_submodule_dirty(git3_submodule *sm, const char *name, void *payload)
 {
-	git_str submodulepath = GIT_STR_INIT;
-	git_str dirtypath = GIT_STR_INIT;
-	git_repository *submodule_repo;
+	git3_str submodulepath = GIT3_STR_INIT;
+	git3_str dirtypath = GIT3_STR_INIT;
+	git3_repository *submodule_repo;
 
-	GIT_UNUSED(name);
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(name);
+	GIT3_UNUSED(payload);
 
 	/* remove submodule directory in preparation for init and repo_init */
-	cl_git_pass(git_str_joinpath(
+	cl_git_pass(git3_str_joinpath(
 		&submodulepath,
-		git_repository_workdir(g_repo),
-		git_submodule_path(sm)
+		git3_repository_workdir(g_repo),
+		git3_submodule_path(sm)
 	));
-	git_futils_rmdir_r(git_str_cstr(&submodulepath), NULL, GIT_RMDIR_REMOVE_FILES);
+	git3_futils_rmdir_r(git3_str_cstr(&submodulepath), NULL, GIT3_RMDIR_REMOVE_FILES);
 
 	/* initialize submodule's repository */
-	cl_git_pass(git_submodule_repo_init(&submodule_repo, sm, 0));
+	cl_git_pass(git3_submodule_repo_init(&submodule_repo, sm, 0));
 
 	/* create a file in the submodule workdir to make it dirty */
 	cl_git_pass(
-		git_str_joinpath(&dirtypath, git_repository_workdir(submodule_repo), "dirty"));
-	force_create_file(git_str_cstr(&dirtypath));
+		git3_str_joinpath(&dirtypath, git3_repository_workdir(submodule_repo), "dirty"));
+	force_create_file(git3_str_cstr(&dirtypath));
 
-	git_str_dispose(&dirtypath);
-	git_str_dispose(&submodulepath);
-	git_repository_free(submodule_repo);
+	git3_str_dispose(&dirtypath);
+	git3_str_dispose(&submodulepath);
+	git3_repository_free(submodule_repo);
 
 	return 0;
 }
@@ -259,30 +259,30 @@ static int make_submodule_dirty(git_submodule *sm, const char *name, void *paylo
 void test_checkout_typechange__checkout_with_conflicts(void)
 {
 	int i;
-	git_object *obj;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_object *obj;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 	notify_counts cts = {0};
 
 	opts.notify_flags =
-		GIT_CHECKOUT_NOTIFY_CONFLICT | GIT_CHECKOUT_NOTIFY_UNTRACKED;
+		GIT3_CHECKOUT_NOTIFY_CONFLICT | GIT3_CHECKOUT_NOTIFY_UNTRACKED;
 	opts.notify_cb = notify_counter;
 	opts.notify_payload = &cts;
 
 	for (i = 0; g_typechange_oids[i] != NULL; ++i) {
-		cl_git_pass(git_revparse_single(&obj, g_repo, g_typechange_oids[i]));
+		cl_git_pass(git3_revparse_single(&obj, g_repo, g_typechange_oids[i]));
 
 		force_create_file("typechanges/a/blocker");
 		force_create_file("typechanges/b");
 		force_create_file("typechanges/c/sub/sub/file");
-		git_futils_rmdir_r("typechanges/d", NULL, GIT_RMDIR_REMOVE_FILES);
+		git3_futils_rmdir_r("typechanges/d", NULL, GIT3_RMDIR_REMOVE_FILES);
 		p_mkdir("typechanges/d", 0777); /* intentionally empty dir */
 		force_create_file("typechanges/untracked");
-		cl_git_pass(git_submodule_foreach(g_repo, make_submodule_dirty, NULL));
+		cl_git_pass(git3_submodule_foreach(g_repo, make_submodule_dirty, NULL));
 
-		opts.checkout_strategy = GIT_CHECKOUT_SAFE;
+		opts.checkout_strategy = GIT3_CHECKOUT_SAFE;
 		memset(&cts, 0, sizeof(cts));
 
-		cl_git_fail(git_checkout_tree(g_repo, obj, &opts));
+		cl_git_fail(git3_checkout_tree(g_repo, obj, &opts));
 		cl_assert_equal_i(cts.conflicts, g_typechange_expected_conflicts[i]);
 		cl_assert_equal_i(cts.untracked, g_typechange_expected_untracked[i]);
 		cl_assert_equal_i(cts.dirty, 0);
@@ -290,46 +290,46 @@ void test_checkout_typechange__checkout_with_conflicts(void)
 		cl_assert_equal_i(cts.ignored, 0);
 
 		opts.checkout_strategy =
-			GIT_CHECKOUT_FORCE | GIT_CHECKOUT_REMOVE_UNTRACKED;
+			GIT3_CHECKOUT_FORCE | GIT3_CHECKOUT_REMOVE_UNTRACKED;
 		memset(&cts, 0, sizeof(cts));
 
-		cl_assert(git_fs_path_exists("typechanges/untracked"));
+		cl_assert(git3_fs_path_exists("typechanges/untracked"));
 
-		cl_git_pass(git_checkout_tree(g_repo, obj, &opts));
+		cl_git_pass(git3_checkout_tree(g_repo, obj, &opts));
 		cl_assert_equal_i(0, cts.conflicts);
 
-		cl_assert(!git_fs_path_exists("typechanges/untracked"));
+		cl_assert(!git3_fs_path_exists("typechanges/untracked"));
 
 		cl_git_pass(
-			git_repository_set_head_detached(g_repo, git_object_id(obj)));
+			git3_repository_set_head_detached(g_repo, git3_object_id(obj)));
 
-		assert_workdir_matches_tree(g_repo, git_object_id(obj), NULL, true);
+		assert_workdir_matches_tree(g_repo, git3_object_id(obj), NULL, true);
 
-		git_object_free(obj);
+		git3_object_free(obj);
 	}
 }
 
 void test_checkout_typechange__status_char(void)
 {
 	size_t i;
-	git_oid oid;
-	git_commit *commit;
-	git_diff *diff;
-	const git_diff_delta *delta;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
+	git3_oid oid;
+	git3_commit *commit;
+	git3_diff *diff;
+	const git3_diff_delta *delta;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
 	char expected[8] = {'M', 'M', 'R', 'T', 'D', 'R', 'A', 'R'};
 
-	git_oid_from_string(&oid, "9b19edf33a03a0c59cdfc113bfa5c06179bf9b1a", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, g_repo, &oid));
-	diffopts.flags |= GIT_DIFF_INCLUDE_TYPECHANGE;
-	cl_git_pass(git_diff__commit(&diff, g_repo, commit, &diffopts));
-	cl_git_pass(git_diff_find_similar(diff, NULL));
+	git3_oid_from_string(&oid, "9b19edf33a03a0c59cdfc113bfa5c06179bf9b1a", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, g_repo, &oid));
+	diffopts.flags |= GIT3_DIFF_INCLUDE_TYPECHANGE;
+	cl_git_pass(git3_diff__commit(&diff, g_repo, commit, &diffopts));
+	cl_git_pass(git3_diff_find_similar(diff, NULL));
 
-	for (i = 0; i < git_diff_num_deltas(diff); i++) {
-		delta = git_diff_get_delta(diff, i);
-		cl_assert_equal_i(expected[i], git_diff_status_char(delta->status));
+	for (i = 0; i < git3_diff_num_deltas(diff); i++) {
+		delta = git3_diff_get_delta(diff, i);
+		cl_assert_equal_i(expected[i], git3_diff_status_char(delta->status));
 	}
 
-	git_diff_free(diff);
-	git_commit_free(commit);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
 }

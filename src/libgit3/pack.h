@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -21,23 +21,23 @@
 #include "hashmap_oid.h"
 
 /**
- * Function type for callbacks from git_pack_foreach_entry_offset.
+ * Function type for callbacks from git3_pack_foreach_entry_offset.
  */
-typedef int git_pack_foreach_entry_offset_cb(
-		const git_oid *id,
+typedef int git3_pack_foreach_entry_offset_cb(
+		const git3_oid *id,
 		off64_t offset,
 		void *payload);
 
-#define GIT_PACK_FILE_MODE 0444
+#define GIT3_PACK_FILE_MODE 0444
 
 #define PACK_SIGNATURE 0x5041434b	/* "PACK" */
 #define PACK_VERSION 2
 #define pack_version_ok(v) ((v) == htonl(2))
 
-#define GIT_PACKFILE_OFS_DELTA 6
-#define GIT_PACKFILE_REF_DELTA 7
+#define GIT3_PACKFILE_OFS_DELTA 6
+#define GIT3_PACKFILE_REF_DELTA 7
 
-struct git_pack_header {
+struct git3_pack_header {
 	uint32_t hdr_signature;
 	uint32_t hdr_version;
 	uint32_t hdr_entries;
@@ -63,59 +63,59 @@ struct git_pack_header {
 
 #define PACK_IDX_SIGNATURE 0xff744f63	/* "\377tOc" */
 
-struct git_pack_idx_header {
+struct git3_pack_idx_header {
 	uint32_t idx_signature;
 	uint32_t idx_version;
 };
 
-typedef struct git_pack_cache_entry {
+typedef struct git3_pack_cache_entry {
 	size_t last_usage; /* enough? */
-	git_atomic32 refcount;
-	git_rawobj raw;
-} git_pack_cache_entry;
+	git3_atomic32 refcount;
+	git3_rawobj raw;
+} git3_pack_cache_entry;
 
 struct pack_chain_elem {
 	off64_t base_key;
 	off64_t offset;
 	size_t size;
-	git_object_t type;
+	git3_object_t type;
 };
 
-typedef git_array_t(struct pack_chain_elem) git_dependency_chain;
+typedef git3_array_t(struct pack_chain_elem) git3_dependency_chain;
 
-#define GIT_PACK_CACHE_MEMORY_LIMIT 16 * 1024 * 1024
-#define GIT_PACK_CACHE_SIZE_LIMIT 1024 * 1024 /* don't bother caching anything over 1MB */
+#define GIT3_PACK_CACHE_MEMORY_LIMIT 16 * 1024 * 1024
+#define GIT3_PACK_CACHE_SIZE_LIMIT 1024 * 1024 /* don't bother caching anything over 1MB */
 
-struct git_pack_entry {
+struct git3_pack_entry {
 	off64_t offset;
-	git_oid id;
-	struct git_pack_file *p;
+	git3_oid id;
+	struct git3_pack_file *p;
 };
 
-GIT_HASHMAP_STRUCT(git_pack_offsetmap, off64_t, git_pack_cache_entry *);
+GIT3_HASHMAP_STRUCT(git3_pack_offsetmap, off64_t, git3_pack_cache_entry *);
 
-GIT_HASHMAP_OID_STRUCT(git_pack_oidmap, struct git_pack_entry *);
-GIT_HASHMAP_OID_PROTOTYPES(git_pack_oidmap, struct git_pack_entry *);
+GIT3_HASHMAP_OID_STRUCT(git3_pack_oidmap, struct git3_pack_entry *);
+GIT3_HASHMAP_OID_PROTOTYPES(git3_pack_oidmap, struct git3_pack_entry *);
 
 typedef struct {
 	size_t memory_used;
 	size_t memory_limit;
 	size_t use_ctr;
-	git_mutex lock;
-	git_pack_offsetmap entries;
-} git_pack_cache;
+	git3_mutex lock;
+	git3_pack_offsetmap entries;
+} git3_pack_cache;
 
-struct git_pack_file {
-	git_mwindow_file mwf;
-	git_map index_map;
-	git_mutex lock; /* protect updates to index_map */
-	git_atomic32 refcount;
+struct git3_pack_file {
+	git3_mwindow_file mwf;
+	git3_map index_map;
+	git3_mutex lock; /* protect updates to index_map */
+	git3_atomic32 refcount;
 
 	uint32_t num_objects;
 	uint32_t num_bad_objects;
-	git_oid *bad_object_ids; /* array of git_oid */
+	git3_oid *bad_object_ids; /* array of git3_oid */
 
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 	unsigned oid_hexsize:7,
 	         oid_size:6,
 	         pack_local:1,
@@ -123,17 +123,17 @@ struct git_pack_file {
 		 has_cache:1;
 
 	int index_version;
-	git_time_t mtime;
+	git3_time_t mtime;
 
-	git_pack_oidmap idx_cache;
+	git3_pack_oidmap idx_cache;
 	unsigned char **ids;
 
-	git_pack_cache bases; /* delta base cache */
+	git3_pack_cache bases; /* delta base cache */
 
 	time_t last_freshen; /* last time the packfile was freshened */
 
 	/* something like ".git/objects/pack/xxxxx.pack" */
-	char pack_name[GIT_FLEX_ARRAY]; /* more */
+	char pack_name[GIT3_FLEX_ARRAY]; /* more */
 };
 
 /**
@@ -146,78 +146,78 @@ struct git_pack_file {
  * .pack file (stride = oid_size + 4), whereas files with version 2 store
  * them in a contiguous flat array (stride = oid_size).
  */
-int git_pack__lookup_id(
+int git3_pack__lookup_id(
 	const void *id_lookup_table,
 	size_t stride,
 	unsigned lo,
 	unsigned hi,
 	const unsigned char *id_prefix,
-	const git_oid_t oid_type);
+	const git3_oid_t oid_type);
 
-typedef struct git_packfile_stream {
+typedef struct git3_packfile_stream {
 	off64_t curpos;
 	int done;
-	git_zstream zstream;
-	struct git_pack_file *p;
-	git_mwindow *mw;
-} git_packfile_stream;
+	git3_zstream zstream;
+	struct git3_pack_file *p;
+	git3_mwindow *mw;
+} git3_packfile_stream;
 
-int git_packfile__object_header(size_t *out, unsigned char *hdr, size_t size, git_object_t type);
+int git3_packfile__object_header(size_t *out, unsigned char *hdr, size_t size, git3_object_t type);
 
-int git_packfile__name(char **out, const char *path);
+int git3_packfile__name(char **out, const char *path);
 
-int git_packfile_unpack_header(
+int git3_packfile_unpack_header(
 		size_t *size_p,
-		git_object_t *type_p,
-		struct git_pack_file *p,
-		git_mwindow **w_curs,
+		git3_object_t *type_p,
+		struct git3_pack_file *p,
+		git3_mwindow **w_curs,
 		off64_t *curpos);
 
-int git_packfile_resolve_header(
+int git3_packfile_resolve_header(
 		size_t *size_p,
-		git_object_t *type_p,
-		struct git_pack_file *p,
+		git3_object_t *type_p,
+		struct git3_pack_file *p,
 		off64_t offset);
 
-int git_packfile_unpack(git_rawobj *obj, struct git_pack_file *p, off64_t *obj_offset);
+int git3_packfile_unpack(git3_rawobj *obj, struct git3_pack_file *p, off64_t *obj_offset);
 
-int git_packfile_stream_open(git_packfile_stream *obj, struct git_pack_file *p, off64_t curpos);
-ssize_t git_packfile_stream_read(git_packfile_stream *obj, void *buffer, size_t len);
-void git_packfile_stream_dispose(git_packfile_stream *obj);
+int git3_packfile_stream_open(git3_packfile_stream *obj, struct git3_pack_file *p, off64_t curpos);
+ssize_t git3_packfile_stream_read(git3_packfile_stream *obj, void *buffer, size_t len);
+void git3_packfile_stream_dispose(git3_packfile_stream *obj);
 
 int get_delta_base(
 		off64_t *delta_base_out,
-		struct git_pack_file *p,
-		git_mwindow **w_curs,
+		struct git3_pack_file *p,
+		git3_mwindow **w_curs,
 		off64_t *curpos,
-		git_object_t type,
+		git3_object_t type,
 		off64_t delta_obj_offset);
 
-void git_packfile_free(struct git_pack_file *p, bool unlink_packfile);
-int git_packfile_alloc(
-	struct git_pack_file **pack_out,
+void git3_packfile_free(struct git3_pack_file *p, bool unlink_packfile);
+int git3_packfile_alloc(
+	struct git3_pack_file **pack_out,
 	const char *path,
-	git_oid_t oid_type);
+	git3_oid_t oid_type);
 
-int git_pack_entry_find(
-		struct git_pack_entry *e,
-		struct git_pack_file *p,
-		const git_oid *short_id,
+int git3_pack_entry_find(
+		struct git3_pack_entry *e,
+		struct git3_pack_file *p,
+		const git3_oid *short_id,
 		size_t len);
-int git_pack_foreach_entry(
-		struct git_pack_file *p,
-		git_odb_foreach_cb cb,
+int git3_pack_foreach_entry(
+		struct git3_pack_file *p,
+		git3_odb_foreach_cb cb,
 		void *data);
 /**
- * Similar to git_pack_foreach_entry, but:
+ * Similar to git3_pack_foreach_entry, but:
  * - It also provides the offset of the object within the
  *   packfile.
  * - It does not sort the objects in any order.
  * - It retains the lock while invoking the callback.
  */
-int git_pack_foreach_entry_offset(
-		struct git_pack_file *p,
-		git_pack_foreach_entry_offset_cb cb,
+int git3_pack_foreach_entry_offset(
+		struct git3_pack_file *p,
+		git3_pack_foreach_entry_offset_cb cb,
 		void *data);
 
 #endif

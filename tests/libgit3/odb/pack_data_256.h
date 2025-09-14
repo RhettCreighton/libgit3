@@ -1,4 +1,4 @@
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 
 static const char *packed_objects_256[] = {
 	"99f3b405443221141eb0fd1e0cca5d355f893983749b7fb455769fba434e7945",

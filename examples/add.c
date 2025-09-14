@@ -1,7 +1,7 @@
 /*
- * libgit2 "add" example - shows how to modify the index
+ * libgit3 "add" example - shows how to modify the index
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,7 +15,7 @@
 #include "common.h"
 
 /**
- * The following example demonstrates how to add files with libgit2.
+ * The following example demonstrates how to add files with libgit3.
  *
  * It will use the repository in the current working directory, and act
  * on files passed as its parameters.
@@ -34,7 +34,7 @@ enum index_mode {
 struct index_options {
 	int dry_run;
 	int verbose;
-	git_repository *repo;
+	git3_repository *repo;
 	enum index_mode mode;
 	int add_update;
 };
@@ -43,11 +43,11 @@ struct index_options {
 static void parse_opts(const char **repo_path, struct index_options *opts, struct args_info *args);
 int print_matched_cb(const char *path, const char *matched_pathspec, void *payload);
 
-int lg2_add(git_repository *repo, int argc, char **argv)
+int lg2_add(git3_repository *repo, int argc, char **argv)
 {
-	git_index_matched_path_cb matched_cb = NULL;
-	git_index *index;
-	git_strarray array = {0};
+	git3_index_matched_path_cb matched_cb = NULL;
+	git3_index *index;
+	git3_strarray array = {0};
 	struct index_options options = {0};
 	struct args_info args = ARGS_INFO_INIT;
 
@@ -58,7 +58,7 @@ int lg2_add(git_repository *repo, int argc, char **argv)
 	strarray_from_args(&array, &args);
 
 	/* Grab the repository's index. */
-	check_lg2(git_repository_index(&index, repo), "Could not open repository index", NULL);
+	check_lg2(git3_repository_index(&index, repo), "Could not open repository index", NULL);
 
 	/* Setup a callback if the requested options need it */
 	if (options.verbose || options.dry_run) {
@@ -69,21 +69,21 @@ int lg2_add(git_repository *repo, int argc, char **argv)
 
 	/* Perform the requested action with the index and files */
 	if (options.add_update) {
-		git_index_update_all(index, &array, matched_cb, &options);
+		git3_index_update_all(index, &array, matched_cb, &options);
 	} else {
-		git_index_add_all(index, &array, 0, matched_cb, &options);
+		git3_index_add_all(index, &array, 0, matched_cb, &options);
 	}
 
 	/* Cleanup memory */
-	git_index_write(index);
-	git_index_free(index);
+	git3_index_write(index);
+	git3_index_free(index);
 
 	return 0;
 }
 
 /*
  * This callback is called for each file under consideration by
- * git_index_(update|add)_all above.
+ * git3_index_(update|add)_all above.
  * It makes uses of the callback's ability to abort the action.
  */
 int print_matched_cb(const char *path, const char *matched_pathspec, void *payload)
@@ -94,10 +94,10 @@ int print_matched_cb(const char *path, const char *matched_pathspec, void *paylo
 	(void)matched_pathspec;
 
 	/* Get the file status */
-	if (git_status_file(&status, opts->repo, path) < 0)
+	if (git3_status_file(&status, opts->repo, path) < 0)
 		return -1;
 
-	if ((status & GIT_STATUS_WT_MODIFIED) || (status & GIT_STATUS_WT_NEW)) {
+	if ((status & GIT3_STATUS_WT_MODIFIED) || (status & GIT3_STATUS_WT_NEW)) {
 		printf("add '%s'\n", path);
 		ret = 0;
 	} else {

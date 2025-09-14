@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_transports_ssh_exec_h__
@@ -13,13 +13,13 @@
 #include "git3/transport.h"
 #include "git3/sys/transport.h"
 
-int git_smart_subtransport_ssh_exec(
-	git_smart_subtransport **out,
-	git_transport *owner,
+int git3_smart_subtransport_ssh_exec(
+	git3_smart_subtransport **out,
+	git3_transport *owner,
 	void *param);
 
-int git_smart_subtransport_ssh_exec_set_paths(
-	git_smart_subtransport *subtransport,
+int git3_smart_subtransport_ssh_exec_set_paths(
+	git3_smart_subtransport *subtransport,
 	const char *cmd_uploadpack,
 	const char *cmd_receivepack);
 

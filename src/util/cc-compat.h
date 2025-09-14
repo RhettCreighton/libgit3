@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_cc_compat_h__
@@ -12,43 +12,43 @@
 /*
  * See if our compiler is known to support flexible array members.
  */
-#ifndef GIT_FLEX_ARRAY
+#ifndef GIT3_FLEX_ARRAY
 #	if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-#		define GIT_FLEX_ARRAY /* empty */
+#		define GIT3_FLEX_ARRAY /* empty */
 #	elif defined(__GNUC__)
 #		if (__GNUC__ >= 3)
-#			define GIT_FLEX_ARRAY /* empty */
+#			define GIT3_FLEX_ARRAY /* empty */
 #		else
-#			define GIT_FLEX_ARRAY 0 /* older GNU extension */
+#			define GIT3_FLEX_ARRAY 0 /* older GNU extension */
 #		endif
 #	endif
 
 /* Default to safer but a bit wasteful traditional style */
-#	ifndef GIT_FLEX_ARRAY
-#		define GIT_FLEX_ARRAY 1
+#	ifndef GIT3_FLEX_ARRAY
+#		define GIT3_FLEX_ARRAY 1
 #	endif
 #endif
 
 #if defined(__GNUC__)
-#	define GIT_ALIGN(x,size) x __attribute__ ((aligned(size)))
+#	define GIT3_ALIGN(x,size) x __attribute__ ((aligned(size)))
 #elif defined(_MSC_VER)
-#	define GIT_ALIGN(x,size) __declspec(align(size)) x
+#	define GIT3_ALIGN(x,size) __declspec(align(size)) x
 #else
-#	define GIT_ALIGN(x,size) x
+#	define GIT3_ALIGN(x,size) x
 #endif
 
 #if defined(__GNUC__)
-# define GIT_UNUSED(x)                                                         \
+# define GIT3_UNUSED(x)                                                         \
 	do {                                                                   \
 		__typeof__(x) _unused __attribute__((unused));                 \
 		_unused = (x);                                                 \
 	} while (0)
-# define GIT_UNUSED_ARG __attribute__((unused))
-# define GIT_UNUSED_FUNCTION __attribute__((unused))
+# define GIT3_UNUSED_ARG __attribute__((unused))
+# define GIT3_UNUSED_FUNCTION __attribute__((unused))
 #else
-# define GIT_UNUSED(x) ((void)(x))
-# define GIT_UNUSED_ARG
-# define GIT_UNUSED_FUNCTION
+# define GIT3_UNUSED(x) ((void)(x))
+# define GIT3_UNUSED_ARG
+# define GIT3_UNUSED_FUNCTION
 #endif
 
 /* Define the printf format specifier to use for size_t output */

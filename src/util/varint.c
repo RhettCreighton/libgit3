@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "varint.h"
 
-uintmax_t git_decode_varint(const unsigned char *bufp, size_t *varint_len)
+uintmax_t git3_decode_varint(const unsigned char *bufp, size_t *varint_len)
 {
 	const unsigned char *buf = bufp;
 	unsigned char c = *buf++;
@@ -27,7 +27,7 @@ uintmax_t git_decode_varint(const unsigned char *bufp, size_t *varint_len)
 	return val;
 }
 
-int git_encode_varint(unsigned char *buf, size_t bufsize, uintmax_t value)
+int git3_encode_varint(unsigned char *buf, size_t bufsize, uintmax_t value)
 {
 	unsigned char varint[16];
 	unsigned pos = sizeof(varint) - 1;

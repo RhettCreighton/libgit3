@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_refdb_backend_h__
@@ -12,13 +12,13 @@
 #include "git3/oid.h"
 
 /**
- * @file git2/sys/refdb_backend.h
+ * @file git3/sys/refdb_backend.h
  * @brief Custom reference database backends for refs storage
- * @defgroup git_refdb_backend Custom reference database backends for refs storage
+ * @defgroup git3_refdb_backend Custom reference database backends for refs storage
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 
 /**
@@ -26,38 +26,38 @@ GIT_BEGIN_DECL
  * element, so the API can talk to it. You'd define your iterator as
  *
  *     struct my_iterator {
- *             git_reference_iterator parent;
+ *             git3_reference_iterator parent;
  *             ...
  *     }
  *
- * and assign `iter->parent.backend` to your `git_refdb_backend`.
+ * and assign `iter->parent.backend` to your `git3_refdb_backend`.
  */
-struct git_reference_iterator {
-	git_refdb *db;
+struct git3_reference_iterator {
+	git3_refdb *db;
 
 	/**
 	 * Return the current reference and advance the iterator.
 	 */
-	int GIT_CALLBACK(next)(
-		git_reference **ref,
-		git_reference_iterator *iter);
+	int GIT3_CALLBACK(next)(
+		git3_reference **ref,
+		git3_reference_iterator *iter);
 
 	/**
 	 * Return the name of the current reference and advance the iterator
 	 */
-	int GIT_CALLBACK(next_name)(
+	int GIT3_CALLBACK(next_name)(
 		const char **ref_name,
-		git_reference_iterator *iter);
+		git3_reference_iterator *iter);
 
 	/**
 	 * Free the iterator
 	 */
-	void GIT_CALLBACK(free)(
-		git_reference_iterator *iter);
+	void GIT3_CALLBACK(free)(
+		git3_reference_iterator *iter);
 };
 
 /** An instance for a custom backend */
-struct git_refdb_backend {
+struct git3_refdb_backend {
 	unsigned int version; /**< The backend API version */
 
 	/**
@@ -71,9 +71,9 @@ struct git_refdb_backend {
 	 *               existence.
 	 * @return `0` on success, a negative error value code.
 	 */
-	int GIT_CALLBACK(exists)(
+	int GIT3_CALLBACK(exists)(
 		int *exists,
-		git_refdb_backend *backend,
+		git3_refdb_backend *backend,
 		const char *ref_name);
 
 	/**
@@ -85,12 +85,12 @@ struct git_refdb_backend {
 	 *          reference, if it could be found, otherwise to `NULL`.
 	 * @param ref_name The reference's name that should be checked for
 	 *               existence.
-	 * @return `0` on success, `GIT_ENOTFOUND` if the reference does
+	 * @return `0` on success, `GIT3_ENOTFOUND` if the reference does
 	 *         exist, otherwise a negative error code.
 	 */
-	int GIT_CALLBACK(lookup)(
-		git_reference **out,
-		git_refdb_backend *backend,
+	int GIT3_CALLBACK(lookup)(
+		git3_reference **out,
+		git3_refdb_backend *backend,
 		const char *ref_name);
 
 	/**
@@ -100,17 +100,17 @@ struct git_refdb_backend {
 	 *
 	 * @param out The implementation shall set this to the allocated
 	 *          reference iterator. A custom structure may be used with an
-	 *          embedded `git_reference_iterator` structure. Both `next`
-	 *          and `next_name` functions of `git_reference_iterator` need
+	 *          embedded `git3_reference_iterator` structure. Both `next`
+	 *          and `next_name` functions of `git3_reference_iterator` need
 	 *          to be populated.
 	 * @param glob A pattern to filter references by. If given, the iterator
 	 *           shall only return references that match the glob when
 	 *           passed to `wildmatch`.
 	 * @return `0` on success, otherwise a negative error code.
 	 */
-	int GIT_CALLBACK(iterator)(
-		git_reference_iterator **iter,
-		struct git_refdb_backend *backend,
+	int GIT3_CALLBACK(iterator)(
+		git3_reference_iterator **iter,
+		struct git3_refdb_backend *backend,
 		const char *glob);
 
 	/**
@@ -139,10 +139,10 @@ struct git_refdb_backend {
 	 *                 not exist at the point of writing.
 	 * @return `0` on success, otherwise a negative error code.
 	 */
-	int GIT_CALLBACK(write)(git_refdb_backend *backend,
-		     const git_reference *ref, int force,
-		     const git_signature *who, const char *message,
-		     const git_oid *old, const char *old_target);
+	int GIT3_CALLBACK(write)(git3_refdb_backend *backend,
+		     const git3_reference *ref, int force,
+		     const git3_signature *who, const char *message,
+		     const git3_oid *old, const char *old_target);
 
 	/**
 	 * Rename a reference in the refdb.
@@ -161,10 +161,10 @@ struct git_refdb_backend {
 	 *              performed. Shall be used to create a reflog entry.
 	 * @return `0` on success, otherwise a negative error code.
 	 */
-	int GIT_CALLBACK(rename)(
-		git_reference **out, git_refdb_backend *backend,
+	int GIT3_CALLBACK(rename)(
+		git3_reference **out, git3_refdb_backend *backend,
 		const char *old_name, const char *new_name, int force,
-		const git_signature *who, const char *message);
+		const git3_signature *who, const char *message);
 
 	/**
 	 * Deletes the given reference from the refdb.
@@ -183,7 +183,7 @@ struct git_refdb_backend {
 	 *                 writing the new value.
 	 * @return `0` on success, otherwise a negative error code.
 	 */
-	int GIT_CALLBACK(del)(git_refdb_backend *backend, const char *ref_name, const git_oid *old_id, const char *old_target);
+	int GIT3_CALLBACK(del)(git3_refdb_backend *backend, const char *ref_name, const git3_oid *old_id, const char *old_target);
 
 	/**
 	 * Suggests that the given refdb compress or optimize its references.
@@ -196,7 +196,7 @@ struct git_refdb_backend {
 	 *
 	 * @return `0` on success a negative error code otherwise
 	 */
-	int GIT_CALLBACK(compress)(git_refdb_backend *backend);
+	int GIT3_CALLBACK(compress)(git3_refdb_backend *backend);
 
 	/**
 	 * Query whether a particular reference has a log (may be empty)
@@ -209,7 +209,7 @@ struct git_refdb_backend {
 	 * @return `0` on success, `1` if the reflog for the given reference
 	 *         exists, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(has_log)(git_refdb_backend *backend, const char *refname);
+	int GIT3_CALLBACK(has_log)(git3_refdb_backend *backend, const char *refname);
 
 	/**
 	 * Make sure a particular reference will have a reflog which
@@ -219,15 +219,15 @@ struct git_refdb_backend {
 	 *
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(ensure_log)(git_refdb_backend *backend, const char *refname);
+	int GIT3_CALLBACK(ensure_log)(git3_refdb_backend *backend, const char *refname);
 
 	/**
-	 * Frees any resources held by the refdb (including the `git_refdb_backend`
+	 * Frees any resources held by the refdb (including the `git3_refdb_backend`
 	 * itself).
 	 *
 	 * A refdb backend implementation must provide this function.
 	 */
-	void GIT_CALLBACK(free)(git_refdb_backend *backend);
+	void GIT3_CALLBACK(free)(git3_refdb_backend *backend);
 
 	/**
 	 * Read the reflog for the given reference name.
@@ -236,7 +236,7 @@ struct git_refdb_backend {
 	 *
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(reflog_read)(git_reflog **out, git_refdb_backend *backend, const char *name);
+	int GIT3_CALLBACK(reflog_read)(git3_reflog **out, git3_refdb_backend *backend, const char *name);
 
 	/**
 	 * Write a reflog to disk.
@@ -248,7 +248,7 @@ struct git_refdb_backend {
 	 *             written to disk.
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(reflog_write)(git_refdb_backend *backend, git_reflog *reflog);
+	int GIT3_CALLBACK(reflog_write)(git3_refdb_backend *backend, git3_reflog *reflog);
 
 	/**
 	 * Rename a reflog.
@@ -259,7 +259,7 @@ struct git_refdb_backend {
 	 * @param new_name The name of new reference whose reflog shall be renamed to.
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(reflog_rename)(git_refdb_backend *_backend, const char *old_name, const char *new_name);
+	int GIT3_CALLBACK(reflog_rename)(git3_refdb_backend *_backend, const char *old_name, const char *new_name);
 
 	/**
 	 * Remove a reflog.
@@ -269,7 +269,7 @@ struct git_refdb_backend {
 	 * @param name The name of the reference whose reflog shall be deleted.
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(reflog_delete)(git_refdb_backend *backend, const char *name);
+	int GIT3_CALLBACK(reflog_delete)(git3_refdb_backend *backend, const char *name);
 
 	/**
 	 * Lock a reference.
@@ -282,7 +282,7 @@ struct git_refdb_backend {
 	 * @param refname Reference that shall be locked.
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(lock)(void **payload_out, git_refdb_backend *backend, const char *refname);
+	int GIT3_CALLBACK(lock)(void **payload_out, git3_refdb_backend *backend, const char *refname);
 
 	/**
 	 * Unlock a reference.
@@ -308,26 +308,26 @@ struct git_refdb_backend {
 	 *              case `update_reflog` is set.
 	 * @return `0` on success, a negative error code otherwise
 	 */
-	int GIT_CALLBACK(unlock)(git_refdb_backend *backend, void *payload, int success, int update_reflog,
-		      const git_reference *ref, const git_signature *sig, const char *message);
+	int GIT3_CALLBACK(unlock)(git3_refdb_backend *backend, void *payload, int success, int update_reflog,
+		      const git3_reference *ref, const git3_signature *sig, const char *message);
 };
 
-/** Current version for the `git_refdb_backend_options` structure */
-#define GIT_REFDB_BACKEND_VERSION 1
+/** Current version for the `git3_refdb_backend_options` structure */
+#define GIT3_REFDB_BACKEND_VERSION 1
 
-/** Static constructor for `git_refdb_backend_options` */
-#define GIT_REFDB_BACKEND_INIT {GIT_REFDB_BACKEND_VERSION}
+/** Static constructor for `git3_refdb_backend_options` */
+#define GIT3_REFDB_BACKEND_INIT {GIT3_REFDB_BACKEND_VERSION}
 
 /**
- * Initializes a `git_refdb_backend` with default values. Equivalent to
- * creating an instance with GIT_REFDB_BACKEND_INIT.
+ * Initializes a `git3_refdb_backend` with default values. Equivalent to
+ * creating an instance with GIT3_REFDB_BACKEND_INIT.
  *
- * @param backend the `git_refdb_backend` struct to initialize
- * @param version Version of struct; pass `GIT_REFDB_BACKEND_VERSION`
+ * @param backend the `git3_refdb_backend` struct to initialize
+ * @param version Version of struct; pass `GIT3_REFDB_BACKEND_VERSION`
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_refdb_init_backend(
-	git_refdb_backend *backend,
+GIT3_EXTERN(int) git3_refdb_init_backend(
+	git3_refdb_backend *backend,
 	unsigned int version);
 
 /**
@@ -337,29 +337,29 @@ GIT_EXTERN(int) git_refdb_init_backend(
  * opened / created, but you can use this to explicitly construct a
  * filesystem refdb backend for a repository.
  *
- * @param backend_out Output pointer to the git_refdb_backend object
+ * @param backend_out Output pointer to the git3_refdb_backend object
  * @param repo Git repository to access
  * @return 0 on success, <0 error code on failure
  */
-GIT_EXTERN(int) git_refdb_backend_fs(
-	git_refdb_backend **backend_out,
-	git_repository *repo);
+GIT3_EXTERN(int) git3_refdb_backend_fs(
+	git3_refdb_backend **backend_out,
+	git3_repository *repo);
 
 /**
  * Sets the custom backend to an existing reference DB
  *
- * The `git_refdb` will take ownership of the `git_refdb_backend` so you
+ * The `git3_refdb` will take ownership of the `git3_refdb_backend` so you
  * should NOT free it after calling this function.
  *
  * @param refdb database to add the backend to
- * @param backend pointer to a git_refdb_backend instance
+ * @param backend pointer to a git3_refdb_backend instance
  * @return 0 on success; error code otherwise
  */
-GIT_EXTERN(int) git_refdb_set_backend(
-	git_refdb *refdb,
-	git_refdb_backend *backend);
+GIT3_EXTERN(int) git3_refdb_set_backend(
+	git3_refdb *refdb,
+	git3_refdb_backend *backend);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

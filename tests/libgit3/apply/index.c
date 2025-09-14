@@ -1,21 +1,21 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "apply_helpers.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-recursive"
 
 void test_apply_index__initialize(void)
 {
-	git_oid oid;
-	git_commit *commit;
+	git3_oid oid;
+	git3_commit *commit;
 
 	repo = cl_git_sandbox_init(TEST_REPO_PATH);
 
-	git_oid_from_string(&oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	cl_git_pass(git_reset(repo, (git_object *)commit, GIT_RESET_HARD, NULL));
-	git_commit_free(commit);
+	git3_oid_from_string(&oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_reset(repo, (git3_object *)commit, GIT3_RESET_HARD, NULL));
+	git3_commit_free(commit);
 }
 
 void test_apply_index__cleanup(void)
@@ -25,11 +25,11 @@ void test_apply_index__cleanup(void)
 
 void test_apply_index__generate_diff(void)
 {
-	git_oid a_oid, b_oid;
-	git_commit *a_commit, *b_commit;
-	git_tree *a_tree, *b_tree;
-	git_diff *diff;
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_oid a_oid, b_oid;
+	git3_commit *a_commit, *b_commit;
+	git3_tree *a_tree, *b_tree;
+	git3_diff *diff;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 
 	struct merge_index_entry index_expected[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -42,30 +42,30 @@ void test_apply_index__generate_diff(void)
 	size_t index_expected_cnt = sizeof(index_expected) /
 		sizeof(struct merge_index_entry);
 
-	git_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT_OID_SHA1);
-	git_oid_from_string(&b_oid, "7c7bf85e978f1d18c0566f702d2cb7766b9c8d4f", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&a_commit, repo, &a_oid));
-	cl_git_pass(git_commit_lookup(&b_commit, repo, &b_oid));
+	git3_oid_from_string(&a_oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT3_OID_SHA1);
+	git3_oid_from_string(&b_oid, "7c7bf85e978f1d18c0566f702d2cb7766b9c8d4f", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&a_commit, repo, &a_oid));
+	cl_git_pass(git3_commit_lookup(&b_commit, repo, &b_oid));
 
-	cl_git_pass(git_commit_tree(&a_tree, a_commit));
-	cl_git_pass(git_commit_tree(&b_tree, b_commit));
+	cl_git_pass(git3_commit_tree(&a_tree, a_commit));
+	cl_git_pass(git3_commit_tree(&b_tree, b_commit));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, repo, a_tree, b_tree, &diff_opts));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, repo, a_tree, b_tree, &diff_opts));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
-	git_tree_free(a_tree);
-	git_tree_free(b_tree);
-	git_commit_free(a_commit);
-	git_commit_free(b_commit);
+	git3_diff_free(diff);
+	git3_tree_free(a_tree);
+	git3_tree_free(b_tree);
+	git3_commit_free(a_commit);
+	git3_commit_free(b_commit);
 }
 
 void test_apply_index__parsed_diff(void)
 {
-	git_diff *diff;
+	git3_diff *diff;
 
 	struct merge_index_entry index_expected[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -80,17 +80,17 @@ void test_apply_index__parsed_diff(void)
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_MODIFY_TWO_FILES, strlen(DIFF_MODIFY_TWO_FILES)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__removes_file(void)
 {
-	git_diff *diff;
+	git3_diff *diff;
 
 	struct merge_index_entry index_expected[] = {
 		{ 0100644, "f51658077d85f2264fa179b4d0848268cb3475c3", 0, "asparagus.txt" },
@@ -104,17 +104,17 @@ void test_apply_index__removes_file(void)
 
 	cl_git_pass(diff_from_buffer(&diff, DIFF_DELETE_FILE,
 		strlen(DIFF_DELETE_FILE)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__adds_file(void)
 {
-	git_diff *diff;
+	git3_diff *diff;
 
 	struct merge_index_entry index_expected[] = {
 		{ 0100644, "f51658077d85f2264fa179b4d0848268cb3475c3", 0, "asparagus.txt" },
@@ -130,17 +130,17 @@ void test_apply_index__adds_file(void)
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_ADD_FILE, strlen(DIFF_ADD_FILE)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__modified_workdir_with_unmodified_index_is_ok(void)
 {
-	git_diff *diff;
+	git3_diff *diff;
 
 	const char *diff_file = DIFF_MODIFY_TWO_FILES;
 
@@ -170,18 +170,18 @@ void test_apply_index__modified_workdir_with_unmodified_index_is_ok(void)
 	cl_git_rewritefile("merge-recursive/veal.txt", "Hello, world.\n");
 
 	cl_git_pass(diff_from_buffer(&diff, diff_file, strlen(diff_file)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_apply_workdir(repo, workdir_expected, workdir_expected_cnt);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__application_failure_leaves_index_unmodified(void)
 {
-	git_diff *diff;
-	git_index *index;
+	git3_diff *diff;
+	git3_index *index;
 
 	const char *diff_file = DIFF_MODIFY_TWO_FILES;
 
@@ -196,24 +196,24 @@ void test_apply_index__application_failure_leaves_index_unmodified(void)
 		sizeof(struct merge_index_entry);
 
 	/* mutate the index */
-	cl_git_pass(git_repository_index(&index, repo));
-	cl_git_pass(git_index_remove(index, "veal.txt", 0));
-	cl_git_pass(git_index_write(index));
-	git_index_free(index);
+	cl_git_pass(git3_repository_index(&index, repo));
+	cl_git_pass(git3_index_remove(index, "veal.txt", 0));
+	cl_git_pass(git3_index_write(index));
+	git3_index_free(index);
 
 	cl_git_pass(diff_from_buffer(&diff, diff_file, strlen(diff_file)));
-	cl_git_fail_with(GIT_EAPPLYFAIL, git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_fail_with(GIT3_EAPPLYFAIL, git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__keeps_nonconflicting_changes(void)
 {
-	git_diff *diff;
-	git_index *index;
-	git_index_entry idx_entry;
+	git3_diff *diff;
+	git3_index *index;
+	git3_index_entry idx_entry;
 
 	const char *diff_file = DIFF_MODIFY_TWO_FILES;
 
@@ -228,32 +228,32 @@ void test_apply_index__keeps_nonconflicting_changes(void)
 		sizeof(struct merge_index_entry);
 
 	/* mutate the index */
-	cl_git_pass(git_repository_index(&index, repo));
+	cl_git_pass(git3_repository_index(&index, repo));
 
-	memset(&idx_entry, 0, sizeof(git_index_entry));
+	memset(&idx_entry, 0, sizeof(git3_index_entry));
 	idx_entry.mode = 0100644;
 	idx_entry.path = "beef.txt";
-	cl_git_pass(git_oid_from_string(&idx_entry.id, "898d12687fb35be271c27c795a6b32c8b51da79e", GIT_OID_SHA1));
-	cl_git_pass(git_index_add(index, &idx_entry));
+	cl_git_pass(git3_oid_from_string(&idx_entry.id, "898d12687fb35be271c27c795a6b32c8b51da79e", GIT3_OID_SHA1));
+	cl_git_pass(git3_index_add(index, &idx_entry));
 
-	cl_git_pass(git_index_remove(index, "bouilli.txt", 0));
-	cl_git_pass(git_index_write(index));
-	git_index_free(index);
+	cl_git_pass(git3_index_remove(index, "bouilli.txt", 0));
+	cl_git_pass(git3_index_write(index));
+	git3_index_free(index);
 
 	cl_git_pass(diff_from_buffer(&diff, diff_file, strlen(diff_file)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__can_apply_nonconflicting_file_changes(void)
 {
-	git_diff *diff;
-	git_index *index;
-	git_index_entry idx_entry;
+	git3_diff *diff;
+	git3_index *index;
+	git3_index_entry idx_entry;
 
 	const char *diff_file = DIFF_MODIFY_TWO_FILES;
 
@@ -274,29 +274,29 @@ void test_apply_index__can_apply_nonconflicting_file_changes(void)
 	 * has a new line appended.
 	 */
 
-	cl_git_pass(git_repository_index(&index, repo));
+	cl_git_pass(git3_repository_index(&index, repo));
 
-	memset(&idx_entry, 0, sizeof(git_index_entry));
+	memset(&idx_entry, 0, sizeof(git3_index_entry));
 	idx_entry.mode = 0100644;
 	idx_entry.path = "asparagus.txt";
-	cl_git_pass(git_oid_from_string(&idx_entry.id, "06d3fefb8726ab1099acc76e02dfb85e034b2538", GIT_OID_SHA1));
-	cl_git_pass(git_index_add(index, &idx_entry));
+	cl_git_pass(git3_oid_from_string(&idx_entry.id, "06d3fefb8726ab1099acc76e02dfb85e034b2538", GIT3_OID_SHA1));
+	cl_git_pass(git3_index_add(index, &idx_entry));
 
-	cl_git_pass(git_index_write(index));
-	git_index_free(index);
+	cl_git_pass(git3_index_write(index));
+	git3_index_free(index);
 
 	cl_git_pass(diff_from_buffer(&diff, diff_file, strlen(diff_file)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_apply_index__change_mode(void)
 {
-	git_diff *diff;
+	git3_diff *diff;
 
 	const char *diff_file = DIFF_EXECUTABLE_FILE;
 
@@ -312,10 +312,10 @@ void test_apply_index__change_mode(void)
 		sizeof(struct merge_index_entry);
 
 	cl_git_pass(diff_from_buffer(&diff, diff_file, strlen(diff_file)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, NULL));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, NULL));
 
 	validate_apply_index(repo, index_expected, index_expected_cnt);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }

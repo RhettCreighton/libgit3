@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_merge_h__
@@ -13,20 +13,20 @@
 #include "git3/merge.h"
 
 /**
- * @file git2/sys/merge.h
+ * @file git3/sys/merge.h
  * @brief Custom merge drivers
- * @defgroup git_merge Custom merge drivers
+ * @defgroup git3_merge Custom merge drivers
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * A "merge driver" is a mechanism that can be configured to handle
  * conflict resolution for files changed in both the "ours" and "theirs"
  * side of a merge.
  */
-typedef struct git_merge_driver git_merge_driver;
+typedef struct git3_merge_driver git3_merge_driver;
 
 /**
  * Look up a merge driver by name
@@ -34,19 +34,19 @@ typedef struct git_merge_driver git_merge_driver;
  * @param name The name of the merge driver
  * @return Pointer to the merge driver object or NULL if not found
  */
-GIT_EXTERN(git_merge_driver *) git_merge_driver_lookup(const char *name);
+GIT3_EXTERN(git3_merge_driver *) git3_merge_driver_lookup(const char *name);
 
 /** The "text" merge driver */
-#define GIT_MERGE_DRIVER_TEXT   "text"
+#define GIT3_MERGE_DRIVER_TEXT   "text"
 /** The "binary" merge driver */
-#define GIT_MERGE_DRIVER_BINARY "binary"
+#define GIT3_MERGE_DRIVER_BINARY "binary"
 /** The "union" merge driver */
-#define GIT_MERGE_DRIVER_UNION  "union"
+#define GIT3_MERGE_DRIVER_UNION  "union"
 
 /**
  * A merge driver source represents the file to be merged
  */
-typedef struct git_merge_driver_source git_merge_driver_source;
+typedef struct git3_merge_driver_source git3_merge_driver_source;
 
 /**
  * Get the repository that the source data is coming from.
@@ -54,8 +54,8 @@ typedef struct git_merge_driver_source git_merge_driver_source;
  * @param src the merge driver source
  * @return the repository
  */
-GIT_EXTERN(git_repository *) git_merge_driver_source_repo(
-	const git_merge_driver_source *src);
+GIT3_EXTERN(git3_repository *) git3_merge_driver_source_repo(
+	const git3_merge_driver_source *src);
 
 /**
  * Gets the ancestor of the file to merge.
@@ -63,8 +63,8 @@ GIT_EXTERN(git_repository *) git_merge_driver_source_repo(
  * @param src the merge driver source
  * @return the ancestor or NULL if there was no ancestor
  */
-GIT_EXTERN(const git_index_entry *) git_merge_driver_source_ancestor(
-	const git_merge_driver_source *src);
+GIT3_EXTERN(const git3_index_entry *) git3_merge_driver_source_ancestor(
+	const git3_merge_driver_source *src);
 
 /**
  * Gets the ours side of the file to merge.
@@ -72,8 +72,8 @@ GIT_EXTERN(const git_index_entry *) git_merge_driver_source_ancestor(
  * @param src the merge driver source
  * @return the ours side or NULL if there was no ours side
  */
-GIT_EXTERN(const git_index_entry *) git_merge_driver_source_ours(
-	const git_merge_driver_source *src);
+GIT3_EXTERN(const git3_index_entry *) git3_merge_driver_source_ours(
+	const git3_merge_driver_source *src);
 
 /**
  * Gets the theirs side of the file to merge.
@@ -81,8 +81,8 @@ GIT_EXTERN(const git_index_entry *) git_merge_driver_source_ours(
  * @param src the merge driver source
  * @return the theirs side or NULL if there was no theirs side
  */
-GIT_EXTERN(const git_index_entry *) git_merge_driver_source_theirs(
-	const git_merge_driver_source *src);
+GIT3_EXTERN(const git3_index_entry *) git3_merge_driver_source_theirs(
+	const git3_merge_driver_source *src);
 
 /**
  * Gets the merge file options that the merge was invoked with.
@@ -90,8 +90,8 @@ GIT_EXTERN(const git_index_entry *) git_merge_driver_source_theirs(
  * @param src the merge driver source
  * @return the options
  */
-GIT_EXTERN(const git_merge_file_options *) git_merge_driver_source_file_options(
-	const git_merge_driver_source *src);
+GIT3_EXTERN(const git3_merge_file_options *) git3_merge_driver_source_file_options(
+	const git3_merge_driver_source *src);
 
 
 /**
@@ -103,27 +103,27 @@ GIT_EXTERN(const git_merge_file_options *) git_merge_driver_source_file_options(
  *
  * If non-NULL, the merge driver's `initialize` callback will be invoked
  * right before the first use of the driver, so you can defer expensive
- * initialization operations (in case libgit2 is being used in a way that
+ * initialization operations (in case libgit3 is being used in a way that
  * doesn't need the merge driver).
  *
  * @param self the merge driver to initialize
  * @return 0 on success, or a negative number on failure
  */
-typedef int GIT_CALLBACK(git_merge_driver_init_fn)(git_merge_driver *self);
+typedef int GIT3_CALLBACK(git3_merge_driver_init_fn)(git3_merge_driver *self);
 
 /**
  * Shutdown callback on merge driver
  *
  * Specified as `driver.shutdown`, this is an optional callback invoked
- * when the merge driver is unregistered or when libgit2 is shutting down.
+ * when the merge driver is unregistered or when libgit3 is shutting down.
  * It will be called once at most and should release resources as needed.
  * This may be called even if the `initialize` callback was not made.
  *
- * Typically this function will free the `git_merge_driver` object itself.
+ * Typically this function will free the `git3_merge_driver` object itself.
  *
  * @param self the merge driver to shutdown
  */
-typedef void GIT_CALLBACK(git_merge_driver_shutdown_fn)(git_merge_driver *self);
+typedef void GIT3_CALLBACK(git3_merge_driver_shutdown_fn)(git3_merge_driver *self);
 
 /**
  * Callback to perform the merge.
@@ -132,9 +132,9 @@ typedef void GIT_CALLBACK(git_merge_driver_shutdown_fn)(git_merge_driver *self);
  * merge.  If it can successfully perform a merge, it should populate
  * `path_out` with a pointer to the filename to accept, `mode_out` with
  * the resultant mode, and `merged_out` with the buffer of the merged file
- * and then return 0.  If the driver returns `GIT_PASSTHROUGH`, then the
+ * and then return 0.  If the driver returns `GIT3_PASSTHROUGH`, then the
  * default merge driver should instead be run.  It can also return
- * `GIT_EMERGECONFLICT` if the driver is not able to produce a merge result,
+ * `GIT3_EMERGECONFLICT` if the driver is not able to produce a merge result,
  * and the file will remain conflicted.  Any other errors will fail and
  * return to the caller.
  *
@@ -151,42 +151,42 @@ typedef void GIT_CALLBACK(git_merge_driver_shutdown_fn)(git_merge_driver *self);
  * @param src the data about the unmerged file
  * @return 0 on success, or an error code
  */
-typedef int GIT_CALLBACK(git_merge_driver_apply_fn)(
-	git_merge_driver *self,
+typedef int GIT3_CALLBACK(git3_merge_driver_apply_fn)(
+	git3_merge_driver *self,
 	const char **path_out,
 	uint32_t *mode_out,
-	git_buf *merged_out,
+	git3_buf *merged_out,
 	const char *filter_name,
-	const git_merge_driver_source *src);
+	const git3_merge_driver_source *src);
 
 /**
  * Merge driver structure used to register custom merge drivers.
  *
  * To associate extra data with a driver, allocate extra data and put the
- * `git_merge_driver` struct at the start of your data buffer, then cast
+ * `git3_merge_driver` struct at the start of your data buffer, then cast
  * the `self` pointer to your larger structure when your callback is invoked.
  */
-struct git_merge_driver {
-	/** The `version` should be set to `GIT_MERGE_DRIVER_VERSION`. */
+struct git3_merge_driver {
+	/** The `version` should be set to `GIT3_MERGE_DRIVER_VERSION`. */
 	unsigned int                 version;
 
 	/** Called when the merge driver is first used for any file. */
-	git_merge_driver_init_fn     initialize;
+	git3_merge_driver_init_fn     initialize;
 
 	/** Called when the merge driver is unregistered from the system. */
-	git_merge_driver_shutdown_fn shutdown;
+	git3_merge_driver_shutdown_fn shutdown;
 
 	/**
 	 * Called to merge the contents of a conflict.  If this function
-	 * returns `GIT_PASSTHROUGH` then the default (`text`) merge driver
+	 * returns `GIT3_PASSTHROUGH` then the default (`text`) merge driver
 	 * will instead be invoked.  If this function returns
-	 * `GIT_EMERGECONFLICT` then the file will remain conflicted.
+	 * `GIT3_EMERGECONFLICT` then the file will remain conflicted.
 	 */
-	git_merge_driver_apply_fn    apply;
+	git3_merge_driver_apply_fn    apply;
 };
 
-/** The version for the `git_merge_driver` */
-#define GIT_MERGE_DRIVER_VERSION 1
+/** The version for the `git3_merge_driver` */
+#define GIT3_MERGE_DRIVER_VERSION 1
 
 /**
  * Register a merge driver under a given name.
@@ -200,19 +200,19 @@ struct git_merge_driver {
  * shutdown).
  *
  * @param name The name of this driver to match an attribute.  Attempting
- * 			to register with an in-use name will return GIT_EEXISTS.
+ * 			to register with an in-use name will return GIT3_EEXISTS.
  * @param driver The merge driver definition.  This pointer will be stored
- *			as is by libgit2 so it must be a durable allocation (either
+ *			as is by libgit3 so it must be a durable allocation (either
  *			static or on the heap).
  * @return 0 on successful registry, error code <0 on failure
  */
-GIT_EXTERN(int) git_merge_driver_register(
-	const char *name, git_merge_driver *driver);
+GIT3_EXTERN(int) git3_merge_driver_register(
+	const char *name, git3_merge_driver *driver);
 
 /**
  * Remove the merge driver with the given name.
  *
- * Attempting to remove the builtin libgit2 merge drivers is not permitted
+ * Attempting to remove the builtin libgit3 merge drivers is not permitted
  * and will return an error.
  *
  * Currently the merge driver registry is not thread safe, so any
@@ -222,9 +222,9 @@ GIT_EXTERN(int) git_merge_driver_register(
  * @param name The name under which the merge driver was registered
  * @return 0 on success, error code <0 on failure
  */
-GIT_EXTERN(int) git_merge_driver_unregister(const char *name);
+GIT3_EXTERN(int) git3_merge_driver_unregister(const char *name);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "tag.h"
 
-static git_repository *g_repo;
+static git3_repository *g_repo;
 
 #define MAX_USED_TAGS 6
 
@@ -14,23 +14,23 @@ struct pattern_match_t
 };
 
 /* Helpers */
-static void ensure_tag_pattern_match(git_repository *repo,
+static void ensure_tag_pattern_match(git3_repository *repo,
 									 const struct pattern_match_t* data)
 {
 	int already_found[MAX_USED_TAGS] = { 0 };
-	git_strarray tag_list;
+	git3_strarray tag_list;
 	int error = 0;
 	size_t successfully_found = 0;
 	size_t i, j;
 
 	cl_assert(data->expected_matches <= MAX_USED_TAGS);
 
-	if ((error = git_tag_list_match(&tag_list, data->pattern, repo)) < 0)
+	if ((error = git3_tag_list_match(&tag_list, data->pattern, repo)) < 0)
 		goto exit;
 
 	if (tag_list.count != data->expected_matches)
 	{
-		error = GIT_ERROR;
+		error = GIT3_ERROR;
 		goto exit;
 	}
 
@@ -50,7 +50,7 @@ static void ensure_tag_pattern_match(git_repository *repo,
 	cl_assert_equal_i((int)successfully_found, (int)data->expected_matches);
 
 exit:
-	git_strarray_dispose(&tag_list);
+	git3_strarray_dispose(&tag_list);
 	cl_git_pass(error);
 }
 
@@ -68,13 +68,13 @@ void test_object_tag_list__cleanup(void)
 void test_object_tag_list__list_all(void)
 {
 	/* list all tag names from the repository */
-	git_strarray tag_list;
+	git3_strarray tag_list;
 
-	cl_git_pass(git_tag_list(&tag_list, g_repo));
+	cl_git_pass(git3_tag_list(&tag_list, g_repo));
 
 	cl_assert_equal_i((int)tag_list.count, 6);
 
-	git_strarray_dispose(&tag_list);
+	git3_strarray_dispose(&tag_list);
 }
 
 static const struct pattern_match_t matches[] = {

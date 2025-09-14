@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_filter_h__
@@ -13,7 +13,7 @@
 #include "buffer.h"
 
 /**
- * @file git2/filter.h
+ * @file git3/filter.h
  * @brief Filters modify files during checkout or commit
  * @ingroup Git
  *
@@ -25,7 +25,7 @@
  * `\r\n` line endings.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Filters are applied in one of two directions: smudging - which is
@@ -35,33 +35,33 @@ GIT_BEGIN_DECL
  * change is being applied.
  */
 typedef enum {
-	GIT_FILTER_TO_WORKTREE = 0,
-	GIT_FILTER_SMUDGE = GIT_FILTER_TO_WORKTREE,
-	GIT_FILTER_TO_ODB = 1,
-	GIT_FILTER_CLEAN = GIT_FILTER_TO_ODB
-} git_filter_mode_t;
+	GIT3_FILTER_TO_WORKTREE = 0,
+	GIT3_FILTER_SMUDGE = GIT3_FILTER_TO_WORKTREE,
+	GIT3_FILTER_TO_ODB = 1,
+	GIT3_FILTER_CLEAN = GIT3_FILTER_TO_ODB
+} git3_filter_mode_t;
 
 /**
  * Filter option flags.
  */
 typedef enum {
-	GIT_FILTER_DEFAULT = 0u,
+	GIT3_FILTER_DEFAULT = 0u,
 
 	/** Don't error for `safecrlf` violations, allow them to continue. */
-	GIT_FILTER_ALLOW_UNSAFE = (1u << 0),
+	GIT3_FILTER_ALLOW_UNSAFE = (1u << 0),
 
 	/** Don't load `/etc/gitattributes` (or the system equivalent) */
-	GIT_FILTER_NO_SYSTEM_ATTRIBUTES = (1u << 1),
+	GIT3_FILTER_NO_SYSTEM_ATTRIBUTES = (1u << 1),
 
 	/** Load attributes from `.gitattributes` in the root of HEAD */
-	GIT_FILTER_ATTRIBUTES_FROM_HEAD = (1u << 2),
+	GIT3_FILTER_ATTRIBUTES_FROM_HEAD = (1u << 2),
 
 	/**
 	 * Load attributes from `.gitattributes` in a given commit.
-	 * This can only be specified in a `git_filter_options`.
+	 * This can only be specified in a `git3_filter_options`.
 	 */
-	GIT_FILTER_ATTRIBUTES_FROM_COMMIT = (1u << 3)
-} git_filter_flag_t;
+	GIT3_FILTER_ATTRIBUTES_FROM_COMMIT = (1u << 3)
+} git3_filter_flag_t;
 
 /**
  * Filtering options
@@ -69,34 +69,34 @@ typedef enum {
 typedef struct {
 	unsigned int version;
 
-	/** See `git_filter_flag_t` above */
+	/** See `git3_filter_flag_t` above */
 	uint32_t flags;
 
-#ifdef GIT_DEPRECATE_HARD
+#ifdef GIT3_DEPRECATE_HARD
 	void *reserved;
 #else
-	git_oid *commit_id;
+	git3_oid *commit_id;
 #endif
 
 	/**
 	 * The commit to load attributes from, when
-	 * `GIT_FILTER_ATTRIBUTES_FROM_COMMIT` is specified.
+	 * `GIT3_FILTER_ATTRIBUTES_FROM_COMMIT` is specified.
 	 */
-	git_oid attr_commit_id;
-} git_filter_options;
+	git3_oid attr_commit_id;
+} git3_filter_options;
 
-/** Current version for the `git_filter_options` structure */
-#define GIT_FILTER_OPTIONS_VERSION 1
+/** Current version for the `git3_filter_options` structure */
+#define GIT3_FILTER_OPTIONS_VERSION 1
 
-/** Static constructor for `git_filter_options` */
-#define GIT_FILTER_OPTIONS_INIT {GIT_FILTER_OPTIONS_VERSION}
+/** Static constructor for `git3_filter_options` */
+#define GIT3_FILTER_OPTIONS_INIT {GIT3_FILTER_OPTIONS_VERSION}
 
 /**
  * A filter that can transform file data
  *
  * This represents a filter that can be used to transform or even replace
  * file data.  Libgit2 includes one built in filter and it is possible to
- * write your own (see git2/sys/filter.h for information on that).
+ * write your own (see git3/sys/filter.h for information on that).
  *
  * The two builtin filters are:
  *
@@ -106,7 +106,7 @@ typedef struct {
  * * "ident" which replaces "$Id$" in a blob with "$Id: <blob OID>$" upon
  *   checkout and replaced "$Id: <anything>$" with "$Id$" on checkin.
  */
-typedef struct git_filter git_filter;
+typedef struct git3_filter git3_filter;
 
 /**
  * List of filters to be applied
@@ -114,57 +114,57 @@ typedef struct git_filter git_filter;
  * This represents a list of filters to be applied to a file / blob.  You
  * can build the list with one call, apply it with another, and dispose it
  * with a third.  In typical usage, there are not many occasions where a
- * git_filter_list is needed directly since the library will generally
+ * git3_filter_list is needed directly since the library will generally
  * handle conversions for you, but it can be convenient to be able to
  * build and apply the list sometimes.
  */
-typedef struct git_filter_list git_filter_list;
+typedef struct git3_filter_list git3_filter_list;
 
 /**
  * Load the filter list for a given path.
  *
- * This will return 0 (success) but set the output git_filter_list to NULL
+ * This will return 0 (success) but set the output git3_filter_list to NULL
  * if no filters are requested for the given file.
  *
- * @param filters Output newly created git_filter_list (or NULL)
+ * @param filters Output newly created git3_filter_list (or NULL)
  * @param repo Repository object that contains `path`
  * @param blob The blob to which the filter will be applied (if known)
  * @param path Relative path of the file to be filtered
  * @param mode Filtering direction (WT->ODB or ODB->WT)
- * @param flags Combination of `git_filter_flag_t` flags
+ * @param flags Combination of `git3_filter_flag_t` flags
  * @return 0 on success (which could still return NULL if no filters are
  *         needed for the requested file), <0 on error
  */
-GIT_EXTERN(int) git_filter_list_load(
-	git_filter_list **filters,
-	git_repository *repo,
-	git_blob *blob, /* can be NULL */
+GIT3_EXTERN(int) git3_filter_list_load(
+	git3_filter_list **filters,
+	git3_repository *repo,
+	git3_blob *blob, /* can be NULL */
 	const char *path,
-	git_filter_mode_t mode,
+	git3_filter_mode_t mode,
 	uint32_t flags);
 
 /**
  * Load the filter list for a given path.
  *
- * This will return 0 (success) but set the output git_filter_list to NULL
+ * This will return 0 (success) but set the output git3_filter_list to NULL
  * if no filters are requested for the given file.
  *
- * @param filters Output newly created git_filter_list (or NULL)
+ * @param filters Output newly created git3_filter_list (or NULL)
  * @param repo Repository object that contains `path`
  * @param blob The blob to which the filter will be applied (if known)
  * @param path Relative path of the file to be filtered
  * @param mode Filtering direction (WT->ODB or ODB->WT)
- * @param opts The `git_filter_options` to use when loading filters
+ * @param opts The `git3_filter_options` to use when loading filters
  * @return 0 on success (which could still return NULL if no filters are
  *         needed for the requested file), <0 on error
  */
-GIT_EXTERN(int) git_filter_list_load_ext(
-	git_filter_list **filters,
-	git_repository *repo,
-	git_blob *blob,
+GIT3_EXTERN(int) git3_filter_list_load_ext(
+	git3_filter_list **filters,
+	git3_repository *repo,
+	git3_blob *blob,
 	const char *path,
-	git_filter_mode_t mode,
-	git_filter_options *opts);
+	git3_filter_mode_t mode,
+	git3_filter_options *opts);
 
 /**
  * Query the filter list to see if a given filter (by name) will run.
@@ -174,26 +174,26 @@ GIT_EXTERN(int) git_filter_list_load_ext(
  * This will return 0 if the given filter is not in the list, or 1 if
  * the filter will be applied.
  *
- * @param filters A loaded git_filter_list (or NULL)
+ * @param filters A loaded git3_filter_list (or NULL)
  * @param name The name of the filter to query
  * @return 1 if the filter is in the list, 0 otherwise
  */
-GIT_EXTERN(int) git_filter_list_contains(
-	git_filter_list *filters,
+GIT3_EXTERN(int) git3_filter_list_contains(
+	git3_filter_list *filters,
 	const char *name);
 
 /**
  * Apply filter list to a data buffer.
  *
  * @param out Buffer to store the result of the filtering
- * @param filters A loaded git_filter_list (or NULL)
+ * @param filters A loaded git3_filter_list (or NULL)
  * @param in Buffer containing the data to filter
  * @param in_len The length of the input buffer
  * @return 0 on success, an error code otherwise
  */
-GIT_EXTERN(int) git_filter_list_apply_to_buffer(
-	git_buf *out,
-	git_filter_list *filters,
+GIT3_EXTERN(int) git3_filter_list_apply_to_buffer(
+	git3_buf *out,
+	git3_filter_list *filters,
 	const char *in,
 	size_t in_len);
 
@@ -207,10 +207,10 @@ GIT_EXTERN(int) git_filter_list_apply_to_buffer(
  * taken as relative to the workdir
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_filter_list_apply_to_file(
-	git_buf *out,
-	git_filter_list *filters,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_filter_list_apply_to_file(
+	git3_buf *out,
+	git3_filter_list *filters,
+	git3_repository *repo,
 	const char *path);
 
 /**
@@ -221,10 +221,10 @@ GIT_EXTERN(int) git_filter_list_apply_to_file(
  * @param blob the blob to filter
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_filter_list_apply_to_blob(
-	git_buf *out,
-	git_filter_list *filters,
-	git_blob *blob);
+GIT3_EXTERN(int) git3_filter_list_apply_to_blob(
+	git3_buf *out,
+	git3_filter_list *filters,
+	git3_blob *blob);
 
 /**
  * Apply a filter list to an arbitrary buffer as a stream
@@ -235,11 +235,11 @@ GIT_EXTERN(int) git_filter_list_apply_to_blob(
  * @param target the stream into which the data will be written
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_filter_list_stream_buffer(
-	git_filter_list *filters,
+GIT3_EXTERN(int) git3_filter_list_stream_buffer(
+	git3_filter_list *filters,
 	const char *buffer,
 	size_t len,
-	git_writestream *target);
+	git3_writestream *target);
 
 /**
  * Apply a filter list to a file as a stream
@@ -251,11 +251,11 @@ GIT_EXTERN(int) git_filter_list_stream_buffer(
  * @param target the stream into which the data will be written
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_filter_list_stream_file(
-	git_filter_list *filters,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_filter_list_stream_file(
+	git3_filter_list *filters,
+	git3_repository *repo,
 	const char *path,
-	git_writestream *target);
+	git3_writestream *target);
 
 /**
  * Apply a filter list to a blob as a stream
@@ -265,19 +265,19 @@ GIT_EXTERN(int) git_filter_list_stream_file(
  * @param target the stream into which the data will be written
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_filter_list_stream_blob(
-	git_filter_list *filters,
-	git_blob *blob,
-	git_writestream *target);
+GIT3_EXTERN(int) git3_filter_list_stream_blob(
+	git3_filter_list *filters,
+	git3_blob *blob,
+	git3_writestream *target);
 
 /**
- * Free a git_filter_list
+ * Free a git3_filter_list
  *
- * @param filters A git_filter_list created by `git_filter_list_load`
+ * @param filters A git3_filter_list created by `git3_filter_list_load`
  */
-GIT_EXTERN(void) git_filter_list_free(git_filter_list *filters);
+GIT3_EXTERN(void) git3_filter_list_free(git3_filter_list *filters);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

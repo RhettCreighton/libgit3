@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -11,17 +11,17 @@ size_t strlen(const char *s);
 
 typedef struct va_list_str *va_list;
 
-typedef struct git_vector {
+typedef struct git3_vector {
 	void **contents;
 	size_t length;
-} git_vector;
+} git3_vector;
 
-typedef struct git_buf {
+typedef struct git3_buf {
 	char *ptr;
 	size_t asize, size;
-} git_buf;
+} git3_buf;
 
-int git_vector_insert(git_vector *v, void *element)
+int git3_vector_insert(git3_vector *v, void *element)
 {
 	if (!v)
 		__coverity_panic__();
@@ -34,12 +34,12 @@ int git_vector_insert(git_vector *v, void *element)
 	return 0;
 }
 
-int git_buf_len(const struct git_buf *buf)
+int git3_buf_len(const struct git3_buf *buf)
 {
 	return strlen(buf->ptr);
 }
 
-int git_buf_vprintf(git_buf *buf, const char *format, va_list ap)
+int git3_buf_vprintf(git3_buf *buf, const char *format, va_list ap)
 {
     char ch, *s;
     size_t len;
@@ -57,7 +57,7 @@ int git_buf_vprintf(git_buf *buf, const char *format, va_list ap)
     return 0;
 }
 
-int git_buf_put(git_buf *buf, const char *data, size_t len)
+int git3_buf_put(git3_buf *buf, const char *data, size_t len)
 {
     buf->ptr = __coverity_alloc__(buf->size + len + 1);
     memmove(buf->ptr + buf->size, data, len);
@@ -66,7 +66,7 @@ int git_buf_put(git_buf *buf, const char *data, size_t len)
     return 0;
 }
 
-int git_buf_set(git_buf *buf, const void *data, size_t len)
+int git3_buf_set(git3_buf *buf, const void *data, size_t len)
 {
     buf->ptr = __coverity_alloc__(len + 1);
     memmove(buf->ptr, data, len);

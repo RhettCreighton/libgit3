@@ -54,7 +54,7 @@ option(DEBUG_STRICT_OPEN       "Enable path validation in open"                 
 
 # Output options
 option(SONAME                  "Set the (SO)VERSION of the target"                      ON)
-   set(LIBGIT2_FILENAME        "git3" CACHE STRING "Name of the produced binary")
+   set(LIBGIT3_FILENAME        "git3" CACHE STRING "Name of the produced binary")
 option(DEPRECATE_HARD          "Do not include deprecated functions in the library"    OFF)
 
 # Compilation options
@@ -128,8 +128,8 @@ endif()
 # Export for people who use us as a dependency
 
 if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
-	set(LIBGIT2_DEPENDENCY_OBJECTS ${LIBGIT2_DEPENDENCY_OBJECTS} PARENT_SCOPE)
-	set(LIBGIT2_SYSTEM_LIBS ${LIBGIT2_SYSTEM_LIBS} PARENT_SCOPE)
+	set(LIBGIT3_DEPENDENCY_OBJECTS ${LIBGIT3_DEPENDENCY_OBJECTS} PARENT_SCOPE)
+	set(LIBGIT3_SYSTEM_LIBS ${LIBGIT3_SYSTEM_LIBS} PARENT_SCOPE)
 endif()
 
 

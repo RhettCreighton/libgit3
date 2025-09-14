@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_reader_h__
@@ -10,12 +10,12 @@
 #include "common.h"
 
 /* Returned when the workdir does not match the index */
-#define GIT_READER_MISMATCH	1
+#define GIT3_READER_MISMATCH	1
 
-typedef struct git_reader git_reader;
+typedef struct git3_reader git3_reader;
 
 /*
- * The `git_reader` structure is a generic interface for reading the
+ * The `git3_reader` structure is a generic interface for reading the
  * contents of a file by its name, and implementations are provided
  * for reading out of a tree, the index, and the working directory.
  *
@@ -24,13 +24,13 @@ typedef struct git_reader git_reader;
  * it's reading.  Callers should ensure that they do not use a
  * reader after disposing the underlying object that it reads.
  */
-struct git_reader {
-	int (*read)(git_str *out, git_oid *out_oid, git_filemode_t *mode, git_reader *reader, const char *filename);
+struct git3_reader {
+	int (*read)(git3_str *out, git3_oid *out_oid, git3_filemode_t *mode, git3_reader *reader, const char *filename);
 };
 
 /**
- * Create a `git_reader` that will allow random access to the given
- * tree.  Paths requested via `git_reader_read` will be rooted at this
+ * Create a `git3_reader` that will allow random access to the given
+ * tree.  Paths requested via `git3_reader_read` will be rooted at this
  * tree, callers are not expected to recurse through tree lookups.  Thus,
  * you can request to read `/src/foo.c` and the tree provided to this
  * function will be searched to find another tree named `src`, which
@@ -40,12 +40,12 @@ struct git_reader {
  * @param tree The tree object to read
  * @return 0 on success, or an error code < 0
  */
-extern int git_reader_for_tree(
-	git_reader **out,
-	git_tree *tree);
+extern int git3_reader_for_tree(
+	git3_reader **out,
+	git3_tree *tree);
 
 /**
- * Create a `git_reader` that will allow random access to the given
+ * Create a `git3_reader` that will allow random access to the given
  * index, or the repository's index.
  *
  * @param out The reader for the given index
@@ -53,13 +53,13 @@ extern int git_reader_for_tree(
  * @param index The index to read, or NULL to use the repository's index
  * @return 0 on success, or an error code < 0
  */
-extern int git_reader_for_index(
-	git_reader **out,
-	git_repository *repo,
-	git_index *index);
+extern int git3_reader_for_index(
+	git3_reader **out,
+	git3_repository *repo,
+	git3_index *index);
 
 /**
- * Create a `git_reader` that will allow random access to the given
+ * Create a `git3_reader` that will allow random access to the given
  * repository's working directory.  Note that the contents are read
  * in repository format, meaning any workdir -> odb filters are
  * applied.
@@ -76,9 +76,9 @@ extern int git_reader_for_index(
  *        the working directory is unmodified.
  * @return 0 on success, or an error code < 0
  */
-extern int git_reader_for_workdir(
-	git_reader **out,
-	git_repository *repo,
+extern int git3_reader_for_workdir(
+	git3_reader **out,
+	git3_repository *repo,
 	bool validate_index);
 
 /**
@@ -90,11 +90,11 @@ extern int git_reader_for_workdir(
  * @param reader The reader to read
  * @param filename The filename to read from the reader
  */
-extern int git_reader_read(
-	git_str *out,
-	git_oid *out_id,
-	git_filemode_t *out_filemode,
-	git_reader *reader,
+extern int git3_reader_read(
+	git3_str *out,
+	git3_oid *out_id,
+	git3_filemode_t *out_filemode,
+	git3_reader *reader,
 	const char *filename);
 
 /**
@@ -102,6 +102,6 @@ extern int git_reader_read(
  *
  * @param reader The reader to free
  */
-extern void git_reader_free(git_reader *reader);
+extern void git3_reader_free(git3_reader *reader);
 
 #endif

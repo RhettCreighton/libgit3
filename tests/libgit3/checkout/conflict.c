@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/sys/index.h"
 #include "futils.h"
 #include "repository.h"
 
-static git_repository *g_repo;
-static git_index *g_index;
+static git3_repository *g_repo;
+static git3_index *g_index;
 
 #define TEST_REPO_PATH "merge-resolve"
 
@@ -49,7 +49,7 @@ static git_index *g_index;
 
 struct checkout_index_entry {
 	uint16_t mode;
-	char oid_str[GIT_OID_SHA1_HEXSIZE+1];
+	char oid_str[GIT3_OID_SHA1_HEXSIZE+1];
 	int stage;
 	char path[128];
 };
@@ -62,55 +62,55 @@ struct checkout_name_entry {
 
 void test_checkout_conflict__initialize(void)
 {
-	git_config *cfg;
+	git3_config *cfg;
 
 	g_repo = cl_git_sandbox_init(TEST_REPO_PATH);
-	git_repository_index(&g_index, g_repo);
+	git3_repository_index(&g_index, g_repo);
 
 	cl_git_rewritefile(
 		TEST_REPO_PATH "/.gitattributes",
 		"* text eol=lf\n");
 
 	/* Ensure that the user's merge.conflictstyle doesn't interfere */
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_string(cfg, "merge.conflictstyle", "merge"));
-	git_config_free(cfg);
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_string(cfg, "merge.conflictstyle", "merge"));
+	git3_config_free(cfg);
 }
 
 void test_checkout_conflict__cleanup(void)
 {
-	git_index_free(g_index);
+	git3_index_free(g_index);
 	cl_git_sandbox_cleanup();
 }
 
 static void create_index(struct checkout_index_entry *entries, size_t entries_len)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 	size_t i;
 
 	for (i = 0; i < entries_len; i++) {
-		git_str_joinpath(&path, TEST_REPO_PATH, entries[i].path);
+		git3_str_joinpath(&path, TEST_REPO_PATH, entries[i].path);
 
 		if (entries[i].stage == 3 && (i == 0 || strcmp(entries[i-1].path, entries[i].path) != 0 || entries[i-1].stage != 2))
-			p_unlink(git_str_cstr(&path));
+			p_unlink(git3_str_cstr(&path));
 
-		cl_git_pass(git_index_remove_bypath(g_index, entries[i].path));
+		cl_git_pass(git3_index_remove_bypath(g_index, entries[i].path));
 	}
 
 	for (i = 0; i < entries_len; i++) {
-		git_index_entry entry;
+		git3_index_entry entry;
 
-		memset(&entry, 0x0, sizeof(git_index_entry));
+		memset(&entry, 0x0, sizeof(git3_index_entry));
 
 		entry.mode = entries[i].mode;
-		GIT_INDEX_ENTRY_STAGE_SET(&entry, entries[i].stage);
-		git_oid_from_string(&entry.id, entries[i].oid_str, GIT_OID_SHA1);
+		GIT3_INDEX_ENTRY_STAGE_SET(&entry, entries[i].stage);
+		git3_oid_from_string(&entry.id, entries[i].oid_str, GIT3_OID_SHA1);
 		entry.path = entries[i].path;
 
-		cl_git_pass(git_index_add(g_index, &entry));
+		cl_git_pass(git3_index_add(g_index, &entry));
 	}
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 static void create_index_names(struct checkout_name_entry *entries, size_t entries_len)
@@ -118,7 +118,7 @@ static void create_index_names(struct checkout_name_entry *entries, size_t entri
 	size_t i;
 
 	for (i = 0; i < entries_len; i++) {
-		cl_git_pass(git_index_name_add(g_index,
+		cl_git_pass(git3_index_name_add(g_index,
 			strlen(entries[i].ancestor) == 0 ? NULL : entries[i].ancestor,
 			strlen(entries[i].ours) == 0 ? NULL : entries[i].ours,
 			strlen(entries[i].theirs) == 0 ? NULL : entries[i].theirs));
@@ -134,48 +134,48 @@ static void create_conflicting_index(void)
 	};
 
 	create_index(checkout_index_entries, 3);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 }
 
 static void ensure_workdir_contents(const char *path, const char *contents)
 {
-	git_str fullpath = GIT_STR_INIT, data_buf = GIT_STR_INIT;
+	git3_str fullpath = GIT3_STR_INIT, data_buf = GIT3_STR_INIT;
 
 	cl_git_pass(
-		git_str_joinpath(&fullpath, git_repository_workdir(g_repo), path));
+		git3_str_joinpath(&fullpath, git3_repository_workdir(g_repo), path));
 
-	cl_git_pass(git_futils_readbuffer(&data_buf, git_str_cstr(&fullpath)));
-	cl_assert(strcmp(git_str_cstr(&data_buf), contents) == 0);
+	cl_git_pass(git3_futils_readbuffer(&data_buf, git3_str_cstr(&fullpath)));
+	cl_assert(strcmp(git3_str_cstr(&data_buf), contents) == 0);
 
-	git_str_dispose(&fullpath);
-	git_str_dispose(&data_buf);
+	git3_str_dispose(&fullpath);
+	git3_str_dispose(&data_buf);
 }
 
 static void ensure_workdir_oid(const char *path, const char *oid_str)
 {
-	git_oid expected, actual;
+	git3_oid expected, actual;
 
-	cl_git_pass(git_oid_from_string(&expected, oid_str, GIT_OID_SHA1));
-	cl_git_pass(git_repository_hashfile(&actual, g_repo, path, GIT_OBJECT_BLOB, NULL));
+	cl_git_pass(git3_oid_from_string(&expected, oid_str, GIT3_OID_SHA1));
+	cl_git_pass(git3_repository_hashfile(&actual, g_repo, path, GIT3_OBJECT_BLOB, NULL));
 	cl_assert_equal_oid(&expected, &actual);
 }
 
 static void ensure_workdir_mode(const char *path, int mode)
 {
-#ifdef GIT_WIN32
-	GIT_UNUSED(path);
-	GIT_UNUSED(mode);
+#ifdef GIT3_WIN32
+	GIT3_UNUSED(path);
+	GIT3_UNUSED(mode);
 #else
-	git_str fullpath = GIT_STR_INIT;
+	git3_str fullpath = GIT3_STR_INIT;
 	struct stat st;
 
 	cl_git_pass(
-		git_str_joinpath(&fullpath, git_repository_workdir(g_repo), path));
+		git3_str_joinpath(&fullpath, git3_repository_workdir(g_repo), path));
 
-	cl_git_pass(p_stat(git_str_cstr(&fullpath), &st));
+	cl_git_pass(p_stat(git3_str_cstr(&fullpath), &st));
 	cl_assert_equal_i((mode & S_IRWXU), (st.st_mode & S_IRWXU));
 
-	git_str_dispose(&fullpath);
+	git3_str_dispose(&fullpath);
 #endif
 }
 
@@ -186,72 +186,72 @@ static void ensure_workdir(const char *path, int mode, const char *oid_str)
 }
 
 static void ensure_workdir_link(
-	git_repository *repo,
+	git3_repository *repo,
 	const char *path,
 	const char *target)
 {
 	int symlinks;
 
-	cl_git_pass(git_repository__configmap_lookup(&symlinks, repo, GIT_CONFIGMAP_SYMLINKS));
+	cl_git_pass(git3_repository__configmap_lookup(&symlinks, repo, GIT3_CONFIGMAP_SYMLINKS));
 
 	if (!symlinks) {
 		ensure_workdir_contents(path, target);
 	} else {
-		git_str fullpath = GIT_STR_INIT;
+		git3_str fullpath = GIT3_STR_INIT;
 		char actual[1024];
 		struct stat st;
 		int len;
 
 		cl_git_pass(
-			git_str_joinpath(&fullpath, git_repository_workdir(g_repo), path));
+			git3_str_joinpath(&fullpath, git3_repository_workdir(g_repo), path));
 
-		cl_git_pass(p_lstat(git_str_cstr(&fullpath), &st));
+		cl_git_pass(p_lstat(git3_str_cstr(&fullpath), &st));
 		cl_assert(S_ISLNK(st.st_mode));
 
-		cl_assert((len = p_readlink(git_str_cstr(&fullpath), actual, 1024)) > 0);
+		cl_assert((len = p_readlink(git3_str_cstr(&fullpath), actual, 1024)) > 0);
 		actual[len] = '\0';
 		cl_assert(strcmp(actual, target) == 0);
 
-		git_str_dispose(&fullpath);
+		git3_str_dispose(&fullpath);
 	}
 }
 
 void test_checkout_conflict__ignored(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
-	opts.checkout_strategy |= GIT_CHECKOUT_SKIP_UNMERGED;
+	opts.checkout_strategy |= GIT3_CHECKOUT_SKIP_UNMERGED;
 
 	create_conflicting_index();
 	cl_git_pass(p_unlink(TEST_REPO_PATH "/conflicting.txt"));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
-	cl_assert(!git_fs_path_exists(TEST_REPO_PATH "/conflicting.txt"));
+	cl_assert(!git3_fs_path_exists(TEST_REPO_PATH "/conflicting.txt"));
 }
 
 void test_checkout_conflict__ours(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
-	opts.checkout_strategy |= GIT_CHECKOUT_USE_OURS;
+	opts.checkout_strategy |= GIT3_CHECKOUT_USE_OURS;
 
 	create_conflicting_index();
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("conflicting.txt", CONFLICTING_OURS_FILE);
 }
 
 void test_checkout_conflict__theirs(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
-	opts.checkout_strategy |= GIT_CHECKOUT_USE_THEIRS;
+	opts.checkout_strategy |= GIT3_CHECKOUT_USE_THEIRS;
 
 	create_conflicting_index();
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("conflicting.txt", CONFLICTING_THEIRS_FILE);
 
@@ -259,18 +259,18 @@ void test_checkout_conflict__theirs(void)
 
 void test_checkout_conflict__diff3(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	create_conflicting_index();
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("conflicting.txt", CONFLICTING_DIFF3_FILE);
 }
 
 void test_checkout_conflict__automerge(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, AUTOMERGEABLE_ANCESTOR_OID, 1, "automergeable.txt" },
@@ -279,16 +279,16 @@ void test_checkout_conflict__automerge(void)
 	};
 
 	create_index(checkout_index_entries, 3);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("automergeable.txt", AUTOMERGEABLE_MERGED_FILE);
 }
 
 void test_checkout_conflict__directory_file(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_ANCESTOR_OID, 1, "df-1" },
@@ -309,9 +309,9 @@ void test_checkout_conflict__directory_file(void)
 	};
 
 	create_index(checkout_index_entries, 12);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_oid("df-1/file", CONFLICTING_THEIRS_OID);
 	ensure_workdir_oid("df-1~ours", CONFLICTING_OURS_OID);
@@ -325,7 +325,7 @@ void test_checkout_conflict__directory_file(void)
 
 void test_checkout_conflict__directory_file_with_custom_labels(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_ANCESTOR_OID, 1, "df-1" },
@@ -349,9 +349,9 @@ void test_checkout_conflict__directory_file_with_custom_labels(void)
 	opts.their_label = "branch";
 
 	create_index(checkout_index_entries, 12);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_oid("df-1/file", CONFLICTING_THEIRS_OID);
 	ensure_workdir_oid("df-1~HEAD", CONFLICTING_OURS_OID);
@@ -365,7 +365,7 @@ void test_checkout_conflict__directory_file_with_custom_labels(void)
 
 void test_checkout_conflict__link_file(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_ANCESTOR_OID, 1, "link-1" },
@@ -386,9 +386,9 @@ void test_checkout_conflict__link_file(void)
 	};
 
 	create_index(checkout_index_entries, 12);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	/* Typechange conflicts always keep the file in the workdir */
 	ensure_workdir_oid("link-1", CONFLICTING_OURS_OID);
@@ -399,7 +399,7 @@ void test_checkout_conflict__link_file(void)
 
 void test_checkout_conflict__links(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0120000, LINK_ANCESTOR_OID, 1, "link-1" },
@@ -411,9 +411,9 @@ void test_checkout_conflict__links(void)
 	};
 
 	create_index(checkout_index_entries, 5);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	/* Conflicts with links always keep the ours side (even with -Xtheirs) */
 	ensure_workdir_link(g_repo, "link-1", LINK_OURS_TARGET);
@@ -422,7 +422,7 @@ void test_checkout_conflict__links(void)
 
 void test_checkout_conflict__add_add(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_OURS_OID, 2, "conflicting.txt" },
@@ -430,9 +430,9 @@ void test_checkout_conflict__add_add(void)
 	};
 
 	create_index(checkout_index_entries, 2);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	/* Add/add writes diff3 files */
 	ensure_workdir_contents("conflicting.txt", CONFLICTING_DIFF3_FILE);
@@ -440,7 +440,7 @@ void test_checkout_conflict__add_add(void)
 
 void test_checkout_conflict__mode_change(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_ANCESTOR_OID, 1, "executable-1" },
@@ -469,9 +469,9 @@ void test_checkout_conflict__mode_change(void)
 	};
 
 	create_index(checkout_index_entries, 18);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	/* Keep the modified mode */
 	ensure_workdir_oid("executable-1", CONFLICTING_THEIRS_OID);
@@ -495,7 +495,7 @@ void test_checkout_conflict__mode_change(void)
 
 void test_checkout_conflict__renames(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e", 0, "0a-no-change.txt" },
@@ -599,9 +599,9 @@ void test_checkout_conflict__renames(void)
 
 	create_index(checkout_index_entries, 41);
 	create_index_names(checkout_name_entries, 9);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir("0a-no-change.txt",
 		0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e");
@@ -678,7 +678,7 @@ void test_checkout_conflict__renames(void)
 
 void test_checkout_conflict__rename_keep_ours(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e", 0, "0a-no-change.txt" },
@@ -780,13 +780,13 @@ void test_checkout_conflict__rename_keep_ours(void)
 		}
 	};
 
-	opts.checkout_strategy |= GIT_CHECKOUT_USE_OURS;
+	opts.checkout_strategy |= GIT3_CHECKOUT_USE_OURS;
 
 	create_index(checkout_index_entries, 41);
 	create_index_names(checkout_name_entries, 9);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir("0a-no-change.txt",
 				   0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e");
@@ -845,7 +845,7 @@ void test_checkout_conflict__rename_keep_ours(void)
 
 void test_checkout_conflict__name_mangled_file_exists_in_workdir(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, "b42712cfe99a1a500b2a51fe984e0b8a7702ba11", 1, "test-one-side-one.txt" },
@@ -915,7 +915,7 @@ void test_checkout_conflict__name_mangled_file_exists_in_workdir(void)
 
 	create_index(checkout_index_entries, 24);
 	create_index_names(checkout_name_entries, 6);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
 	/* Add some files on disk that conflict with the names that would be chosen
 	 * for the files written for each side. */
@@ -952,7 +952,7 @@ void test_checkout_conflict__name_mangled_file_exists_in_workdir(void)
 	cl_git_rewritefile("merge-resolve/directory_file-two~theirs",
 		"Index contents written to ~theirs_0 in this D/F conflict");
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir("test-one.txt~ours_0",
 		0100644, "b42712cfe99a1a500b2a51fe984e0b8a7702ba11");
@@ -983,7 +983,7 @@ void test_checkout_conflict__name_mangled_file_exists_in_workdir(void)
 
 void test_checkout_conflict__update_only(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, AUTOMERGEABLE_ANCESTOR_OID, 1, "automergeable.txt" },
@@ -1002,35 +1002,35 @@ void test_checkout_conflict__update_only(void)
 		{ 0100644, CONFLICTING_THEIRS_OID, 3, "directory_file-two" },
 	};
 
-	opts.checkout_strategy |= GIT_CHECKOUT_UPDATE_ONLY;
+	opts.checkout_strategy |= GIT3_CHECKOUT_UPDATE_ONLY;
 
 	create_index(checkout_index_entries, 3);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
 	cl_git_pass(p_mkdir("merge-resolve/directory_file-two", 0777));
 	cl_git_rewritefile("merge-resolve/directory_file-two/file", CONFLICTING_OURS_FILE);
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("automergeable.txt", AUTOMERGEABLE_MERGED_FILE);
 	ensure_workdir("directory_file-two/file", 0100644, CONFLICTING_OURS_OID);
 
-	cl_assert(!git_fs_path_exists("merge-resolve/modify-delete"));
-	cl_assert(!git_fs_path_exists("merge-resolve/test-one.txt"));
-	cl_assert(!git_fs_path_exists("merge-resolve/test-one-side-one.txt"));
-	cl_assert(!git_fs_path_exists("merge-resolve/test-one-side-two.txt"));
-	cl_assert(!git_fs_path_exists("merge-resolve/test-one.txt~ours"));
-	cl_assert(!git_fs_path_exists("merge-resolve/test-one.txt~theirs"));
-	cl_assert(!git_fs_path_exists("merge-resolve/directory_file-one/file"));
-	cl_assert(!git_fs_path_exists("merge-resolve/directory_file-one~ours"));
-	cl_assert(!git_fs_path_exists("merge-resolve/directory_file-two~theirs"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/modify-delete"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/test-one.txt"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/test-one-side-one.txt"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/test-one-side-two.txt"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/test-one.txt~ours"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/test-one.txt~theirs"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/directory_file-one/file"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/directory_file-one~ours"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/directory_file-two~theirs"));
 }
 
 void test_checkout_conflict__path_filters(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 	char *paths[] = { "conflicting-1.txt", "conflicting-3.txt" };
-	git_strarray patharray = {0};
+	git3_strarray patharray = {0};
 
 	struct checkout_index_entry checkout_index_entries[] = {
 		{ 0100644, CONFLICTING_ANCESTOR_OID, 1, "conflicting-1.txt" },
@@ -1056,14 +1056,14 @@ void test_checkout_conflict__path_filters(void)
 	opts.paths = patharray;
 
 	create_index(checkout_index_entries, 12);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
 	ensure_workdir_contents("conflicting-1.txt", CONFLICTING_DIFF3_FILE);
-	cl_assert(!git_fs_path_exists("merge-resolve/conflicting-2.txt"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/conflicting-2.txt"));
 	ensure_workdir_contents("conflicting-3.txt", AUTOMERGEABLE_MERGED_FILE);
-	cl_assert(!git_fs_path_exists("merge-resolve/conflicting-4.txt"));
+	cl_assert(!git3_fs_path_exists("merge-resolve/conflicting-4.txt"));
 }
 
 static void collect_progress(
@@ -1072,21 +1072,21 @@ static void collect_progress(
 	size_t total_steps,
 	void *payload)
 {
-	git_vector *paths = payload;
+	git3_vector *paths = payload;
 
-	GIT_UNUSED(completed_steps);
-	GIT_UNUSED(total_steps);
+	GIT3_UNUSED(completed_steps);
+	GIT3_UNUSED(total_steps);
 
 	if (path == NULL)
 		return;
 
-	git_vector_insert(paths, git__strdup(path));
+	git3_vector_insert(paths, git3__strdup(path));
 }
 
 void test_checkout_conflict__report_progress(void)
 {
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_vector paths = GIT_VECTOR_INIT;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_vector paths = GIT3_VECTOR_INIT;
 	char *path;
 	size_t i;
 
@@ -1113,18 +1113,18 @@ void test_checkout_conflict__report_progress(void)
 
 
 	create_index(checkout_index_entries, 12);
-	cl_git_pass(git_index_write(g_index));
+	cl_git_pass(git3_index_write(g_index));
 
-	cl_git_pass(git_checkout_index(g_repo, g_index, &opts));
+	cl_git_pass(git3_checkout_index(g_repo, g_index, &opts));
 
-	cl_assert_equal_i(4, git_vector_length(&paths));
-	cl_assert_equal_s("conflicting-1.txt", git_vector_get(&paths, 0));
-	cl_assert_equal_s("conflicting-2.txt", git_vector_get(&paths, 1));
-	cl_assert_equal_s("conflicting-3.txt", git_vector_get(&paths, 2));
-	cl_assert_equal_s("conflicting-4.txt", git_vector_get(&paths, 3));
+	cl_assert_equal_i(4, git3_vector_length(&paths));
+	cl_assert_equal_s("conflicting-1.txt", git3_vector_get(&paths, 0));
+	cl_assert_equal_s("conflicting-2.txt", git3_vector_get(&paths, 1));
+	cl_assert_equal_s("conflicting-3.txt", git3_vector_get(&paths, 2));
+	cl_assert_equal_s("conflicting-4.txt", git3_vector_get(&paths, 3));
 
-	git_vector_foreach(&paths, i, path)
-		git__free(path);
+	git3_vector_foreach(&paths, i, path)
+		git3__free(path);
 
-	git_vector_dispose(&paths);
+	git3_vector_dispose(&paths);
 }

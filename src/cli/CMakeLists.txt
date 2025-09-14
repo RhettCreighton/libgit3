@@ -26,32 +26,32 @@ list(SORT CLI_SRC_C)
 #
 
 if(BUILD_CLI STREQUAL "dynamic")
-	set(CLI_LIBGIT2_LIBRARY libgit3package)
+	set(CLI_LIBGIT3_LIBRARY libgit3package)
 else()
-	set(CLI_LIBGIT2_OBJECTS $<TARGET_OBJECTS:libgit3>)
+	set(CLI_LIBGIT3_OBJECTS $<TARGET_OBJECTS:libgit3>)
 endif()
 
 #
 # Compile and link the CLI
 #
 
-add_executable(git2_cli ${CLI_SRC_C} ${CLI_SRC_OS} ${CLI_OBJECTS}
+add_executable(git3_cli ${CLI_SRC_C} ${CLI_SRC_OS} ${CLI_OBJECTS}
 	$<TARGET_OBJECTS:util>
-	${CLI_LIBGIT2_OBJECTS}
-	${LIBGIT2_DEPENDENCY_OBJECTS})
-target_link_libraries(git2_cli ${CLI_LIBGIT2_LIBRARY} ${LIBGIT2_SYSTEM_LIBS})
+	${CLI_LIBGIT3_OBJECTS}
+	${LIBGIT3_DEPENDENCY_OBJECTS})
+target_link_libraries(git3_cli ${CLI_LIBGIT3_LIBRARY} ${LIBGIT3_SYSTEM_LIBS})
 
-set_target_properties(git2_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit3_BINARY_DIR})
-set_target_properties(git2_cli PROPERTIES OUTPUT_NAME ${LIBGIT2_FILENAME})
+set_target_properties(git3_cli PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${libgit3_BINARY_DIR})
+set_target_properties(git3_cli PROPERTIES OUTPUT_NAME ${LIBGIT3_FILENAME})
 
-ide_split_sources(git2_cli)
+ide_split_sources(git3_cli)
 
-target_include_directories(git2_cli PRIVATE ${CLI_INCLUDES})
+target_include_directories(git3_cli PRIVATE ${CLI_INCLUDES})
 
 if(MSVC_IDE)
 	# Precompiled headers
-	set_target_properties(git2_cli PROPERTIES COMPILE_FLAGS "/Yuprecompiled.h /FIprecompiled.h")
+	set_target_properties(git3_cli PROPERTIES COMPILE_FLAGS "/Yuprecompiled.h /FIprecompiled.h")
 	set_source_files_properties(win32/precompiled.c COMPILE_FLAGS "/Ycprecompiled.h")
 endif()
 
-install(TARGETS git2_cli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS git3_cli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

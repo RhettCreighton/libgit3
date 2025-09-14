@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -20,24 +20,24 @@ struct info_names {
 };
 
 static const struct info_names buildinfo_names[] = {
-	{ GIT_BUILDINFO_CPU,          "cpu"               },
-	{ GIT_BUILDINFO_COMMIT,       "built from commit" },
+	{ GIT3_BUILDINFO_CPU,          "cpu"               },
+	{ GIT3_BUILDINFO_COMMIT,       "built from commit" },
 	{ 0, NULL }
 };
 
 static const struct info_names feature_names[] = {
-	{ GIT_FEATURE_SHA1,           "sha1"              },
-	{ GIT_FEATURE_SHA256,         "sha256"            },
-	{ GIT_FEATURE_THREADS,        "threads"           },
-	{ GIT_FEATURE_NSEC,           "nsec"              },
-	{ GIT_FEATURE_COMPRESSION,    "compression"       },
-	{ GIT_FEATURE_I18N,           "i18n"              },
-	{ GIT_FEATURE_REGEX,          "regex"             },
-	{ GIT_FEATURE_SSH,            "ssh"               },
-	{ GIT_FEATURE_HTTPS,          "https"             },
-	{ GIT_FEATURE_HTTP_PARSER,    "http_parser"       },
-	{ GIT_FEATURE_AUTH_NTLM,      "auth_ntlm"         },
-	{ GIT_FEATURE_AUTH_NEGOTIATE, "auth_negotiate"    },
+	{ GIT3_FEATURE_SHA1,           "sha1"              },
+	{ GIT3_FEATURE_SHA256,         "sha256"            },
+	{ GIT3_FEATURE_THREADS,        "threads"           },
+	{ GIT3_FEATURE_NSEC,           "nsec"              },
+	{ GIT3_FEATURE_COMPRESSION,    "compression"       },
+	{ GIT3_FEATURE_I18N,           "i18n"              },
+	{ GIT3_FEATURE_REGEX,          "regex"             },
+	{ GIT3_FEATURE_SSH,            "ssh"               },
+	{ GIT3_FEATURE_HTTPS,          "https"             },
+	{ GIT3_FEATURE_HTTP_PARSER,    "http_parser"       },
+	{ GIT3_FEATURE_AUTH_NTLM,      "auth_ntlm"         },
+	{ GIT3_FEATURE_AUTH_NEGOTIATE, "auth_negotiate"    },
 	{ 0, NULL }
 };
 
@@ -79,13 +79,13 @@ int cmd_version(int argc, char **argv)
 		return 0;
 	}
 
-	printf("%s version %s\n", PROGRAM_NAME, LIBGIT2_VERSION);
+	printf("%s version %s\n", PROGRAM_NAME, LIBGIT3_VERSION);
 
 	if (build_options) {
-		supported_features = git_libgit3_features();
+		supported_features = git3_libgit3_features();
 
 		for (i = buildinfo_names; i->key; i++) {
-			const char *value = git_libgit3_buildinfo(i->key);
+			const char *value = git3_libgit3_buildinfo(i->key);
 
 			if (value && *value)
 				printf("%s: %s\n", i->name, value);
@@ -98,7 +98,7 @@ int cmd_version(int argc, char **argv)
 			if (!(supported_features & i->key))
 				continue;
 
-			backend = git_libgit3_feature_backend(i->key);
+			backend = git3_libgit3_feature_backend(i->key);
 			printf("backend-%s: %s\n", i->name, backend);
 		}
 	}

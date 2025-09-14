@@ -182,7 +182,7 @@ int match_arg_separator(struct args_info *args)
 	return 1;
 }
 
-void strarray_from_args(git_strarray *array, struct args_info *args)
+void strarray_from_args(git3_strarray *array, struct args_info *args)
 {
 	size_t i;
 

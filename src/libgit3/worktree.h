@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_worktree_h__
@@ -12,7 +12,7 @@
 #include "git3/common.h"
 #include "git3/worktree.h"
 
-struct git_worktree {
+struct git3_worktree {
 	/* Name of the working tree. This is the name of the
 	 * containing directory in the `$PARENT/.git/worktrees/`
 	 * directory. */
@@ -34,6 +34,6 @@ struct git_worktree {
 	unsigned int locked:1;
 };
 
-char *git_worktree__read_link(const char *base, const char *file);
+char *git3_worktree__read_link(const char *base, const char *file);
 
 #endif

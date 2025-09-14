@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,16 +12,16 @@
 #include "git3.h"
 #include "auth.h"
 
-#ifdef GIT_AUTH_NEGOTIATE
+#ifdef GIT3_AUTH_NEGOTIATE
 
-extern int git_http_auth_negotiate(
-	git_http_auth_context **out,
-	const git_net_url *url);
+extern int git3_http_auth_negotiate(
+	git3_http_auth_context **out,
+	const git3_net_url *url);
 
 #else
 
-#define git_http_auth_negotiate git_http_auth_dummy
+#define git3_http_auth_negotiate git3_http_auth_dummy
 
-#endif /* GIT_AUTH_NEGOTIATE */
+#endif /* GIT3_AUTH_NEGOTIATE */
 
 #endif

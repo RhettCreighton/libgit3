@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -15,17 +15,17 @@
  * Windows path length, however win32 Unicode APIs generally allow up to 32,767
  * if prefixed with "\\?\" (i.e. converted to an NT-style name).
  */
-#define GIT_WIN_PATH_MAX GIT_PATH_MAX
+#define GIT3_WIN_PATH_MAX GIT3_PATH_MAX
 
 /*
  * Provides a large enough buffer to support Windows Git paths:
- * GIT_WIN_PATH_MAX is 4096, corresponding to a maximum path length of 4095
+ * GIT3_WIN_PATH_MAX is 4096, corresponding to a maximum path length of 4095
  * characters plus a NULL terminator.  Prefixing with "\\?\" adds 4 characters,
  * but if the original was a UNC path, then we turn "\\server\share" into
  * "\\?\UNC\server\share".  So we replace the first two characters with
- * 8 characters, a net gain of 6, so the maximum length is GIT_WIN_PATH_MAX+6.
+ * 8 characters, a net gain of 6, so the maximum length is GIT3_WIN_PATH_MAX+6.
  */
-#define GIT_WIN_PATH_UTF16		GIT_WIN_PATH_MAX+6
+#define GIT3_WIN_PATH_UTF16		GIT3_WIN_PATH_MAX+6
 
 /* Maximum size of a UTF-8 Win32 Git path.  We remove the "\\?\" or "\\?\UNC\"
  * prefixes for presentation, bringing us back to 4095 (non-NULL)
@@ -34,15 +34,15 @@
  * Two characters in the range U+0800 -> U+FFFF take up more space in UTF-8
  * (6 bytes) than one surrogate pair (4 bytes).
  */
-#define GIT_WIN_PATH_UTF8		((GIT_WIN_PATH_MAX - 1) * 3 + 1)
+#define GIT3_WIN_PATH_UTF8		((GIT3_WIN_PATH_MAX - 1) * 3 + 1)
 
 /*
  * The length of a Windows "shortname", for 8.3 compatibility.
  */
-#define GIT_WIN_PATH_SHORTNAME  13
+#define GIT3_WIN_PATH_SHORTNAME  13
 
 /* Win32 path types */
-typedef wchar_t git_win32_path[GIT_WIN_PATH_UTF16];
-typedef char git_win32_utf8_path[GIT_WIN_PATH_UTF8];
+typedef wchar_t git3_win32_path[GIT3_WIN_PATH_UTF16];
+typedef char git3_win32_utf8_path[GIT3_WIN_PATH_UTF8];
 
 #endif

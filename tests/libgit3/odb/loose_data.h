@@ -2,7 +2,7 @@ typedef struct object_data {
     unsigned char *bytes;  /* (compressed) bytes stored in object store */
     size_t        blen;    /* length of data in object store            */
     char          *id;     /* object id (hex chars)                     */
-    git_oid_t     id_type; /* type of object id (sha1 or sha256)        */
+    git3_oid_t     id_type; /* type of object id (sha1 or sha256)        */
     char          *type;   /* object type                               */
     char          *dir;    /* object store (fan-out) directory name     */
     char          *file;   /* object store filename                     */
@@ -27,7 +27,7 @@ static object_data one = {
     one_bytes,
     sizeof(one_bytes),
     "8b137891791fe96927ad78e64b0aad7bded08bdc",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "blob",
     "test-objects/8b",
     "test-objects/8b/137891791fe96927ad78e64b0aad7bded08bdc",
@@ -35,12 +35,12 @@ static object_data one = {
     sizeof(one_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data one_sha256 = {
     one_bytes,
     sizeof(one_bytes),
     "4c0d52d180c61d01ce1a91dec5ee58f0cbe65fd59433aea803ab927965493fd7",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "blob",
     "test-objects/4c",
     "test-objects/4c/0d52d180c61d01ce1a91dec5ee58f0cbe65fd59433aea803ab927965493fd7",
@@ -86,7 +86,7 @@ static unsigned char commit_bytes[] = {
     0x1f, 0x78, 0x35,
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static unsigned char commit_bytes_sha256[] = {
     0x78, 0x01, 0x85, 0x90, 0xc1, 0x4e, 0xc3, 0x30,
     0x0c, 0x86, 0x39, 0xe7, 0x29, 0x7c, 0x87, 0x4e,
@@ -170,7 +170,7 @@ static unsigned char commit_data[] = {
     0x3e, 0x0a,
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static unsigned char commit_data_sha256[] = {
     0x74, 0x72, 0x65, 0x65, 0x20, 0x33, 0x34, 0x61,
     0x34, 0x38, 0x35, 0x34, 0x62, 0x35, 0x34, 0x32,
@@ -227,7 +227,7 @@ static object_data commit = {
     commit_bytes,
     sizeof(commit_bytes),
     "3d7f8a6af076c8c3f20071a8935cdbe8228594d1",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "commit",
     "test-objects/3d",
     "test-objects/3d/7f8a6af076c8c3f20071a8935cdbe8228594d1",
@@ -235,12 +235,12 @@ static object_data commit = {
     sizeof(commit_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data commit_sha256 = {
     commit_bytes_sha256,
     sizeof(commit_bytes_sha256),
     "a2a430fb63b294f868af4ef6ccc9c3e8256e370859ce578a23837ac85337f562",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "commit",
     "test-objects/a2",
     "test-objects/a2/a430fb63b294f868af4ef6ccc9c3e8256e370859ce578a23837ac85337f562",
@@ -292,7 +292,7 @@ static unsigned char tree_data[] = {
     0xd8, 0xc2, 0xe4, 0x8c, 0x53, 0x91,
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static unsigned char tree_bytes_sha256[] = {
     0x78, 0x01, 0x2b, 0x29, 0x4a, 0x4d, 0x55, 0x30,
     0x32, 0x32, 0x66, 0x30, 0x34, 0x30, 0x30, 0x33,
@@ -361,7 +361,7 @@ static object_data tree = {
     tree_bytes,
     sizeof(tree_bytes),
     "dff2da90b254e1beb889d1f1f1288be1803782df",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "tree",
     "test-objects/df",
     "test-objects/df/f2da90b254e1beb889d1f1f1288be1803782df",
@@ -369,12 +369,12 @@ static object_data tree = {
     sizeof(tree_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data tree_sha256 = {
     tree_bytes_sha256,
     sizeof(tree_bytes_sha256),
     "34a4854b5426f92460b4ae35e6d79746be66c38bffd6ef3bc4f053ed78a36ba4",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "tree",
     "test-objects/34",
     "test-objects/34/a4854b5426f92460b4ae35e6d79746be66c38bffd6ef3bc4f053ed78a36ba4",
@@ -434,7 +434,7 @@ static unsigned char tag_data[] = {
     0x2e, 0x30, 0x2e, 0x31, 0x0a,
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static unsigned char tag_bytes_sha256[] = {
     0x78, 0x01, 0x55, 0x8f, 0xd1, 0x4e, 0x84, 0x30,
     0x10, 0x45, 0x7d, 0xee, 0x57, 0xcc, 0xbb, 0x2e,
@@ -528,7 +528,7 @@ static object_data tag = {
     tag_bytes,
     sizeof(tag_bytes),
     "09d373e1dfdc16b129ceec6dd649739911541e05",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "tag",
     "test-objects/09",
     "test-objects/09/d373e1dfdc16b129ceec6dd649739911541e05",
@@ -536,12 +536,12 @@ static object_data tag = {
     sizeof(tag_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data tag_sha256 = {
     tag_bytes_sha256,
     sizeof(tag_bytes_sha256),
     "f535d7595d5d0e5e530b5deb34542c96491fea300a1318036b605306548cb225",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "tag",
     "test-objects/f5",
     "test-objects/f5/35d7595d5d0e5e530b5deb34542c96491fea300a1318036b605306548cb225",
@@ -567,7 +567,7 @@ static object_data zero = {
     zero_bytes,
     sizeof(zero_bytes),
     "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "blob",
     "test-objects/e6",
     "test-objects/e6/9de29bb2d1d6434b8b29ae775ad8c2e48c5391",
@@ -575,12 +575,12 @@ static object_data zero = {
     0,
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data zero_sha256 = {
     zero_bytes,
     sizeof(zero_bytes),
     "473a0f4c3be8a93681a267e3b1e9a7dcda1185436fe141f7749120a303721813",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "blob",
     "test-objects/47",
     "test-objects/47/3a0f4c3be8a93681a267e3b1e9a7dcda1185436fe141f7749120a303721813",
@@ -607,7 +607,7 @@ static object_data two = {
     two_bytes,
     sizeof(two_bytes),
     "78981922613b2afb6025042ff6bd878ac1994e85",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "blob",
     "test-objects/78",
     "test-objects/78/981922613b2afb6025042ff6bd878ac1994e85",
@@ -615,12 +615,12 @@ static object_data two = {
     sizeof(two_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data two_sha256 = {
     two_bytes,
     sizeof(two_bytes),
     "f8625e43f9e04f24291f77cdbe4c71b3c2a3b0003f60419b3ed06a058d766c8b",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "blob",
     "test-objects/f8",
     "test-objects/f8/625e43f9e04f24291f77cdbe4c71b3c2a3b0003f60419b3ed06a058d766c8b",
@@ -870,7 +870,7 @@ static object_data some = {
     some_bytes,
     sizeof(some_bytes),
     "fd8430bc864cfcd5f10e5590f8a447e01b942bfe",
-    GIT_OID_SHA1,
+    GIT3_OID_SHA1,
     "blob",
     "test-objects/fd",
     "test-objects/fd/8430bc864cfcd5f10e5590f8a447e01b942bfe",
@@ -878,12 +878,12 @@ static object_data some = {
     sizeof(some_data),
 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static object_data some_sha256 = {
     some_bytes,
     sizeof(some_bytes),
     "083c2b8b445640d171e7aa667b0b32007006f786711032ebb82931cca69cc15b",
-    GIT_OID_SHA256,
+    GIT3_OID_SHA256,
     "blob",
     "test-objects/08",
     "test-objects/08/3c2b8b445640d171e7aa667b0b32007006f786711032ebb82931cca69cc15b",

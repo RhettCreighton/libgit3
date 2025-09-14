@@ -1,7 +1,7 @@
 /*
- * Utilities library for libgit2 examples
+ * Utilities library for libgit3 examples
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -22,13 +22,13 @@
 
 void check_lg2(int error, const char *message, const char *extra)
 {
-	const git_error *lg2err;
+	const git3_error *lg2err;
 	const char *lg2msg = "", *lg2spacer = "";
 
 	if (!error)
 		return;
 
-	if ((lg2err = git_error_last()) != NULL && lg2err->message != NULL) {
+	if ((lg2err = git3_error_last()) != NULL && lg2err->message != NULL) {
 		lg2msg = lg2err->message;
 		lg2spacer = " - ";
 	}
@@ -54,9 +54,9 @@ void fatal(const char *message, const char *extra)
 }
 
 int diff_output(
-	const git_diff_delta *d,
-	const git_diff_hunk *h,
-	const git_diff_line *l,
+	const git3_diff_delta *d,
+	const git3_diff_hunk *h,
+	const git3_diff_line *l,
 	void *p)
 {
 	FILE *fp = (FILE*)p;
@@ -66,9 +66,9 @@ int diff_output(
 	if (!fp)
 		fp = stdout;
 
-	if (l->origin == GIT_DIFF_LINE_CONTEXT ||
-		l->origin == GIT_DIFF_LINE_ADDITION ||
-		l->origin == GIT_DIFF_LINE_DELETION)
+	if (l->origin == GIT3_DIFF_LINE_CONTEXT ||
+		l->origin == GIT3_DIFF_LINE_ADDITION ||
+		l->origin == GIT3_DIFF_LINE_DELETION)
 		fputc(l->origin, fp);
 
 	fwrite(l->content, 1, l->content_len, fp);
@@ -77,19 +77,19 @@ int diff_output(
 }
 
 void treeish_to_tree(
-	git_tree **out, git_repository *repo, const char *treeish)
+	git3_tree **out, git3_repository *repo, const char *treeish)
 {
-	git_object *obj = NULL;
+	git3_object *obj = NULL;
 
 	check_lg2(
-		git_revparse_single(&obj, repo, treeish),
+		git3_revparse_single(&obj, repo, treeish),
 		"looking up object", treeish);
 
 	check_lg2(
-		git_object_peel((git_object **)out, obj, GIT_OBJECT_TREE),
+		git3_object_peel((git3_object **)out, obj, GIT3_OBJECT_TREE),
 		"resolving object to tree", treeish);
 
-	git_object_free(obj);
+	git3_object_free(obj);
 }
 
 void *xrealloc(void *oldp, size_t newsz)
@@ -102,25 +102,25 @@ void *xrealloc(void *oldp, size_t newsz)
 	return p;
 }
 
-int resolve_refish(git_annotated_commit **commit, git_repository *repo, const char *refish)
+int resolve_refish(git3_annotated_commit **commit, git3_repository *repo, const char *refish)
 {
-	git_reference *ref;
-	git_object *obj;
+	git3_reference *ref;
+	git3_object *obj;
 	int err = 0;
 
 	assert(commit != NULL);
 
-	err = git_reference_dwim(&ref, repo, refish);
-	if (err == GIT_OK) {
-		git_annotated_commit_from_ref(commit, repo, ref);
-		git_reference_free(ref);
+	err = git3_reference_dwim(&ref, repo, refish);
+	if (err == GIT3_OK) {
+		git3_annotated_commit_from_ref(commit, repo, ref);
+		git3_reference_free(ref);
 		return 0;
 	}
 
-	err = git_revparse_single(&obj, repo, refish);
-	if (err == GIT_OK) {
-		err = git_annotated_commit_lookup(commit, repo, git_object_id(obj));
-		git_object_free(obj);
+	err = git3_revparse_single(&obj, repo, refish);
+	if (err == GIT3_OK) {
+		err = git3_annotated_commit_lookup(commit, repo, git3_object_id(obj));
+		git3_object_free(obj);
 	}
 
 	return err;
@@ -176,7 +176,7 @@ static int ask(char **out, const char *prompt, char optional)
 	return 0;
 }
 
-int cred_acquire_cb(git_credential **out,
+int cred_acquire_cb(git3_credential **out,
 		const char *url,
 		const char *username_from_url,
 		unsigned int allowed_types,
@@ -195,7 +195,7 @@ int cred_acquire_cb(git_credential **out,
 		goto out;
 	}
 
-	if (allowed_types & GIT_CREDENTIAL_SSH_KEY) {
+	if (allowed_types & GIT3_CREDENTIAL_SSH_KEY) {
 		int n;
 
 		if ((error = ask(&privkey, "SSH Key:", 0)) < 0 ||
@@ -207,14 +207,14 @@ int cred_acquire_cb(git_credential **out,
 		    (n = snprintf(pubkey, n + 1, "%s.pub", privkey)) < 0)
 			goto out;
 
-		error = git_credential_ssh_key_new(out, username, pubkey, privkey, password);
-	} else if (allowed_types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
+		error = git3_credential_ssh_key_new(out, username, pubkey, privkey, password);
+	} else if (allowed_types & GIT3_CREDENTIAL_USERPASS_PLAINTEXT) {
 		if ((error = ask(&password, "Password:", 1)) < 0)
 			goto out;
 
-		error = git_credential_userpass_plaintext_new(out, username, password);
-	} else if (allowed_types & GIT_CREDENTIAL_USERNAME) {
-		error = git_credential_username_new(out, username);
+		error = git3_credential_userpass_plaintext_new(out, username, password);
+	} else if (allowed_types & GIT3_CREDENTIAL_USERNAME) {
+		error = git3_credential_username_new(out, username);
 	}
 
 out:

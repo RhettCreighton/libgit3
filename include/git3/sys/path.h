@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -11,16 +11,16 @@
 #include "git3/common.h"
 
 /**
- * @file git2/sys/path.h
+ * @file git3/sys/path.h
  * @brief Custom path handling
- * @defgroup git_path Custom path handling
+ * @defgroup git3_path Custom path handling
  * @ingroup Git
  *
  * Merge will take two commits and attempt to produce a commit that
  * includes the changes that were made in both branches.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * The kinds of git-specific files we know about.
@@ -30,12 +30,12 @@ GIT_BEGIN_DECL
  */
 typedef enum {
 	/** Check for the .gitignore file */
-	GIT_PATH_GITFILE_GITIGNORE,
+	GIT3_PATH_GITFILE_GITIGNORE,
 	/** Check for the .gitmodules file */
-	GIT_PATH_GITFILE_GITMODULES,
+	GIT3_PATH_GITFILE_GITMODULES,
 	/** Check for the .gitattributes file */
-	GIT_PATH_GITFILE_GITATTRIBUTES
-} git_path_gitfile;
+	GIT3_PATH_GITFILE_GITATTRIBUTES
+} git3_path_gitfile;
 
 /**
  * The kinds of checks to perform according to which filesystem we are trying to
@@ -43,12 +43,12 @@ typedef enum {
  */
 typedef enum {
 	/** Do both NTFS- and HFS-specific checks */
-	GIT_PATH_FS_GENERIC,
+	GIT3_PATH_FS_GENERIC,
 	/** Do NTFS-specific checks only */
-	GIT_PATH_FS_NTFS,
+	GIT3_PATH_FS_NTFS,
 	/** Do HFS-specific checks only */
-	GIT_PATH_FS_HFS
-} git_path_fs;
+	GIT3_PATH_FS_HFS
+} git3_path_fs;
 
 /**
  * Check whether a path component corresponds to a .git$SUFFIX
@@ -67,9 +67,9 @@ typedef enum {
  * @return 0 in case the file does not match, a positive value if
  *         it does; -1 in case of an error
  */
-GIT_EXTERN(int) git_path_is_gitfile(const char *path, size_t pathlen, git_path_gitfile gitfile, git_path_fs fs);
+GIT3_EXTERN(int) git3_path_is_gitfile(const char *path, size_t pathlen, git3_path_gitfile gitfile, git3_path_fs fs);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

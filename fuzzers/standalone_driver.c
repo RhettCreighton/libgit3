@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -15,30 +15,30 @@
 
 static int run_one_file(const char *filename)
 {
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 	int error = 0;
 
-	if (git_futils_readbuffer(&buf, filename) < 0) {
-		fprintf(stderr, "Failed to read %s: %s\n", filename, git_error_last()->message);
+	if (git3_futils_readbuffer(&buf, filename) < 0) {
+		fprintf(stderr, "Failed to read %s: %s\n", filename, git3_error_last()->message);
 		error = -1;
 		goto exit;
 	}
 
 	LLVMFuzzerTestOneInput((const unsigned char *)buf.ptr, buf.size);
 exit:
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 	return error;
 }
 
 int main(int argc, char **argv)
 {
-	git_vector corpus_files = GIT_VECTOR_INIT;
+	git3_vector corpus_files = GIT3_VECTOR_INIT;
 	char *filename = NULL;
 	unsigned i = 0;
 	int error = 0;
 
-	if (git_libgit3_init() < 0) {
-		fprintf(stderr, "Failed to initialize libgit2\n");
+	if (git3_libgit3_init() < 0) {
+		fprintf(stderr, "Failed to initialize libgit3\n");
 		abort();
 	}
 
@@ -51,13 +51,13 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Running %s against %s\n", argv[0], argv[1]);
 	LLVMFuzzerInitialize(&argc, &argv);
 
-	if (git_fs_path_dirload(&corpus_files, argv[1], 0, 0x0) < 0) {
+	if (git3_fs_path_dirload(&corpus_files, argv[1], 0, 0x0) < 0) {
 		fprintf(stderr, "Failed to scan corpus directory '%s': %s\n",
-			argv[1], git_error_last()->message);
+			argv[1], git3_error_last()->message);
 		error = -1;
 		goto exit;
 	}
-	git_vector_foreach(&corpus_files, i, filename) {
+	git3_vector_foreach(&corpus_files, i, filename) {
 		fprintf(stderr, "\tRunning %s...\n", filename);
 		if (run_one_file(filename) < 0) {
 			error = -1;
@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Done %d runs\n", i);
 
 exit:
-	git_vector_dispose_deep(&corpus_files);
-	git_libgit3_shutdown();
+	git3_vector_dispose_deep(&corpus_files);
+	git3_libgit3_shutdown();
 	return error;
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -18,252 +18,252 @@
 /* tree reader */
 
 typedef struct {
-	git_reader reader;
-	git_tree *tree;
+	git3_reader reader;
+	git3_tree *tree;
 } tree_reader;
 
 static int tree_reader_read(
-	git_str *out,
-	git_oid *out_id,
-	git_filemode_t *out_filemode,
-	git_reader *_reader,
+	git3_str *out,
+	git3_oid *out_id,
+	git3_filemode_t *out_filemode,
+	git3_reader *_reader,
 	const char *filename)
 {
 	tree_reader *reader = (tree_reader *)_reader;
-	git_tree_entry *tree_entry = NULL;
-	git_blob *blob = NULL;
-	git_object_size_t blobsize;
+	git3_tree_entry *tree_entry = NULL;
+	git3_blob *blob = NULL;
+	git3_object_size_t blobsize;
 	int error;
 
-	if ((error = git_tree_entry_bypath(&tree_entry, reader->tree, filename)) < 0 ||
-	    (error = git_blob_lookup(&blob, git_tree_owner(reader->tree), git_tree_entry_id(tree_entry))) < 0)
+	if ((error = git3_tree_entry_bypath(&tree_entry, reader->tree, filename)) < 0 ||
+	    (error = git3_blob_lookup(&blob, git3_tree_owner(reader->tree), git3_tree_entry_id(tree_entry))) < 0)
 		goto done;
 
-	blobsize = git_blob_rawsize(blob);
-	GIT_ERROR_CHECK_BLOBSIZE(blobsize);
+	blobsize = git3_blob_rawsize(blob);
+	GIT3_ERROR_CHECK_BLOBSIZE(blobsize);
 
-	if ((error = git_str_set(out, git_blob_rawcontent(blob), (size_t)blobsize)) < 0)
+	if ((error = git3_str_set(out, git3_blob_rawcontent(blob), (size_t)blobsize)) < 0)
 		goto done;
 
 	if (out_id)
-		git_oid_cpy(out_id, git_tree_entry_id(tree_entry));
+		git3_oid_cpy(out_id, git3_tree_entry_id(tree_entry));
 
 	if (out_filemode)
-		*out_filemode = git_tree_entry_filemode(tree_entry);
+		*out_filemode = git3_tree_entry_filemode(tree_entry);
 
 done:
-	git_blob_free(blob);
-	git_tree_entry_free(tree_entry);
+	git3_blob_free(blob);
+	git3_tree_entry_free(tree_entry);
 	return error;
 }
 
-int git_reader_for_tree(git_reader **out, git_tree *tree)
+int git3_reader_for_tree(git3_reader **out, git3_tree *tree)
 {
 	tree_reader *reader;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(tree);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(tree);
 
-	reader = git__calloc(1, sizeof(tree_reader));
-	GIT_ERROR_CHECK_ALLOC(reader);
+	reader = git3__calloc(1, sizeof(tree_reader));
+	GIT3_ERROR_CHECK_ALLOC(reader);
 
 	reader->reader.read = tree_reader_read;
 	reader->tree = tree;
 
-	*out = (git_reader *)reader;
+	*out = (git3_reader *)reader;
 	return 0;
 }
 
 /* workdir reader */
 
 typedef struct {
-	git_reader reader;
-	git_repository *repo;
-	git_index *index;
+	git3_reader reader;
+	git3_repository *repo;
+	git3_index *index;
 } workdir_reader;
 
 static int workdir_reader_read(
-	git_str *out,
-	git_oid *out_id,
-	git_filemode_t *out_filemode,
-	git_reader *_reader,
+	git3_str *out,
+	git3_oid *out_id,
+	git3_filemode_t *out_filemode,
+	git3_reader *_reader,
 	const char *filename)
 {
 	workdir_reader *reader = (workdir_reader *)_reader;
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 	struct stat st;
-	git_filemode_t filemode;
-	git_filter_list *filters = NULL;
-	const git_index_entry *idx_entry;
-	git_oid id;
+	git3_filemode_t filemode;
+	git3_filter_list *filters = NULL;
+	const git3_index_entry *idx_entry;
+	git3_oid id;
 	int error;
 
-	if ((error = git_repository_workdir_path(&path, reader->repo, filename)) < 0)
+	if ((error = git3_repository_workdir_path(&path, reader->repo, filename)) < 0)
 		goto done;
 
 	if ((error = p_lstat(path.ptr, &st)) < 0) {
 		if (error == -1 && errno == ENOENT)
-			error = GIT_ENOTFOUND;
+			error = GIT3_ENOTFOUND;
 
-		git_error_set(GIT_ERROR_OS, "could not stat '%s'", path.ptr);
+		git3_error_set(GIT3_ERROR_OS, "could not stat '%s'", path.ptr);
 		goto done;
 	}
 
-	filemode = git_futils_canonical_mode(st.st_mode);
+	filemode = git3_futils_canonical_mode(st.st_mode);
 
 	/*
 	 * Patch application - for example - uses the filtered version of
 	 * the working directory data to match git.  So we will run the
 	 * workdir -> ODB filter on the contents in this workdir reader.
 	 */
-	if ((error = git_filter_list_load(&filters, reader->repo, NULL, filename,
-		GIT_FILTER_TO_ODB, GIT_FILTER_DEFAULT)) < 0)
+	if ((error = git3_filter_list_load(&filters, reader->repo, NULL, filename,
+		GIT3_FILTER_TO_ODB, GIT3_FILTER_DEFAULT)) < 0)
 		goto done;
 
-	if ((error = git_filter_list__apply_to_file(out,
+	if ((error = git3_filter_list__apply_to_file(out,
 	    filters, reader->repo, path.ptr)) < 0)
 		goto done;
 
 	if (out_id || reader->index) {
-		if ((error = git_odb__hash(&id, out->ptr, out->size, GIT_OBJECT_BLOB, reader->repo->oid_type)) < 0)
+		if ((error = git3_odb__hash(&id, out->ptr, out->size, GIT3_OBJECT_BLOB, reader->repo->oid_type)) < 0)
 			goto done;
 	}
 
 	if (reader->index) {
-		if (!(idx_entry = git_index_get_bypath(reader->index, filename, 0)) ||
+		if (!(idx_entry = git3_index_get_bypath(reader->index, filename, 0)) ||
 		    filemode != idx_entry->mode ||
-		    !git_oid_equal(&id, &idx_entry->id)) {
-			error = GIT_READER_MISMATCH;
+		    !git3_oid_equal(&id, &idx_entry->id)) {
+			error = GIT3_READER_MISMATCH;
 			goto done;
 		}
 	}
 
 	if (out_id)
-		git_oid_cpy(out_id, &id);
+		git3_oid_cpy(out_id, &id);
 
 	if (out_filemode)
 		*out_filemode = filemode;
 
 done:
-	git_filter_list_free(filters);
-	git_str_dispose(&path);
+	git3_filter_list_free(filters);
+	git3_str_dispose(&path);
 	return error;
 }
 
-int git_reader_for_workdir(
-	git_reader **out,
-	git_repository *repo,
+int git3_reader_for_workdir(
+	git3_reader **out,
+	git3_repository *repo,
 	bool validate_index)
 {
 	workdir_reader *reader;
 	int error;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(repo);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(repo);
 
-	reader = git__calloc(1, sizeof(workdir_reader));
-	GIT_ERROR_CHECK_ALLOC(reader);
+	reader = git3__calloc(1, sizeof(workdir_reader));
+	GIT3_ERROR_CHECK_ALLOC(reader);
 
 	reader->reader.read = workdir_reader_read;
 	reader->repo = repo;
 
 	if (validate_index &&
-	    (error = git_repository_index__weakptr(&reader->index, repo)) < 0) {
-		git__free(reader);
+	    (error = git3_repository_index__weakptr(&reader->index, repo)) < 0) {
+		git3__free(reader);
 		return error;
 	}
 
-	*out = (git_reader *)reader;
+	*out = (git3_reader *)reader;
 	return 0;
 }
 
 /* index reader */
 
 typedef struct {
-	git_reader reader;
-	git_repository *repo;
-	git_index *index;
+	git3_reader reader;
+	git3_repository *repo;
+	git3_index *index;
 } index_reader;
 
 static int index_reader_read(
-	git_str *out,
-	git_oid *out_id,
-	git_filemode_t *out_filemode,
-	git_reader *_reader,
+	git3_str *out,
+	git3_oid *out_id,
+	git3_filemode_t *out_filemode,
+	git3_reader *_reader,
 	const char *filename)
 {
 	index_reader *reader = (index_reader *)_reader;
-	const git_index_entry *entry;
-	git_blob *blob;
+	const git3_index_entry *entry;
+	git3_blob *blob;
 	int error;
 
-	if ((entry = git_index_get_bypath(reader->index, filename, 0)) == NULL)
-		return GIT_ENOTFOUND;
+	if ((entry = git3_index_get_bypath(reader->index, filename, 0)) == NULL)
+		return GIT3_ENOTFOUND;
 
-	if ((error = git_blob_lookup(&blob, reader->repo, &entry->id)) < 0)
+	if ((error = git3_blob_lookup(&blob, reader->repo, &entry->id)) < 0)
 		goto done;
 
 	if (out_id)
-		git_oid_cpy(out_id, &entry->id);
+		git3_oid_cpy(out_id, &entry->id);
 
 	if (out_filemode)
 		*out_filemode = entry->mode;
 
-	error = git_blob__getbuf(out, blob);
+	error = git3_blob__getbuf(out, blob);
 
 done:
-	git_blob_free(blob);
+	git3_blob_free(blob);
 	return error;
 }
 
-int git_reader_for_index(
-	git_reader **out,
-	git_repository *repo,
-	git_index *index)
+int git3_reader_for_index(
+	git3_reader **out,
+	git3_repository *repo,
+	git3_index *index)
 {
 	index_reader *reader;
 	int error;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(repo);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(repo);
 
-	reader = git__calloc(1, sizeof(index_reader));
-	GIT_ERROR_CHECK_ALLOC(reader);
+	reader = git3__calloc(1, sizeof(index_reader));
+	GIT3_ERROR_CHECK_ALLOC(reader);
 
 	reader->reader.read = index_reader_read;
 	reader->repo = repo;
 
 	if (index) {
 		reader->index = index;
-	} else if ((error = git_repository_index__weakptr(&reader->index, repo)) < 0) {
-		git__free(reader);
+	} else if ((error = git3_repository_index__weakptr(&reader->index, repo)) < 0) {
+		git3__free(reader);
 		return error;
 	}
 
-	*out = (git_reader *)reader;
+	*out = (git3_reader *)reader;
 	return 0;
 }
 
 /* generic */
 
-int git_reader_read(
-	git_str *out,
-	git_oid *out_id,
-	git_filemode_t *out_filemode,
-	git_reader *reader,
+int git3_reader_read(
+	git3_str *out,
+	git3_oid *out_id,
+	git3_filemode_t *out_filemode,
+	git3_reader *reader,
 	const char *filename)
 {
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(reader);
-	GIT_ASSERT_ARG(filename);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(reader);
+	GIT3_ASSERT_ARG(filename);
 
 	return reader->read(out, out_id, out_filemode, reader, filename);
 }
 
-void git_reader_free(git_reader *reader)
+void git3_reader_free(git3_reader *reader)
 {
 	if (!reader)
 		return;
 
-	git__free(reader);
+	git3__free(reader);
 }

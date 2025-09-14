@@ -19,19 +19,19 @@ endif()
 #
 
 if(DEBUG_POOL)
-	set(GIT_DEBUG_POOL 1)
+	set(GIT3_DEBUG_POOL 1)
 endif()
-add_feature_info("Debug pool" GIT_DEBUG_POOL "debug-mode struct pool allocators")
+add_feature_info("Debug pool" GIT3_DEBUG_POOL "debug-mode struct pool allocators")
 
 if(DEBUG_STRICT_ALLOC)
-	set(GIT_DEBUG_STRICT_ALLOC 1)
+	set(GIT3_DEBUG_STRICT_ALLOC 1)
 endif()
-add_feature_info("Debug alloc" GIT_DEBUG_STRICT_ALLOC "debug-mode strict allocators")
+add_feature_info("Debug alloc" GIT3_DEBUG_STRICT_ALLOC "debug-mode strict allocators")
 
 if(DEBUG_STRICT_OPEN)
-	set(GIT_DEBUG_STRICT_OPEN 1)
+	set(GIT3_DEBUG_STRICT_OPEN 1)
 endif()
-add_feature_info("Debug open" GIT_DEBUG_STRICT_OPEN "strict path validation in open")
+add_feature_info("Debug open" GIT3_DEBUG_STRICT_OPEN "strict path validation in open")
 
 #
 # Optional feature enablement
@@ -57,7 +57,7 @@ include(SelectAuthNegotiate)
 # futimes/futimens
 
 if(HAVE_FUTIMENS)
-	set(GIT_FUTIMENS 1)
+	set(GIT3_FUTIMENS 1)
 endif()
 
 # qsort
@@ -66,46 +66,46 @@ endif()
 # of the comparison function:
 check_prototype_definition_safe(qsort_r
 	"void (qsort_r)(void *base, size_t nmemb, size_t size, void *context, int (*compar)(void *, const void *, const void *))"
-	"" "stdlib.h" GIT_QSORT_BSD)
+	"" "stdlib.h" GIT3_QSORT_BSD)
 
 # GNU or POSIX qsort_r() has the 'context' parameter as the last argument of the
 # comparison function:
 check_prototype_definition_safe(qsort_r
 	"void (qsort_r)(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *, void *), void *context)"
-	"" "stdlib.h" GIT_QSORT_GNU)
+	"" "stdlib.h" GIT3_QSORT_GNU)
 
 # C11 qsort_s() has the 'context' parameter as the last argument of the
 # comparison function, and returns an error status:
 check_prototype_definition_safe(qsort_s
 	"errno_t (qsort_s)(void *base, rsize_t nmemb, rsize_t size, int (*compar)(const void *, const void *, void *), void *context)"
-	"0" "stdlib.h" GIT_QSORT_C11)
+	"0" "stdlib.h" GIT3_QSORT_C11)
 
 # MSC qsort_s() has the 'context' parameter as the first argument of the
 # comparison function, and as the last argument of qsort_s():
 check_prototype_definition_safe(qsort_s
 	"void (qsort_s)(void *base, size_t num, size_t width, int (*compare )(void *, const void *, const void *), void *context)"
-	"" "stdlib.h" GIT_QSORT_MSC)
+	"" "stdlib.h" GIT3_QSORT_MSC)
 
 # random / entropy data
 
-check_symbol_exists(getentropy unistd.h GIT_RAND_GETENTROPY)
-check_symbol_exists(getloadavg stdlib.h GIT_RAND_GETLOADAVG)
+check_symbol_exists(getentropy unistd.h GIT3_RAND_GETENTROPY)
+check_symbol_exists(getloadavg stdlib.h GIT3_RAND_GETLOADAVG)
 
 # poll
 
 if(WIN32)
-	set(GIT_IO_WSAPOLL 1)
+	set(GIT3_IO_WSAPOLL 1)
 else()
-	check_symbol_exists(poll poll.h GIT_IO_POLL)
-	check_symbol_exists(select sys/select.h GIT_IO_SELECT)
+	check_symbol_exists(poll poll.h GIT3_IO_POLL)
+	check_symbol_exists(select sys/select.h GIT3_IO_SELECT)
 endif()
 
 # determine architecture of the machine
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-	set(GIT_ARCH_64 1)
+	set(GIT3_ARCH_64 1)
 elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-	set(GIT_ARCH_32 1)
+	set(GIT3_ARCH_32 1)
 elseif(CMAKE_SIZEOF_VOID_P)
 	message(FATAL_ERROR "Unsupported architecture (pointer size is ${CMAKE_SIZEOF_VOID_P} bytes)")
 else()
@@ -117,25 +117,25 @@ endif()
 check_library_exists(rt clock_gettime "time.h" NEED_LIBRT)
 
 if(NEED_LIBRT AND NOT CMAKE_SYSTEM_NAME MATCHES "iOS")
-	list(APPEND LIBGIT2_SYSTEM_LIBS rt)
-	list(APPEND LIBGIT2_PC_LIBS "-lrt")
+	list(APPEND LIBGIT3_SYSTEM_LIBS rt)
+	list(APPEND LIBGIT3_PC_LIBS "-lrt")
 endif()
 
 # platform libraries
 
 if(WIN32)
-	list(APPEND LIBGIT2_SYSTEM_LIBS "ws2_32" "secur32")
-	list(APPEND LIBGIT2_PC_LIBS "-lws2_32" "-lsecur32")
+	list(APPEND LIBGIT3_SYSTEM_LIBS "ws2_32" "secur32")
+	list(APPEND LIBGIT3_PC_LIBS "-lws2_32" "-lsecur32")
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "(Solaris|SunOS)")
-	list(APPEND LIBGIT2_SYSTEM_LIBS socket nsl)
-	list(APPEND LIBGIT2_PC_LIBS "-lsocket" "-lnsl")
+	list(APPEND LIBGIT3_SYSTEM_LIBS socket nsl)
+	list(APPEND LIBGIT3_PC_LIBS "-lsocket" "-lnsl")
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Haiku")
-	list(APPEND LIBGIT2_SYSTEM_LIBS gnu network)
-	list(APPEND LIBGIT2_PC_LIBS "-lgnu -lnetwork")
+	list(APPEND LIBGIT3_SYSTEM_LIBS gnu network)
+	list(APPEND LIBGIT3_PC_LIBS "-lgnu -lnetwork")
 endif()
 
 if(AMIGA)
@@ -146,9 +146,9 @@ endif()
 # Set build time information
 #
 
-set(GIT_BUILD_CPU "${CMAKE_SYSTEM_PROCESSOR}")
+set(GIT3_BUILD_CPU "${CMAKE_SYSTEM_PROCESSOR}")
 execute_process(COMMAND git rev-parse HEAD
-	OUTPUT_VARIABLE GIT_BUILD_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE)
+	OUTPUT_VARIABLE GIT3_BUILD_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 #
 # Include child projects

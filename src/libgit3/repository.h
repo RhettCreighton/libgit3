@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_repository_h__
@@ -28,35 +28,35 @@
 #include "grafts.h"
 
 #define DOT_GIT ".git3"
-#define GIT_DIR DOT_GIT "/"
-#define GIT_DIR_MODE 0755
-#define GIT_BARE_DIR_MODE 0777
+#define GIT3_DIR DOT_GIT "/"
+#define GIT3_DIR_MODE 0755
+#define GIT3_BARE_DIR_MODE 0777
 
 /* Default DOS-compatible 8.3 "short name" for a git repository, "GIT~1" */
-#define GIT_DIR_SHORTNAME "GIT~1"
+#define GIT3_DIR_SHORTNAME "GIT~1"
 
-extern bool git_repository__fsync_gitdir;
-extern bool git_repository__validate_ownership;
+extern bool git3_repository__fsync_gitdir;
+extern bool git3_repository__validate_ownership;
 
 /** Cvar cache identifiers */
 typedef enum {
-	GIT_CONFIGMAP_AUTO_CRLF = 0,    /* core.autocrlf */
-	GIT_CONFIGMAP_EOL,              /* core.eol */
-	GIT_CONFIGMAP_SYMLINKS,         /* core.symlinks */
-	GIT_CONFIGMAP_IGNORECASE,       /* core.ignorecase */
-	GIT_CONFIGMAP_FILEMODE,         /* core.filemode */
-	GIT_CONFIGMAP_IGNORESTAT,       /* core.ignorestat */
-	GIT_CONFIGMAP_TRUSTCTIME,       /* core.trustctime */
-	GIT_CONFIGMAP_ABBREV,           /* core.abbrev */
-	GIT_CONFIGMAP_PRECOMPOSE,       /* core.precomposeunicode */
-	GIT_CONFIGMAP_SAFE_CRLF,		/* core.safecrlf */
-	GIT_CONFIGMAP_LOGALLREFUPDATES, /* core.logallrefupdates */
-	GIT_CONFIGMAP_PROTECTHFS,       /* core.protectHFS */
-	GIT_CONFIGMAP_PROTECTNTFS,      /* core.protectNTFS */
-	GIT_CONFIGMAP_FSYNCOBJECTFILES, /* core.fsyncObjectFiles */
-	GIT_CONFIGMAP_LONGPATHS,        /* core.longpaths */
-	GIT_CONFIGMAP_CACHE_MAX
-} git_configmap_item;
+	GIT3_CONFIGMAP_AUTO_CRLF = 0,    /* core.autocrlf */
+	GIT3_CONFIGMAP_EOL,              /* core.eol */
+	GIT3_CONFIGMAP_SYMLINKS,         /* core.symlinks */
+	GIT3_CONFIGMAP_IGNORECASE,       /* core.ignorecase */
+	GIT3_CONFIGMAP_FILEMODE,         /* core.filemode */
+	GIT3_CONFIGMAP_IGNORESTAT,       /* core.ignorestat */
+	GIT3_CONFIGMAP_TRUSTCTIME,       /* core.trustctime */
+	GIT3_CONFIGMAP_ABBREV,           /* core.abbrev */
+	GIT3_CONFIGMAP_PRECOMPOSE,       /* core.precomposeunicode */
+	GIT3_CONFIGMAP_SAFE_CRLF,		/* core.safecrlf */
+	GIT3_CONFIGMAP_LOGALLREFUPDATES, /* core.logallrefupdates */
+	GIT3_CONFIGMAP_PROTECTHFS,       /* core.protectHFS */
+	GIT3_CONFIGMAP_PROTECTNTFS,      /* core.protectNTFS */
+	GIT3_CONFIGMAP_FSYNCOBJECTFILES, /* core.fsyncObjectFiles */
+	GIT3_CONFIGMAP_LONGPATHS,        /* core.longpaths */
+	GIT3_CONFIGMAP_CACHE_MAX
+} git3_configmap_item;
 
 /**
  * Configuration map value enumerations
@@ -68,81 +68,81 @@ typedef enum {
  */
 typedef enum {
 	/* The value hasn't been loaded from the cache yet */
-	GIT_CONFIGMAP_NOT_CACHED = -1,
+	GIT3_CONFIGMAP_NOT_CACHED = -1,
 
 	/* core.safecrlf: false, 'fail', 'warn' */
-	GIT_SAFE_CRLF_FALSE = 0,
-	GIT_SAFE_CRLF_FAIL = 1,
-	GIT_SAFE_CRLF_WARN = 2,
+	GIT3_SAFE_CRLF_FALSE = 0,
+	GIT3_SAFE_CRLF_FAIL = 1,
+	GIT3_SAFE_CRLF_WARN = 2,
 
 	/* core.autocrlf: false, true, 'input; */
-	GIT_AUTO_CRLF_FALSE = 0,
-	GIT_AUTO_CRLF_TRUE = 1,
-	GIT_AUTO_CRLF_INPUT = 2,
-	GIT_AUTO_CRLF_DEFAULT = GIT_AUTO_CRLF_FALSE,
+	GIT3_AUTO_CRLF_FALSE = 0,
+	GIT3_AUTO_CRLF_TRUE = 1,
+	GIT3_AUTO_CRLF_INPUT = 2,
+	GIT3_AUTO_CRLF_DEFAULT = GIT3_AUTO_CRLF_FALSE,
 
 	/* core.eol: unset, 'crlf', 'lf', 'native' */
-	GIT_EOL_UNSET = 0,
-	GIT_EOL_CRLF = 1,
-	GIT_EOL_LF = 2,
-#ifdef GIT_WIN32
-	GIT_EOL_NATIVE = GIT_EOL_CRLF,
+	GIT3_EOL_UNSET = 0,
+	GIT3_EOL_CRLF = 1,
+	GIT3_EOL_LF = 2,
+#ifdef GIT3_WIN32
+	GIT3_EOL_NATIVE = GIT3_EOL_CRLF,
 #else
-	GIT_EOL_NATIVE = GIT_EOL_LF,
+	GIT3_EOL_NATIVE = GIT3_EOL_LF,
 #endif
-	GIT_EOL_DEFAULT = GIT_EOL_NATIVE,
+	GIT3_EOL_DEFAULT = GIT3_EOL_NATIVE,
 
 	/* core.symlinks: bool */
-	GIT_SYMLINKS_DEFAULT = GIT_CONFIGMAP_TRUE,
+	GIT3_SYMLINKS_DEFAULT = GIT3_CONFIGMAP_TRUE,
 	/* core.ignorecase */
-	GIT_IGNORECASE_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_IGNORECASE_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.filemode */
-	GIT_FILEMODE_DEFAULT = GIT_CONFIGMAP_TRUE,
+	GIT3_FILEMODE_DEFAULT = GIT3_CONFIGMAP_TRUE,
 	/* core.ignorestat */
-	GIT_IGNORESTAT_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_IGNORESTAT_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.trustctime */
-	GIT_TRUSTCTIME_DEFAULT = GIT_CONFIGMAP_TRUE,
+	GIT3_TRUSTCTIME_DEFAULT = GIT3_CONFIGMAP_TRUE,
 	/* core.abbrev */
-	GIT_ABBREV_FALSE = GIT_OID_MAX_HEXSIZE,
-	GIT_ABBREV_MINIMUM = 4,
-	GIT_ABBREV_DEFAULT = 7,
+	GIT3_ABBREV_FALSE = GIT3_OID_MAX_HEXSIZE,
+	GIT3_ABBREV_MINIMUM = 4,
+	GIT3_ABBREV_DEFAULT = 7,
 	/* core.precomposeunicode */
-	GIT_PRECOMPOSE_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_PRECOMPOSE_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.safecrlf */
-	GIT_SAFE_CRLF_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_SAFE_CRLF_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.logallrefupdates */
-	GIT_LOGALLREFUPDATES_FALSE = GIT_CONFIGMAP_FALSE,
-	GIT_LOGALLREFUPDATES_TRUE = GIT_CONFIGMAP_TRUE,
-	GIT_LOGALLREFUPDATES_UNSET = 2,
-	GIT_LOGALLREFUPDATES_ALWAYS = 3,
-	GIT_LOGALLREFUPDATES_DEFAULT = GIT_LOGALLREFUPDATES_UNSET,
+	GIT3_LOGALLREFUPDATES_FALSE = GIT3_CONFIGMAP_FALSE,
+	GIT3_LOGALLREFUPDATES_TRUE = GIT3_CONFIGMAP_TRUE,
+	GIT3_LOGALLREFUPDATES_UNSET = 2,
+	GIT3_LOGALLREFUPDATES_ALWAYS = 3,
+	GIT3_LOGALLREFUPDATES_DEFAULT = GIT3_LOGALLREFUPDATES_UNSET,
 	/* core.protectHFS */
-	GIT_PROTECTHFS_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_PROTECTHFS_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.protectNTFS */
-	GIT_PROTECTNTFS_DEFAULT = GIT_CONFIGMAP_TRUE,
+	GIT3_PROTECTNTFS_DEFAULT = GIT3_CONFIGMAP_TRUE,
 	/* core.fsyncObjectFiles */
-	GIT_FSYNCOBJECTFILES_DEFAULT = GIT_CONFIGMAP_FALSE,
+	GIT3_FSYNCOBJECTFILES_DEFAULT = GIT3_CONFIGMAP_FALSE,
 	/* core.longpaths */
-	GIT_LONGPATHS_DEFAULT = GIT_CONFIGMAP_FALSE
-} git_configmap_value;
+	GIT3_LONGPATHS_DEFAULT = GIT3_CONFIGMAP_FALSE
+} git3_configmap_value;
 
 /* internal repository init flags */
 enum {
-	GIT_REPOSITORY_INIT__HAS_DOTGIT = (1u << 16),
-	GIT_REPOSITORY_INIT__NATURAL_WD = (1u << 17),
-	GIT_REPOSITORY_INIT__IS_REINIT  = (1u << 18)
+	GIT3_REPOSITORY_INIT__HAS_DOTGIT = (1u << 16),
+	GIT3_REPOSITORY_INIT__NATURAL_WD = (1u << 17),
+	GIT3_REPOSITORY_INIT__IS_REINIT  = (1u << 18)
 };
 
 /** Internal structure for repository object */
-struct git_repository {
-	git_odb *_odb;
-	git_refdb *_refdb;
-	git_config *_config;
-	git_index *_index;
+struct git3_repository {
+	git3_odb *_odb;
+	git3_refdb *_refdb;
+	git3_config *_config;
+	git3_index *_index;
 
-	git_cache objects;
-	git_attr_cache *attrcache;
-	git_diff_driver_registry *diff_drivers;
+	git3_cache objects;
+	git3_attr_cache *attrcache;
+	git3_diff_driver_registry *diff_drivers;
 
 	char *gitlink;
 	char *gitdir;
@@ -153,37 +153,37 @@ struct git_repository {
 	char *ident_name;
 	char *ident_email;
 
-	git_array_t(git_str) reserved_names;
+	git3_array_t(git3_str) reserved_names;
 
 	unsigned use_env:1,
 	         is_bare:1,
 	         is_worktree:1;
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 
 	unsigned int lru_counter;
 
-	git_grafts *grafts;
-	git_grafts *shallow_grafts;
+	git3_grafts *grafts;
+	git3_grafts *shallow_grafts;
 
-	git_atomic32 attr_session_key;
+	git3_atomic32 attr_session_key;
 
-	intptr_t configmap_cache[GIT_CONFIGMAP_CACHE_MAX];
-	git_submodule_cache *submodule_cache;
+	intptr_t configmap_cache[GIT3_CONFIGMAP_CACHE_MAX];
+	git3_submodule_cache *submodule_cache;
 };
 
-GIT_INLINE(git_attr_cache *) git_repository_attr_cache(git_repository *repo)
+GIT3_INLINE(git3_attr_cache *) git3_repository_attr_cache(git3_repository *repo)
 {
 	return repo->attrcache;
 }
 
-int git_repository_head_commit(git_commit **commit, git_repository *repo);
-int git_repository_head_tree(git_tree **tree, git_repository *repo);
-int git_repository_create_head(const char *git_dir, const char *ref_name);
+int git3_repository_head_commit(git3_commit **commit, git3_repository *repo);
+int git3_repository_head_tree(git3_tree **tree, git3_repository *repo);
+int git3_repository_create_head(const char *git3_dir, const char *ref_name);
 
-typedef int (*git_repository_foreach_worktree_cb)(git_repository *, void *);
+typedef int (*git3_repository_foreach_worktree_cb)(git3_repository *, void *);
 
-int git_repository_foreach_worktree(git_repository *repo,
-				    git_repository_foreach_worktree_cb cb,
+int git3_repository_foreach_worktree(git3_repository *repo,
+				    git3_repository_foreach_worktree_cb cb,
 				    void *payload);
 
 /*
@@ -193,12 +193,12 @@ int git_repository_foreach_worktree(git_repository *repo,
  * permanent references to these (i.e. between API calls), since they may
  * become invalidated if the user replaces a repository internal.
  */
-int git_repository_config__weakptr(git_config **out, git_repository *repo);
-int git_repository_odb__weakptr(git_odb **out, git_repository *repo);
-int git_repository_refdb__weakptr(git_refdb **out, git_repository *repo);
-int git_repository_index__weakptr(git_index **out, git_repository *repo);
-int git_repository_grafts__weakptr(git_grafts **out, git_repository *repo);
-int git_repository_shallow_grafts__weakptr(git_grafts **out, git_repository *repo);
+int git3_repository_config__weakptr(git3_config **out, git3_repository *repo);
+int git3_repository_odb__weakptr(git3_odb **out, git3_repository *repo);
+int git3_repository_refdb__weakptr(git3_refdb **out, git3_repository *repo);
+int git3_repository_index__weakptr(git3_index **out, git3_repository *repo);
+int git3_repository_grafts__weakptr(git3_grafts **out, git3_repository *repo);
+int git3_repository_shallow_grafts__weakptr(git3_grafts **out, git3_repository *repo);
 
 /*
  * Configuration map cache
@@ -206,39 +206,39 @@ int git_repository_shallow_grafts__weakptr(git_grafts **out, git_repository *rep
  * Efficient access to the most used config variables of a repository.
  * The cache is cleared every time the config backend is replaced.
  */
-int git_repository__configmap_lookup(int *out, git_repository *repo, git_configmap_item item);
-void git_repository__configmap_lookup_cache_clear(git_repository *repo);
+int git3_repository__configmap_lookup(int *out, git3_repository *repo, git3_configmap_item item);
+void git3_repository__configmap_lookup_cache_clear(git3_repository *repo);
 
 /** Return the length that object names will be abbreviated to. */
-int git_repository__abbrev_length(int *out, git_repository *repo);
+int git3_repository__abbrev_length(int *out, git3_repository *repo);
 
-int git_repository__item_path(git_str *out, const git_repository *repo, git_repository_item_t item);
+int git3_repository__item_path(git3_str *out, const git3_repository *repo, git3_repository_item_t item);
 
-GIT_INLINE(int) git_repository__ensure_not_bare(
-	git_repository *repo,
+GIT3_INLINE(int) git3_repository__ensure_not_bare(
+	git3_repository *repo,
 	const char *operation_name)
 {
-	if (!git_repository_is_bare(repo))
+	if (!git3_repository_is_bare(repo))
 		return 0;
 
-	git_error_set(
-		GIT_ERROR_REPOSITORY,
+	git3_error_set(
+		GIT3_ERROR_REPOSITORY,
 		"cannot %s. This operation is not allowed against bare repositories.",
 		operation_name);
 
-	return GIT_EBAREREPO;
+	return GIT3_EBAREREPO;
 }
 
-int git_repository__set_orig_head(git_repository *repo, const git_oid *orig_head);
+int git3_repository__set_orig_head(git3_repository *repo, const git3_oid *orig_head);
 
-int git_repository__cleanup_files(git_repository *repo, const char *files[], size_t files_len);
+int git3_repository__cleanup_files(git3_repository *repo, const char *files[], size_t files_len);
 
 /* The default "reserved names" for a repository */
-extern git_str git_repository__reserved_names_win32[];
-extern size_t git_repository__reserved_names_win32_len;
+extern git3_str git3_repository__reserved_names_win32[];
+extern size_t git3_repository__reserved_names_win32_len;
 
-extern git_str git_repository__reserved_names_posix[];
-extern size_t git_repository__reserved_names_posix_len;
+extern git3_str git3_repository__reserved_names_posix[];
+extern size_t git3_repository__reserved_names_posix_len;
 
 /*
  * Gets any "reserved names" in the repository.  This will return paths
@@ -250,17 +250,17 @@ extern size_t git_repository__reserved_names_posix_len;
  * shortname.  If that fails, this function returns false, but out and outlen
  * will still be populated with good defaults.
  */
-bool git_repository__reserved_names(
-	git_str **out, size_t *outlen, git_repository *repo, bool include_ntfs);
+bool git3_repository__reserved_names(
+	git3_str **out, size_t *outlen, git3_repository *repo, bool include_ntfs);
 
-int git_repository__shallow_roots(git_oid **out, size_t *out_len, git_repository *repo);
-int git_repository__shallow_roots_write(git_repository *repo, git_oidarray *roots);
+int git3_repository__shallow_roots(git3_oid **out, size_t *out_len, git3_repository *repo);
+int git3_repository__shallow_roots_write(git3_repository *repo, git3_oidarray *roots);
 
 /*
  * The default branch for the repository; the `init.defaultBranch`
  * configuration option, if set, or `master` if it is not.
  */
-int git_repository_initialbranch(git_str *out, git_repository *repo);
+int git3_repository_initialbranch(git3_str *out, git3_repository *repo);
 
 /*
  * Given a relative `path`, this makes it absolute based on the
@@ -268,27 +268,27 @@ int git_repository_initialbranch(git_str *out, git_repository *repo);
  * to ensure that the path is not longer than MAX_PATH on Windows
  * (unless `core.longpaths` is set in the repo config).
  */
-int git_repository_workdir_path(git_str *out, git_repository *repo, const char *path);
+int git3_repository_workdir_path(git3_str *out, git3_repository *repo, const char *path);
 
-int git_repository__extensions(char ***out, size_t *out_len);
-int git_repository__set_extensions(const char **extensions, size_t len);
-void git_repository__free_extensions(void);
+int git3_repository__extensions(char ***out, size_t *out_len);
+int git3_repository__set_extensions(const char **extensions, size_t len);
+void git3_repository__free_extensions(void);
 
 /*
  * Set the object format (OID type) for a repository; this will set
  * both the configuration and the internal value for the oid type.
  */
-int git_repository__set_objectformat(
-	git_repository *repo,
-	git_oid_t oid_type);
+int git3_repository__set_objectformat(
+	git3_repository *repo,
+	git3_oid_t oid_type);
 
 /* SHA256 support */
 
-#ifndef GIT_EXPERIMENTAL_SHA256
+#ifndef GIT3_EXPERIMENTAL_SHA256
 
-GIT_EXTERN(int) git_repository_new_ext(
-	git_repository **out,
-	git_repository_new_options *opts);
+GIT3_EXTERN(int) git3_repository_new_ext(
+	git3_repository **out,
+	git3_repository_new_options *opts);
 
 #endif
 

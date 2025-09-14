@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "index.h"
 
-static git_repository *g_repo;
+static git3_repository *g_repo;
 
 void test_index_splitindex__initialize(void)
 {
@@ -15,7 +15,7 @@ void test_index_splitindex__cleanup(void)
 
 void test_index_splitindex__fail_on_open(void)
 {
-	git_index *idx;
-	cl_git_fail_with(-1, git_repository_index(&idx, g_repo));
-	cl_assert_equal_s(git_error_last()->message, "unsupported mandatory extension: 'link'");
+	git3_index *idx;
+	cl_git_fail_with(-1, git3_repository_index(&idx, g_repo));
+	cl_assert_equal_s(git3_error_last()->message, "unsupported mandatory extension: 'link'");
 }

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/commit.h"
 
 static const char *committer_name = "Vicent Marti";
@@ -12,11 +12,11 @@ static const char *root_commit_message = "This is a root commit\n\
 static const char *root_reflog_message = "commit (initial): This is a root commit \
 This is a root commit and should be the only one in this branch";
 static char *head_old;
-static git_reference *head, *branch;
-static git_commit *commit;
+static git3_reference *head, *branch;
+static git3_commit *commit;
 
 /* Fixture setup */
-static git_repository *g_repo;
+static git3_repository *g_repo;
 void test_commit_write__initialize(void)
 {
    g_repo = cl_git_sandbox_init("testrepo");
@@ -24,44 +24,44 @@ void test_commit_write__initialize(void)
 
 void test_commit_write__cleanup(void)
 {
-	git_reference_free(head);
+	git3_reference_free(head);
 	head = NULL;
 
-	git_reference_free(branch);
+	git3_reference_free(branch);
 	branch = NULL;
 
-	git_commit_free(commit);
+	git3_commit_free(commit);
 	commit = NULL;
 
-	git__free(head_old);
+	git3__free(head_old);
 	head_old = NULL;
 
 	cl_git_sandbox_cleanup();
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_STRICT_OBJECT_CREATION, 1));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_OBJECT_CREATION, 1));
 }
 
 
 /* write a new commit object from memory to disk */
 void test_commit_write__from_memory(void)
 {
-   git_oid tree_id, parent_id, commit_id;
-   git_signature *author, *committer;
-   const git_signature *author1, *committer1;
-   git_commit *parent;
-   git_tree *tree;
+   git3_oid tree_id, parent_id, commit_id;
+   git3_signature *author, *committer;
+   const git3_signature *author1, *committer1;
+   git3_commit *parent;
+   git3_tree *tree;
 
-   git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-   cl_git_pass(git_tree_lookup(&tree, g_repo, &tree_id));
+   git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+   cl_git_pass(git3_tree_lookup(&tree, g_repo, &tree_id));
 
-   git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
-   cl_git_pass(git_commit_lookup(&parent, g_repo, &parent_id));
+   git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
+   cl_git_pass(git3_commit_lookup(&parent, g_repo, &parent_id));
 
    /* create signatures */
-   cl_git_pass(git_signature_new(&committer, committer_name, committer_email, 123456789, 60));
-   cl_git_pass(git_signature_new(&author, committer_name, committer_email, 987654321, 90));
+   cl_git_pass(git3_signature_new(&committer, committer_name, committer_email, 123456789, 60));
+   cl_git_pass(git3_signature_new(&author, committer_name, committer_email, 987654321, 90));
 
-   cl_git_pass(git_commit_create_v(
+   cl_git_pass(git3_commit_create_v(
       &commit_id, /* out id */
       g_repo,
       NULL, /* do not update the HEAD */
@@ -72,53 +72,53 @@ void test_commit_write__from_memory(void)
       tree,
       1, parent));
 
-   git_object_free((git_object *)parent);
-   git_object_free((git_object *)tree);
+   git3_object_free((git3_object *)parent);
+   git3_object_free((git3_object *)tree);
 
-   git_signature_free(committer);
-   git_signature_free(author);
+   git3_signature_free(committer);
+   git3_signature_free(author);
 
-   cl_git_pass(git_commit_lookup(&commit, g_repo, &commit_id));
+   cl_git_pass(git3_commit_lookup(&commit, g_repo, &commit_id));
 
    /* Check attributes were set correctly */
-   author1 = git_commit_author(commit);
+   author1 = git3_commit_author(commit);
    cl_assert(author1 != NULL);
    cl_assert_equal_s(committer_name, author1->name);
    cl_assert_equal_s(committer_email, author1->email);
    cl_assert(author1->when.time == 987654321);
    cl_assert(author1->when.offset == 90);
 
-   committer1 = git_commit_committer(commit);
+   committer1 = git3_commit_committer(commit);
    cl_assert(committer1 != NULL);
    cl_assert_equal_s(committer_name, committer1->name);
    cl_assert_equal_s(committer_email, committer1->email);
    cl_assert(committer1->when.time == 123456789);
    cl_assert(committer1->when.offset == 60);
 
-   cl_assert_equal_s(commit_message, git_commit_message(commit));
+   cl_assert_equal_s(commit_message, git3_commit_message(commit));
 }
 
 void test_commit_write__into_buf(void)
 {
-	git_oid tree_id;
-	git_signature *author, *committer;
-	git_tree *tree;
-	git_commit *parent;
-	git_oid parent_id;
-	git_buf commit = GIT_BUF_INIT;
+	git3_oid tree_id;
+	git3_signature *author, *committer;
+	git3_tree *tree;
+	git3_commit *parent;
+	git3_oid parent_id;
+	git3_buf commit = GIT3_BUF_INIT;
 
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	cl_git_pass(git_tree_lookup(&tree, g_repo, &tree_id));
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	cl_git_pass(git3_tree_lookup(&tree, g_repo, &tree_id));
 
 	/* create signatures */
-	cl_git_pass(git_signature_new(&committer, committer_name, committer_email, 123456789, 60));
-	cl_git_pass(git_signature_new(&author, committer_name, committer_email, 987654321, 90));
+	cl_git_pass(git3_signature_new(&committer, committer_name, committer_email, 123456789, 60));
+	cl_git_pass(git3_signature_new(&author, committer_name, committer_email, 987654321, 90));
 
-	git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&parent, g_repo, &parent_id));
+	git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&parent, g_repo, &parent_id));
 
-	cl_git_pass(git_commit_create_buffer(&commit, g_repo, author, committer,
-					     NULL, root_commit_message, tree, 1, (const git_commit **) &parent));
+	cl_git_pass(git3_commit_create_buffer(&commit, g_repo, author, committer,
+					     NULL, root_commit_message, tree, 1, (const git3_commit **) &parent));
 
 	cl_assert_equal_s(commit.ptr,
 			  "tree 1810dff58d8a660512d4832e740f692884338ccd\n\
@@ -130,41 +130,41 @@ This is a root commit\n\
    This is a root commit and should be the only one in this branch\n\
 ");
 
-	git_buf_dispose(&commit);
-	git_tree_free(tree);
-	git_commit_free(parent);
-	git_signature_free(author);
-	git_signature_free(committer);
+	git3_buf_dispose(&commit);
+	git3_tree_free(tree);
+	git3_commit_free(parent);
+	git3_signature_free(author);
+	git3_signature_free(committer);
 }
 
 /* create a root commit */
 void test_commit_write__root(void)
 {
-	git_oid tree_id, commit_id;
-	const git_oid *branch_oid;
-	git_signature *author, *committer;
+	git3_oid tree_id, commit_id;
+	const git3_oid *branch_oid;
+	git3_signature *author, *committer;
 	const char *branch_name = "refs/heads/root-commit-branch";
-	git_tree *tree;
-	git_reflog *log;
-	const git_reflog_entry *entry;
+	git3_tree *tree;
+	git3_reflog *log;
+	const git3_reflog_entry *entry;
 
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	cl_git_pass(git_tree_lookup(&tree, g_repo, &tree_id));
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	cl_git_pass(git3_tree_lookup(&tree, g_repo, &tree_id));
 
 	/* create signatures */
-	cl_git_pass(git_signature_new(&committer, committer_name, committer_email, 123456789, 60));
-	cl_git_pass(git_signature_new(&author, committer_name, committer_email, 987654321, 90));
+	cl_git_pass(git3_signature_new(&committer, committer_name, committer_email, 123456789, 60));
+	cl_git_pass(git3_signature_new(&author, committer_name, committer_email, 987654321, 90));
 
 	/* First we need to update HEAD so it points to our non-existent branch */
-	cl_git_pass(git_reference_lookup(&head, g_repo, "HEAD"));
-	cl_assert(git_reference_type(head) == GIT_REFERENCE_SYMBOLIC);
-	head_old = git__strdup(git_reference_symbolic_target(head));
+	cl_git_pass(git3_reference_lookup(&head, g_repo, "HEAD"));
+	cl_assert(git3_reference_type(head) == GIT3_REFERENCE_SYMBOLIC);
+	head_old = git3__strdup(git3_reference_symbolic_target(head));
 	cl_assert(head_old != NULL);
-	git_reference_free(head);
+	git3_reference_free(head);
 
-	cl_git_pass(git_reference_symbolic_create(&head, g_repo, "HEAD", branch_name, 1, NULL));
+	cl_git_pass(git3_reference_symbolic_create(&head, g_repo, "HEAD", branch_name, 1, NULL));
 
-	cl_git_pass(git_commit_create_v(
+	cl_git_pass(git3_commit_create_v(
 		&commit_id, /* out id */
 		g_repo,
 		"HEAD",
@@ -175,49 +175,49 @@ void test_commit_write__root(void)
 		tree,
 		0));
 
-	git_object_free((git_object *)tree);
-	git_signature_free(author);
+	git3_object_free((git3_object *)tree);
+	git3_signature_free(author);
 
 	/*
 	 * The fact that creating a commit works has already been
 	 * tested. Here we just make sure it's our commit and that it was
 	 * written as a root commit.
 	 */
-	cl_git_pass(git_commit_lookup(&commit, g_repo, &commit_id));
-	cl_assert(git_commit_parentcount(commit) == 0);
-	cl_git_pass(git_reference_lookup(&branch, g_repo, branch_name));
-	branch_oid = git_reference_target(branch);
+	cl_git_pass(git3_commit_lookup(&commit, g_repo, &commit_id));
+	cl_assert(git3_commit_parentcount(commit) == 0);
+	cl_git_pass(git3_reference_lookup(&branch, g_repo, branch_name));
+	branch_oid = git3_reference_target(branch);
 	cl_assert_equal_oid(branch_oid, &commit_id);
-	cl_assert_equal_s(root_commit_message, git_commit_message(commit));
+	cl_assert_equal_s(root_commit_message, git3_commit_message(commit));
 
-	cl_git_pass(git_reflog_read(&log, g_repo, branch_name));
-	cl_assert_equal_i(1, git_reflog_entrycount(log));
-	entry = git_reflog_entry_byindex(log, 0);
-	cl_assert_equal_s(committer->email, git_reflog_entry_committer(entry)->email);
-	cl_assert_equal_s(committer->name, git_reflog_entry_committer(entry)->name);
-	cl_assert_equal_s(root_reflog_message, git_reflog_entry_message(entry));
+	cl_git_pass(git3_reflog_read(&log, g_repo, branch_name));
+	cl_assert_equal_i(1, git3_reflog_entrycount(log));
+	entry = git3_reflog_entry_byindex(log, 0);
+	cl_assert_equal_s(committer->email, git3_reflog_entry_committer(entry)->email);
+	cl_assert_equal_s(committer->name, git3_reflog_entry_committer(entry)->name);
+	cl_assert_equal_s(root_reflog_message, git3_reflog_entry_message(entry));
 
-	git_signature_free(committer);
-	git_reflog_free(log);
+	git3_signature_free(committer);
+	git3_reflog_free(log);
 }
 
 static int create_commit_from_ids(
-	git_oid *result,
-	const git_oid *tree_id,
-	const git_oid *parent_id)
+	git3_oid *result,
+	const git3_oid *tree_id,
+	const git3_oid *parent_id)
 {
-	git_signature *author, *committer;
-	const git_oid *parent_ids[1];
+	git3_signature *author, *committer;
+	const git3_oid *parent_ids[1];
 	int ret;
 
-	cl_git_pass(git_signature_new(
+	cl_git_pass(git3_signature_new(
 		&committer, committer_name, committer_email, 123456789, 60));
-	cl_git_pass(git_signature_new(
+	cl_git_pass(git3_signature_new(
 		&author, committer_name, committer_email, 987654321, 90));
 
 	parent_ids[0] = parent_id;
 
-	ret = git_commit_create_from_ids(
+	ret = git3_commit_create_from_ids(
 		result,
 		g_repo,
 		NULL,
@@ -229,73 +229,73 @@ static int create_commit_from_ids(
 		1,
 		parent_ids);
 
-	git_signature_free(committer);
-	git_signature_free(author);
+	git3_signature_free(committer);
+	git3_signature_free(author);
 
 	return ret;
 }
 
 void test_commit_write__can_write_invalid_objects(void)
 {
-	git_oid expected_id, tree_id, parent_id, commit_id;
+	git3_oid expected_id, tree_id, parent_id, commit_id;
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_STRICT_OBJECT_CREATION, 0));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_OBJECT_CREATION, 0));
 
 	/* this is a valid tree and parent */
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
 
-	git_oid_from_string(&expected_id, "c8571bbec3a72c4bcad31648902e5a453f1adece", GIT_OID_SHA1);
+	git3_oid_from_string(&expected_id, "c8571bbec3a72c4bcad31648902e5a453f1adece", GIT3_OID_SHA1);
 	cl_git_pass(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 	cl_assert_equal_oid(&expected_id, &commit_id);
 
 	/* this is a wholly invented tree id */
-	git_oid_from_string(&tree_id, "1234567890123456789012345678901234567890", GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, "1234567890123456789012345678901234567890", GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
 
-	git_oid_from_string(&expected_id, "996008340b8e68d69bf3c28d7c57fb7ec3c8e202", GIT_OID_SHA1);
+	git3_oid_from_string(&expected_id, "996008340b8e68d69bf3c28d7c57fb7ec3c8e202", GIT3_OID_SHA1);
 	cl_git_pass(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 	cl_assert_equal_oid(&expected_id, &commit_id);
 
 	/* this is a wholly invented parent id */
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, "1234567890123456789012345678901234567890", GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, "1234567890123456789012345678901234567890", GIT3_OID_SHA1);
 
-	git_oid_from_string(&expected_id, "d78f660cab89d9791ca6714b57978bf2a7e709fd", GIT_OID_SHA1);
+	git3_oid_from_string(&expected_id, "d78f660cab89d9791ca6714b57978bf2a7e709fd", GIT3_OID_SHA1);
 	cl_git_pass(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 	cl_assert_equal_oid(&expected_id, &commit_id);
 
 	/* these are legitimate objects, but of the wrong type */
-	git_oid_from_string(&tree_id, parent_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, tree_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, parent_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, tree_id_str, GIT3_OID_SHA1);
 
-	git_oid_from_string(&expected_id, "5d80c07414e3f18792949699dfcacadf7748f361", GIT_OID_SHA1);
+	git3_oid_from_string(&expected_id, "5d80c07414e3f18792949699dfcacadf7748f361", GIT3_OID_SHA1);
 	cl_git_pass(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 	cl_assert_equal_oid(&expected_id, &commit_id);
 }
 
 void test_commit_write__can_validate_objects(void)
 {
-	git_oid tree_id, parent_id, commit_id;
+	git3_oid tree_id, parent_id, commit_id;
 
 	/* this is a valid tree and parent */
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
 	cl_git_pass(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 
 	/* this is a wholly invented tree id */
-	git_oid_from_string(&tree_id, "1234567890123456789012345678901234567890", GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, parent_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, "1234567890123456789012345678901234567890", GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, parent_id_str, GIT3_OID_SHA1);
 	cl_git_fail(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 
 	/* this is a wholly invented parent id */
-	git_oid_from_string(&tree_id, tree_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, "1234567890123456789012345678901234567890", GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, tree_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, "1234567890123456789012345678901234567890", GIT3_OID_SHA1);
 	cl_git_fail(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 
 	/* these are legitimate objects, but of the wrong type */
-	git_oid_from_string(&tree_id, parent_id_str, GIT_OID_SHA1);
-	git_oid_from_string(&parent_id, tree_id_str, GIT_OID_SHA1);
+	git3_oid_from_string(&tree_id, parent_id_str, GIT3_OID_SHA1);
+	git3_oid_from_string(&parent_id, tree_id_str, GIT3_OID_SHA1);
 	cl_git_fail(create_commit_from_ids(&commit_id, &tree_id, &parent_id));
 }
 
@@ -316,10 +316,10 @@ committer Ben Burkert <ben@benburkert.com> 1358451456 -0800\n\
 \n\
 a simple commit which does not work\n";
 
-	git_oid id;
+	git3_oid id;
 
-	cl_git_fail_with(-1, git_commit_create_with_signature(&id, g_repo, badtree, sig, "magicsig"));
-	cl_git_fail_with(-1, git_commit_create_with_signature(&id, g_repo, badparent, sig, "magicsig"));
+	cl_git_fail_with(-1, git3_commit_create_with_signature(&id, g_repo, badtree, sig, "magicsig"));
+	cl_git_fail_with(-1, git3_commit_create_with_signature(&id, g_repo, badparent, sig, "magicsig"));
 
 }
 
@@ -342,18 +342,18 @@ magicsig magic word: pretty please\n\
 \n\
 a simple commit which works\n";
 
-	git_oid id;
-	git_odb *odb;
-	git_odb_object *obj;
+	git3_oid id;
+	git3_odb *odb;
+	git3_odb_object *obj;
 
-	cl_git_pass(git_commit_create_with_signature(&id, g_repo, data, sig, "magicsig"));
+	cl_git_pass(git3_commit_create_with_signature(&id, g_repo, data, sig, "magicsig"));
 
-	cl_git_pass(git_repository_odb(&odb, g_repo));
-	cl_git_pass(git_odb_read(&obj, odb, &id));
-	cl_assert_equal_s(complete, git_odb_object_data(obj));
+	cl_git_pass(git3_repository_odb(&odb, g_repo));
+	cl_git_pass(git3_odb_read(&obj, odb, &id));
+	cl_assert_equal_s(complete, git3_odb_object_data(obj));
 
-	git_odb_object_free(obj);
-	git_odb_free(odb);
+	git3_odb_object_free(obj);
+	git3_odb_free(odb);
 }
 
 void test_commit_write__attach_multiline_signature(void)
@@ -407,18 +407,18 @@ gpgsig -----BEGIN PGP SIGNATURE-----\n\
 \n\
 a simple commit which works\n";
 
-	git_oid one, two;
-	git_odb *odb;
-	git_odb_object *obj;
+	git3_oid one, two;
+	git3_odb *odb;
+	git3_odb_object *obj;
 
-	cl_git_pass(git_commit_create_with_signature(&one, g_repo, data, gpgsig, "gpgsig"));
-	cl_git_pass(git_commit_create_with_signature(&two, g_repo, data, gpgsig, NULL));
+	cl_git_pass(git3_commit_create_with_signature(&one, g_repo, data, gpgsig, "gpgsig"));
+	cl_git_pass(git3_commit_create_with_signature(&two, g_repo, data, gpgsig, NULL));
 
-	cl_assert(!git_oid_cmp(&one, &two));
-	cl_git_pass(git_repository_odb(&odb, g_repo));
-	cl_git_pass(git_odb_read(&obj, odb, &one));
-	cl_assert_equal_s(complete, git_odb_object_data(obj));
+	cl_assert(!git3_oid_cmp(&one, &two));
+	cl_git_pass(git3_repository_odb(&odb, g_repo));
+	cl_git_pass(git3_odb_read(&obj, odb, &one));
+	cl_assert_equal_s(complete, git3_odb_object_data(obj));
 
-	git_odb_object_free(obj);
-	git_odb_free(odb);
+	git3_odb_object_free(obj);
+	git3_odb_free(odb);
 }

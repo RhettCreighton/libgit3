@@ -1,7 +1,7 @@
 /*
- * libgit2 "rev-parse" example - shows how to parse revspecs
+ * libgit3 "rev-parse" example - shows how to parse revspecs
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -21,9 +21,9 @@ struct parse_state {
 	int not;
 };
 static void parse_opts(struct parse_state *ps, int argc, char *argv[]);
-static int parse_revision(git_repository *repo, struct parse_state *ps);
+static int parse_revision(git3_repository *repo, struct parse_state *ps);
 
-int lg2_rev_parse(git_repository *repo, int argc, char *argv[])
+int lg2_rev_parse(git3_repository *repo, int argc, char *argv[])
 {
 	struct parse_state ps = {0};
 
@@ -62,39 +62,39 @@ static void parse_opts(struct parse_state *ps, int argc, char *argv[])
 	}
 }
 
-static int parse_revision(git_repository *repo, struct parse_state *ps)
+static int parse_revision(git3_repository *repo, struct parse_state *ps)
 {
-	git_revspec rs;
-	char str[GIT_OID_SHA1_HEXSIZE + 1];
+	git3_revspec rs;
+	char str[GIT3_OID_SHA1_HEXSIZE + 1];
 
-	check_lg2(git_revparse(&rs, repo, ps->spec), "Could not parse", ps->spec);
+	check_lg2(git3_revparse(&rs, repo, ps->spec), "Could not parse", ps->spec);
 
-	if ((rs.flags & GIT_REVSPEC_SINGLE) != 0) {
-		git_oid_tostr(str, sizeof(str), git_object_id(rs.from));
+	if ((rs.flags & GIT3_REVSPEC_SINGLE) != 0) {
+		git3_oid_tostr(str, sizeof(str), git3_object_id(rs.from));
 		printf("%s\n", str);
-		git_object_free(rs.from);
+		git3_object_free(rs.from);
 	}
-	else if ((rs.flags & GIT_REVSPEC_RANGE) != 0) {
-		git_oid_tostr(str, sizeof(str), git_object_id(rs.to));
+	else if ((rs.flags & GIT3_REVSPEC_RANGE) != 0) {
+		git3_oid_tostr(str, sizeof(str), git3_object_id(rs.to));
 		printf("%s\n", str);
-		git_object_free(rs.to);
+		git3_object_free(rs.to);
 
-		if ((rs.flags & GIT_REVSPEC_MERGE_BASE) != 0) {
-			git_oid base;
-			check_lg2(git_merge_base(&base, repo,
-						git_object_id(rs.from), git_object_id(rs.to)),
+		if ((rs.flags & GIT3_REVSPEC_MERGE_BASE) != 0) {
+			git3_oid base;
+			check_lg2(git3_merge_base(&base, repo,
+						git3_object_id(rs.from), git3_object_id(rs.to)),
 					"Could not find merge base", ps->spec);
 
-			git_oid_tostr(str, sizeof(str), &base);
+			git3_oid_tostr(str, sizeof(str), &base);
 			printf("%s\n", str);
 		}
 
-		git_oid_tostr(str, sizeof(str), git_object_id(rs.from));
+		git3_oid_tostr(str, sizeof(str), git3_object_id(rs.from));
 		printf("^%s\n", str);
-		git_object_free(rs.from);
+		git3_object_free(rs.from);
 	}
 	else {
-		fatal("Invalid results from git_revparse", ps->spec);
+		fatal("Invalid results from git3_revparse", ps->spec);
 	}
 
 	return 0;

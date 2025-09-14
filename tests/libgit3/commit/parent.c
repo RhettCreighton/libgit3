@@ -1,41 +1,41 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
-static git_repository *_repo;
-static git_commit *commit;
+static git3_repository *_repo;
+static git3_commit *commit;
 
 void test_commit_parent__initialize(void)
 {
-	git_oid oid;
+	git3_oid oid;
 
-	cl_git_pass(git_repository_open(&_repo, cl_fixture("testrepo.git")));
+	cl_git_pass(git3_repository_open(&_repo, cl_fixture("testrepo.git")));
 
-	git_oid_from_string(&oid, "be3563ae3f795b2b4353bcce3a527ad0a4f7f644", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, _repo, &oid));
+	git3_oid_from_string(&oid, "be3563ae3f795b2b4353bcce3a527ad0a4f7f644", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, _repo, &oid));
 }
 
 void test_commit_parent__cleanup(void)
 {
-	git_commit_free(commit);
+	git3_commit_free(commit);
 	commit = NULL;
 
-	git_repository_free(_repo);
+	git3_repository_free(_repo);
 	_repo = NULL;
 }
 
 static void assert_nth_gen_parent(unsigned int gen, const char *expected_oid)
 {
-	git_commit *parent = NULL;
+	git3_commit *parent = NULL;
 	int error;
 	
-	error = git_commit_nth_gen_ancestor(&parent, commit, gen);
+	error = git3_commit_nth_gen_ancestor(&parent, commit, gen);
 
 	if (expected_oid != NULL) {
 		cl_assert_equal_i(0, error);
-		cl_assert_equal_i(0, git_oid_streq(git_commit_id(parent), expected_oid));
+		cl_assert_equal_i(0, git3_oid_streq(git3_commit_id(parent), expected_oid));
 	} else
-		cl_assert_equal_i(GIT_ENOTFOUND, error);
+		cl_assert_equal_i(GIT3_ENOTFOUND, error);
 
-	git_commit_free(parent);
+	git3_commit_free(parent);
 }
 
 /*

@@ -3,7 +3,7 @@
  * properly handles large (2Gb+) files.
  */
 
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 static const char *filename = "core_ftruncate.txt";
 static int fd = -1;

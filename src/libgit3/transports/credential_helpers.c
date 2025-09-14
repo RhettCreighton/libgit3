@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -9,17 +9,17 @@
 
 #include "git3/credential_helpers.h"
 
-int git_credential_userpass(
-		git_credential **cred,
+int git3_credential_userpass(
+		git3_credential **cred,
 		const char *url,
 		const char *user_from_url,
 		unsigned int allowed_types,
 		void *payload)
 {
-	git_credential_userpass_payload *userpass = (git_credential_userpass_payload*)payload;
+	git3_credential_userpass_payload *userpass = (git3_credential_userpass_payload*)payload;
 	const char *effective_username = NULL;
 
-	GIT_UNUSED(url);
+	GIT3_UNUSED(url);
 
 	if (!userpass || !userpass->password) return -1;
 
@@ -42,11 +42,11 @@ int git_credential_userpass(
 	else
 		return -1;
 
-	if (GIT_CREDENTIAL_USERNAME & allowed_types)
-		return git_credential_username_new(cred, effective_username);
+	if (GIT3_CREDENTIAL_USERNAME & allowed_types)
+		return git3_credential_username_new(cred, effective_username);
 
-	if ((GIT_CREDENTIAL_USERPASS_PLAINTEXT & allowed_types) == 0 ||
-			git_credential_userpass_plaintext_new(cred, effective_username, userpass->password) < 0)
+	if ((GIT3_CREDENTIAL_USERPASS_PLAINTEXT & allowed_types) == 0 ||
+			git3_credential_userpass_plaintext_new(cred, effective_username, userpass->password) < 0)
 		return -1;
 
 	return 0;
@@ -54,15 +54,15 @@ int git_credential_userpass(
 
 /* Deprecated credential functions */
 
-#ifndef GIT_DEPRECATE_HARD
-int git_cred_userpass(
-	git_credential **out,
+#ifndef GIT3_DEPRECATE_HARD
+int git3_cred_userpass(
+	git3_credential **out,
 	const char *url,
 	const char *user_from_url,
 	unsigned int allowed_types,
 	void *payload)
 {
-	return git_credential_userpass(out, url, user_from_url,
+	return git3_credential_userpass(out, url, user_from_url,
 		allowed_types, payload);
 }
 #endif

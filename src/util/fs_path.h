@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_fs_path_h__
 #define INCLUDE_fs_path_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include "posix.h"
 #include "str.h"
@@ -31,16 +31,16 @@
  * the string ".". If path is a null pointer or points to an empty string,
  * dirname() shall return a pointer to the string "." .
  *
- * The `git_fs_path_dirname` implementation is thread safe. The returned
+ * The `git3_fs_path_dirname` implementation is thread safe. The returned
  * string must be manually free'd.
  *
- * The `git_fs_path_dirname_r` implementation writes the dirname to a `git_str`
+ * The `git3_fs_path_dirname_r` implementation writes the dirname to a `git3_str`
  * if the buffer pointer is not NULL.
  * It returns an error code < 0 if there is an allocation error, otherwise
  * the length of the dirname (which will be > 0).
  */
-extern char *git_fs_path_dirname(const char *path);
-extern int git_fs_path_dirname_r(git_str *buffer, const char *path);
+extern char *git3_fs_path_dirname(const char *path);
+extern int git3_fs_path_dirname_r(git3_str *buffer, const char *path);
 
 /*
  * This function returns the basename of the file, which is the last
@@ -51,20 +51,20 @@ extern int git_fs_path_dirname_r(git_str *buffer, const char *path);
  * Trailing slashes and backslashes are significant: the basename of
  * c:/foo/bar/ is an empty string after the rightmost slash.
  *
- * The `git_fs_path_basename` implementation is thread safe. The returned
+ * The `git3_fs_path_basename` implementation is thread safe. The returned
  * string must be manually free'd.
  *
- * The `git_fs_path_basename_r` implementation writes the basename to a `git_str`.
+ * The `git3_fs_path_basename_r` implementation writes the basename to a `git3_str`.
  * It returns an error code < 0 if there is an allocation error, otherwise
  * the length of the basename (which will be >= 0).
  */
-extern char *git_fs_path_basename(const char *path);
-extern int git_fs_path_basename_r(git_str *buffer, const char *path);
+extern char *git3_fs_path_basename(const char *path);
+extern int git3_fs_path_basename_r(git3_str *buffer, const char *path);
 
 /* Return the offset of the start of the basename.  Unlike the other
  * basename functions, this returns 0 if the path is empty.
  */
-extern size_t git_fs_path_basename_offset(git_str *buffer);
+extern size_t git3_fs_path_basename_offset(git3_str *buffer);
 
 /**
  * Find offset to root of path if path has one.
@@ -74,31 +74,31 @@ extern size_t git_fs_path_basename_offset(git_str *buffer);
  * "c:/windows/rooted/path" returns 2).  If the path is not rooted, this
  * returns -1.
  */
-extern int git_fs_path_root(const char *path);
+extern int git3_fs_path_root(const char *path);
 
 /**
  * Ensure path has a trailing '/'.
  */
-extern int git_fs_path_to_dir(git_str *path);
+extern int git3_fs_path_to_dir(git3_str *path);
 
 /**
  * Ensure string has a trailing '/' if there is space for it.
  */
-extern void git_fs_path_string_to_dir(char *path, size_t size);
+extern void git3_fs_path_string_to_dir(char *path, size_t size);
 
 /**
  * Provides the length of the given path string with no trailing
  * slashes.
  */
-size_t git_fs_path_dirlen(const char *path);
+size_t git3_fs_path_dirlen(const char *path);
 
 /**
  * Returns nonzero if the given path is a filesystem root; on Windows, this
  * means a drive letter (eg `A:/`, `C:\`). On POSIX this is `/`.
  */
-GIT_INLINE(int) git_fs_path_is_root(const char *name)
+GIT3_INLINE(int) git3_fs_path_is_root(const char *name)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	if (((name[0] >= 'A' && name[0] <= 'Z') || (name[0] >= 'a' && name[0] <= 'z')) &&
 	      name[1] == ':' &&
 	     (name[2] == '/' || name[2] == '\\') &&
@@ -112,31 +112,31 @@ GIT_INLINE(int) git_fs_path_is_root(const char *name)
 /**
  * Taken from git.git; returns nonzero if the given path is "." or "..".
  */
-GIT_INLINE(int) git_fs_path_is_dot_or_dotdot(const char *name)
+GIT3_INLINE(int) git3_fs_path_is_dot_or_dotdot(const char *name)
 {
 	return (name[0] == '.' &&
 			  (name[1] == '\0' ||
 				(name[1] == '.' && name[2] == '\0')));
 }
 
-#ifdef GIT_WIN32
-GIT_INLINE(int) git_fs_path_is_dot_or_dotdotW(const wchar_t *name)
+#ifdef GIT3_WIN32
+GIT3_INLINE(int) git3_fs_path_is_dot_or_dotdotW(const wchar_t *name)
 {
 	return (name[0] == L'.' &&
 			  (name[1] == L'\0' ||
 				(name[1] == L'.' && name[2] == L'\0')));
 }
 
-#define git_fs_path_is_absolute(p) \
-	(git__isalpha((p)[0]) && (p)[1] == ':' && ((p)[2] == '\\' || (p)[2] == '/'))
+#define git3_fs_path_is_absolute(p) \
+	(git3__isalpha((p)[0]) && (p)[1] == ':' && ((p)[2] == '\\' || (p)[2] == '/'))
 
-#define git_fs_path_is_dirsep(p) \
+#define git3_fs_path_is_dirsep(p) \
 	((p) == '/' || (p) == '\\')
 
 /**
  * Convert backslashes in path to forward slashes.
  */
-GIT_INLINE(void) git_fs_path_mkposix(char *path)
+GIT3_INLINE(void) git3_fs_path_mkposix(char *path)
 {
 	while (*path) {
 		if (*path == '\\')
@@ -146,12 +146,12 @@ GIT_INLINE(void) git_fs_path_mkposix(char *path)
 	}
 }
 #else
-#	define git_fs_path_mkposix(p) /* blank */
+#	define git3_fs_path_mkposix(p) /* blank */
 
-#define git_fs_path_is_absolute(p) \
+#define git3_fs_path_is_absolute(p) \
 	((p)[0] == '/')
 
-#define git_fs_path_is_dirsep(p) \
+#define git3_fs_path_is_dirsep(p) \
 	((p) == '/')
 
 #endif
@@ -159,7 +159,7 @@ GIT_INLINE(void) git_fs_path_mkposix(char *path)
 /**
  * Check if string is a relative path (i.e. starts with "./" or "../")
  */
-GIT_INLINE(int) git_fs_path_is_relative(const char *p)
+GIT3_INLINE(int) git3_fs_path_is_relative(const char *p)
 {
 	return (p[0] == '.' && (p[1] == '/' || (p[1] == '.' && p[2] == '/')));
 }
@@ -167,17 +167,17 @@ GIT_INLINE(int) git_fs_path_is_relative(const char *p)
 /**
  * Check if string is at end of path segment (i.e. looking at '/' or '\0')
  */
-GIT_INLINE(int) git_fs_path_at_end_of_segment(const char *p)
+GIT3_INLINE(int) git3_fs_path_at_end_of_segment(const char *p)
 {
 	return !*p || *p == '/';
 }
 
-extern int git__percent_decode(git_str *decoded_out, const char *input);
+extern int git3__percent_decode(git3_str *decoded_out, const char *input);
 
 /**
  * Extract path from file:// URL.
  */
-extern int git_fs_path_fromurl(git_str *local_path_out, const char *file_url);
+extern int git3_fs_path_fromurl(git3_str *local_path_out, const char *file_url);
 
 
 /**
@@ -190,35 +190,35 @@ extern int git_fs_path_fromurl(git_str *local_path_out, const char *file_url);
  * Check if a file exists and can be accessed.
  * @return true or false
  */
-extern bool git_fs_path_exists(const char *path);
+extern bool git3_fs_path_exists(const char *path);
 
 /**
  * Check if the given path points to a directory.
  * @return true or false
  */
-extern bool git_fs_path_isdir(const char *path);
+extern bool git3_fs_path_isdir(const char *path);
 
 /**
  * Check if the given path points to a regular file.
  * @return true or false
  */
-extern bool git_fs_path_isfile(const char *path);
+extern bool git3_fs_path_isfile(const char *path);
 
 /**
  * Check if the given path points to a symbolic link.
  * @return true or false
  */
-extern bool git_fs_path_islink(const char *path);
+extern bool git3_fs_path_islink(const char *path);
 
 /**
  * Check if the given path is a directory, and is empty.
  */
-extern bool git_fs_path_is_empty_dir(const char *path);
+extern bool git3_fs_path_is_empty_dir(const char *path);
 
 /**
  * Stat a file and/or link and set error if needed.
  */
-extern int git_fs_path_lstat(const char *path, struct stat *st);
+extern int git3_fs_path_lstat(const char *path, struct stat *st);
 
 /**
  * Check if the parent directory contains the item.
@@ -227,7 +227,7 @@ extern int git_fs_path_lstat(const char *path, struct stat *st);
  * @param item Item that might be in the directory.
  * @return 0 if item exists in directory, <0 otherwise.
  */
-extern bool git_fs_path_contains(git_str *dir, const char *item);
+extern bool git3_fs_path_contains(git3_str *dir, const char *item);
 
 /**
  * Check if the given path contains the given subdirectory.
@@ -236,7 +236,7 @@ extern bool git_fs_path_contains(git_str *dir, const char *item);
  * @param subdir Subdirectory name to look for in parent
  * @return true if subdirectory exists, false otherwise.
  */
-extern bool git_fs_path_contains_dir(git_str *parent, const char *subdir);
+extern bool git3_fs_path_contains_dir(git3_str *parent, const char *subdir);
 
 /**
  * Determine the common directory length between two paths, including
@@ -248,18 +248,18 @@ extern bool git_fs_path_contains_dir(git_str *parent, const char *subdir);
  * @param two The second path
  * @return The length of the common directory
  */
-extern size_t git_fs_path_common_dirlen(const char *one, const char *two);
+extern size_t git3_fs_path_common_dirlen(const char *one, const char *two);
 
 /**
  * Make the path relative to the given parent path.
  *
  * @param path The path to make relative
  * @param parent The parent path to make path relative to
- * @return 0 if path was made relative, GIT_ENOTFOUND
+ * @return 0 if path was made relative, GIT3_ENOTFOUND
  *         if there was not common root between the paths,
  *         or <0.
  */
-extern int git_fs_path_make_relative(git_str *path, const char *parent);
+extern int git3_fs_path_make_relative(git3_str *path, const char *parent);
 
 /**
  * Check if the given path contains the given file.
@@ -268,7 +268,7 @@ extern int git_fs_path_make_relative(git_str *path, const char *parent);
  * @param file File name to look for in parent
  * @return true if file exists, false otherwise.
  */
-extern bool git_fs_path_contains_file(git_str *dir, const char *file);
+extern bool git3_fs_path_contains_file(git3_str *dir, const char *file);
 
 /**
  * Prepend base to unrooted path or just copy path over.
@@ -276,36 +276,36 @@ extern bool git_fs_path_contains_file(git_str *dir, const char *file);
  * This will optionally return the index into the path where the "root"
  * is, either the end of the base directory prefix or the path root.
  */
-extern int git_fs_path_join_unrooted(
-	git_str *path_out, const char *path, const char *base, ssize_t *root_at);
+extern int git3_fs_path_join_unrooted(
+	git3_str *path_out, const char *path, const char *base, ssize_t *root_at);
 
 /**
  * Removes multiple occurrences of '/' in a row, squashing them into a
  * single '/'.
  */
-extern void git_fs_path_squash_slashes(git_str *path);
+extern void git3_fs_path_squash_slashes(git3_str *path);
 
 /**
  * Clean up path, prepending base if it is not already rooted.
  */
-extern int git_fs_path_prettify(git_str *path_out, const char *path, const char *base);
+extern int git3_fs_path_prettify(git3_str *path_out, const char *path, const char *base);
 
 /**
  * Clean up path, prepending base if it is not already rooted and
  * appending a slash.
  */
-extern int git_fs_path_prettify_dir(git_str *path_out, const char *path, const char *base);
+extern int git3_fs_path_prettify_dir(git3_str *path_out, const char *path, const char *base);
 
 /**
  * Get a directory from a path.
  *
- * If path is a directory, this acts like `git_fs_path_prettify_dir`
+ * If path is a directory, this acts like `git3_fs_path_prettify_dir`
  * (cleaning up path and appending a '/').  If path is a normal file,
  * this prettifies it, then removed the filename a la dirname and
  * appends the trailing '/'.  If the path does not exist, it is
  * treated like a regular filename.
  */
-extern int git_fs_path_find_dir(git_str *dir);
+extern int git3_fs_path_find_dir(git3_str *dir);
 
 /**
  * Resolve relative references within a path.
@@ -317,7 +317,7 @@ extern int git_fs_path_find_dir(git_str *dir);
  * Additionally, this will recognize an "c:/" drive prefix or a "xyz://" URL
  * prefix and not touch that part of the path.
  */
-extern int git_fs_path_resolve_relative(git_str *path, size_t ceiling);
+extern int git3_fs_path_resolve_relative(git3_str *path, size_t ceiling);
 
 /**
  * Apply a relative path to base path.
@@ -328,12 +328,12 @@ extern int git_fs_path_resolve_relative(git_str *path, size_t ceiling);
  * slash, "." will be eaten with no change, and ".." will remove a
  * segment from the base path.
  */
-extern int git_fs_path_apply_relative(git_str *target, const char *relpath);
+extern int git3_fs_path_apply_relative(git3_str *target, const char *relpath);
 
 enum {
-	GIT_FS_PATH_DIR_IGNORE_CASE = (1u << 0),
-	GIT_FS_PATH_DIR_PRECOMPOSE_UNICODE = (1u << 1),
-	GIT_FS_PATH_DIR_INCLUDE_DOT_AND_DOTDOT = (1u << 2),
+	GIT3_FS_PATH_DIR_IGNORE_CASE = (1u << 0),
+	GIT3_FS_PATH_DIR_PRECOMPOSE_UNICODE = (1u << 1),
+	GIT3_FS_PATH_DIR_INCLUDE_DOT_AND_DOTDOT = (1u << 2),
 };
 
 /**
@@ -341,7 +341,7 @@ enum {
  *
  * @param pathbuf Buffer the function reads the initial directory
  * 		path from, and updates with each successive entry's name.
- * @param flags Combination of GIT_FS_PATH_DIR flags.
+ * @param flags Combination of GIT3_FS_PATH_DIR flags.
  * @param callback Callback for each entry. Passed the `payload` and each
  *		successive path inside the directory as a full path.  This may
  *		safely append text to the pathbuf if needed.  Return non-zero to
@@ -349,16 +349,16 @@ enum {
  * @param payload Passed to callback as first argument.
  * @return 0 on success or error code from OS error or from callback
  */
-extern int git_fs_path_direach(
-	git_str *pathbuf,
+extern int git3_fs_path_direach(
+	git3_str *pathbuf,
 	uint32_t flags,
-	int (*callback)(void *payload, git_str *path),
+	int (*callback)(void *payload, git3_str *path),
 	void *payload);
 
 /**
  * Sort function to order two paths
  */
-extern int git_fs_path_cmp(
+extern int git3_fs_path_cmp(
 	const char *name1, size_t len1, int isdir1,
 	const char *name2, size_t len2, int isdir2,
 	int (*compare)(const char *, const char *, size_t));
@@ -381,17 +381,17 @@ extern int git_fs_path_cmp(
  *		be modified in any way. Return non-zero to stop iteration.
  * @param payload Passed to fn as the first ath.
  */
-extern int git_fs_path_walk_up(
-	git_str *pathbuf,
+extern int git3_fs_path_walk_up(
+	git3_str *pathbuf,
 	const char *ceiling,
 	int (*callback)(void *payload, const char *path),
 	void *payload);
 
 
 enum {
-	GIT_FS_PATH_NOTEQUAL = 0,
-	GIT_FS_PATH_EQUAL = 1,
-	GIT_FS_PATH_PREFIX = 2
+	GIT3_FS_PATH_NOTEQUAL = 0,
+	GIT3_FS_PATH_EQUAL = 1,
+	GIT3_FS_PATH_PREFIX = 2
 };
 
 /*
@@ -399,7 +399,7 @@ enum {
  * @param parent The possible parent
  * @param child The possible child
  */
-GIT_INLINE(int) git_fs_path_equal_or_prefixed(
+GIT3_INLINE(int) git3_fs_path_equal_or_prefixed(
 	const char *parent,
 	const char *child,
 	ssize_t *prefixlen)
@@ -411,83 +411,83 @@ GIT_INLINE(int) git_fs_path_equal_or_prefixed(
 		lastslash = (*p == '/');
 
 		if (*p++ != *c++)
-			return GIT_FS_PATH_NOTEQUAL;
+			return GIT3_FS_PATH_NOTEQUAL;
 	}
 
 	if (*p != '\0')
-		return GIT_FS_PATH_NOTEQUAL;
+		return GIT3_FS_PATH_NOTEQUAL;
 
 	if (*c == '\0') {
 		if (prefixlen)
 			*prefixlen = p - parent;
 
-		return GIT_FS_PATH_EQUAL;
+		return GIT3_FS_PATH_EQUAL;
 	}
 
 	if (*c == '/' || lastslash) {
 		if (prefixlen)
 			*prefixlen = (p - parent) - lastslash;
 
-		return GIT_FS_PATH_PREFIX;
+		return GIT3_FS_PATH_PREFIX;
 	}
 
-	return GIT_FS_PATH_NOTEQUAL;
+	return GIT3_FS_PATH_NOTEQUAL;
 }
 
-/* translate errno to libgit2 error code and set error message */
-extern int git_fs_path_set_error(
+/* translate errno to libgit3 error code and set error message */
+extern int git3_fs_path_set_error(
 	int errno_value, const char *path, const char *action);
 
 /* check if non-ascii characters are present in filename */
-extern bool git_fs_path_has_non_ascii(const char *path, size_t pathlen);
+extern bool git3_fs_path_has_non_ascii(const char *path, size_t pathlen);
 
-#define GIT_PATH_REPO_ENCODING "UTF-8"
+#define GIT3_PATH_REPO_ENCODING "UTF-8"
 
 #ifdef __APPLE__
-#define GIT_PATH_NATIVE_ENCODING "UTF-8-MAC"
+#define GIT3_PATH_NATIVE_ENCODING "UTF-8-MAC"
 #else
-#define GIT_PATH_NATIVE_ENCODING "UTF-8"
+#define GIT3_PATH_NATIVE_ENCODING "UTF-8"
 #endif
 
-#ifdef GIT_I18N_ICONV
+#ifdef GIT3_I18N_ICONV
 
 #include <iconv.h>
 
 typedef struct {
 	iconv_t map;
-	git_str buf;
-} git_fs_path_iconv_t;
+	git3_str buf;
+} git3_fs_path_iconv_t;
 
-#define GIT_PATH_ICONV_INIT { (iconv_t)-1, GIT_STR_INIT }
+#define GIT3_PATH_ICONV_INIT { (iconv_t)-1, GIT3_STR_INIT }
 
 /* Init iconv data for converting decomposed UTF-8 to precomposed */
-extern int git_fs_path_iconv_init_precompose(git_fs_path_iconv_t *ic);
+extern int git3_fs_path_iconv_init_precompose(git3_fs_path_iconv_t *ic);
 
 /* Clear allocated iconv data */
-extern void git_fs_path_iconv_clear(git_fs_path_iconv_t *ic);
+extern void git3_fs_path_iconv_clear(git3_fs_path_iconv_t *ic);
 
 /*
  * Rewrite `in` buffer using iconv map if necessary, replacing `in`
  * pointer internal iconv buffer if rewrite happened.  The `in` pointer
  * will be left unchanged if no rewrite was needed.
  */
-extern int git_fs_path_iconv(git_fs_path_iconv_t *ic, const char **in, size_t *inlen);
+extern int git3_fs_path_iconv(git3_fs_path_iconv_t *ic, const char **in, size_t *inlen);
 
-#endif /* GIT_I18N_ICONV */
+#endif /* GIT3_I18N_ICONV */
 
-extern bool git_fs_path_does_decompose_unicode(const char *root);
+extern bool git3_fs_path_does_decompose_unicode(const char *root);
 
 
-typedef struct git_fs_path_diriter git_fs_path_diriter;
+typedef struct git3_fs_path_diriter git3_fs_path_diriter;
 
-#if defined(GIT_WIN32) && !defined(__MINGW32__)
+#if defined(GIT3_WIN32) && !defined(__MINGW32__)
 
-struct git_fs_path_diriter
+struct git3_fs_path_diriter
 {
-	git_win32_path path;
+	git3_win32_path path;
 	size_t parent_len;
 
-	git_str path_utf8;
+	git3_str path_utf8;
 	size_t parent_utf8_len;
 
 	HANDLE handle;
@@ -498,25 +498,25 @@ struct git_fs_path_diriter
 	unsigned int needs_next;
 };
 
-#define GIT_FS_PATH_DIRITER_INIT { {0}, 0, GIT_STR_INIT, 0, INVALID_HANDLE_VALUE }
+#define GIT3_FS_PATH_DIRITER_INIT { {0}, 0, GIT3_STR_INIT, 0, INVALID_HANDLE_VALUE }
 
 #else
 
-struct git_fs_path_diriter
+struct git3_fs_path_diriter
 {
-	git_str path;
+	git3_str path;
 	size_t parent_len;
 
 	unsigned int flags;
 
 	DIR *dir;
 
-#ifdef GIT_I18N_ICONV
-	git_fs_path_iconv_t ic;
+#ifdef GIT3_I18N_ICONV
+	git3_fs_path_iconv_t ic;
 #endif
 };
 
-#define GIT_FS_PATH_DIRITER_INIT { GIT_STR_INIT }
+#define GIT3_FS_PATH_DIRITER_INIT { GIT3_STR_INIT }
 
 #endif
 
@@ -528,19 +528,19 @@ struct git_fs_path_diriter
  * @param flags Directory reader flags
  * @return 0 or an error code
  */
-extern int git_fs_path_diriter_init(
-	git_fs_path_diriter *diriter,
+extern int git3_fs_path_diriter_init(
+	git3_fs_path_diriter *diriter,
 	const char *path,
 	unsigned int flags);
 
 /**
- * Advance the directory iterator.  Will return GIT_ITEROVER when
+ * Advance the directory iterator.  Will return GIT3_ITEROVER when
  * the iteration has completed successfully.
  *
  * @param diriter The directory iterator
- * @return 0, GIT_ITEROVER, or an error code
+ * @return 0, GIT3_ITEROVER, or an error code
  */
-extern int git_fs_path_diriter_next(git_fs_path_diriter *diriter);
+extern int git3_fs_path_diriter_next(git3_fs_path_diriter *diriter);
 
 /**
  * Returns the file name of the current item in the iterator.
@@ -550,10 +550,10 @@ extern int git_fs_path_diriter_next(git_fs_path_diriter *diriter);
  * @param diriter The directory iterator
  * @return 0 or an error code
  */
-extern int git_fs_path_diriter_filename(
+extern int git3_fs_path_diriter_filename(
 	const char **out,
 	size_t *out_len,
-	git_fs_path_diriter *diriter);
+	git3_fs_path_diriter *diriter);
 
 /**
  * Returns the full path of the current item in the iterator; that
@@ -565,10 +565,10 @@ extern int git_fs_path_diriter_filename(
  * @param diriter The directory iterator
  * @return 0 or an error code
  */
-extern int git_fs_path_diriter_fullpath(
+extern int git3_fs_path_diriter_fullpath(
 	const char **out,
 	size_t *out_len,
-	git_fs_path_diriter *diriter);
+	git3_fs_path_diriter *diriter);
 
 /**
  * Performs an `lstat` on the current item in the iterator.
@@ -577,19 +577,19 @@ extern int git_fs_path_diriter_fullpath(
  * @param diriter The directory iterator
  * @return 0 or an error code
  */
-extern int git_fs_path_diriter_stat(struct stat *out, git_fs_path_diriter *diriter);
+extern int git3_fs_path_diriter_stat(struct stat *out, git3_fs_path_diriter *diriter);
 
 /**
  * Closes the directory iterator.
  *
  * @param diriter The directory iterator
  */
-extern void git_fs_path_diriter_free(git_fs_path_diriter *diriter);
+extern void git3_fs_path_diriter_free(git3_fs_path_diriter *diriter);
 
 /**
  * Load all directory entries (except '.' and '..') into a vector.
  *
- * For cases where `git_fs_path_direach()` is not appropriate, this
+ * For cases where `git3_fs_path_direach()` is not appropriate, this
  * allows you to load the filenames in a directory into a vector
  * of strings. That vector can then be sorted, iterated, or whatever.
  * Remember to free alloc of the allocated strings when you are done.
@@ -599,66 +599,66 @@ extern void git_fs_path_diriter_free(git_fs_path_diriter *diriter);
  * @param prefix_len When inserting entries, the trailing part of path
  * 		will be prefixed after this length.  I.e. given path "/a/b" and
  * 		prefix_len 3, the entries will look like "b/e1", "b/e2", etc.
- * @param flags Combination of GIT_FS_PATH_DIR flags.
+ * @param flags Combination of GIT3_FS_PATH_DIR flags.
  */
-extern int git_fs_path_dirload(
-	git_vector *contents,
+extern int git3_fs_path_dirload(
+	git3_vector *contents,
 	const char *path,
 	size_t prefix_len,
 	uint32_t flags);
 
 
 /* Used for paths to repositories on the filesystem */
-extern bool git_fs_path_is_local_file_url(const char *file_url);
-extern int git_fs_path_from_url_or_path(git_str *local_path_out, const char *url_or_path);
+extern bool git3_fs_path_is_local_file_url(const char *file_url);
+extern int git3_fs_path_from_url_or_path(git3_str *local_path_out, const char *url_or_path);
 
-/* Flags to determine path validity in `git_fs_path_isvalid` */
-#define GIT_FS_PATH_REJECT_EMPTY_COMPONENT    (1 << 0)
-#define GIT_FS_PATH_REJECT_TRAVERSAL          (1 << 1)
-#define GIT_FS_PATH_REJECT_SLASH              (1 << 2)
-#define GIT_FS_PATH_REJECT_BACKSLASH          (1 << 3)
-#define GIT_FS_PATH_REJECT_TRAILING_DOT       (1 << 4)
-#define GIT_FS_PATH_REJECT_TRAILING_SPACE     (1 << 5)
-#define GIT_FS_PATH_REJECT_TRAILING_COLON     (1 << 6)
-#define GIT_FS_PATH_REJECT_DOS_PATHS          (1 << 7)
-#define GIT_FS_PATH_REJECT_NT_CHARS           (1 << 8)
-#define GIT_FS_PATH_REJECT_LONG_PATHS         (1 << 9)
+/* Flags to determine path validity in `git3_fs_path_isvalid` */
+#define GIT3_FS_PATH_REJECT_EMPTY_COMPONENT    (1 << 0)
+#define GIT3_FS_PATH_REJECT_TRAVERSAL          (1 << 1)
+#define GIT3_FS_PATH_REJECT_SLASH              (1 << 2)
+#define GIT3_FS_PATH_REJECT_BACKSLASH          (1 << 3)
+#define GIT3_FS_PATH_REJECT_TRAILING_DOT       (1 << 4)
+#define GIT3_FS_PATH_REJECT_TRAILING_SPACE     (1 << 5)
+#define GIT3_FS_PATH_REJECT_TRAILING_COLON     (1 << 6)
+#define GIT3_FS_PATH_REJECT_DOS_PATHS          (1 << 7)
+#define GIT3_FS_PATH_REJECT_NT_CHARS           (1 << 8)
+#define GIT3_FS_PATH_REJECT_LONG_PATHS         (1 << 9)
 
-#define GIT_FS_PATH_REJECT_MAX                (1 << 9)
+#define GIT3_FS_PATH_REJECT_MAX                (1 << 9)
 
 /* Default path safety for writing files to disk: since we use the
  * Win32 "File Namespace" APIs ("\\?\") we need to protect from
  * paths that the normal Win32 APIs would not write.
  */
-#ifdef GIT_WIN32
-# define GIT_FS_PATH_REJECT_FILESYSTEM_DEFAULTS \
-	GIT_FS_PATH_REJECT_EMPTY_COMPONENT | \
-	GIT_FS_PATH_REJECT_TRAVERSAL | \
-	GIT_FS_PATH_REJECT_BACKSLASH | \
-	GIT_FS_PATH_REJECT_TRAILING_DOT | \
-	GIT_FS_PATH_REJECT_TRAILING_SPACE | \
-	GIT_FS_PATH_REJECT_TRAILING_COLON | \
-	GIT_FS_PATH_REJECT_DOS_PATHS | \
-	GIT_FS_PATH_REJECT_NT_CHARS
+#ifdef GIT3_WIN32
+# define GIT3_FS_PATH_REJECT_FILESYSTEM_DEFAULTS \
+	GIT3_FS_PATH_REJECT_EMPTY_COMPONENT | \
+	GIT3_FS_PATH_REJECT_TRAVERSAL | \
+	GIT3_FS_PATH_REJECT_BACKSLASH | \
+	GIT3_FS_PATH_REJECT_TRAILING_DOT | \
+	GIT3_FS_PATH_REJECT_TRAILING_SPACE | \
+	GIT3_FS_PATH_REJECT_TRAILING_COLON | \
+	GIT3_FS_PATH_REJECT_DOS_PATHS | \
+	GIT3_FS_PATH_REJECT_NT_CHARS
 #else
-# define GIT_FS_PATH_REJECT_FILESYSTEM_DEFAULTS \
-	GIT_FS_PATH_REJECT_EMPTY_COMPONENT | \
-	GIT_FS_PATH_REJECT_TRAVERSAL
+# define GIT3_FS_PATH_REJECT_FILESYSTEM_DEFAULTS \
+	GIT3_FS_PATH_REJECT_EMPTY_COMPONENT | \
+	GIT3_FS_PATH_REJECT_TRAVERSAL
 #endif
 
 /**
  * Validate a filesystem path; with custom callbacks per-character and
  * per-path component.
  */
-extern bool git_fs_path_str_is_valid_ext(
-	const git_str *path,
+extern bool git3_fs_path_str_is_valid_ext(
+	const git3_str *path,
 	unsigned int flags,
 	bool (*validate_char_cb)(char ch, void *payload),
 	bool (*validate_component_cb)(const char *component, size_t len, void *payload),
 	bool (*validate_length_cb)(const char *component, size_t len, size_t utf8_char_len),
 	void *payload);
 
-GIT_INLINE(bool) git_fs_path_is_valid_ext(
+GIT3_INLINE(bool) git3_fs_path_is_valid_ext(
 	const char *path,
 	unsigned int flags,
 	bool (*validate_char_cb)(char ch, void *payload),
@@ -666,8 +666,8 @@ GIT_INLINE(bool) git_fs_path_is_valid_ext(
 	bool (*validate_length_cb)(const char *component, size_t len, size_t utf8_char_len),
 	void *payload)
 {
-	const git_str str = GIT_STR_INIT_CONST(path, SIZE_MAX);
-	return git_fs_path_str_is_valid_ext(
+	const git3_str str = GIT3_STR_INIT_CONST(path, SIZE_MAX);
+	return git3_fs_path_str_is_valid_ext(
 		&str,
 		flags,
 		validate_char_cb,
@@ -683,50 +683,50 @@ GIT_INLINE(bool) git_fs_path_is_valid_ext(
  * (trailing ' ' or ':' characters), or filenames ("component names")
  * that are not supported ('AUX', 'COM1").
  */
-GIT_INLINE(bool) git_fs_path_is_valid(
+GIT3_INLINE(bool) git3_fs_path_is_valid(
 	const char *path,
 	unsigned int flags)
 {
-	const git_str str = GIT_STR_INIT_CONST(path, SIZE_MAX);
-	return git_fs_path_str_is_valid_ext(&str, flags, NULL, NULL, NULL, NULL);
+	const git3_str str = GIT3_STR_INIT_CONST(path, SIZE_MAX);
+	return git3_fs_path_str_is_valid_ext(&str, flags, NULL, NULL, NULL, NULL);
 }
 
-/** Validate a filesystem path in a `git_str`. */
-GIT_INLINE(bool) git_fs_path_str_is_valid(
-	const git_str *path,
+/** Validate a filesystem path in a `git3_str`. */
+GIT3_INLINE(bool) git3_fs_path_str_is_valid(
+	const git3_str *path,
 	unsigned int flags)
 {
-	return git_fs_path_str_is_valid_ext(path, flags, NULL, NULL, NULL, NULL);
+	return git3_fs_path_str_is_valid_ext(path, flags, NULL, NULL, NULL, NULL);
 }
 
-extern int git_fs_path_validate_str_length_with_suffix(
-	git_str *path,
+extern int git3_fs_path_validate_str_length_with_suffix(
+	git3_str *path,
 	size_t suffix_len);
 
 /**
  * Validate an on-disk path, taking into account that it will have a
  * suffix appended (eg, `.lock`).
  */
-GIT_INLINE(int) git_fs_path_validate_filesystem_with_suffix(
+GIT3_INLINE(int) git3_fs_path_validate_filesystem_with_suffix(
 	const char *path,
 	size_t path_len,
 	size_t suffix_len)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	size_t path_chars, total_chars;
 
-	path_chars = git_utf8_char_length(path, path_len);
+	path_chars = git3_utf8_char_length(path, path_len);
 
-	if (GIT_ADD_SIZET_OVERFLOW(&total_chars, path_chars, suffix_len) ||
+	if (GIT3_ADD_SIZET_OVERFLOW(&total_chars, path_chars, suffix_len) ||
 	    total_chars > MAX_PATH) {
-		git_error_set(GIT_ERROR_FILESYSTEM, "path too long: '%s'", path);
+		git3_error_set(GIT3_ERROR_FILESYSTEM, "path too long: '%s'", path);
 		return -1;
 	}
 	return 0;
 #else
-	GIT_UNUSED(path);
-	GIT_UNUSED(path_len);
-	GIT_UNUSED(suffix_len);
+	GIT3_UNUSED(path);
+	GIT3_UNUSED(path_len);
+	GIT3_UNUSED(suffix_len);
 	return 0;
 #endif
 }
@@ -738,76 +738,76 @@ GIT_INLINE(int) git_fs_path_validate_filesystem_with_suffix(
  * Windows.
  *
  * For paths within the working directory, you should use ensure that
- * `core.longpaths` is obeyed.  Use `git_fs_path_validate_workdir`.
+ * `core.longpaths` is obeyed.  Use `git3_fs_path_validate_workdir`.
  */
-GIT_INLINE(int) git_fs_path_validate_filesystem(
+GIT3_INLINE(int) git3_fs_path_validate_filesystem(
 	const char *path,
 	size_t path_len)
 {
-	return git_fs_path_validate_filesystem_with_suffix(path, path_len, 0);
+	return git3_fs_path_validate_filesystem_with_suffix(path, path_len, 0);
 }
 
 /**
  * Convert any backslashes into slashes
  */
-int git_fs_path_normalize_slashes(git_str *out, const char *path);
+int git3_fs_path_normalize_slashes(git3_str *out, const char *path);
 
-bool git_fs_path_supports_symlinks(const char *dir);
+bool git3_fs_path_supports_symlinks(const char *dir);
 
 typedef enum {
-	GIT_FS_PATH_OWNER_NONE = 0,
+	GIT3_FS_PATH_OWNER_NONE = 0,
 
 	/** The file must be owned by the current user. */
-	GIT_FS_PATH_OWNER_CURRENT_USER = (1 << 0),
+	GIT3_FS_PATH_OWNER_CURRENT_USER = (1 << 0),
 
 	/** The file must be owned by the system account. */
-	GIT_FS_PATH_OWNER_ADMINISTRATOR = (1 << 1),
+	GIT3_FS_PATH_OWNER_ADMINISTRATOR = (1 << 1),
 
 	/**
 	 * The file may be owned by a system account if the current
 	 * user is in an administrator group. Windows only; this is
 	 * a noop on non-Windows systems.
 	 */
-	GIT_FS_PATH_USER_IS_ADMINISTRATOR = (1 << 2),
+	GIT3_FS_PATH_USER_IS_ADMINISTRATOR = (1 << 2),
 
 	/**
 	 * The file is owned by the current user, who is running `sudo`.
 	 */
-	GIT_FS_PATH_OWNER_RUNNING_SUDO = (1 << 3),
+	GIT3_FS_PATH_OWNER_RUNNING_SUDO = (1 << 3),
 
 	/** The file may be owned by another user. */
-	GIT_FS_PATH_OWNER_OTHER = (1 << 4)
-} git_fs_path_owner_t;
+	GIT3_FS_PATH_OWNER_OTHER = (1 << 4)
+} git3_fs_path_owner_t;
 
 /**
  * Sets the mock ownership for files; subsequent calls to
- * `git_fs_path_owner_is_*` functions will return this data until
- * cleared with `GIT_FS_PATH_OWNER_NONE`.
+ * `git3_fs_path_owner_is_*` functions will return this data until
+ * cleared with `GIT3_FS_PATH_OWNER_NONE`.
  */
-void git_fs_path__set_owner(git_fs_path_owner_t owner);
+void git3_fs_path__set_owner(git3_fs_path_owner_t owner);
 
 /** Verify that the file in question is owned by the given owner. */
-int git_fs_path_owner_is(
+int git3_fs_path_owner_is(
 	bool *out,
 	const char *path,
-	git_fs_path_owner_t owner_type);
+	git3_fs_path_owner_t owner_type);
 
 /**
  * Verify that the file in question is owned by an administrator or system
  * account.
  */
-int git_fs_path_owner_is_system(bool *out, const char *path);
+int git3_fs_path_owner_is_system(bool *out, const char *path);
 
 /**
  * Verify that the file in question is owned by the current user;
  */
 
-int git_fs_path_owner_is_current_user(bool *out, const char *path);
+int git3_fs_path_owner_is_current_user(bool *out, const char *path);
 
 /**
  * Search the current PATH for the given executable, returning the full
  * path if it is found.
  */
-int git_fs_path_find_executable(git_str *fullpath, const char *executable);
+int git3_fs_path_find_executable(git3_str *fullpath, const char *executable);
 
 #endif

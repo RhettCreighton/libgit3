@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "blob.h"
 #include "filter.h"
@@ -12,7 +12,7 @@
 #define BITFLIP_FILTER_PRIORITY -1
 #define REVERSE_FILTER_PRIORITY -2
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 # define NEWLINE "\r\n"
 #else
 # define NEWLINE "\n"
@@ -39,7 +39,7 @@ static unsigned char bitflipped_and_reversed_data[] =
 
 #define BITFLIPPED_AND_REVERSED_DATA_LEN 51
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 static void register_custom_filters(void);
 
@@ -69,23 +69,23 @@ static void register_custom_filters(void)
 	static int filters_registered = 0;
 
 	if (!filters_registered) {
-		cl_git_pass(git_filter_register(
+		cl_git_pass(git3_filter_register(
 			"bitflip", create_bitflip_filter(), BITFLIP_FILTER_PRIORITY));
 
-		cl_git_pass(git_filter_register(
+		cl_git_pass(git3_filter_register(
 			"reverse", create_reverse_filter("+reverse"),
 			REVERSE_FILTER_PRIORITY));
 
 		/* re-register reverse filter with standard filter=xyz priority */
-		cl_git_pass(git_filter_register(
+		cl_git_pass(git3_filter_register(
 			"pre-reverse",
 			create_reverse_filter("+prereverse"),
-			GIT_FILTER_DRIVER_PRIORITY));
+			GIT3_FILTER_DRIVER_PRIORITY));
 
-		cl_git_pass(git_filter_register(
+		cl_git_pass(git3_filter_register(
 			"erroneous",
 			create_erroneous_filter("+erroneous"),
-			GIT_FILTER_DRIVER_PRIORITY));
+			GIT3_FILTER_DRIVER_PRIORITY));
 
 		filters_registered = 1;
 	}
@@ -93,96 +93,96 @@ static void register_custom_filters(void)
 
 void test_filter_custom__to_odb(void)
 {
-	git_filter_list *fl;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *fl;
+	git3_buf out = GIT3_BUF_INIT;
 	const char *in;
 	size_t in_len;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "herofile", GIT_FILTER_TO_ODB, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "herofile", GIT3_FILTER_TO_ODB, 0));
 
 	in = workdir_data;
 	in_len = strlen(workdir_data);
 
-	cl_git_pass(git_filter_list_apply_to_buffer(&out, fl, in, in_len));
+	cl_git_pass(git3_filter_list_apply_to_buffer(&out, fl, in, in_len));
 
 	cl_assert_equal_i(BITFLIPPED_AND_REVERSED_DATA_LEN, out.size);
 
 	cl_assert_equal_i(
 		0, memcmp(bitflipped_and_reversed_data, out.ptr, out.size));
 
-	git_filter_list_free(fl);
-	git_buf_dispose(&out);
+	git3_filter_list_free(fl);
+	git3_buf_dispose(&out);
 }
 
 void test_filter_custom__to_workdir(void)
 {
-	git_filter_list *fl;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *fl;
+	git3_buf out = GIT3_BUF_INIT;
 	const char *in;
 	size_t in_len;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "herofile", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "herofile", GIT3_FILTER_TO_WORKTREE, 0));
 
 	in = (char *)bitflipped_and_reversed_data;
 	in_len = BITFLIPPED_AND_REVERSED_DATA_LEN;
 
-	cl_git_pass(git_filter_list_apply_to_buffer(&out, fl, in, in_len));
+	cl_git_pass(git3_filter_list_apply_to_buffer(&out, fl, in, in_len));
 
 	cl_assert_equal_i(strlen(workdir_data), out.size);
 
 	cl_assert_equal_i(
 		0, memcmp(workdir_data, out.ptr, out.size));
 
-	git_filter_list_free(fl);
-	git_buf_dispose(&out);
+	git3_filter_list_free(fl);
+	git3_buf_dispose(&out);
 }
 
 void test_filter_custom__can_register_a_custom_filter_in_the_repository(void)
 {
-	git_filter_list *fl;
+	git3_filter_list *fl;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "herofile", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "herofile", GIT3_FILTER_TO_WORKTREE, 0));
 	/* expect: bitflip, reverse, crlf */
-	cl_assert_equal_sz(3, git_filter_list_length(fl));
-	git_filter_list_free(fl);
+	cl_assert_equal_sz(3, git3_filter_list_length(fl));
+	git3_filter_list_free(fl);
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "herocorp", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "herocorp", GIT3_FILTER_TO_WORKTREE, 0));
 	/* expect: bitflip, reverse - possibly crlf depending on global config */
 	{
-		size_t flen = git_filter_list_length(fl);
+		size_t flen = git3_filter_list_length(fl);
 		cl_assert(flen == 2 || flen == 3);
 	}
-	git_filter_list_free(fl);
+	git3_filter_list_free(fl);
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "hero.bin", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "hero.bin", GIT3_FILTER_TO_WORKTREE, 0));
 	/* expect: bitflip, reverse */
-	cl_assert_equal_sz(2, git_filter_list_length(fl));
-	git_filter_list_free(fl);
+	cl_assert_equal_sz(2, git3_filter_list_length(fl));
+	git3_filter_list_free(fl);
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "heroflip", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "heroflip", GIT3_FILTER_TO_WORKTREE, 0));
 	/* expect: bitflip (because of -reverse) */
-	cl_assert_equal_sz(1, git_filter_list_length(fl));
-	git_filter_list_free(fl);
+	cl_assert_equal_sz(1, git3_filter_list_length(fl));
+	git3_filter_list_free(fl);
 
-	cl_git_pass(git_filter_list_load(
+	cl_git_pass(git3_filter_list_load(
 		&fl, g_repo, NULL, "doesntapplytome.bin",
-		GIT_FILTER_TO_WORKTREE, 0));
+		GIT3_FILTER_TO_WORKTREE, 0));
 	/* expect: none */
-	cl_assert_equal_sz(0, git_filter_list_length(fl));
-	git_filter_list_free(fl);
+	cl_assert_equal_sz(0, git3_filter_list_length(fl));
+	git3_filter_list_free(fl);
 }
 
 void test_filter_custom__order_dependency(void)
 {
-	git_index *index;
-	git_blob *blob;
-	git_buf buf = { 0 };
+	git3_index *index;
+	git3_blob *blob;
+	git3_buf buf = { 0 };
 
 	/* so if ident and reverse are used together, an interesting thing
 	 * happens - a reversed "$Id$" string is no longer going to trigger
@@ -204,65 +204,65 @@ void test_filter_custom__order_dependency(void)
 		"empty_standard_repo/hero.2.rev-ident",
 		"Another test\n$dI$\nCrazy!\n");
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_add_bypath(index, "hero.1.rev-ident"));
-	cl_git_pass(git_index_add_bypath(index, "hero.2.rev-ident"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_add_bypath(index, "hero.1.rev-ident"));
+	cl_git_pass(git3_index_add_bypath(index, "hero.2.rev-ident"));
 	cl_repo_commit_from_index(NULL, g_repo, NULL, 0, "Filter chains\n");
-	git_index_free(index);
+	git3_index_free(index);
 
-	cl_git_pass(git_blob_lookup(&blob, g_repo,
-		& git_index_get_bypath(index, "hero.1.rev-ident", 0)->id));
+	cl_git_pass(git3_blob_lookup(&blob, g_repo,
+		& git3_index_get_bypath(index, "hero.1.rev-ident", 0)->id));
 	cl_assert_equal_s(
-		"\n!nuf evaH\n$dI$\ntset a si sihT", git_blob_rawcontent(blob));
-	cl_git_pass(git_blob_filter(&buf, blob, "hero.1.rev-ident", NULL));
+		"\n!nuf evaH\n$dI$\ntset a si sihT", git3_blob_rawcontent(blob));
+	cl_git_pass(git3_blob_filter(&buf, blob, "hero.1.rev-ident", NULL));
 	/* no expansion because id was reversed at checkin and now at ident
 	 * time, reverse is not applied yet */
 	cl_assert_equal_s(
 		"This is a test\n$Id$\nHave fun!\n", buf.ptr);
-	git_blob_free(blob);
+	git3_blob_free(blob);
 
-	cl_git_pass(git_blob_lookup(&blob, g_repo,
-		& git_index_get_bypath(index, "hero.2.rev-ident", 0)->id));
+	cl_git_pass(git3_blob_lookup(&blob, g_repo,
+		& git3_index_get_bypath(index, "hero.2.rev-ident", 0)->id));
 	cl_assert_equal_s(
-		"\n!yzarC\n$Id$\ntset rehtonA", git_blob_rawcontent(blob));
-	cl_git_pass(git_blob_filter(&buf, blob, "hero.2.rev-ident", NULL));
+		"\n!yzarC\n$Id$\ntset rehtonA", git3_blob_rawcontent(blob));
+	cl_git_pass(git3_blob_filter(&buf, blob, "hero.2.rev-ident", NULL));
 	/* expansion because reverse was applied at checkin and at ident time,
 	 * reverse is not applied yet */
 	cl_assert_equal_s(
 		"Another test\n$ 59001fe193103b1016b27027c0c827d036fd0ac8 :dI$\nCrazy!\n", buf.ptr);
-	cl_assert_equal_i(0, git_oid_strcmp(
-		git_blob_id(blob), "8ca0df630d728c0c72072b6101b301391ef10095"));
-	git_blob_free(blob);
+	cl_assert_equal_i(0, git3_oid_strcmp(
+		git3_blob_id(blob), "8ca0df630d728c0c72072b6101b301391ef10095"));
+	git3_blob_free(blob);
 
-	git_buf_dispose(&buf);
+	git3_buf_dispose(&buf);
 }
 
 void test_filter_custom__filter_registry_failure_cases(void)
 {
-	git_filter fake = { GIT_FILTER_VERSION, 0 };
+	git3_filter fake = { GIT3_FILTER_VERSION, 0 };
 
-	cl_assert_equal_i(GIT_EEXISTS, git_filter_register("bitflip", &fake, 0));
+	cl_assert_equal_i(GIT3_EEXISTS, git3_filter_register("bitflip", &fake, 0));
 
-	cl_git_fail(git_filter_unregister(GIT_FILTER_CRLF));
-	cl_git_fail(git_filter_unregister(GIT_FILTER_IDENT));
-	cl_assert_equal_i(GIT_ENOTFOUND, git_filter_unregister("not-a-filter"));
+	cl_git_fail(git3_filter_unregister(GIT3_FILTER_CRLF));
+	cl_git_fail(git3_filter_unregister(GIT3_FILTER_IDENT));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_filter_unregister("not-a-filter"));
 }
 
 void test_filter_custom__erroneous_filter_fails(void)
 {
-	git_filter_list *filters;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *filters;
+	git3_buf out = GIT3_BUF_INIT;
 	const char *in;
 	size_t in_len;
 
-	cl_git_pass(git_filter_list_load(
-		&filters, g_repo, NULL, "villain", GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_load(
+		&filters, g_repo, NULL, "villain", GIT3_FILTER_TO_WORKTREE, 0));
 
 	in = workdir_data;
 	in_len = strlen(workdir_data);
 
-	cl_git_fail(git_filter_list_apply_to_buffer(&out, filters, in, in_len));
+	cl_git_fail(git3_filter_list_apply_to_buffer(&out, filters, in, in_len));
 
-	git_filter_list_free(filters);
-	git_buf_dispose(&out);
+	git3_filter_list_free(filters);
+	git3_buf_dispose(&out);
 }

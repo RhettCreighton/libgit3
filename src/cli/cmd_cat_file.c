@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -53,12 +53,12 @@ static void print_help(void)
 	cli_opt_help_fprint(stdout, opts);
 }
 
-static int print_odb(git_object *object, display_t display)
+static int print_odb(git3_object *object, display_t display)
 {
-	git_odb *odb = NULL;
-	git_odb_object *odb_object = NULL;
+	git3_odb *odb = NULL;
+	git3_odb_object *odb_object = NULL;
 	const unsigned char *content;
-	git_object_size_t size;
+	git3_object_size_t size;
 	int ret = 0;
 
 	/*
@@ -67,18 +67,18 @@ static int print_odb(git_object *object, display_t display)
 	 * we need to do an ODB lookup.  (Thankfully, this should be cached
 	 * in-memory from our last call.)
 	 */
-	if (git_object_type(object) == GIT_OBJECT_BLOB) {
-		content = git_blob_rawcontent((git_blob *)object);
-		size = git_blob_rawsize((git_blob *)object);
+	if (git3_object_type(object) == GIT3_OBJECT_BLOB) {
+		content = git3_blob_rawcontent((git3_blob *)object);
+		size = git3_blob_rawsize((git3_blob *)object);
 	} else {
-		if (git_repository_odb(&odb, git_object_owner(object)) < 0 ||
-		    git_odb_read(&odb_object, odb, git_object_id(object)) < 0) {
+		if (git3_repository_odb(&odb, git3_object_owner(object)) < 0 ||
+		    git3_odb_read(&odb_object, odb, git3_object_id(object)) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
 
-		content = git_odb_object_data(odb_object);
-		size = git_odb_object_size(odb_object);
+		content = git3_odb_object_data(odb_object);
+		size = git3_odb_object_size(odb_object);
 	}
 
 	switch (display) {
@@ -91,43 +91,43 @@ static int print_odb(git_object *object, display_t display)
 			ret = cli_error_os();
 		break;
 	default:
-		GIT_ASSERT(0);
+		GIT3_ASSERT(0);
 	}
 
 done:
-	git_odb_object_free(odb_object);
-	git_odb_free(odb);
+	git3_odb_object_free(odb_object);
+	git3_odb_free(odb);
 	return ret;
 }
 
-static int print_type(git_object *object)
+static int print_type(git3_object *object)
 {
-	if (printf("%s\n", git_object_type2string(git_object_type(object))) < 0)
+	if (printf("%s\n", git3_object_type2string(git3_object_type(object))) < 0)
 		return cli_error_os();
 
 	return 0;
 }
 
-static int print_pretty(git_object *object)
+static int print_pretty(git3_object *object)
 {
-	const git_tree_entry *entry;
+	const git3_tree_entry *entry;
 	size_t i, count;
 
 	/*
 	 * Only trees are stored in an unreadable format and benefit from
 	 * pretty-printing.
 	 */
-	if (git_object_type(object) != GIT_OBJECT_TREE)
+	if (git3_object_type(object) != GIT3_OBJECT_TREE)
 		return print_odb(object, DISPLAY_CONTENT);
 
-	for (i = 0, count = git_tree_entrycount((git_tree *)object); i < count; i++) {
-		entry = git_tree_entry_byindex((git_tree *)object, i);
+	for (i = 0, count = git3_tree_entrycount((git3_tree *)object); i < count; i++) {
+		entry = git3_tree_entry_byindex((git3_tree *)object, i);
 
 		if (printf("%06o %s %s\t%s\n",
-		           git_tree_entry_filemode_raw(entry),
-		           git_object_type2string(git_tree_entry_type(entry)),
-		           git_oid_tostr_s(git_tree_entry_id(entry)),
-		           git_tree_entry_name(entry)) < 0)
+		           git3_tree_entry_filemode_raw(entry),
+		           git3_object_type2string(git3_tree_entry_type(entry)),
+		           git3_oid_tostr_s(git3_tree_entry_id(entry)),
+		           git3_tree_entry_name(entry)) < 0)
 			return cli_error_os();
 	}
 
@@ -137,9 +137,9 @@ static int print_pretty(git_object *object)
 int cmd_cat_file(int argc, char **argv)
 {
 	cli_repository_open_options open_opts = { argv + 1, argc - 1};
-	git_repository *repo = NULL;
-	git_object *object = NULL;
-	git_object_t type;
+	git3_repository *repo = NULL;
+	git3_object *object = NULL;
+	git3_object_t type;
 	cli_opt invalid_opt;
 	int giterr, ret = 0;
 
@@ -154,8 +154,8 @@ int cmd_cat_file(int argc, char **argv)
 	if (cli_repository_open(&repo, &open_opts) < 0)
 		return cli_error_git();
 
-	if ((giterr = git_revparse_single(&object, repo, object_spec)) < 0) {
-		if (display == DISPLAY_EXISTS && giterr == GIT_ENOTFOUND)
+	if ((giterr = git3_revparse_single(&object, repo, object_spec)) < 0) {
+		if (display == DISPLAY_EXISTS && giterr == GIT3_ENOTFOUND)
 			ret = 1;
 		else
 			ret = cli_error_git();
@@ -164,19 +164,19 @@ int cmd_cat_file(int argc, char **argv)
 	}
 
 	if (type_name) {
-		git_object *peeled;
+		git3_object *peeled;
 
-		if ((type = git_object_string2type(type_name)) == GIT_OBJECT_INVALID) {
+		if ((type = git3_object_string2type(type_name)) == GIT3_OBJECT_INVALID) {
 			ret = cli_error_usage("invalid object type '%s'", type_name);
 			goto done;
 		}
 
-		if (git_object_peel(&peeled, object, type) < 0) {
+		if (git3_object_peel(&peeled, object, type) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
 
-		git_object_free(object);
+		git3_object_free(object);
 		object = peeled;
 	}
 
@@ -196,7 +196,7 @@ int cmd_cat_file(int argc, char **argv)
 	}
 
 done:
-	git_object_free(object);
-	git_repository_free(repo);
+	git3_object_free(object);
+	git3_repository_free(repo);
 	return ret;
 }

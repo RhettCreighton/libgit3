@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/merge.h"
 #include "merge.h"
 #include "../merge_helpers.h"
 #include "futils.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-resolve"
 
@@ -25,7 +25,7 @@ void test_merge_trees_modeconflict__cleanup(void)
 
 void test_merge_trees_modeconflict__df_conflict(void)
 {
-	git_index *index;
+	git3_index *index;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "49130a28ef567af9a6a6104c38773fedfa5f9742", 2, "dir-10" },
@@ -54,5 +54,5 @@ void test_merge_trees_modeconflict__df_conflict(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 20));
 
-	git_index_free(index);
+	git3_index_free(index);
 }

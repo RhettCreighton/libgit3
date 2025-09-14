@@ -1,8 +1,8 @@
 typedef struct {
 	const char *reponame;
 	const char *worktreename;
-	git_repository *repo;
-	git_repository *worktree;
+	git3_repository *repo;
+	git3_repository *worktree;
 } worktree_fixture;
 
 #define WORKTREE_FIXTURE_INIT(repo, worktree) { (repo), (worktree), NULL, NULL }

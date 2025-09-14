@@ -1,13 +1,13 @@
 #include "common.h"
 
-/* This part is not strictly libgit2-dependent, but you can use this
+/* This part is not strictly libgit3-dependent, but you can use this
  * as a starting point for a git-like tool */
 
-typedef int (*git_command_fn)(git_repository *, int , char **);
+typedef int (*git3_command_fn)(git3_repository *, int , char **);
 
 struct {
 	char *name;
-	git_command_fn fn;
+	git3_command_fn fn;
 	char requires_repo;
 } commands[] = {
 	{ "add",          lg2_add,          1 },
@@ -38,17 +38,17 @@ struct {
 	{ "tag",          lg2_tag,          1 },
 };
 
-static int run_command(git_command_fn fn, git_repository *repo, struct args_info args)
+static int run_command(git3_command_fn fn, git3_repository *repo, struct args_info args)
 {
 	int error;
 
 	/* Run the command. If something goes wrong, print the error message to stderr */
 	error = fn(repo, args.argc - args.pos, &args.argv[args.pos]);
 	if (error < 0) {
-		if (git_error_last() == NULL)
+		if (git3_error_last() == NULL)
 			fprintf(stderr, "Error without message");
 		else
-			fprintf(stderr, "Bad news:\n %s\n", git_error_last()->message);
+			fprintf(stderr, "Bad news:\n %s\n", git3_error_last()->message);
 	}
 
 	return !!error;
@@ -68,15 +68,15 @@ static int usage(const char *prog)
 int main(int argc, char **argv)
 {
 	struct args_info args = ARGS_INFO_INIT;
-	git_repository *repo = NULL;
-	const char *git_dir = NULL;
+	git3_repository *repo = NULL;
+	const char *git3_dir = NULL;
 	int return_code = 1;
 	size_t i;
 
 	if (argc < 2)
 		usage(argv[0]);
 
-	git_libgit3_init();
+	git3_libgit3_init();
 
 	for (args.pos = 1; args.pos < args.argc; ++args.pos) {
 		char *a = args.argv[args.pos];
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 		if (a[0] != '-') {
 			/* non-arg */
 			break;
-		} else if (optional_str_arg(&git_dir, &args, "--git-dir", ".git")) {
+		} else if (optional_str_arg(&git3_dir, &args, "--git-dir", ".git")) {
 			continue;
 		} else if (match_arg_separator(&args)) {
 			break;
@@ -94,8 +94,8 @@ int main(int argc, char **argv)
 	if (args.pos == args.argc)
 		usage(argv[0]);
 
-	if (!git_dir)
-		git_dir = ".";
+	if (!git3_dir)
+		git3_dir = ".";
 
 	for (i = 0; i < ARRAY_SIZE(commands); ++i) {
 		if (strcmp(args.argv[args.pos], commands[i].name))
@@ -106,8 +106,8 @@ int main(int argc, char **argv)
 		 * of the local repository and pass it to the function.
 		 * */
 		if (commands[i].requires_repo) {
-			check_lg2(git_repository_open_ext(&repo, git_dir, 0, NULL),
-				  "Unable to open repository '%s'", git_dir);
+			check_lg2(git3_repository_open_ext(&repo, git3_dir, 0, NULL),
+				  "Unable to open repository '%s'", git3_dir);
 		}
 
 		return_code = run_command(commands[i].fn, repo, args);
@@ -117,8 +117,8 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Command not found: %s\n", argv[1]);
 
 shutdown:
-	git_repository_free(repo);
-	git_libgit3_shutdown();
+	git3_repository_free(repo);
+	git3_libgit3_shutdown();
 
 	return return_code;
 }

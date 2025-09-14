@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,27 +12,27 @@
 #include "posix.h"
 #include "date.h"
 
-void git_signature_free(git_signature *sig)
+void git3_signature_free(git3_signature *sig)
 {
 	if (sig == NULL)
 		return;
 
-	git__free(sig->name);
+	git3__free(sig->name);
 	sig->name = NULL;
-	git__free(sig->email);
+	git3__free(sig->email);
 	sig->email = NULL;
-	git__free(sig);
+	git3__free(sig);
 }
 
 static int signature_parse_error(const char *msg)
 {
-	git_error_set(GIT_ERROR_INVALID, "failed to parse signature - %s", msg);
-	return GIT_EINVALID;
+	git3_error_set(GIT3_ERROR_INVALID, "failed to parse signature - %s", msg);
+	return GIT3_EINVALID;
 }
 
 static int signature_error(const char *msg)
 {
-	git_error_set(GIT_ERROR_INVALID, "failed to parse signature - %s", msg);
+	git3_error_set(GIT3_ERROR_INVALID, "failed to parse signature - %s", msg);
 	return -1;
 }
 
@@ -64,15 +64,15 @@ static char *extract_trimmed(const char *ptr, size_t len)
 		len--;
 	}
 
-	return git__substrdup(ptr, len);
+	return git3__substrdup(ptr, len);
 }
 
-int git_signature_new(git_signature **sig_out, const char *name, const char *email, git_time_t time, int offset)
+int git3_signature_new(git3_signature **sig_out, const char *name, const char *email, git3_time_t time, int offset)
 {
-	git_signature *p = NULL;
+	git3_signature *p = NULL;
 
-	GIT_ASSERT_ARG(name);
-	GIT_ASSERT_ARG(email);
+	GIT3_ASSERT_ARG(name);
+	GIT3_ASSERT_ARG(email);
 
 	*sig_out = NULL;
 
@@ -82,16 +82,16 @@ int git_signature_new(git_signature **sig_out, const char *name, const char *ema
 			"Neither `name` nor `email` should contain angle brackets chars.");
 	}
 
-	p = git__calloc(1, sizeof(git_signature));
-	GIT_ERROR_CHECK_ALLOC(p);
+	p = git3__calloc(1, sizeof(git3_signature));
+	GIT3_ERROR_CHECK_ALLOC(p);
 
 	p->name = extract_trimmed(name, strlen(name));
-	GIT_ERROR_CHECK_ALLOC(p->name);
+	GIT3_ERROR_CHECK_ALLOC(p->name);
 	p->email = extract_trimmed(email, strlen(email));
-	GIT_ERROR_CHECK_ALLOC(p->email);
+	GIT3_ERROR_CHECK_ALLOC(p->email);
 
 	if (p->name[0] == '\0' || p->email[0] == '\0') {
-		git_signature_free(p);
+		git3_signature_free(p);
 		return signature_error("Signature cannot have an empty name or email");
 	}
 
@@ -103,21 +103,21 @@ int git_signature_new(git_signature **sig_out, const char *name, const char *ema
 	return 0;
 }
 
-int git_signature_dup(git_signature **dest, const git_signature *source)
+int git3_signature_dup(git3_signature **dest, const git3_signature *source)
 {
-	git_signature *signature;
+	git3_signature *signature;
 
 	if (source == NULL)
 		return 0;
 
-	signature = git__calloc(1, sizeof(git_signature));
-	GIT_ERROR_CHECK_ALLOC(signature);
+	signature = git3__calloc(1, sizeof(git3_signature));
+	GIT3_ERROR_CHECK_ALLOC(signature);
 
-	signature->name = git__strdup(source->name);
-	GIT_ERROR_CHECK_ALLOC(signature->name);
+	signature->name = git3__strdup(source->name);
+	GIT3_ERROR_CHECK_ALLOC(signature->name);
 
-	signature->email = git__strdup(source->email);
-	GIT_ERROR_CHECK_ALLOC(signature->email);
+	signature->email = git3__strdup(source->email);
+	GIT3_ERROR_CHECK_ALLOC(signature->email);
 
 	signature->when.time = source->when.time;
 	signature->when.offset = source->when.offset;
@@ -128,21 +128,21 @@ int git_signature_dup(git_signature **dest, const git_signature *source)
 	return 0;
 }
 
-int git_signature__pdup(git_signature **dest, const git_signature *source, git_pool *pool)
+int git3_signature__pdup(git3_signature **dest, const git3_signature *source, git3_pool *pool)
 {
-	git_signature *signature;
+	git3_signature *signature;
 
 	if (source == NULL)
 		return 0;
 
-	signature = git_pool_mallocz(pool, sizeof(git_signature));
-	GIT_ERROR_CHECK_ALLOC(signature);
+	signature = git3_pool_mallocz(pool, sizeof(git3_signature));
+	GIT3_ERROR_CHECK_ALLOC(signature);
 
-	signature->name = git_pool_strdup(pool, source->name);
-	GIT_ERROR_CHECK_ALLOC(signature->name);
+	signature->name = git3_pool_strdup(pool, source->name);
+	GIT3_ERROR_CHECK_ALLOC(signature->name);
 
-	signature->email = git_pool_strdup(pool, source->email);
-	GIT_ERROR_CHECK_ALLOC(signature->email);
+	signature->email = git3_pool_strdup(pool, source->email);
+	GIT3_ERROR_CHECK_ALLOC(signature->email);
 
 	signature->when.time = source->when.time;
 	signature->when.offset = source->when.offset;
@@ -175,8 +175,8 @@ static void current_time(time_t *now_out, int *offset_out)
 	*offset_out = (int)offset;
 }
 
-int git_signature_now(
-	git_signature **sig_out,
+int git3_signature_now(
+	git3_signature **sig_out,
 	const char *name,
 	const char *email)
 {
@@ -185,29 +185,29 @@ int git_signature_now(
 
 	current_time(&now, &offset);
 
-	return git_signature_new(sig_out, name, email, now, offset);
+	return git3_signature_new(sig_out, name, email, now, offset);
 }
 
-int git_signature_default(git_signature **out, git_repository *repo)
+int git3_signature_default(git3_signature **out, git3_repository *repo)
 {
 	int error;
-	git_config *cfg;
+	git3_config *cfg;
 	const char *user_name, *user_email;
 
-	if ((error = git_repository_config_snapshot(&cfg, repo)) < 0)
+	if ((error = git3_repository_config_snapshot(&cfg, repo)) < 0)
 		return error;
 
-	if (!(error = git_config_get_string(&user_name, cfg, "user.name")) &&
-		!(error = git_config_get_string(&user_email, cfg, "user.email")))
-		error = git_signature_now(out, user_name, user_email);
+	if (!(error = git3_config_get_string(&user_name, cfg, "user.name")) &&
+		!(error = git3_config_get_string(&user_email, cfg, "user.email")))
+		error = git3_signature_now(out, user_name, user_email);
 
-	git_config_free(cfg);
+	git3_config_free(cfg);
 	return error;
 }
 
 static int user_from_env(
-	git_signature **out,
-	git_repository *repo,
+	git3_signature **out,
+	git3_repository *repo,
 	const char *name_env_var,
 	const char *email_env_var,
 	const char *date_env_var,
@@ -215,93 +215,93 @@ static int user_from_env(
 	int default_offset)
 {
 	int error;
-	git_config *cfg;
+	git3_config *cfg;
 	const char *name, *email, *date;
-	git_time_t timestamp;
+	git3_time_t timestamp;
 	int offset;
-	git_str name_env = GIT_STR_INIT;
-	git_str email_env = GIT_STR_INIT;
-	git_str date_env = GIT_STR_INIT;
+	git3_str name_env = GIT3_STR_INIT;
+	git3_str email_env = GIT3_STR_INIT;
+	git3_str date_env = GIT3_STR_INIT;
 
-	if ((error = git_repository_config_snapshot(&cfg, repo)) < 0)
+	if ((error = git3_repository_config_snapshot(&cfg, repo)) < 0)
 		return error;
 
 	/* Check if the environment variable for the name is set */
-	if (!(git__getenv(&name_env, name_env_var))) {
-		name = git_str_cstr(&name_env);
+	if (!(git3__getenv(&name_env, name_env_var))) {
+		name = git3_str_cstr(&name_env);
 	} else {
 		/* or else read the configuration value. */
-		if ((error = git_config_get_string(&name, cfg, "user.name")) < 0)
+		if ((error = git3_config_get_string(&name, cfg, "user.name")) < 0)
 			goto done;
 	}
 
 	/* Check if the environment variable for the email is set. */
-	if (!(git__getenv(&email_env, email_env_var))) {
-		email = git_str_cstr(&email_env);
+	if (!(git3__getenv(&email_env, email_env_var))) {
+		email = git3_str_cstr(&email_env);
 	} else {
-		if ((error = git_config_get_string(&email, cfg, "user.email")) == GIT_ENOTFOUND) {
-			git_error *last_error;
+		if ((error = git3_config_get_string(&email, cfg, "user.email")) == GIT3_ENOTFOUND) {
+			git3_error *last_error;
 
-			git_error_save(&last_error);
+			git3_error_save(&last_error);
 
-			if ((error = git__getenv(&email_env, "EMAIL")) < 0) {
-				git_error_restore(last_error);
-				error = GIT_ENOTFOUND;
+			if ((error = git3__getenv(&email_env, "EMAIL")) < 0) {
+				git3_error_restore(last_error);
+				error = GIT3_ENOTFOUND;
 				goto done;
 			}
 
-			email = git_str_cstr(&email_env);
-			git_error_free(last_error);
+			email = git3_str_cstr(&email_env);
+			git3_error_free(last_error);
 		} else if (error < 0) {
 			goto done;
 		}
 	}
 
 	/* Check if the environment variable for the timestamp is set */
-	if (!(git__getenv(&date_env, date_env_var))) {
-		date = git_str_cstr(&date_env);
+	if (!(git3__getenv(&date_env, date_env_var))) {
+		date = git3_str_cstr(&date_env);
 
-		if ((error = git_date_offset_parse(&timestamp, &offset, date)) < 0)
+		if ((error = git3_date_offset_parse(&timestamp, &offset, date)) < 0)
 			goto done;
 	} else {
 		timestamp = default_time;
 		offset = default_offset;
 	}
 
-	error = git_signature_new(out, name, email, timestamp, offset);
+	error = git3_signature_new(out, name, email, timestamp, offset);
 
 done:
-	git_config_free(cfg);
-	git_str_dispose(&name_env);
-	git_str_dispose(&email_env);
-	git_str_dispose(&date_env);
+	git3_config_free(cfg);
+	git3_str_dispose(&name_env);
+	git3_str_dispose(&email_env);
+	git3_str_dispose(&date_env);
 	return error;
 }
 
-int git_signature_default_from_env(
-	git_signature **author_out,
-	git_signature **committer_out,
-	git_repository *repo)
+int git3_signature_default_from_env(
+	git3_signature **author_out,
+	git3_signature **committer_out,
+	git3_repository *repo)
 {
-	git_signature *author = NULL, *committer = NULL;
+	git3_signature *author = NULL, *committer = NULL;
 	time_t now;
 	int offset;
 	int error;
 
-	GIT_ASSERT_ARG(author_out || committer_out);
-	GIT_ASSERT_ARG(repo);
+	GIT3_ASSERT_ARG(author_out || committer_out);
+	GIT3_ASSERT_ARG(repo);
 
 	current_time(&now, &offset);
 
 	if (author_out &&
-	    (error = user_from_env(&author, repo, "GIT_AUTHOR_NAME",
-			"GIT_AUTHOR_EMAIL", "GIT_AUTHOR_DATE",
+	    (error = user_from_env(&author, repo, "GIT3_AUTHOR_NAME",
+			"GIT3_AUTHOR_EMAIL", "GIT3_AUTHOR_DATE",
 			now, offset)) < 0)
 		goto on_error;
 
 	if (committer_out &&
-	    (error = user_from_env(&committer, repo, "GIT_COMMITTER_NAME",
-			"GIT_COMMITTER_EMAIL", "GIT_COMMITTER_DATE",
+	    (error = user_from_env(&committer, repo, "GIT3_COMMITTER_NAME",
+			"GIT3_COMMITTER_EMAIL", "GIT3_COMMITTER_DATE",
 			now, offset)) < 0)
 		goto on_error;
 
@@ -314,18 +314,18 @@ int git_signature_default_from_env(
 	return 0;
 
 on_error:
-	git__free(author);
-	git__free(committer);
+	git3__free(author);
+	git3__free(committer);
 	return error;
 }
 
-int git_signature__parse(git_signature *sig, const char **buffer_out,
+int git3_signature__parse(git3_signature *sig, const char **buffer_out,
 		const char *buffer_end, const char *header, char ender)
 {
 	const char *buffer = *buffer_out;
 	const char *email_start, *email_end;
 
-	memset(sig, 0, sizeof(git_signature));
+	memset(sig, 0, sizeof(git3_signature));
 
 	if (ender &&
 		(buffer_end = memchr(buffer, ender, buffer_end - buffer)) == NULL)
@@ -340,8 +340,8 @@ int git_signature__parse(git_signature *sig, const char **buffer_out,
 		buffer += header_len;
 	}
 
-	email_start = git__memrchr(buffer, '<', buffer_end - buffer);
-	email_end = git__memrchr(buffer, '>', buffer_end - buffer);
+	email_start = git3__memrchr(buffer, '<', buffer_end - buffer);
+	email_end = git3__memrchr(buffer, '>', buffer_end - buffer);
 
 	if (!email_start || !email_end || email_end <= email_start)
 		return signature_parse_error("malformed e-mail");
@@ -355,10 +355,10 @@ int git_signature__parse(git_signature *sig, const char **buffer_out,
 		const char *time_start = email_end + 2;
 		const char *time_end;
 
-		if (git__strntol64(&sig->when.time, time_start,
+		if (git3__strntol64(&sig->when.time, time_start,
 				   buffer_end - time_start, &time_end, 10) < 0) {
-			git__free(sig->name);
-			git__free(sig->email);
+			git3__free(sig->name);
+			git3__free(sig->email);
 			sig->name = sig->email = NULL;
 			return signature_parse_error("invalid Unix timestamp");
 		}
@@ -371,7 +371,7 @@ int git_signature__parse(git_signature *sig, const char **buffer_out,
 			tz_start = time_end + 1;
 
 			if ((tz_start[0] != '-' && tz_start[0] != '+') ||
-			    git__strntol32(&offset, tz_start + 1,
+			    git3__strntol32(&offset, tz_start + 1,
 					   buffer_end - tz_start - 1, &tz_end, 10) < 0) {
 				/* malformed timezone, just assume it's zero */
 				offset = 0;
@@ -397,32 +397,32 @@ int git_signature__parse(git_signature *sig, const char **buffer_out,
 	return 0;
 }
 
-int git_signature_from_buffer(git_signature **out, const char *buf)
+int git3_signature_from_buffer(git3_signature **out, const char *buf)
 {
-	git_signature *sig;
+	git3_signature *sig;
 	const char *buf_end;
 	int error;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(buf);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(buf);
 
 	*out = NULL;
 
-	sig = git__calloc(1, sizeof(git_signature));
-	GIT_ERROR_CHECK_ALLOC(sig);
+	sig = git3__calloc(1, sizeof(git3_signature));
+	GIT3_ERROR_CHECK_ALLOC(sig);
 
 	buf_end = buf + strlen(buf);
-	error = git_signature__parse(sig, &buf, buf_end, NULL, '\0');
+	error = git3_signature__parse(sig, &buf, buf_end, NULL, '\0');
 
 	if (error)
-		git__free(sig);
+		git3__free(sig);
 	else
 		*out = sig;
 
 	return error;
 }
 
-void git_signature__writebuf(git_str *buf, const char *header, const git_signature *sig)
+void git3_signature__writebuf(git3_str *buf, const char *header, const git3_signature *sig)
 {
 	int offset, hours, mins;
 	char sign;
@@ -436,19 +436,19 @@ void git_signature__writebuf(git_str *buf, const char *header, const git_signatu
 	hours = offset / 60;
 	mins = offset % 60;
 
-	git_str_printf(buf, "%s%s <%s> %u %c%02d%02d\n",
+	git3_str_printf(buf, "%s%s <%s> %u %c%02d%02d\n",
 			header ? header : "", sig->name, sig->email,
 			(unsigned)sig->when.time, sign, hours, mins);
 }
 
-bool git_signature__equal(const git_signature *one, const git_signature *two)
+bool git3_signature__equal(const git3_signature *one, const git3_signature *two)
 {
-	GIT_ASSERT_ARG(one);
-	GIT_ASSERT_ARG(two);
+	GIT3_ASSERT_ARG(one);
+	GIT3_ASSERT_ARG(two);
 
 	return
-		git__strcmp(one->name, two->name) == 0 &&
-		git__strcmp(one->email, two->email) == 0 &&
+		git3__strcmp(one->name, two->name) == 0 &&
+		git3__strcmp(one->email, two->email) == 0 &&
 		one->when.time == two->when.time &&
 		one->when.offset == two->when.offset &&
 		one->when.sign == two->when.sign;

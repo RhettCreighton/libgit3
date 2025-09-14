@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -11,15 +11,15 @@
 #include "runtime.h"
 #include "git3/trace.h"
 
-struct git_trace_data git_trace__data = {0};
+struct git3_trace_data git3_trace__data = {0};
 
-int git_trace_set(git_trace_level_t level, git_trace_cb callback)
+int git3_trace_set(git3_trace_level_t level, git3_trace_cb callback)
 {
-	GIT_ASSERT_ARG(level == 0 || callback != NULL);
+	GIT3_ASSERT_ARG(level == 0 || callback != NULL);
 
-	git_trace__data.level = level;
-	git_trace__data.callback = callback;
-	GIT_MEMORY_BARRIER;
+	git3_trace__data.level = level;
+	git3_trace__data.callback = callback;
+	GIT3_MEMORY_BARRIER;
 
 	return 0;
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -15,7 +15,7 @@
  * A general purpose set of progress printing functions.  An individual
  * `cli_progress` object is capable of displaying progress for a single
  * function, even if that function displays multiple pieces of progress
- * (like `git_clone`).  `cli_progress_finish` should be called after
+ * (like `git3_clone`).  `cli_progress_finish` should be called after
  * any function invocation to re-set state.
  */
 
@@ -38,9 +38,9 @@ typedef struct {
 	uint64_t last_update;
 
 	/* Accumulators for partial output and deferred updates. */
-	git_str sideband;
-	git_str onscreen;
-	git_str deferred;
+	git3_str sideband;
+	git3_str onscreen;
+	git3_str deferred;
 
 	/* Last update about throughput */
 	uint64_t throughput_update;
@@ -51,7 +51,7 @@ typedef struct {
 
 /**
  * Prints sideband data from fetch to the console.  Suitable for a
- * `sideband_progress` callback for `git_fetch_options`.
+ * `sideband_progress` callback for `git3_fetch_options`.
  *
  * @param str The sideband string
  * @param len The length of the sideband string
@@ -65,30 +65,30 @@ extern int cli_progress_fetch_sideband(
 
 /**
  * Prints fetch transfer statistics to the console.  Suitable for a
- * `transfer_progress` callback for `git_fetch_options`.
+ * `transfer_progress` callback for `git3_fetch_options`.
  *
  * @param stats The indexer stats
  * @param payload A pointer to the cli_progress
  * @return 0 on success, -1 on failure
  */
 extern int cli_progress_fetch_transfer(
-	const git_indexer_progress *stats,
+	const git3_indexer_progress *stats,
 	void *payload);
 
 /**
  * Prints indexer progress to the console. Suitable for a
- * `progress_cb` callback for `git_indexer_options`.
+ * `progress_cb` callback for `git3_indexer_options`.
  *
  * @param stats The indexer stats
  * @param payload A pointer to the cli_progress
  */
 extern int cli_progress_indexer(
-	const git_indexer_progress *stats,
+	const git3_indexer_progress *stats,
 	void *payload);
 
 /**
  * Prints checkout progress to the console.  Suitable for a
- * `progress_cb` callback for `git_checkout_options`.
+ * `progress_cb` callback for `git3_checkout_options`.
  *
  * @param path The path being written
  * @param completed_steps The completed checkout steps

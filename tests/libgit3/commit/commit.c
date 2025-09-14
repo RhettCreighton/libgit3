@@ -1,18 +1,18 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "commit.h"
 #include "git3/commit.h"
 
-static git_repository *_repo;
+static git3_repository *_repo;
 
 void test_commit_commit__initialize(void)
 {
 	cl_fixture_sandbox("testrepo.git");
-	cl_git_pass(git_repository_open(&_repo, "testrepo.git"));
+	cl_git_pass(git3_repository_open(&_repo, "testrepo.git"));
 }
 
 void test_commit_commit__cleanup(void)
 {
-	git_repository_free(_repo);
+	git3_repository_free(_repo);
 	_repo = NULL;
 
 	cl_fixture_cleanup("testrepo.git");
@@ -20,119 +20,119 @@ void test_commit_commit__cleanup(void)
 
 void test_commit_commit__create_unexisting_update_ref(void)
 {
-	git_oid oid;
-	git_tree *tree;
-	git_commit *commit;
-	git_signature *s;
-	git_reference *ref;
+	git3_oid oid;
+	git3_tree *tree;
+	git3_commit *commit;
+	git3_signature *s;
+	git3_reference *ref;
 
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, _repo, &oid));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, _repo, &oid));
 
-	git_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT_OID_SHA1);
-	cl_git_pass(git_tree_lookup(&tree, _repo, &oid));
+	git3_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT3_OID_SHA1);
+	cl_git_pass(git3_tree_lookup(&tree, _repo, &oid));
 
-	cl_git_pass(git_signature_now(&s, "alice", "alice@example.com"));
+	cl_git_pass(git3_signature_now(&s, "alice", "alice@example.com"));
 
-	cl_git_fail(git_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
-	cl_git_pass(git_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
-				      NULL, "some msg", tree, 1, (const git_commit **) &commit));
+	cl_git_fail(git3_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
+	cl_git_pass(git3_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
+				      NULL, "some msg", tree, 1, (const git3_commit **) &commit));
 
 	/* fail because the parent isn't the tip of the branch anymore */
-	cl_git_fail(git_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
-				      NULL, "some msg", tree, 1, (const git_commit **) &commit));
+	cl_git_fail(git3_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
+				      NULL, "some msg", tree, 1, (const git3_commit **) &commit));
 
-	cl_git_pass(git_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
-	cl_assert_equal_oid(&oid, git_reference_target(ref));
+	cl_git_pass(git3_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
+	cl_assert_equal_oid(&oid, git3_reference_target(ref));
 
-	git_tree_free(tree);
-	git_commit_free(commit);
-	git_signature_free(s);
-	git_reference_free(ref);
+	git3_tree_free(tree);
+	git3_commit_free(commit);
+	git3_signature_free(s);
+	git3_reference_free(ref);
 }
 
 void test_commit_commit__create_initial_commit(void)
 {
-	git_oid oid;
-	git_tree *tree;
-	git_commit *commit;
-	git_signature *s;
-	git_reference *ref;
+	git3_oid oid;
+	git3_tree *tree;
+	git3_commit *commit;
+	git3_signature *s;
+	git3_reference *ref;
 
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, _repo, &oid));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, _repo, &oid));
 
-	git_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT_OID_SHA1);
-	cl_git_pass(git_tree_lookup(&tree, _repo, &oid));
+	git3_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT3_OID_SHA1);
+	cl_git_pass(git3_tree_lookup(&tree, _repo, &oid));
 
-	cl_git_pass(git_signature_now(&s, "alice", "alice@example.com"));
+	cl_git_pass(git3_signature_now(&s, "alice", "alice@example.com"));
 
-	cl_git_fail(git_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
-	cl_git_pass(git_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
+	cl_git_fail(git3_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
+	cl_git_pass(git3_commit_create(&oid, _repo, "refs/heads/foo/bar", s, s,
 				      NULL, "initial commit", tree, 0, NULL));
 
-	cl_git_pass(git_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
+	cl_git_pass(git3_reference_lookup(&ref, _repo, "refs/heads/foo/bar"));
 
-	cl_assert_equal_oid(&oid, git_reference_target(ref));
+	cl_assert_equal_oid(&oid, git3_reference_target(ref));
 
-	git_tree_free(tree);
-	git_commit_free(commit);
-	git_signature_free(s);
-	git_reference_free(ref);
+	git3_tree_free(tree);
+	git3_commit_free(commit);
+	git3_signature_free(s);
+	git3_reference_free(ref);
 }
 
 void test_commit_commit__create_initial_commit_parent_not_current(void)
 {
-	git_oid oid;
-	git_oid original_oid;
-	git_tree *tree;
-	git_commit *commit;
-	git_signature *s;
+	git3_oid oid;
+	git3_oid original_oid;
+	git3_tree *tree;
+	git3_commit *commit;
+	git3_signature *s;
 
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, _repo, &oid));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, _repo, &oid));
 
-	git_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT_OID_SHA1);
-	cl_git_pass(git_tree_lookup(&tree, _repo, &oid));
+	git3_oid_from_string(&oid, "944c0f6e4dfa41595e6eb3ceecdb14f50fe18162", GIT3_OID_SHA1);
+	cl_git_pass(git3_tree_lookup(&tree, _repo, &oid));
 
-	cl_git_pass(git_signature_now(&s, "alice", "alice@example.com"));
+	cl_git_pass(git3_signature_now(&s, "alice", "alice@example.com"));
 
-	cl_git_pass(git_reference_name_to_id(&original_oid, _repo, "HEAD"));
+	cl_git_pass(git3_reference_name_to_id(&original_oid, _repo, "HEAD"));
 
-	cl_git_fail(git_commit_create(&oid, _repo, "HEAD", s, s,
+	cl_git_fail(git3_commit_create(&oid, _repo, "HEAD", s, s,
 				      NULL, "initial commit", tree, 0, NULL));
 
-	cl_git_pass(git_reference_name_to_id(&oid, _repo, "HEAD"));
+	cl_git_pass(git3_reference_name_to_id(&oid, _repo, "HEAD"));
 
 	cl_assert_equal_oid(&oid, &original_oid);
 
-	git_tree_free(tree);
-	git_commit_free(commit);
-	git_signature_free(s);
+	git3_tree_free(tree);
+	git3_commit_free(commit);
+	git3_signature_free(s);
 }
 
 static void assert_commit_summary(const char *expected, const char *given)
 {
-	git_commit *dummy;
+	git3_commit *dummy;
 
-	cl_assert(dummy = git__calloc(1, sizeof(struct git_commit)));
+	cl_assert(dummy = git3__calloc(1, sizeof(struct git3_commit)));
 
-	dummy->raw_message = git__strdup(given);
-	cl_assert_equal_s(expected, git_commit_summary(dummy));
+	dummy->raw_message = git3__strdup(given);
+	cl_assert_equal_s(expected, git3_commit_summary(dummy));
 
-	git_commit__free(dummy);
+	git3_commit__free(dummy);
 }
 
 static void assert_commit_body(const char *expected, const char *given)
 {
-	git_commit *dummy;
+	git3_commit *dummy;
 
-	cl_assert(dummy = git__calloc(1, sizeof(struct git_commit)));
+	cl_assert(dummy = git3__calloc(1, sizeof(struct git3_commit)));
 
-	dummy->raw_message = git__strdup(given);
-	cl_assert_equal_s(expected, git_commit_body(dummy));
+	dummy->raw_message = git3__strdup(given);
+	cl_assert_equal_s(expected, git3_commit_body(dummy));
 
-	git_commit__free(dummy);
+	git3_commit__free(dummy);
 }
 
 void test_commit_commit__summary(void)

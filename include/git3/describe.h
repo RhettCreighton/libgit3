@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_describe_h__
@@ -12,9 +12,9 @@
 #include "buffer.h"
 
 /**
- * @file git2/describe.h
+ * @file git3/describe.h
  * @brief Describe a commit in reference to tags
- * @defgroup git_describe Git describing routines
+ * @defgroup git3_describe Git describing routines
  * @ingroup Git
  * @{
  *
@@ -22,7 +22,7 @@
  * relates to the tags. This can be useful for showing how the current
  * commit has changed from a particular tagged version of the repository.
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Reference lookup strategy
@@ -32,23 +32,23 @@ GIT_BEGIN_DECL
  * refs/ respectively.
  */
 typedef enum {
-	GIT_DESCRIBE_DEFAULT,
-	GIT_DESCRIBE_TAGS,
-	GIT_DESCRIBE_ALL
-} git_describe_strategy_t;
+	GIT3_DESCRIBE_DEFAULT,
+	GIT3_DESCRIBE_TAGS,
+	GIT3_DESCRIBE_ALL
+} git3_describe_strategy_t;
 
 /**
  * Describe options structure
  *
- * Initialize with `GIT_DESCRIBE_OPTIONS_INIT`. Alternatively, you can
- * use `git_describe_options_init`.
+ * Initialize with `GIT3_DESCRIBE_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_describe_options_init`.
  *
  */
-typedef struct git_describe_options {
+typedef struct git3_describe_options {
 	unsigned int version;
 
 	unsigned int max_candidates_tags; /**< default: 10 */
-	unsigned int describe_strategy; /**< default: GIT_DESCRIBE_DEFAULT */
+	unsigned int describe_strategy; /**< default: GIT3_DESCRIBE_DEFAULT */
 	const char *pattern;
 	/**
 	 * When calculating the distance from the matching tag or
@@ -62,39 +62,39 @@ typedef struct git_describe_options {
 	 * commit.
 	 */
 	int show_commit_oid_as_fallback;
-} git_describe_options;
+} git3_describe_options;
 
 /** Default maximum candidate tags */
-#define GIT_DESCRIBE_DEFAULT_MAX_CANDIDATES_TAGS 10
+#define GIT3_DESCRIBE_DEFAULT_MAX_CANDIDATES_TAGS 10
 /** Default abbreviated size */
-#define GIT_DESCRIBE_DEFAULT_ABBREVIATED_SIZE 7
+#define GIT3_DESCRIBE_DEFAULT_ABBREVIATED_SIZE 7
 
-/** Current version for the `git_describe_options` structure */
-#define GIT_DESCRIBE_OPTIONS_VERSION 1
+/** Current version for the `git3_describe_options` structure */
+#define GIT3_DESCRIBE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_describe_options` */
-#define GIT_DESCRIBE_OPTIONS_INIT { \
-	GIT_DESCRIBE_OPTIONS_VERSION, \
-	GIT_DESCRIBE_DEFAULT_MAX_CANDIDATES_TAGS, \
+/** Static constructor for `git3_describe_options` */
+#define GIT3_DESCRIBE_OPTIONS_INIT { \
+	GIT3_DESCRIBE_OPTIONS_VERSION, \
+	GIT3_DESCRIBE_DEFAULT_MAX_CANDIDATES_TAGS, \
 }
 
 /**
- * Initialize git_describe_options structure
+ * Initialize git3_describe_options structure
  *
- * Initializes a `git_describe_options` with default values. Equivalent to creating
- * an instance with GIT_DESCRIBE_OPTIONS_INIT.
+ * Initializes a `git3_describe_options` with default values. Equivalent to creating
+ * an instance with GIT3_DESCRIBE_OPTIONS_INIT.
  *
- * @param opts The `git_describe_options` struct to initialize.
- * @param version The struct version; pass `GIT_DESCRIBE_OPTIONS_VERSION`.
+ * @param opts The `git3_describe_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_DESCRIBE_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_describe_options_init(git_describe_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_describe_options_init(git3_describe_options *opts, unsigned int version);
 
 /**
  * Describe format options structure
  *
- * Initialize with `GIT_DESCRIBE_FORMAT_OPTIONS_INIT`. Alternatively, you can
- * use `git_describe_format_options_init`.
+ * Initialize with `GIT3_DESCRIBE_FORMAT_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_describe_format_options_init`.
  *
  */
 typedef struct {
@@ -117,33 +117,33 @@ typedef struct {
 	 * be appended to the description string.
 	 */
 	const char *dirty_suffix;
-} git_describe_format_options;
+} git3_describe_format_options;
 
-/** Current version for the `git_describe_format_options` structure */
-#define GIT_DESCRIBE_FORMAT_OPTIONS_VERSION 1
+/** Current version for the `git3_describe_format_options` structure */
+#define GIT3_DESCRIBE_FORMAT_OPTIONS_VERSION 1
 
-/** Static constructor for `git_describe_format_options` */
-#define GIT_DESCRIBE_FORMAT_OPTIONS_INIT { \
-		GIT_DESCRIBE_FORMAT_OPTIONS_VERSION,   \
-		GIT_DESCRIBE_DEFAULT_ABBREVIATED_SIZE, \
+/** Static constructor for `git3_describe_format_options` */
+#define GIT3_DESCRIBE_FORMAT_OPTIONS_INIT { \
+		GIT3_DESCRIBE_FORMAT_OPTIONS_VERSION,   \
+		GIT3_DESCRIBE_DEFAULT_ABBREVIATED_SIZE, \
  }
 
 /**
- * Initialize git_describe_format_options structure
+ * Initialize git3_describe_format_options structure
  *
- * Initializes a `git_describe_format_options` with default values. Equivalent to creating
- * an instance with GIT_DESCRIBE_FORMAT_OPTIONS_INIT.
+ * Initializes a `git3_describe_format_options` with default values. Equivalent to creating
+ * an instance with GIT3_DESCRIBE_FORMAT_OPTIONS_INIT.
  *
- * @param opts The `git_describe_format_options` struct to initialize.
- * @param version The struct version; pass `GIT_DESCRIBE_FORMAT_OPTIONS_VERSION`.
+ * @param opts The `git3_describe_format_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_DESCRIBE_FORMAT_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_describe_format_options_init(git_describe_format_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_describe_format_options_init(git3_describe_format_options *opts, unsigned int version);
 
 /**
  * A struct that stores the result of a describe operation.
  */
-typedef struct git_describe_result git_describe_result;
+typedef struct git3_describe_result git3_describe_result;
 
 /**
  * Describe a commit
@@ -156,10 +156,10 @@ typedef struct git_describe_result git_describe_result;
  * @param opts the lookup options (or NULL for defaults)
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_describe_commit(
-	git_describe_result **result,
-	git_object *committish,
-	git_describe_options *opts);
+GIT3_EXTERN(int) git3_describe_commit(
+	git3_describe_result **result,
+	git3_object *committish,
+	git3_describe_options *opts);
 
 /**
  * Describe a commit
@@ -174,33 +174,33 @@ GIT_EXTERN(int) git_describe_commit(
  * @param opts the lookup options (or NULL for defaults)
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_describe_workdir(
-	git_describe_result **out,
-	git_repository *repo,
-	git_describe_options *opts);
+GIT3_EXTERN(int) git3_describe_workdir(
+	git3_describe_result **out,
+	git3_repository *repo,
+	git3_describe_options *opts);
 
 /**
  * Print the describe result to a buffer
  *
  * @param out The buffer to store the result
- * @param result the result from `git_describe_commit()` or
- * `git_describe_workdir()`.
+ * @param result the result from `git3_describe_commit()` or
+ * `git3_describe_workdir()`.
  * @param opts the formatting options (or NULL for defaults)
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_describe_format(
-	git_buf *out,
-	const git_describe_result *result,
-	const git_describe_format_options *opts);
+GIT3_EXTERN(int) git3_describe_format(
+	git3_buf *out,
+	const git3_describe_result *result,
+	const git3_describe_format_options *opts);
 
 /**
  * Free the describe result.
  *
  * @param result The result to free.
  */
-GIT_EXTERN(void) git_describe_result_free(git_describe_result *result);
+GIT3_EXTERN(void) git3_describe_result_free(git3_describe_result *result);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

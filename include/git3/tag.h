@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_tag_h__
@@ -14,13 +14,13 @@
 #include "strarray.h"
 
 /**
- * @file git2/tag.h
+ * @file git3/tag.h
  * @brief A (nearly) immutable pointer to a commit; useful for versioning
- * @defgroup git_tag Git tag management
+ * @defgroup git3_tag Git tag management
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Lookup a tag object from the repository.
@@ -30,14 +30,14 @@ GIT_BEGIN_DECL
  * @param id identity of the tag to locate.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_lookup(
-	git_tag **out, git_repository *repo, const git_oid *id);
+GIT3_EXTERN(int) git3_tag_lookup(
+	git3_tag **out, git3_repository *repo, const git3_oid *id);
 
 /**
  * Lookup a tag object from the repository,
  * given a prefix of its identifier (short id).
  *
- * @see git_object_lookup_prefix
+ * @see git3_object_lookup_prefix
  *
  * @param out pointer to the looked up tag
  * @param repo the repo to use when locating the tag.
@@ -45,20 +45,20 @@ GIT_EXTERN(int) git_tag_lookup(
  * @param len the length of the short identifier
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_lookup_prefix(
-	git_tag **out, git_repository *repo, const git_oid *id, size_t len);
+GIT3_EXTERN(int) git3_tag_lookup_prefix(
+	git3_tag **out, git3_repository *repo, const git3_oid *id, size_t len);
 
 /**
  * Close an open tag
  *
- * You can no longer use the git_tag pointer after this call.
+ * You can no longer use the git3_tag pointer after this call.
  *
  * IMPORTANT: You MUST call this method when you are through with a tag to
  * release memory. Failure to do so will cause a memory leak.
  *
  * @param tag the tag to close
  */
-GIT_EXTERN(void) git_tag_free(git_tag *tag);
+GIT3_EXTERN(void) git3_tag_free(git3_tag *tag);
 
 /**
  * Get the id of a tag.
@@ -66,7 +66,7 @@ GIT_EXTERN(void) git_tag_free(git_tag *tag);
  * @param tag a previously loaded tag.
  * @return object identity for the tag.
  */
-GIT_EXTERN(const git_oid *) git_tag_id(const git_tag *tag);
+GIT3_EXTERN(const git3_oid *) git3_tag_id(const git3_tag *tag);
 
 /**
  * Get the repository that contains the tag.
@@ -74,7 +74,7 @@ GIT_EXTERN(const git_oid *) git_tag_id(const git_tag *tag);
  * @param tag A previously loaded tag.
  * @return Repository that contains this tag.
  */
-GIT_EXTERN(git_repository *) git_tag_owner(const git_tag *tag);
+GIT3_EXTERN(git3_repository *) git3_tag_owner(const git3_tag *tag);
 
 /**
  * Get the tagged object of a tag
@@ -86,7 +86,7 @@ GIT_EXTERN(git_repository *) git_tag_owner(const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_target(git_object **target_out, const git_tag *tag);
+GIT3_EXTERN(int) git3_tag_target(git3_object **target_out, const git3_tag *tag);
 
 /**
  * Get the OID of the tagged object of a tag
@@ -94,7 +94,7 @@ GIT_EXTERN(int) git_tag_target(git_object **target_out, const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return pointer to the OID
  */
-GIT_EXTERN(const git_oid *) git_tag_target_id(const git_tag *tag);
+GIT3_EXTERN(const git3_oid *) git3_tag_target_id(const git3_tag *tag);
 
 /**
  * Get the type of a tag's tagged object
@@ -102,7 +102,7 @@ GIT_EXTERN(const git_oid *) git_tag_target_id(const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return type of the tagged object
  */
-GIT_EXTERN(git_object_t) git_tag_target_type(const git_tag *tag);
+GIT3_EXTERN(git3_object_t) git3_tag_target_type(const git3_tag *tag);
 
 /**
  * Get the name of a tag
@@ -110,7 +110,7 @@ GIT_EXTERN(git_object_t) git_tag_target_type(const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return name of the tag
  */
-GIT_EXTERN(const char *) git_tag_name(const git_tag *tag);
+GIT3_EXTERN(const char *) git3_tag_name(const git3_tag *tag);
 
 /**
  * Get the tagger (author) of a tag
@@ -118,7 +118,7 @@ GIT_EXTERN(const char *) git_tag_name(const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return reference to the tag's author or NULL when unspecified
  */
-GIT_EXTERN(const git_signature *) git_tag_tagger(const git_tag *tag);
+GIT3_EXTERN(const git3_signature *) git3_tag_tagger(const git3_tag *tag);
 
 /**
  * Get the message of a tag
@@ -126,7 +126,7 @@ GIT_EXTERN(const git_signature *) git_tag_tagger(const git_tag *tag);
  * @param tag a previously loaded tag.
  * @return message of the tag or NULL when unspecified
  */
-GIT_EXTERN(const char *) git_tag_message(const git_tag *tag);
+GIT3_EXTERN(const char *) git3_tag_message(const git3_tag *tag);
 
 
 /**
@@ -137,7 +137,7 @@ GIT_EXTERN(const char *) git_tag_message(const git_tag *tag);
  * already exists with the given name, it'll be replaced.
  *
  * The message will not be cleaned up. This can be achieved
- * through `git_message_prettify()`.
+ * through `git3_message_prettify()`.
  *
  * The tag name will be checked for validity. You must avoid
  * the characters '~', '^', ':', '\\', '?', '[', and '*', and the
@@ -146,7 +146,7 @@ GIT_EXTERN(const char *) git_tag_message(const git_tag *tag);
  * @param oid Pointer where to store the OID of the
  * newly created tag. If the tag already exists, this parameter
  * will be the oid of the existing tag, and the function will
- * return a GIT_EEXISTS error code.
+ * return a GIT3_EEXISTS error code.
  *
  * @param repo Repository where to store the tag
  *
@@ -164,24 +164,24 @@ GIT_EXTERN(const char *) git_tag_message(const git_tag *tag);
  *
  * @param force Overwrite existing references
  *
- * @return 0 on success, GIT_EINVALIDSPEC or an error code
+ * @return 0 on success, GIT3_EINVALIDSPEC or an error code
  *	A tag object is written to the ODB, and a proper reference
  *	is written in the /refs/tags folder, pointing to it
  */
-GIT_EXTERN(int) git_tag_create(
-	git_oid *oid,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_create(
+	git3_oid *oid,
+	git3_repository *repo,
 	const char *tag_name,
-	const git_object *target,
-	const git_signature *tagger,
+	const git3_object *target,
+	const git3_signature *tagger,
 	const char *message,
 	int force);
 
 /**
- * Create a new tag in the object database pointing to a git_object
+ * Create a new tag in the object database pointing to a git3_object
  *
  * The message will not be cleaned up. This can be achieved
- * through `git_message_prettify()`.
+ * through `git3_message_prettify()`.
  *
  * @param oid Pointer where to store the OID of the
  * newly created tag
@@ -200,12 +200,12 @@ GIT_EXTERN(int) git_tag_create(
  *
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_tag_annotation_create(
-	git_oid *oid,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_annotation_create(
+	git3_oid *oid,
+	git3_repository *repo,
 	const char *tag_name,
-	const git_object *target,
-	const git_signature *tagger,
+	const git3_object *target,
+	const git3_signature *tagger,
 	const char *message);
 
 /**
@@ -217,9 +217,9 @@ GIT_EXTERN(int) git_tag_annotation_create(
  * @param force Overwrite existing tags
  * @return 0 on success; error code otherwise
  */
-GIT_EXTERN(int) git_tag_create_from_buffer(
-	git_oid *oid,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_create_from_buffer(
+	git3_oid *oid,
+	git3_repository *repo,
 	const char *buffer,
 	int force);
 
@@ -231,12 +231,12 @@ GIT_EXTERN(int) git_tag_create_from_buffer(
  * already exists with the given name, it'll be replaced.
  *
  * The tag name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * @param oid Pointer where to store the OID of the provided
  * target object. If the tag already exists, this parameter
  * will be filled with the oid of the existing pointed object
- * and the function will return a GIT_EEXISTS error code.
+ * and the function will return a GIT3_EEXISTS error code.
  *
  * @param repo Repository where to store the lightweight tag
  *
@@ -249,32 +249,32 @@ GIT_EXTERN(int) git_tag_create_from_buffer(
  *
  * @param force Overwrite existing references
  *
- * @return 0 on success, GIT_EINVALIDSPEC or an error code
+ * @return 0 on success, GIT3_EINVALIDSPEC or an error code
  *	A proper reference is written in the /refs/tags folder,
  * pointing to the provided target object
  */
-GIT_EXTERN(int) git_tag_create_lightweight(
-	git_oid *oid,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_create_lightweight(
+	git3_oid *oid,
+	git3_repository *repo,
 	const char *tag_name,
-	const git_object *target,
+	const git3_object *target,
 	int force);
 
 /**
  * Delete an existing tag reference.
  *
  * The tag name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * @param repo Repository where lives the tag
  *
  * @param tag_name Name of the tag to be deleted;
  * this name is validated for consistency.
  *
- * @return 0 on success, GIT_EINVALIDSPEC or an error code
+ * @return 0 on success, GIT3_EINVALIDSPEC or an error code
  */
-GIT_EXTERN(int) git_tag_delete(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_delete(
+	git3_repository *repo,
 	const char *tag_name);
 
 /**
@@ -283,16 +283,16 @@ GIT_EXTERN(int) git_tag_delete(
  * The string array will be filled with the names of the
  * matching tags; these values are owned by the user and
  * should be free'd manually when no longer needed, using
- * `git_strarray_free`.
+ * `git3_strarray_free`.
  *
- * @param tag_names Pointer to a git_strarray structure where
+ * @param tag_names Pointer to a git3_strarray structure where
  *		the tag names will be stored
  * @param repo Repository where to find the tags
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_list(
-	git_strarray *tag_names,
-	git_repository *repo);
+GIT3_EXTERN(int) git3_tag_list(
+	git3_strarray *tag_names,
+	git3_repository *repo);
 
 /**
  * Fill a list with all the tags in the Repository
@@ -304,30 +304,30 @@ GIT_EXTERN(int) git_tag_list(
  * The string array will be filled with the names of the
  * matching tags; these values are owned by the user and
  * should be free'd manually when no longer needed, using
- * `git_strarray_free`.
+ * `git3_strarray_free`.
  *
- * @param tag_names Pointer to a git_strarray structure where
+ * @param tag_names Pointer to a git3_strarray structure where
  *		the tag names will be stored
  * @param pattern Standard fnmatch pattern
  * @param repo Repository where to find the tags
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_list_match(
-	git_strarray *tag_names,
+GIT3_EXTERN(int) git3_tag_list_match(
+	git3_strarray *tag_names,
 	const char *pattern,
-	git_repository *repo);
+	git3_repository *repo);
 
 /**
  * Callback used to iterate over tag names
  *
- * @see git_tag_foreach
+ * @see git3_tag_foreach
  *
  * @param name The tag name
  * @param oid The tag's OID
- * @param payload Payload passed to git_tag_foreach
+ * @param payload Payload passed to git3_tag_foreach
  * @return non-zero to terminate the iteration
  */
-typedef int GIT_CALLBACK(git_tag_foreach_cb)(const char *name, git_oid *oid, void *payload);
+typedef int GIT3_CALLBACK(git3_tag_foreach_cb)(const char *name, git3_oid *oid, void *payload);
 
 /**
  * Call callback `cb' for each tag in the repository
@@ -337,25 +337,25 @@ typedef int GIT_CALLBACK(git_tag_foreach_cb)(const char *name, git_oid *oid, voi
  * @param payload Pointer to callback data (optional)
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_tag_foreach(
-	git_repository *repo,
-	git_tag_foreach_cb callback,
+GIT3_EXTERN(int) git3_tag_foreach(
+	git3_repository *repo,
+	git3_tag_foreach_cb callback,
 	void *payload);
 
 
 /**
- * Recursively peel a tag until a non tag git_object is found
+ * Recursively peel a tag until a non tag git3_object is found
  *
  * The retrieved `tag_target` object is owned by the repository
- * and should be closed with the `git_object_free` method.
+ * and should be closed with the `git3_object_free` method.
  *
- * @param tag_target_out Pointer to the peeled git_object
+ * @param tag_target_out Pointer to the peeled git3_object
  * @param tag The tag to be processed
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_tag_peel(
-	git_object **tag_target_out,
-	const git_tag *tag);
+GIT3_EXTERN(int) git3_tag_peel(
+	git3_object **tag_target_out,
+	const git3_tag *tag);
 
 /**
  * Create an in-memory copy of a tag. The copy must be explicitly
@@ -365,7 +365,7 @@ GIT_EXTERN(int) git_tag_peel(
  * @param source Original tag to copy
  * @return 0
  */
-GIT_EXTERN(int) git_tag_dup(git_tag **out, git_tag *source);
+GIT3_EXTERN(int) git3_tag_dup(git3_tag **out, git3_tag *source);
 
 /**
  * Determine whether a tag name is valid, meaning that (when prefixed
@@ -377,9 +377,9 @@ GIT_EXTERN(int) git_tag_dup(git_tag **out, git_tag *source);
  * @param name a tag name to test
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_tag_name_is_valid(int *valid, const char *name);
+GIT3_EXTERN(int) git3_tag_name_is_valid(int *valid, const char *name);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

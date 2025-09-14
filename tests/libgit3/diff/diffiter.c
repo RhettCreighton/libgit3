@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_helpers.h"
 
 void test_diff_diffiter__initialize(void)
@@ -12,150 +12,150 @@ void test_diff_diffiter__cleanup(void)
 
 void test_diff_diffiter__create(void)
 {
-	git_repository *repo = cl_git_sandbox_init("attr");
-	git_diff *diff;
+	git3_repository *repo = cl_git_sandbox_init("attr");
+	git3_diff *diff;
 	size_t d, num_d;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, NULL));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 	for (d = 0; d < num_d; ++d) {
-		const git_diff_delta *delta = git_diff_get_delta(diff, d);
+		const git3_diff_delta *delta = git3_diff_get_delta(diff, d);
 		cl_assert(delta != NULL);
 	}
 
-	cl_assert(!git_diff_get_delta(diff, num_d));
+	cl_assert(!git3_diff_get_delta(diff, num_d));
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_diffiter__iterate_files_1(void)
 {
-	git_repository *repo = cl_git_sandbox_init("attr");
-	git_diff *diff;
+	git3_repository *repo = cl_git_sandbox_init("attr");
+	git3_diff *diff;
 	size_t d, num_d;
 	diff_expects exp = { 0 };
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, NULL));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 
 	for (d = 0; d < num_d; ++d) {
-		const git_diff_delta *delta = git_diff_get_delta(diff, d);
+		const git3_diff_delta *delta = git3_diff_get_delta(diff, d);
 		cl_assert(delta != NULL);
 
 		diff_file_cb(delta, (float)d / (float)num_d, &exp);
 	}
 	cl_assert_equal_sz(6, exp.files);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_diffiter__iterate_files_2(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff *diff;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff *diff;
 	size_t d, num_d;
 	int count = 0;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, NULL));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 	cl_assert_equal_i(8, (int)num_d);
 
 	for (d = 0; d < num_d; ++d) {
-		const git_diff_delta *delta = git_diff_get_delta(diff, d);
+		const git3_diff_delta *delta = git3_diff_get_delta(diff, d);
 		cl_assert(delta != NULL);
 		count++;
 	}
 	cl_assert_equal_i(8, count);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_diffiter__iterate_files_and_hunks(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	size_t d, num_d;
 	int file_count = 0, hunk_count = 0;
 
 	opts.context_lines = 3;
 	opts.interhunk_lines = 1;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
+		git3_patch *patch;
 		size_t h, num_h;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
 		cl_assert(patch);
 
 		file_count++;
 
-		num_h = git_patch_num_hunks(patch);
+		num_h = git3_patch_num_hunks(patch);
 
 		for (h = 0; h < num_h; h++) {
-			const git_diff_hunk *hunk;
+			const git3_diff_hunk *hunk;
 
-			cl_git_pass(git_patch_get_hunk(&hunk, NULL, patch, h));
+			cl_git_pass(git3_patch_get_hunk(&hunk, NULL, patch, h));
 			cl_assert(hunk);
 
 			hunk_count++;
 		}
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
 	cl_assert_equal_i(13, file_count);
 	cl_assert_equal_i(8, hunk_count);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_diffiter__max_size_threshold(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	int file_count = 0, binary_count = 0, hunk_count = 0;
 	size_t d, num_d;
 
 	opts.context_lines = 3;
 	opts.interhunk_lines = 1;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
-	num_d = git_diff_num_deltas(diff);
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	num_d = git3_diff_num_deltas(diff);
 
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
-		const git_diff_delta *delta;
+		git3_patch *patch;
+		const git3_diff_delta *delta;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
 		cl_assert(patch);
-		delta = git_patch_get_delta(patch);
+		delta = git3_patch_get_delta(patch);
 		cl_assert(delta);
 
 		file_count++;
-		hunk_count += (int)git_patch_num_hunks(patch);
+		hunk_count += (int)git3_patch_num_hunks(patch);
 
-		assert((delta->flags & (GIT_DIFF_FLAG_BINARY|GIT_DIFF_FLAG_NOT_BINARY)) != 0);
-		binary_count += ((delta->flags & GIT_DIFF_FLAG_BINARY) != 0);
+		assert((delta->flags & (GIT3_DIFF_FLAG_BINARY|GIT3_DIFF_FLAG_NOT_BINARY)) != 0);
+		binary_count += ((delta->flags & GIT3_DIFF_FLAG_BINARY) != 0);
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
 	cl_assert_equal_i(13, file_count);
 	cl_assert_equal_i(0, binary_count);
 	cl_assert_equal_i(8, hunk_count);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* try again with low file size threshold */
 
@@ -163,26 +163,26 @@ void test_diff_diffiter__max_size_threshold(void)
 
 	opts.context_lines = 3;
 	opts.interhunk_lines = 1;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 	opts.max_size = 50; /* treat anything over 50 bytes as binary! */
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
-	num_d = git_diff_num_deltas(diff);
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	num_d = git3_diff_num_deltas(diff);
 
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
-		const git_diff_delta *delta;
+		git3_patch *patch;
+		const git3_diff_delta *delta;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
-		delta = git_patch_get_delta(patch);
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
+		delta = git3_patch_get_delta(patch);
 
 		file_count++;
-		hunk_count += (int)git_patch_num_hunks(patch);
+		hunk_count += (int)git3_patch_num_hunks(patch);
 
-		assert((delta->flags & (GIT_DIFF_FLAG_BINARY|GIT_DIFF_FLAG_NOT_BINARY)) != 0);
-		binary_count += ((delta->flags & GIT_DIFF_FLAG_BINARY) != 0);
+		assert((delta->flags & (GIT3_DIFF_FLAG_BINARY|GIT3_DIFF_FLAG_NOT_BINARY)) != 0);
+		binary_count += ((delta->flags & GIT3_DIFF_FLAG_BINARY) != 0);
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
 	cl_assert_equal_i(13, file_count);
@@ -194,71 +194,71 @@ void test_diff_diffiter__max_size_threshold(void)
 	cl_assert_equal_i(3, binary_count);
 	cl_assert_equal_i(5, hunk_count);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 
 void test_diff_diffiter__iterate_all(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	diff_expects exp = {0};
 	size_t d, num_d;
 
 	opts.context_lines = 3;
 	opts.interhunk_lines = 1;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
+		git3_patch *patch;
 		size_t h, num_h;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
 		cl_assert(patch);
 		exp.files++;
 
-		num_h = git_patch_num_hunks(patch);
+		num_h = git3_patch_num_hunks(patch);
 		for (h = 0; h < num_h; h++) {
-			const git_diff_hunk *range;
+			const git3_diff_hunk *range;
 			size_t l, num_l;
 
-			cl_git_pass(git_patch_get_hunk(&range, &num_l, patch, h));
+			cl_git_pass(git3_patch_get_hunk(&range, &num_l, patch, h));
 			cl_assert(range);
 			exp.hunks++;
 
 			for (l = 0; l < num_l; ++l) {
-				const git_diff_line *line;
+				const git3_diff_line *line;
 
-				cl_git_pass(git_patch_get_line_in_hunk(&line, patch, h, l));
+				cl_git_pass(git3_patch_get_line_in_hunk(&line, patch, h, l));
 				cl_assert(line && line->content);
 				exp.lines++;
 			}
 		}
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
 	cl_assert_equal_i(13, exp.files);
 	cl_assert_equal_i(8, exp.hunks);
 	cl_assert_equal_i(14, exp.lines);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
-static void iterate_over_patch(git_patch *patch, diff_expects *exp)
+static void iterate_over_patch(git3_patch *patch, diff_expects *exp)
 {
-	size_t h, num_h = git_patch_num_hunks(patch), num_l;
+	size_t h, num_h = git3_patch_num_hunks(patch), num_l;
 
 	exp->files++;
 	exp->hunks += (int)num_h;
 
 	/* let's iterate in reverse, just because we can! */
 	for (h = 1, num_l = 0; h <= num_h; ++h)
-		num_l += git_patch_num_lines_in_hunk(patch, num_h - h);
+		num_l += git3_patch_num_lines_in_hunk(patch, num_h - h);
 
 	exp->lines += (int)num_l;
 }
@@ -267,22 +267,22 @@ static void iterate_over_patch(git_patch *patch, diff_expects *exp)
 
 void test_diff_diffiter__iterate_randomly_while_saving_state(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	diff_expects exp = {0};
-	git_patch *patches[PATCH_CACHE];
+	git3_patch *patches[PATCH_CACHE];
 	size_t p, d, num_d;
 
 	memset(patches, 0, sizeof(patches));
 
 	opts.context_lines = 3;
 	opts.interhunk_lines = 1;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 
 	/* To make sure that references counts work for diff and patch objects,
 	 * this generates patches and randomly caches them.  Only when the patch
@@ -296,32 +296,32 @@ void test_diff_diffiter__iterate_randomly_while_saving_state(void)
 
 	for (d = 0; d < num_d; ++d) {
 		/* take old patch */
-		git_patch *patch = patches[p];
+		git3_patch *patch = patches[p];
 		patches[p] = NULL;
 
 		/* cache new patch */
-		cl_git_pass(git_patch_from_diff(&patches[p], diff, d));
+		cl_git_pass(git3_patch_from_diff(&patches[p], diff, d));
 		cl_assert(patches[p] != NULL);
 
 		/* process old patch if non-NULL */
 		if (patch != NULL) {
 			iterate_over_patch(patch, &exp);
-			git_patch_free(patch);
+			git3_patch_free(patch);
 		}
 
 		p = rand() % PATCH_CACHE;
 	}
 
 	/* free diff list now - refcounts should keep things safe */
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* process remaining unprocessed patches */
 	for (p = 0; p < PATCH_CACHE; p++) {
-		git_patch *patch = patches[p];
+		git3_patch *patch = patches[p];
 
 		if (patch != NULL) {
 			iterate_over_patch(patch, &exp);
-			git_patch_free(patch);
+			git3_patch_free(patch);
 		}
 	}
 
@@ -403,51 +403,51 @@ static const char *expected_patch_text[8] = {
 
 void test_diff_diffiter__iterate_and_generate_patch_text(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff *diff;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff *diff;
 	size_t d, num_d;
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, repo, NULL, NULL));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, repo, NULL, NULL));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 	cl_assert_equal_i(8, (int)num_d);
 
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
-		git_buf buf = GIT_BUF_INIT;
+		git3_patch *patch;
+		git3_buf buf = GIT3_BUF_INIT;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
 		cl_assert(patch != NULL);
 
-		cl_git_pass(git_patch_to_buf(&buf, patch));
+		cl_git_pass(git3_patch_to_buf(&buf, patch));
 
 		cl_assert_equal_s(expected_patch_text[d], buf.ptr);
 
-		git_buf_dispose(&buf);
-		git_patch_free(patch);
+		git3_buf_dispose(&buf);
+		git3_patch_free(patch);
 	}
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_diffiter__checks_options_version(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
-	const git_error *err;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
+	const git3_error *err;
 
 	opts.version = 0;
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	cl_git_fail(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
-	err = git_error_last();
-	cl_assert_equal_i(GIT_ERROR_INVALID, err->klass);
+	cl_git_fail(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	err = git3_error_last();
+	cl_assert_equal_i(GIT3_ERROR_INVALID, err->klass);
 
-	git_error_clear();
+	git3_error_clear();
 	opts.version = 1024;
-	cl_git_fail(git_diff_index_to_workdir(&diff, repo, NULL, &opts));
-	err = git_error_last();
-	cl_assert_equal_i(GIT_ERROR_INVALID, err->klass);
+	cl_git_fail(git3_diff_index_to_workdir(&diff, repo, NULL, &opts));
+	err = git3_error_last();
+	cl_assert_equal_i(GIT3_ERROR_INVALID, err->klass);
 }
 

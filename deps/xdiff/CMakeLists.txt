@@ -7,8 +7,8 @@ target_include_directories(xdiff SYSTEM PRIVATE
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_SOURCE_DIR}/src/util"
 	"${PROJECT_BINARY_DIR}/src/util"
-	${LIBGIT2_SYSTEM_INCLUDES}
-	${LIBGIT2_DEPENDENCY_INCLUDES})
+	${LIBGIT3_SYSTEM_INCLUDES}
+	${LIBGIT3_DEPENDENCY_INCLUDES})
 
 # the xdiff dependency is not (yet) warning-free, disable warnings
 # as errors for the xdiff sources until we've sorted them out

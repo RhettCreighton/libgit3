@@ -1,7 +1,7 @@
 /*
- * libgit2 "checkout" example - shows how to perform checkouts
+ * libgit3 "checkout" example - shows how to perform checkouts
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -26,7 +26,7 @@
 #endif
 
 /**
- * The following example demonstrates how to do checkouts with libgit2.
+ * The following example demonstrates how to do checkouts with libgit3.
  *
  * Recognized options are :
  *  --force: force the checkout to happen.
@@ -100,7 +100,7 @@ static void print_checkout_progress(const char *path, size_t completed_steps, si
  * This function is called when the checkout completes, and is used to report the
  * number of syscalls performed.
  */
-static void print_perf_data(const git_checkout_perfdata *perfdata, void *payload)
+static void print_perf_data(const git3_checkout_perfdata *perfdata, void *payload)
 {
 	(void)payload;
 	printf("perf: stat: %" PRIuZ " mkdir: %" PRIuZ " chmod: %" PRIuZ "\n",
@@ -111,17 +111,17 @@ static void print_perf_data(const git_checkout_perfdata *perfdata, void *payload
  * This is the main "checkout <branch>" function, responsible for performing
  * a branch-based checkout.
  */
-static int perform_checkout_ref(git_repository *repo, git_annotated_commit *target, const char *target_ref, checkout_options *opts)
+static int perform_checkout_ref(git3_repository *repo, git3_annotated_commit *target, const char *target_ref, checkout_options *opts)
 {
-	git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_reference *ref = NULL, *branch = NULL;
-	git_commit *target_commit = NULL;
+	git3_checkout_options checkout_opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_reference *ref = NULL, *branch = NULL;
+	git3_commit *target_commit = NULL;
 	int err;
 
 	/** Setup our checkout options from the parsed options */
-	checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
+	checkout_opts.checkout_strategy = GIT3_CHECKOUT_SAFE;
 	if (opts->force)
-		checkout_opts.checkout_strategy = GIT_CHECKOUT_FORCE;
+		checkout_opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
 
 	if (opts->progress)
 		checkout_opts.progress_cb = print_checkout_progress;
@@ -130,9 +130,9 @@ static int perform_checkout_ref(git_repository *repo, git_annotated_commit *targ
 		checkout_opts.perfdata_cb = print_perf_data;
 
 	/** Grab the commit we're interested to move to */
-	err = git_commit_lookup(&target_commit, repo, git_annotated_commit_id(target));
+	err = git3_commit_lookup(&target_commit, repo, git3_annotated_commit_id(target));
 	if (err != 0) {
-		fprintf(stderr, "failed to lookup commit: %s\n", git_error_last()->message);
+		fprintf(stderr, "failed to lookup commit: %s\n", git3_error_last()->message);
 		goto cleanup;
 	}
 
@@ -140,12 +140,12 @@ static int perform_checkout_ref(git_repository *repo, git_annotated_commit *targ
 	 * Perform the checkout so the workdir corresponds to what target_commit
 	 * contains.
 	 *
-	 * Note that it's okay to pass a git_commit here, because it will be
+	 * Note that it's okay to pass a git3_commit here, because it will be
 	 * peeled to a tree.
 	 */
-	err = git_checkout_tree(repo, (const git_object *)target_commit, &checkout_opts);
+	err = git3_checkout_tree(repo, (const git3_object *)target_commit, &checkout_opts);
 	if (err != 0) {
-		fprintf(stderr, "failed to checkout tree: %s\n", git_error_last()->message);
+		fprintf(stderr, "failed to checkout tree: %s\n", git3_error_last()->message);
 		goto cleanup;
 	}
 
@@ -155,35 +155,35 @@ static int perform_checkout_ref(git_repository *repo, git_annotated_commit *targ
 	 * Depending on the "origin" of target (ie. it's an OID or a branch name),
 	 * we might need to detach HEAD.
 	 */
-	if (git_annotated_commit_ref(target)) {
+	if (git3_annotated_commit_ref(target)) {
 		const char *target_head;
 
-		if ((err = git_reference_lookup(&ref, repo, git_annotated_commit_ref(target))) < 0)
+		if ((err = git3_reference_lookup(&ref, repo, git3_annotated_commit_ref(target))) < 0)
 			goto error;
 
-		if (git_reference_is_remote(ref)) {
-			if ((err = git_branch_create_from_annotated(&branch, repo, target_ref, target, 0)) < 0)
+		if (git3_reference_is_remote(ref)) {
+			if ((err = git3_branch_create_from_annotated(&branch, repo, target_ref, target, 0)) < 0)
 				goto error;
-			target_head = git_reference_name(branch);
+			target_head = git3_reference_name(branch);
 		} else {
-			target_head = git_annotated_commit_ref(target);
+			target_head = git3_annotated_commit_ref(target);
 		}
 
-		err = git_repository_set_head(repo, target_head);
+		err = git3_repository_set_head(repo, target_head);
 	} else {
-		err = git_repository_set_head_detached_from_annotated(repo, target);
+		err = git3_repository_set_head_detached_from_annotated(repo, target);
 	}
 
 error:
 	if (err != 0) {
-		fprintf(stderr, "failed to update HEAD reference: %s\n", git_error_last()->message);
+		fprintf(stderr, "failed to update HEAD reference: %s\n", git3_error_last()->message);
 		goto cleanup;
 	}
 
 cleanup:
-	git_commit_free(target_commit);
-	git_reference_free(branch);
-	git_reference_free(ref);
+	git3_commit_free(target_commit);
+	git3_reference_free(branch);
+	git3_reference_free(ref);
 
 	return err;
 }
@@ -198,14 +198,14 @@ cleanup:
  * The following is a simplified implementation. It will not try
  * to check whether the ref is unique across all remotes.
  */
-static int guess_refish(git_annotated_commit **out, git_repository *repo, const char *ref)
+static int guess_refish(git3_annotated_commit **out, git3_repository *repo, const char *ref)
 {
-	git_strarray remotes = { NULL, 0 };
-	git_reference *remote_ref = NULL;
+	git3_strarray remotes = { NULL, 0 };
+	git3_reference *remote_ref = NULL;
 	int error;
 	size_t i;
 
-	if ((error = git_remote_list(&remotes, repo)) < 0)
+	if ((error = git3_remote_list(&remotes, repo)) < 0)
 		goto out;
 
 	for (i = 0; i < remotes.count; i++) {
@@ -219,37 +219,37 @@ static int guess_refish(git_annotated_commit **out, git_repository *repo, const 
 		}
 		snprintf(refname, reflen + 1, "refs/remotes/%s/%s", remotes.strings[i], ref);
 
-		if ((error = git_reference_lookup(&remote_ref, repo, refname)) < 0)
+		if ((error = git3_reference_lookup(&remote_ref, repo, refname)) < 0)
 			goto next;
 
 		break;
 next:
 		free(refname);
-		if (error < 0 && error != GIT_ENOTFOUND)
+		if (error < 0 && error != GIT3_ENOTFOUND)
 			break;
 	}
 
 	if (!remote_ref) {
-		error = GIT_ENOTFOUND;
+		error = GIT3_ENOTFOUND;
 		goto out;
 	}
 
-	if ((error = git_annotated_commit_from_ref(out, repo, remote_ref)) < 0)
+	if ((error = git3_annotated_commit_from_ref(out, repo, remote_ref)) < 0)
 		goto out;
 
 out:
-	git_reference_free(remote_ref);
-	git_strarray_dispose(&remotes);
+	git3_reference_free(remote_ref);
+	git3_strarray_dispose(&remotes);
 	return error;
 }
 
 /** That example's entry point */
-int lg2_checkout(git_repository *repo, int argc, char **argv)
+int lg2_checkout(git3_repository *repo, int argc, char **argv)
 {
 	struct args_info args = ARGS_INFO_INIT;
 	checkout_options opts;
-	git_repository_state_t state;
-	git_annotated_commit *checkout_target = NULL;
+	git3_repository_state_t state;
+	git3_annotated_commit *checkout_target = NULL;
 	int err = 0;
 	const char *path = ".";
 
@@ -257,8 +257,8 @@ int lg2_checkout(git_repository *repo, int argc, char **argv)
 	parse_options(&path, &opts, &args);
 
 	/** Make sure we're not about to checkout while something else is going on */
-	state = git_repository_state(repo);
-	if (state != GIT_REPOSITORY_STATE_NONE) {
+	state = git3_repository_state(repo);
+	if (state != GIT3_REPOSITORY_STATE_NONE) {
 		fprintf(stderr, "repository is in unexpected state %d\n", state);
 		goto cleanup;
 	}
@@ -273,18 +273,18 @@ int lg2_checkout(git_repository *repo, int argc, char **argv)
 		goto cleanup;
 	} else {
 		/**
-		 * Try to resolve a "refish" argument to a target libgit2 can use
+		 * Try to resolve a "refish" argument to a target libgit3 can use
 		 */
 		if ((err = resolve_refish(&checkout_target, repo, args.argv[args.pos])) < 0 &&
 		    (err = guess_refish(&checkout_target, repo, args.argv[args.pos])) < 0) {
-			fprintf(stderr, "failed to resolve %s: %s\n", args.argv[args.pos], git_error_last()->message);
+			fprintf(stderr, "failed to resolve %s: %s\n", args.argv[args.pos], git3_error_last()->message);
 			goto cleanup;
 		}
 		err = perform_checkout_ref(repo, checkout_target, args.argv[args.pos], &opts);
 	}
 
 cleanup:
-	git_annotated_commit_free(checkout_target);
+	git3_annotated_commit_free(checkout_target);
 
 	return err;
 }

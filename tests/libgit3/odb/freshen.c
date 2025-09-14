@@ -1,25 +1,25 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "odb.h"
 #include "posix.h"
 
-static git_repository *repo;
-static git_odb *odb;
+static git3_repository *repo;
+static git3_odb *odb;
 
 void test_odb_freshen__initialize(void)
 {
 	repo = cl_git_sandbox_init("testrepo.git");
-	cl_git_pass(git_repository_odb(&odb, repo));
+	cl_git_pass(git3_repository_odb(&odb, repo));
 }
 
 void test_odb_freshen__cleanup(void)
 {
-	git_odb_free(odb);
+	git3_odb_free(odb);
 	cl_git_sandbox_cleanup();
 }
 
 static void set_time_wayback(struct stat *out, const char *fn)
 {
-	git_str fullpath = GIT_STR_INIT;
+	git3_str fullpath = GIT3_STR_INIT;
 	struct p_timeval old[2];
 
 	old[0].tv_sec = 1234567890;
@@ -27,11 +27,11 @@ static void set_time_wayback(struct stat *out, const char *fn)
 	old[1].tv_sec = 1234567890;
 	old[1].tv_usec = 0;
 
-	git_str_joinpath(&fullpath, "testrepo.git/objects", fn);
+	git3_str_joinpath(&fullpath, "testrepo.git/objects", fn);
 
-	cl_must_pass(p_utimes(git_str_cstr(&fullpath), old));
-	cl_must_pass(p_lstat(git_str_cstr(&fullpath), out));
-	git_str_dispose(&fullpath);
+	cl_must_pass(p_utimes(git3_str_cstr(&fullpath), old));
+	cl_must_pass(p_lstat(git3_str_cstr(&fullpath), out));
+	git3_str_dispose(&fullpath);
 }
 
 #define LOOSE_STR     "my new file\n"
@@ -40,14 +40,14 @@ static void set_time_wayback(struct stat *out, const char *fn)
 
 void test_odb_freshen__loose_blob(void)
 {
-	git_oid expected_id, id;
+	git3_oid expected_id, id;
 	struct stat before, after;
 
-	cl_git_pass(git_oid_from_string(&expected_id, LOOSE_BLOB_ID, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&expected_id, LOOSE_BLOB_ID, GIT3_OID_SHA1));
 	set_time_wayback(&before, LOOSE_BLOB_FN);
 
 	/* make sure we freshen a blob */
-	cl_git_pass(git_blob_create_from_buffer(&id, repo, LOOSE_STR, CONST_STRLEN(LOOSE_STR)));
+	cl_git_pass(git3_blob_create_from_buffer(&id, repo, LOOSE_STR, CONST_STRLEN(LOOSE_STR)));
 	cl_assert_equal_oid(&expected_id, &id);
 	cl_must_pass(p_lstat("testrepo.git/objects/" LOOSE_BLOB_FN, &after));
 
@@ -61,18 +61,18 @@ void test_odb_freshen__loose_blob(void)
 
 void test_odb_freshen__readonly_object(void)
 {
-	git_oid expected_id, id;
+	git3_oid expected_id, id;
 	struct stat before, after;
 
-	cl_git_pass(git_oid_from_string(&expected_id, UNIQUE_BLOB_ID, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&expected_id, UNIQUE_BLOB_ID, GIT3_OID_SHA1));
 
-	cl_git_pass(git_blob_create_from_buffer(&id, repo, UNIQUE_STR, CONST_STRLEN(UNIQUE_STR)));
+	cl_git_pass(git3_blob_create_from_buffer(&id, repo, UNIQUE_STR, CONST_STRLEN(UNIQUE_STR)));
 	cl_assert_equal_oid(&expected_id, &id);
 
 	set_time_wayback(&before, UNIQUE_BLOB_FN);
 	cl_assert((before.st_mode & S_IWUSR) == 0);
 
-	cl_git_pass(git_blob_create_from_buffer(&id, repo, UNIQUE_STR, CONST_STRLEN(UNIQUE_STR)));
+	cl_git_pass(git3_blob_create_from_buffer(&id, repo, UNIQUE_STR, CONST_STRLEN(UNIQUE_STR)));
 	cl_assert_equal_oid(&expected_id, &id);
 	cl_must_pass(p_lstat("testrepo.git/objects/" UNIQUE_BLOB_FN, &after));
 
@@ -85,15 +85,15 @@ void test_odb_freshen__readonly_object(void)
 
 void test_odb_freshen__loose_tree(void)
 {
-	git_oid expected_id, id;
-	git_tree *tree;
+	git3_oid expected_id, id;
+	git3_tree *tree;
 	struct stat before, after;
 
-	cl_git_pass(git_oid_from_string(&expected_id, LOOSE_TREE_ID, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&expected_id, LOOSE_TREE_ID, GIT3_OID_SHA1));
 	set_time_wayback(&before, LOOSE_TREE_FN);
 
-	cl_git_pass(git_tree_lookup(&tree, repo, &expected_id));
-	cl_git_pass(git_tree_create_updated(&id, repo, tree, 0, NULL));
+	cl_git_pass(git3_tree_lookup(&tree, repo, &expected_id));
+	cl_git_pass(git3_tree_create_updated(&id, repo, tree, 0, NULL));
 
 	/* make sure we freshen a tree */
 	cl_assert_equal_oid(&expected_id, &id);
@@ -102,39 +102,39 @@ void test_odb_freshen__loose_tree(void)
 	cl_assert(before.st_atime < after.st_atime);
 	cl_assert(before.st_mtime < after.st_mtime);
 
-	git_tree_free(tree);
+	git3_tree_free(tree);
 }
 
 void test_odb_freshen__tree_during_commit(void)
 {
-	git_oid tree_id, parent_id, commit_id;
-	git_tree *tree;
-	git_commit *parent;
-	git_signature *signature;
+	git3_oid tree_id, parent_id, commit_id;
+	git3_tree *tree;
+	git3_commit *parent;
+	git3_signature *signature;
 	struct stat before, after;
 
-	cl_git_pass(git_oid_from_string(&tree_id, LOOSE_TREE_ID, GIT_OID_SHA1));
-	cl_git_pass(git_tree_lookup(&tree, repo, &tree_id));
+	cl_git_pass(git3_oid_from_string(&tree_id, LOOSE_TREE_ID, GIT3_OID_SHA1));
+	cl_git_pass(git3_tree_lookup(&tree, repo, &tree_id));
 	set_time_wayback(&before, LOOSE_TREE_FN);
 
-	cl_git_pass(git_oid_from_string(&parent_id, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1));
-	cl_git_pass(git_commit_lookup(&parent, repo, &parent_id));
+	cl_git_pass(git3_oid_from_string(&parent_id, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1));
+	cl_git_pass(git3_commit_lookup(&parent, repo, &parent_id));
 
-	cl_git_pass(git_signature_new(&signature,
+	cl_git_pass(git3_signature_new(&signature,
 		"Refresher", "refresher@example.com", 1488547083, 0));
 
-	cl_git_pass(git_commit_create(&commit_id, repo, NULL,
+	cl_git_pass(git3_commit_create(&commit_id, repo, NULL,
 		signature, signature, NULL, "New commit pointing to old tree",
-		tree, 1, (const git_commit **)&parent));
+		tree, 1, (const git3_commit **)&parent));
 
 	/* make sure we freshen the tree the commit points to */
 	cl_must_pass(p_lstat("testrepo.git/objects/" LOOSE_TREE_FN, &after));
 	cl_assert(before.st_atime < after.st_atime);
 	cl_assert(before.st_mtime < after.st_mtime);
 
-	git_signature_free(signature);
-	git_commit_free(parent);
-	git_tree_free(tree);
+	git3_signature_free(signature);
+	git3_commit_free(parent);
+	git3_tree_free(tree);
 }
 
 #define PACKED_STR "Testing a readme.txt\n"
@@ -143,11 +143,11 @@ void test_odb_freshen__tree_during_commit(void)
 
 void test_odb_freshen__packed_object(void)
 {
-	git_oid expected_id, id;
+	git3_oid expected_id, id;
 	struct stat before, after;
 	struct p_timeval old_times[2];
 
-	cl_git_pass(git_oid_from_string(&expected_id, PACKED_ID, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&expected_id, PACKED_ID, GIT3_OID_SHA1));
 
 	old_times[0].tv_sec = 1234567890;
 	old_times[0].tv_usec = 0;
@@ -159,8 +159,8 @@ void test_odb_freshen__packed_object(void)
 	cl_must_pass(p_lstat("testrepo.git/objects/pack/" PACKED_FN, &before));
 
 	/* ensure that packfile is freshened */
-	cl_git_pass(git_odb_write(&id, odb, PACKED_STR,
-		CONST_STRLEN(PACKED_STR), GIT_OBJECT_BLOB));
+	cl_git_pass(git3_odb_write(&id, odb, PACKED_STR,
+		CONST_STRLEN(PACKED_STR), GIT3_OBJECT_BLOB));
 	cl_assert_equal_oid(&expected_id, &id);
 	cl_must_pass(p_lstat("testrepo.git/objects/pack/" PACKED_FN, &after));
 
@@ -170,8 +170,8 @@ void test_odb_freshen__packed_object(void)
 	memcpy(&before, &after, sizeof(struct stat));
 
 	/* ensure that the pack file is not freshened again immediately */
-	cl_git_pass(git_odb_write(&id, odb, PACKED_STR,
-		CONST_STRLEN(PACKED_STR), GIT_OBJECT_BLOB));
+	cl_git_pass(git3_odb_write(&id, odb, PACKED_STR,
+		CONST_STRLEN(PACKED_STR), GIT3_OBJECT_BLOB));
 	cl_assert_equal_oid(&expected_id, &id);
 	cl_must_pass(p_lstat("testrepo.git/objects/pack/" PACKED_FN, &after));
 

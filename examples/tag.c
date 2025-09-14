@@ -1,7 +1,7 @@
 /*
- * libgit2 "tag" example - shows how to list, create and delete tags
+ * libgit3 "tag" example - shows how to list, create and delete tags
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -42,7 +42,7 @@ struct tag_options {
 
 /** tag_state represents the current program state for dragging around */
 typedef struct {
-	git_repository *repo;
+	git3_repository *repo;
 	struct tag_options *opts;
 } tag_state;
 
@@ -93,12 +93,12 @@ static void print_list_lines(const char *message, const tag_state *state)
 }
 
 /** Tag listing: Print an actual tag object */
-static void print_tag(git_tag *tag, const tag_state *state)
+static void print_tag(git3_tag *tag, const tag_state *state)
 {
-	printf("%-16s", git_tag_name(tag));
+	printf("%-16s", git3_tag_name(tag));
 
 	if (state->opts->num_lines) {
-		const char *msg = git_tag_message(tag);
+		const char *msg = git3_tag_message(tag);
 		print_list_lines(msg, state);
 	} else {
 		printf("\n");
@@ -106,13 +106,13 @@ static void print_tag(git_tag *tag, const tag_state *state)
 }
 
 /** Tag listing: Print a commit (target of a lightweight tag) */
-static void print_commit(git_commit *commit, const char *name,
+static void print_commit(git3_commit *commit, const char *name,
 		const tag_state *state)
 {
 	printf("%-16s", name);
 
 	if (state->opts->num_lines) {
-		const char *msg = git_commit_message(commit);
+		const char *msg = git3_commit_message(commit);
 		print_list_lines(msg, state);
 	} else {
 		printf("\n");
@@ -128,72 +128,72 @@ static void print_name(const char *name)
 /** Tag listing: Lookup tags based on ref name and dispatch to print */
 static int each_tag(const char *name, tag_state *state)
 {
-	git_repository *repo = state->repo;
-	git_object *obj;
+	git3_repository *repo = state->repo;
+	git3_object *obj;
 
-	check_lg2(git_revparse_single(&obj, repo, name),
+	check_lg2(git3_revparse_single(&obj, repo, name),
 			"Failed to lookup rev", name);
 
-	switch (git_object_type(obj)) {
-		case GIT_OBJECT_TAG:
-			print_tag((git_tag *) obj, state);
+	switch (git3_object_type(obj)) {
+		case GIT3_OBJECT_TAG:
+			print_tag((git3_tag *) obj, state);
 			break;
-		case GIT_OBJECT_COMMIT:
-			print_commit((git_commit *) obj, name, state);
+		case GIT3_OBJECT_COMMIT:
+			print_commit((git3_commit *) obj, name, state);
 			break;
 		default:
 			print_name(name);
 	}
 
-	git_object_free(obj);
+	git3_object_free(obj);
 	return 0;
 }
 
 static void action_list_tags(tag_state *state)
 {
 	const char *pattern = state->opts->pattern;
-	git_strarray tag_names = {0};
+	git3_strarray tag_names = {0};
 	size_t i;
 
-	check_lg2(git_tag_list_match(&tag_names, pattern ? pattern : "*", state->repo),
+	check_lg2(git3_tag_list_match(&tag_names, pattern ? pattern : "*", state->repo),
 			"Unable to get list of tags", NULL);
 
 	for(i = 0; i < tag_names.count; i++) {
 		each_tag(tag_names.strings[i], state);
 	}
 
-	git_strarray_dispose(&tag_names);
+	git3_strarray_dispose(&tag_names);
 }
 
 static void action_delete_tag(tag_state *state)
 {
 	struct tag_options *opts = state->opts;
-	git_object *obj;
-	git_buf abbrev_oid = {0};
+	git3_object *obj;
+	git3_buf abbrev_oid = {0};
 
 	check(!opts->tag_name, "Name required");
 
-	check_lg2(git_revparse_single(&obj, state->repo, opts->tag_name),
+	check_lg2(git3_revparse_single(&obj, state->repo, opts->tag_name),
 			"Failed to lookup rev", opts->tag_name);
 
-	check_lg2(git_object_short_id(&abbrev_oid, obj),
+	check_lg2(git3_object_short_id(&abbrev_oid, obj),
 			"Unable to get abbreviated OID", opts->tag_name);
 
-	check_lg2(git_tag_delete(state->repo, opts->tag_name),
+	check_lg2(git3_tag_delete(state->repo, opts->tag_name),
 			"Unable to delete tag", opts->tag_name);
 
 	printf("Deleted tag '%s' (was %s)\n", opts->tag_name, abbrev_oid.ptr);
 
-	git_buf_dispose(&abbrev_oid);
-	git_object_free(obj);
+	git3_buf_dispose(&abbrev_oid);
+	git3_object_free(obj);
 }
 
 static void action_create_lightweight_tag(tag_state *state)
 {
-	git_repository *repo = state->repo;
+	git3_repository *repo = state->repo;
 	struct tag_options *opts = state->opts;
-	git_oid oid;
-	git_object *target;
+	git3_oid oid;
+	git3_object *target;
 
 	check(!opts->tag_name, "Name required");
 
@@ -201,39 +201,39 @@ static void action_create_lightweight_tag(tag_state *state)
 
 	check(!opts->target, "Target required");
 
-	check_lg2(git_revparse_single(&target, repo, opts->target),
+	check_lg2(git3_revparse_single(&target, repo, opts->target),
 			"Unable to resolve spec", opts->target);
 
-	check_lg2(git_tag_create_lightweight(&oid, repo, opts->tag_name,
+	check_lg2(git3_tag_create_lightweight(&oid, repo, opts->tag_name,
 				target, opts->force), "Unable to create tag", NULL);
 
-	git_object_free(target);
+	git3_object_free(target);
 }
 
 static void action_create_tag(tag_state *state)
 {
-	git_repository *repo = state->repo;
+	git3_repository *repo = state->repo;
 	struct tag_options *opts = state->opts;
-	git_signature *tagger;
-	git_oid oid;
-	git_object *target;
+	git3_signature *tagger;
+	git3_oid oid;
+	git3_object *target;
 
 	check(!opts->tag_name, "Name required");
 	check(!opts->message, "Message required");
 
 	if (!opts->target) opts->target = "HEAD";
 
-	check_lg2(git_revparse_single(&target, repo, opts->target),
+	check_lg2(git3_revparse_single(&target, repo, opts->target),
 			"Unable to resolve spec", opts->target);
 
-	check_lg2(git_signature_default_from_env(&tagger, NULL, repo),
+	check_lg2(git3_signature_default_from_env(&tagger, NULL, repo),
 			"Unable to create signature", NULL);
 
-	check_lg2(git_tag_create(&oid, repo, opts->tag_name,
+	check_lg2(git3_tag_create(&oid, repo, opts->tag_name,
 				target, tagger, opts->message, opts->force), "Unable to create tag", NULL);
 
-	git_object_free(target);
-	git_signature_free(tagger);
+	git3_object_free(target);
+	git3_signature_free(tagger);
 }
 
 static void print_usage(void)
@@ -293,7 +293,7 @@ static void tag_options_init(struct tag_options *opts)
 	opts->force     = 0;
 }
 
-int lg2_tag(git_repository *repo, int argc, char **argv)
+int lg2_tag(git3_repository *repo, int argc, char **argv)
 {
 	struct tag_options opts;
 	tag_action action;

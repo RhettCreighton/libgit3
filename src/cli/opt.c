@@ -10,7 +10,7 @@
  * This file was produced by using the `rename.pl` script included with
  * adopt.  The command-line specified was:
  *
- * ./rename.pl cli_opt --filename=opt --include=common.h --inline=GIT_INLINE --header-guard=CLI_opt_h__ --lowercase-status --without-usage
+ * ./rename.pl cli_opt --filename=opt --include=common.h --inline=GIT3_INLINE --header-guard=CLI_opt_h__ --lowercase-status --without-usage
  */
 
 #include <stdlib.h>
@@ -42,7 +42,7 @@
 	 (x)->type == CLI_OPT_TYPE_SWITCH || \
 	 (x)->type == CLI_OPT_TYPE_VALUE)
 
-GIT_INLINE(const cli_opt_spec *) spec_for_long(
+GIT3_INLINE(const cli_opt_spec *) spec_for_long(
 	int *is_negated,
 	int *has_value,
 	const char **value,
@@ -89,7 +89,7 @@ GIT_INLINE(const cli_opt_spec *) spec_for_long(
 	return NULL;
 }
 
-GIT_INLINE(const cli_opt_spec *) spec_for_short(
+GIT3_INLINE(const cli_opt_spec *) spec_for_short(
 	const char **value,
 	const cli_opt_parser *parser,
 	const char *arg)
@@ -115,7 +115,7 @@ GIT_INLINE(const cli_opt_spec *) spec_for_short(
 	return NULL;
 }
 
-GIT_INLINE(const cli_opt_spec *) spec_for_arg(cli_opt_parser *parser)
+GIT3_INLINE(const cli_opt_spec *) spec_for_arg(cli_opt_parser *parser)
 {
 	const cli_opt_spec *spec;
 	size_t args = 0;
@@ -137,7 +137,7 @@ GIT_INLINE(const cli_opt_spec *) spec_for_arg(cli_opt_parser *parser)
 	return NULL;
 }
 
-GIT_INLINE(int) spec_is_choice(const cli_opt_spec *spec)
+GIT3_INLINE(int) spec_is_choice(const cli_opt_spec *spec)
 {
 	return ((spec + 1)->type &&
 	       ((spec + 1)->usage & CLI_OPT_USAGE_CHOICE));
@@ -147,7 +147,7 @@ GIT_INLINE(int) spec_is_choice(const cli_opt_spec *spec)
  * If we have a choice with switches and bare arguments, and we see
  * the switch, then we no longer expect the bare argument.
  */
-GIT_INLINE(void) consume_choices(const cli_opt_spec *spec, cli_opt_parser *parser)
+GIT3_INLINE(void) consume_choices(const cli_opt_spec *spec, cli_opt_parser *parser)
 {
 	/* back up to the beginning of the choices */
 	while (spec->type && (spec->usage & CLI_OPT_USAGE_CHOICE))
@@ -353,7 +353,7 @@ void cli_opt_parser_init(
 	parser->needs_sort = support_gnu_style(flags);
 }
 
-GIT_INLINE(const cli_opt_spec *) spec_for_sort(
+GIT3_INLINE(const cli_opt_spec *) spec_for_sort(
 	int *needs_value,
 	const cli_opt_parser *parser,
 	const char *arg)
@@ -491,7 +491,7 @@ cli_opt_status_t cli_opt_parser_next(cli_opt *opt, cli_opt_parser *parser)
 	return parse_arg(opt, parser);
 }
 
-GIT_INLINE(int) spec_included(const cli_opt_spec **specs, const cli_opt_spec *spec)
+GIT3_INLINE(int) spec_included(const cli_opt_spec **specs, const cli_opt_spec *spec)
 {
 	const cli_opt_spec **i;
 

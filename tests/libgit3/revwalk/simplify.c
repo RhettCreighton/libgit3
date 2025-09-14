@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 void test_revwalk_simplify__cleanup(void)
 {
@@ -26,31 +26,31 @@ static const char *expected_str[] = {
 
 void test_revwalk_simplify__first_parent(void)
 {
-	git_repository *repo;
-	git_revwalk *walk;
-	git_oid id, expected[4];
+	git3_repository *repo;
+	git3_revwalk *walk;
+	git3_oid id, expected[4];
 	int i, error;
 
 	for (i = 0; i < 4; i++) {
-		git_oid_from_string(&expected[i], expected_str[i], GIT_OID_SHA1);
+		git3_oid_from_string(&expected[i], expected_str[i], GIT3_OID_SHA1);
 	}
 
 	repo = cl_git_sandbox_init("testrepo.git");
-	cl_git_pass(git_revwalk_new(&walk, repo));
+	cl_git_pass(git3_revwalk_new(&walk, repo));
 
-	git_oid_from_string(&id, commit_head, GIT_OID_SHA1);
-	cl_git_pass(git_revwalk_push(walk, &id));
-	git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL);
-	git_revwalk_simplify_first_parent(walk);
+	git3_oid_from_string(&id, commit_head, GIT3_OID_SHA1);
+	cl_git_pass(git3_revwalk_push(walk, &id));
+	git3_revwalk_sorting(walk, GIT3_SORT_TOPOLOGICAL);
+	git3_revwalk_simplify_first_parent(walk);
 
 	i = 0;
-	while ((error = git_revwalk_next(&id, walk)) == 0) {
+	while ((error = git3_revwalk_next(&id, walk)) == 0) {
 		cl_assert_equal_oid(&expected[i], &id);
 		i++;
 	}
 
 	cl_assert_equal_i(i, 4);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }

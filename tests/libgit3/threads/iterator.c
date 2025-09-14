@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "thread_helpers.h"
 #include "iterator.h"
 
-static git_repository *_repo;
+static git3_repository *_repo;
 
 void test_threads_iterator__cleanup(void)
 {
@@ -12,36 +12,36 @@ void test_threads_iterator__cleanup(void)
 static void *run_workdir_iterator(void *arg)
 {
 	int error = 0;
-	git_repository *repo;
-	git_iterator *iter;
-	git_iterator_options iter_opts = GIT_ITERATOR_OPTIONS_INIT;
-	const git_index_entry *entry = NULL;
+	git3_repository *repo;
+	git3_iterator *iter;
+	git3_iterator_options iter_opts = GIT3_ITERATOR_OPTIONS_INIT;
+	const git3_index_entry *entry = NULL;
 
-	iter_opts.flags = GIT_ITERATOR_DONT_AUTOEXPAND;
+	iter_opts.flags = GIT3_ITERATOR_DONT_AUTOEXPAND;
 
-	cl_git_pass(git_repository_open(&repo, git_repository_path(_repo)));
-	cl_git_pass(git_iterator_for_workdir(
+	cl_git_pass(git3_repository_open(&repo, git3_repository_path(_repo)));
+	cl_git_pass(git3_iterator_for_workdir(
 		&iter, repo, NULL, NULL, &iter_opts));
 
 	while (!error) {
-		if (entry && entry->mode == GIT_FILEMODE_TREE) {
-			error = git_iterator_advance_into(&entry, iter);
+		if (entry && entry->mode == GIT3_FILEMODE_TREE) {
+			error = git3_iterator_advance_into(&entry, iter);
 
-			if (error == GIT_ENOTFOUND)
-				error = git_iterator_advance(&entry, iter);
+			if (error == GIT3_ENOTFOUND)
+				error = git3_iterator_advance(&entry, iter);
 		} else {
-			error = git_iterator_advance(&entry, iter);
+			error = git3_iterator_advance(&entry, iter);
 		}
 
 		if (!error)
-			(void)git_iterator_current_is_ignored(iter);
+			(void)git3_iterator_current_is_ignored(iter);
 	}
 
-	cl_assert_equal_i(GIT_ITEROVER, error);
+	cl_assert_equal_i(GIT3_ITEROVER, error);
 
-	git_iterator_free(iter);
-	git_repository_free(repo);
-	git_error_clear();
+	git3_iterator_free(iter);
+	git3_repository_free(repo);
+	git3_error_clear();
 	return arg;
 }
 

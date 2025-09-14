@@ -1,7 +1,7 @@
 /*
- * libgit2 "stash" example - shows how to use the stash API
+ * libgit3 "stash" example - shows how to use the stash API
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -68,19 +68,19 @@ static void parse_subcommand(struct opts *opts, int argc, char *argv[])
 	opts->argv = argv;
 }
 
-static int cmd_apply(git_repository *repo, struct opts *opts)
+static int cmd_apply(git3_repository *repo, struct opts *opts)
 {
 	if (opts->argc)
 		usage("apply does not accept any parameters");
 
-	check_lg2(git_stash_apply(repo, 0, NULL),
+	check_lg2(git3_stash_apply(repo, 0, NULL),
 		  "Unable to apply stash", NULL);
 
 	return 0;
 }
 
 static int list_stash_cb(size_t index, const char *message,
-			 const git_oid *stash_id, void *payload)
+			 const git3_oid *stash_id, void *payload)
 {
 	UNUSED(stash_id);
 	UNUSED(payload);
@@ -88,47 +88,47 @@ static int list_stash_cb(size_t index, const char *message,
 	return 0;
 }
 
-static int cmd_list(git_repository *repo, struct opts *opts)
+static int cmd_list(git3_repository *repo, struct opts *opts)
 {
 	if (opts->argc)
 		usage("list does not accept any parameters");
 
-	check_lg2(git_stash_foreach(repo, list_stash_cb, NULL),
+	check_lg2(git3_stash_foreach(repo, list_stash_cb, NULL),
 		  "Unable to list stashes", NULL);
 
 	return 0;
 }
 
-static int cmd_push(git_repository *repo, struct opts *opts)
+static int cmd_push(git3_repository *repo, struct opts *opts)
 {
-	git_signature *signature;
-	git_commit *stash;
-	git_oid stashid;
+	git3_signature *signature;
+	git3_commit *stash;
+	git3_oid stashid;
 
 	if (opts->argc)
 		usage("push does not accept any parameters");
 
-	check_lg2(git_signature_default_from_env(&signature, NULL, repo),
+	check_lg2(git3_signature_default_from_env(&signature, NULL, repo),
 		  "Unable to get signature", NULL);
-	check_lg2(git_stash_save(&stashid, repo, signature, NULL, GIT_STASH_DEFAULT),
+	check_lg2(git3_stash_save(&stashid, repo, signature, NULL, GIT3_STASH_DEFAULT),
 		  "Unable to save stash", NULL);
-	check_lg2(git_commit_lookup(&stash, repo, &stashid),
+	check_lg2(git3_commit_lookup(&stash, repo, &stashid),
 		  "Unable to lookup stash commit", NULL);
 
-	printf("Saved working directory %s\n", git_commit_summary(stash));
+	printf("Saved working directory %s\n", git3_commit_summary(stash));
 
-	git_signature_free(signature);
-	git_commit_free(stash);
+	git3_signature_free(signature);
+	git3_commit_free(stash);
 
 	return 0;
 }
 
-static int cmd_pop(git_repository *repo, struct opts *opts)
+static int cmd_pop(git3_repository *repo, struct opts *opts)
 {
 	if (opts->argc)
 		usage("pop does not accept any parameters");
 
-	check_lg2(git_stash_pop(repo, 0, NULL),
+	check_lg2(git3_stash_pop(repo, 0, NULL),
 		  "Unable to pop stash", NULL);
 
 	printf("Dropped refs/stash@{0}\n");
@@ -136,7 +136,7 @@ static int cmd_pop(git_repository *repo, struct opts *opts)
 	return 0;
 }
 
-int lg2_stash(git_repository *repo, int argc, char *argv[])
+int lg2_stash(git3_repository *repo, int argc, char *argv[])
 {
 	struct opts opts = { 0 };
 

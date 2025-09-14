@@ -1,7 +1,7 @@
 /*
- * libgit2 "init" example - shows how to initialize a new repo
+ * libgit3 "init" example - shows how to initialize a new repo
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -19,7 +19,7 @@
  * documentation for that (try "git help init") to understand what this
  * program is emulating.
  *
- * This demonstrates using the libgit2 APIs to initialize a new repository.
+ * This demonstrates using the libgit3 APIs to initialize a new repository.
  *
  * This also contains a special additional option that regular "git init"
  * does not support which is "--initial-commit" to make a first empty commit.
@@ -37,12 +37,12 @@ struct init_opts {
 	const char *gitdir;
 	const char *dir;
 };
-static void create_initial_commit(git_repository *repo);
+static void create_initial_commit(git3_repository *repo);
 static void parse_opts(struct init_opts *o, int argc, char *argv[]);
 
-int lg2_init(git_repository *repo, int argc, char *argv[])
+int lg2_init(git3_repository *repo, int argc, char *argv[])
 {
-	struct init_opts o = { 1, 0, 0, 0, GIT_REPOSITORY_INIT_SHARED_UMASK, 0, 0, 0 };
+	struct init_opts o = { 1, 0, 0, 0, GIT3_REPOSITORY_INIT_SHARED_UMASK, 0, 0, 0 };
 
 	parse_opts(&o, argc, argv);
 
@@ -51,9 +51,9 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
 	if (o.no_options) {
 		/**
 		 * No options were specified, so let's demonstrate the default
-		 * simple case of git_repository_init() API usage...
+		 * simple case of git3_repository_init() API usage...
 		 */
-		check_lg2(git_repository_init(&repo, o.dir, 0),
+		check_lg2(git3_repository_init(&repo, o.dir, 0),
 			"Could not initialize repository", NULL);
 	}
 	else {
@@ -61,14 +61,14 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
 		 * Some command line options were specified, so we'll use the
 		 * extended init API to handle them
 		 */
-		git_repository_init_options initopts = GIT_REPOSITORY_INIT_OPTIONS_INIT;
-		initopts.flags = GIT_REPOSITORY_INIT_MKPATH;
+		git3_repository_init_options initopts = GIT3_REPOSITORY_INIT_OPTIONS_INIT;
+		initopts.flags = GIT3_REPOSITORY_INIT_MKPATH;
 
 		if (o.bare)
-			initopts.flags |= GIT_REPOSITORY_INIT_BARE;
+			initopts.flags |= GIT3_REPOSITORY_INIT_BARE;
 
 		if (o.template) {
-			initopts.flags |= GIT_REPOSITORY_INIT_EXTERNAL_TEMPLATE;
+			initopts.flags |= GIT3_REPOSITORY_INIT_EXTERNAL_TEMPLATE;
 			initopts.template_path = o.template;
 		}
 
@@ -85,7 +85,7 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
 		if (o.shared != 0)
 			initopts.mode = o.shared;
 
-		check_lg2(git_repository_init_ext(&repo, o.dir, &initopts),
+		check_lg2(git3_repository_init_ext(&repo, o.dir, &initopts),
 				"Could not initialize repository", NULL);
 	}
 
@@ -93,9 +93,9 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
 
 	if (!o.quiet) {
 		if (o.bare || o.gitdir)
-			o.dir = git_repository_path(repo);
+			o.dir = git3_repository_path(repo);
 		else
-			o.dir = git_repository_workdir(repo);
+			o.dir = git3_repository_workdir(repo);
 
 		printf("Initialized empty Git repository in %s\n", o.dir);
 	}
@@ -111,7 +111,7 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
 		printf("Created empty initial commit\n");
 	}
 
-	git_repository_free(repo);
+	git3_repository_free(repo);
 
 	return 0;
 }
@@ -121,36 +121,36 @@ int lg2_init(git_repository *repo, int argc, char *argv[])
  * empty commit in the repository.  This is the helper function that does
  * that.
  */
-static void create_initial_commit(git_repository *repo)
+static void create_initial_commit(git3_repository *repo)
 {
-	git_signature *author_sig = NULL, *committer_sig = NULL;
-	git_index *index;
-	git_oid tree_id, commit_id;
-	git_tree *tree;
+	git3_signature *author_sig = NULL, *committer_sig = NULL;
+	git3_index *index;
+	git3_oid tree_id, commit_id;
+	git3_tree *tree;
 
 	/** First use the config to initialize a commit signature for the user. */
 
-	if ((git_signature_default_from_env(&author_sig, &committer_sig, repo) < 0))
+	if ((git3_signature_default_from_env(&author_sig, &committer_sig, repo) < 0))
 		fatal("Unable to create a commit signature.",
 		      "Perhaps 'user.name' and 'user.email' are not set");
 
 	/* Now let's create an empty tree for this commit */
 
-	if (git_repository_index(&index, repo) < 0)
+	if (git3_repository_index(&index, repo) < 0)
 		fatal("Could not open repository index", NULL);
 
 	/**
-	 * Outside of this example, you could call git_index_add_bypath()
+	 * Outside of this example, you could call git3_index_add_bypath()
 	 * here to put actual files into the index.  For our purposes, we'll
 	 * leave it empty for now.
 	 */
 
-	if (git_index_write_tree(&tree_id, index) < 0)
+	if (git3_index_write_tree(&tree_id, index) < 0)
 		fatal("Unable to write initial tree from index", NULL);
 
-	git_index_free(index);
+	git3_index_free(index);
 
-	if (git_tree_lookup(&tree, repo, &tree_id) < 0)
+	if (git3_tree_lookup(&tree, repo, &tree_id) < 0)
 		fatal("Could not look up initial tree", NULL);
 
 	/**
@@ -161,16 +161,16 @@ static void create_initial_commit(git_repository *repo)
 	 * but here this is the first commit so there will be no parent.
 	 */
 
-	if (git_commit_create_v(
+	if (git3_commit_create_v(
 			&commit_id, repo, "HEAD", author_sig, committer_sig,
 			NULL, "Initial commit", tree, 0) < 0)
 		fatal("Could not create the initial commit", NULL);
 
 	/** Clean up so we don't leak memory. */
 
-	git_tree_free(tree);
-	git_signature_free(author_sig);
-	git_signature_free(committer_sig);
+	git3_tree_free(tree);
+	git3_signature_free(author_sig);
+	git3_signature_free(committer_sig);
 }
 
 static void usage(const char *error, const char *arg)
@@ -187,14 +187,14 @@ static void usage(const char *error, const char *arg)
 static uint32_t parse_shared(const char *shared)
 {
 	if (!strcmp(shared, "false") || !strcmp(shared, "umask"))
-		return GIT_REPOSITORY_INIT_SHARED_UMASK;
+		return GIT3_REPOSITORY_INIT_SHARED_UMASK;
 
 	else if (!strcmp(shared, "true") || !strcmp(shared, "group"))
-		return GIT_REPOSITORY_INIT_SHARED_GROUP;
+		return GIT3_REPOSITORY_INIT_SHARED_GROUP;
 
 	else if (!strcmp(shared, "all") || !strcmp(shared, "world") ||
 			 !strcmp(shared, "everybody"))
-		return GIT_REPOSITORY_INIT_SHARED_ALL;
+		return GIT3_REPOSITORY_INIT_SHARED_ALL;
 
 	else if (shared[0] == '0') {
 		long val;
@@ -234,7 +234,7 @@ static void parse_opts(struct init_opts *o, int argc, char *argv[])
 		else if (!strcmp(a, "--bare"))
 			o->bare = 1;
 		else if (!strcmp(a, "--shared"))
-			o->shared = GIT_REPOSITORY_INIT_SHARED_GROUP;
+			o->shared = GIT3_REPOSITORY_INIT_SHARED_GROUP;
 		else if (!strcmp(a, "--initial-commit"))
 			o->initial_commit = 1;
 		else if (match_str_arg(&sharedarg, &args, "--shared"))

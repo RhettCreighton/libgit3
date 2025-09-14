@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -26,21 +26,21 @@
 		va_end(ap); \
 	} while(0)
 
-GIT_INLINE(int) cli_error(const char *fmt, ...)
+GIT3_INLINE(int) cli_error(const char *fmt, ...)
 {
 	cli_error__print(fmt);
 	return CLI_EXIT_ERROR;
 }
 
-GIT_INLINE(int) cli_error_usage(const char *fmt, ...)
+GIT3_INLINE(int) cli_error_usage(const char *fmt, ...)
 {
 	cli_error__print(fmt);
 	return CLI_EXIT_USAGE;
 }
 
-GIT_INLINE(int) cli_error_git(void)
+GIT3_INLINE(int) cli_error_git(void)
 {
-	const git_error *err = git_error_last();
+	const git3_error *err = git3_error_last();
 	fprintf(stderr, "%s: %s\n", PROGRAM_NAME,
 	        err ? err->message : "unknown error");
 	return CLI_EXIT_GIT;

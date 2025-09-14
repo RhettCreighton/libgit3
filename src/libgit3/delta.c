@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -111,12 +111,12 @@ struct index_entry {
 	struct index_entry *next;
 };
 
-struct git_delta_index {
+struct git3_delta_index {
 	unsigned long memsize;
 	const void *src_buf;
 	size_t src_size;
 	unsigned int hash_mask;
-	struct index_entry *hash[GIT_FLEX_ARRAY];
+	struct index_entry *hash[GIT3_FLEX_ARRAY];
 };
 
 static int lookup_index_alloc(
@@ -124,30 +124,30 @@ static int lookup_index_alloc(
 {
 	size_t entries_len, hash_len, index_len;
 
-	GIT_ERROR_CHECK_ALLOC_MULTIPLY(&entries_len, entries, sizeof(struct index_entry));
-	GIT_ERROR_CHECK_ALLOC_MULTIPLY(&hash_len, hash_count, sizeof(struct index_entry *));
+	GIT3_ERROR_CHECK_ALLOC_MULTIPLY(&entries_len, entries, sizeof(struct index_entry));
+	GIT3_ERROR_CHECK_ALLOC_MULTIPLY(&hash_len, hash_count, sizeof(struct index_entry *));
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&index_len, sizeof(struct git_delta_index), entries_len);
-	GIT_ERROR_CHECK_ALLOC_ADD(&index_len, index_len, hash_len);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&index_len, sizeof(struct git3_delta_index), entries_len);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&index_len, index_len, hash_len);
 
-	if (!git__is_ulong(index_len)) {
-		git_error_set(GIT_ERROR_NOMEMORY, "overly large delta");
+	if (!git3__is_ulong(index_len)) {
+		git3_error_set(GIT3_ERROR_NOMEMORY, "overly large delta");
 		return -1;
 	}
 
-	*out = git__malloc(index_len);
-	GIT_ERROR_CHECK_ALLOC(*out);
+	*out = git3__malloc(index_len);
+	GIT3_ERROR_CHECK_ALLOC(*out);
 
 	*out_len = (unsigned long)index_len;
 	return 0;
 }
 
-int git_delta_index_init(
-	git_delta_index **out, const void *buf, size_t bufsize)
+int git3_delta_index_init(
+	git3_delta_index **out, const void *buf, size_t bufsize)
 {
 	unsigned int i, hsize, hmask, entries, prev_val, *hash_count;
 	const unsigned char *data, *buffer = buf;
-	struct git_delta_index *index;
+	struct git3_delta_index *index;
 	struct index_entry *entry, **hash;
 	void *mem;
 	unsigned long memsize;
@@ -189,9 +189,9 @@ int git_delta_index_init(
 	memset(hash, 0, hsize * sizeof(*hash));
 
 	/* allocate an array to count hash entries */
-	hash_count = git__calloc(hsize, sizeof(*hash_count));
+	hash_count = git3__calloc(hsize, sizeof(*hash_count));
 	if (!hash_count) {
-		git__free(index);
+		git3__free(index);
 		return -1;
 	}
 
@@ -243,20 +243,20 @@ int git_delta_index_init(
 			keep->next = entry;
 		} while (entry);
 	}
-	git__free(hash_count);
+	git3__free(hash_count);
 
 	*out = index;
 	return 0;
 }
 
-void git_delta_index_free(git_delta_index *index)
+void git3_delta_index_free(git3_delta_index *index)
 {
-	git__free(index);
+	git3__free(index);
 }
 
-size_t git_delta_index_size(git_delta_index *index)
+size_t git3_delta_index_size(git3_delta_index *index)
 {
-	GIT_ASSERT_ARG(index);
+	GIT3_ASSERT_ARG(index);
 
 	return index->memsize;
 }
@@ -267,10 +267,10 @@ size_t git_delta_index_size(git_delta_index *index)
  */
 #define MAX_OP_SIZE	(5 + 5 + 1 + RABIN_WINDOW + 7)
 
-int git_delta_create_from_index(
+int git3_delta_create_from_index(
 	void **out,
 	size_t *out_len,
-	const struct git_delta_index *index,
+	const struct git3_delta_index *index,
 	const void *trg_buf,
 	size_t trg_size,
 	size_t max_size)
@@ -289,7 +289,7 @@ int git_delta_create_from_index(
 	if (index->src_size > UINT_MAX ||
 	    trg_size > UINT_MAX ||
 	    max_size > (UINT_MAX - MAX_OP_SIZE - 1)) {
-		git_error_set(GIT_ERROR_INVALID, "buffer sizes too large for delta processing");
+		git3_error_set(GIT3_ERROR_INVALID, "buffer sizes too large for delta processing");
 		return -1;
 	}
 
@@ -297,8 +297,8 @@ int git_delta_create_from_index(
 	bufsize = 8192;
 	if (max_size && bufsize >= max_size)
 		bufsize = (unsigned int)(max_size + MAX_OP_SIZE + 1);
-	buf = git__malloc(bufsize);
-	GIT_ERROR_CHECK_ALLOC(buf);
+	buf = git3__malloc(bufsize);
+	GIT3_ERROR_CHECK_ALLOC(buf);
 
 	/* store reference buffer size */
 	i = (unsigned int)index->src_size;
@@ -433,9 +433,9 @@ int git_delta_create_from_index(
 				bufsize = (unsigned int)(max_size + MAX_OP_SIZE + 1);
 			if (max_size && bufpos > max_size)
 				break;
-			buf = git__realloc(buf, bufsize);
+			buf = git3__realloc(buf, bufsize);
 			if (!buf) {
-				git__free(tmp);
+				git3__free(tmp);
 				return -1;
 			}
 		}
@@ -445,9 +445,9 @@ int git_delta_create_from_index(
 		buf[bufpos - inscnt - 1] = inscnt;
 
 	if (max_size && bufpos > max_size) {
-		git_error_set(GIT_ERROR_NOMEMORY, "delta would be larger than maximum size");
-		git__free(buf);
-		return GIT_EBUFS;
+		git3_error_set(GIT3_ERROR_NOMEMORY, "delta would be larger than maximum size");
+		git3__free(buf);
+		return GIT3_EBUFS;
 	}
 
 	*out_len = bufpos;
@@ -473,7 +473,7 @@ static int hdr_sz(
 
 	do {
 		if (d == end) {
-			git_error_set(GIT_ERROR_INVALID, "truncated delta");
+			git3_error_set(GIT3_ERROR_INVALID, "truncated delta");
 			return -1;
 		}
 
@@ -486,7 +486,7 @@ static int hdr_sz(
 	return 0;
 }
 
-int git_delta_read_header(
+int git3_delta_read_header(
 	size_t *base_out,
 	size_t *result_out,
 	const unsigned char *delta,
@@ -500,8 +500,8 @@ int git_delta_read_header(
 }
 
 #define DELTA_HEADER_BUFFER_LEN 16
-int git_delta_read_header_fromstream(
-	size_t *base_sz, size_t *res_sz, git_packfile_stream *stream)
+int git3_delta_read_header_fromstream(
+	size_t *base_sz, size_t *res_sz, git3_packfile_stream *stream)
 {
 	static const size_t buffer_len = DELTA_HEADER_BUFFER_LEN;
 	unsigned char buffer[DELTA_HEADER_BUFFER_LEN];
@@ -511,12 +511,12 @@ int git_delta_read_header_fromstream(
 
 	len = read = 0;
 	while (len < buffer_len) {
-		read = git_packfile_stream_read(stream, &buffer[len], buffer_len - len);
+		read = git3_packfile_stream_read(stream, &buffer[len], buffer_len - len);
 
 		if (read == 0)
 			break;
 
-		if (read == GIT_EBUFS)
+		if (read == GIT3_EBUFS)
 			continue;
 
 		len += read;
@@ -531,7 +531,7 @@ int git_delta_read_header_fromstream(
 	return 0;
 }
 
-int git_delta_apply(
+int git3_delta_apply(
 	void **out,
 	size_t *out_len,
 	const unsigned char *base,
@@ -552,18 +552,18 @@ int git_delta_apply(
 	 * base object, resulting in data corruption or segfault.
 	 */
 	if ((hdr_sz(&base_sz, &delta, delta_end) < 0) || (base_sz != base_len)) {
-		git_error_set(GIT_ERROR_INVALID, "failed to apply delta: base size does not match given data");
+		git3_error_set(GIT3_ERROR_INVALID, "failed to apply delta: base size does not match given data");
 		return -1;
 	}
 
 	if (hdr_sz(&res_sz, &delta, delta_end) < 0) {
-		git_error_set(GIT_ERROR_INVALID, "failed to apply delta: base size does not match given data");
+		git3_error_set(GIT3_ERROR_INVALID, "failed to apply delta: base size does not match given data");
 		return -1;
 	}
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&alloc_sz, res_sz, 1);
-	res_dp = git__malloc(alloc_sz);
-	GIT_ERROR_CHECK_ALLOC(res_dp);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&alloc_sz, res_sz, 1);
+	res_dp = git3__malloc(alloc_sz);
+	GIT3_ERROR_CHECK_ALLOC(res_dp);
 
 	res_dp[res_sz] = '\0';
 	*out = res_dp;
@@ -587,7 +587,7 @@ int git_delta_apply(
 			if (!len)       len = 0x10000;
 #undef ADD_DELTA
 
-			if (GIT_ADD_SIZET_OVERFLOW(&end, off, len) ||
+			if (GIT3_ADD_SIZET_OVERFLOW(&end, off, len) ||
 			    base_len < end || res_sz < len)
 				goto fail;
 
@@ -618,11 +618,11 @@ int git_delta_apply(
 	return 0;
 
 fail:
-	git__free(*out);
+	git3__free(*out);
 
 	*out = NULL;
 	*out_len = 0;
 
-	git_error_set(GIT_ERROR_INVALID, "failed to apply delta");
+	git3_error_set(GIT3_ERROR_INVALID, "failed to apply delta");
 	return -1;
 }

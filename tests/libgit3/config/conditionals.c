@@ -1,14 +1,14 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "repository.h"
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 # define ROOT_PREFIX "C:"
 #else
 # define ROOT_PREFIX
 #endif
 
-static git_repository *_repo;
+static git3_repository *_repo;
 
 void test_config_conditionals__initialize(void)
 {
@@ -22,46 +22,46 @@ void test_config_conditionals__cleanup(void)
 
 static void assert_condition_includes(const char *keyword, const char *path, bool expected)
 {
-	git_buf value = GIT_BUF_INIT;
-	git_str buf = GIT_STR_INIT;
-	git_config *cfg;
+	git3_buf value = GIT3_BUF_INIT;
+	git3_str buf = GIT3_STR_INIT;
+	git3_config *cfg;
 
-	cl_git_pass(git_str_printf(&buf, "[includeIf \"%s:%s\"]\n", keyword, path));
-	cl_git_pass(git_str_puts(&buf, "path = other\n"));
+	cl_git_pass(git3_str_printf(&buf, "[includeIf \"%s:%s\"]\n", keyword, path));
+	cl_git_pass(git3_str_puts(&buf, "path = other\n"));
 
 	cl_git_mkfile("empty_standard_repo/.git/config", buf.ptr);
 	cl_git_mkfile("empty_standard_repo/.git/other", "[foo]\nbar=baz\n");
 	_repo = cl_git_sandbox_reopen();
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
-	cl_git_pass(git_repository_config(&cfg, _repo));
+	cl_git_pass(git3_repository_config(&cfg, _repo));
 
 	if (expected) {
-		cl_git_pass(git_config_get_string_buf(&value, cfg, "foo.bar"));
+		cl_git_pass(git3_config_get_string_buf(&value, cfg, "foo.bar"));
 		cl_assert_equal_s("baz", value.ptr);
 	} else {
-		cl_git_fail_with(GIT_ENOTFOUND,
-				 git_config_get_string_buf(&value, cfg, "foo.bar"));
+		cl_git_fail_with(GIT3_ENOTFOUND,
+				 git3_config_get_string_buf(&value, cfg, "foo.bar"));
 	}
 
-	git_str_dispose(&buf);
-	git_buf_dispose(&value);
-	git_config_free(cfg);
+	git3_str_dispose(&buf);
+	git3_buf_dispose(&value);
+	git3_config_free(cfg);
 }
 
-static char *sandbox_path(git_str *buf, const char *suffix)
+static char *sandbox_path(git3_str *buf, const char *suffix)
 {
 	char *path = p_realpath(clar_sandbox_path(), NULL);
 	cl_assert(path);
-	cl_git_pass(git_str_attach(buf, path, 0));
-	cl_git_pass(git_str_joinpath(buf, buf->ptr, suffix));
+	cl_git_pass(git3_str_attach(buf, path, 0));
+	cl_git_pass(git3_str_joinpath(buf, buf->ptr, suffix));
 	return buf->ptr;
 }
 
 void test_config_conditionals__gitdir(void)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
 	assert_condition_includes("gitdir", ROOT_PREFIX "/", true);
 	assert_condition_includes("gitdir", "empty_stand", false);
@@ -92,17 +92,17 @@ void test_config_conditionals__gitdir(void)
 	assert_condition_includes("gitdir", sandbox_path(&path, "Empty_Standard_Repo"), false);
 	assert_condition_includes("gitdir", sandbox_path(&path, "Empty_Standard_Repo/"), false);
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 void test_config_conditionals__gitdir_i(void)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
 	assert_condition_includes("gitdir/i", sandbox_path(&path, "empty_standard_repo/"), true);
 	assert_condition_includes("gitdir/i", sandbox_path(&path, "EMPTY_STANDARD_REPO/"), true);
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 void test_config_conditionals__invalid_conditional_fails(void)
@@ -110,9 +110,9 @@ void test_config_conditionals__invalid_conditional_fails(void)
 	assert_condition_includes("foobar", ".git", false);
 }
 
-static void set_head(git_repository *repo, const char *name)
+static void set_head(git3_repository *repo, const char *name)
 {
-	cl_git_pass(git_repository_create_head(git_repository_path(repo), name));
+	cl_git_pass(git3_repository_create_head(git3_repository_path(repo), name));
 }
 
 void test_config_conditionals__onbranch(void)
@@ -151,25 +151,25 @@ void test_config_conditionals__onbranch(void)
 
 void test_config_conditionals__empty(void)
 {
-	git_buf value = GIT_BUF_INIT;
-	git_str buf = GIT_STR_INIT;
-	git_config *cfg;
+	git3_buf value = GIT3_BUF_INIT;
+	git3_str buf = GIT3_STR_INIT;
+	git3_config *cfg;
 
-	cl_git_pass(git_str_puts(&buf, "[includeIf]\n"));
-	cl_git_pass(git_str_puts(&buf, "path = other\n"));
+	cl_git_pass(git3_str_puts(&buf, "[includeIf]\n"));
+	cl_git_pass(git3_str_puts(&buf, "path = other\n"));
 
 	cl_git_mkfile("empty_standard_repo/.git/config", buf.ptr);
 	cl_git_mkfile("empty_standard_repo/.git/other", "[foo]\nbar=baz\n");
 	_repo = cl_git_sandbox_reopen();
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
-	cl_git_pass(git_repository_config(&cfg, _repo));
+	cl_git_pass(git3_repository_config(&cfg, _repo));
 
-	cl_git_fail_with(GIT_ENOTFOUND,
-		git_config_get_string_buf(&value, cfg, "foo.bar"));
+	cl_git_fail_with(GIT3_ENOTFOUND,
+		git3_config_get_string_buf(&value, cfg, "foo.bar"));
 
-	git_str_dispose(&buf);
-	git_buf_dispose(&value);
-	git_config_free(cfg);
+	git3_str_dispose(&buf);
+	git3_buf_dispose(&value);
+	git3_config_free(cfg);
 }

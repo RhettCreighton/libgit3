@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/merge.h"
 #include "merge.h"
@@ -6,7 +6,7 @@
 #include "../merge_helpers.h"
 #include "../conflict_data.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-resolve"
 #define TEST_INDEX_PATH TEST_REPO_PATH "/.git/index"
@@ -67,10 +67,10 @@ void test_merge_trees_automerge__cleanup(void)
 
 void test_merge_trees_automerge__automerge(void)
 {
-	git_index *index;
-	const git_index_entry *entry;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
-	git_blob *blob;
+	git3_index *index;
+	const git3_index_entry *entry;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
+	git3_blob *blob;
 
 	struct merge_index_entry merge_index_entries[] = {
 		ADDED_IN_MASTER_INDEX_ENTRY,
@@ -96,20 +96,20 @@ void test_merge_trees_automerge__automerge(void)
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 	cl_assert(merge_test_reuc(index, merge_reuc_entries, 3));
 
-	cl_assert((entry = git_index_get_bypath(index, "automergeable.txt", 0)) != NULL);
+	cl_assert((entry = git3_index_get_bypath(index, "automergeable.txt", 0)) != NULL);
 	cl_assert(entry->file_size == strlen(AUTOMERGEABLE_MERGED_FILE));
 
-	cl_git_pass(git_object_lookup((git_object **)&blob, repo, &entry->id, GIT_OBJECT_BLOB));
-	cl_assert(memcmp(git_blob_rawcontent(blob), AUTOMERGEABLE_MERGED_FILE, (size_t)entry->file_size) == 0);
+	cl_git_pass(git3_object_lookup((git3_object **)&blob, repo, &entry->id, GIT3_OBJECT_BLOB));
+	cl_assert(memcmp(git3_blob_rawcontent(blob), AUTOMERGEABLE_MERGED_FILE, (size_t)entry->file_size) == 0);
 
-	git_index_free(index);
-	git_blob_free(blob);
+	git3_index_free(index);
+	git3_blob_free(blob);
 }
 
 void test_merge_trees_automerge__favor_ours(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		ADDED_IN_MASTER_INDEX_ENTRY,
@@ -127,20 +127,20 @@ void test_merge_trees_automerge__favor_ours(void)
 		REMOVED_IN_MASTER_REUC_ENTRY,
 	};
 
-	opts.file_favor = GIT_MERGE_FILE_FAVOR_OURS;
+	opts.file_favor = GIT3_MERGE_FILE_FAVOR_OURS;
 
 	cl_git_pass(merge_trees_from_branches(&index, repo, "master", THEIRS_AUTOMERGE_BRANCH, &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 	cl_assert(merge_test_reuc(index, merge_reuc_entries, 4));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_automerge__favor_theirs(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		ADDED_IN_MASTER_INDEX_ENTRY,
@@ -158,20 +158,20 @@ void test_merge_trees_automerge__favor_theirs(void)
 		REMOVED_IN_MASTER_REUC_ENTRY,
 	};
 
-	opts.file_favor = GIT_MERGE_FILE_FAVOR_THEIRS;
+	opts.file_favor = GIT3_MERGE_FILE_FAVOR_THEIRS;
 
 	cl_git_pass(merge_trees_from_branches(&index, repo, "master", THEIRS_AUTOMERGE_BRANCH, &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 	cl_assert(merge_test_reuc(index, merge_reuc_entries, 4));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_automerge__unrelated(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "233c0919c998ed110a4b6ff36f353aec8b713487", 0, "added-in-master.txt" },
@@ -191,5 +191,5 @@ void test_merge_trees_automerge__unrelated(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 11));
 
-	git_index_free(index);
+	git3_index_free(index);
 }

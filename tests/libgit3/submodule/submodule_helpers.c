@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "path.h"
 #include "util.h"
 #include "posix.h"
@@ -11,12 +11,12 @@
  */
 void rewrite_gitmodules(const char *workdir)
 {
-	git_str in_f = GIT_STR_INIT, out_f = GIT_STR_INIT, path = GIT_STR_INIT;
+	git3_str in_f = GIT3_STR_INIT, out_f = GIT3_STR_INIT, path = GIT3_STR_INIT;
 	FILE *in, *out;
 	char line[256];
 
-	cl_git_pass(git_str_joinpath(&in_f, workdir, "gitmodules"));
-	cl_git_pass(git_str_joinpath(&out_f, workdir, ".gitmodules"));
+	cl_git_pass(git3_str_joinpath(&in_f, workdir, "gitmodules"));
+	cl_git_pass(git3_str_joinpath(&out_f, workdir, ".gitmodules"));
 
 	cl_assert((in  = fopen(in_f.ptr, "rb")) != NULL);
 	cl_assert((out = fopen(out_f.ptr, "wb")) != NULL);
@@ -27,26 +27,26 @@ void rewrite_gitmodules(const char *workdir)
 		while (*scan == ' ' || *scan == '\t') scan++;
 
 		/* rename .gitted -> .git in submodule directories */
-		if (git__prefixcmp(scan, "path =") == 0) {
+		if (git3__prefixcmp(scan, "path =") == 0) {
 			scan += strlen("path =");
 			while (*scan == ' ') scan++;
 
-			git_str_joinpath(&path, workdir, scan);
-			git_str_rtrim(&path);
-			git_str_joinpath(&path, path.ptr, ".gitted");
+			git3_str_joinpath(&path, workdir, scan);
+			git3_str_rtrim(&path);
+			git3_str_joinpath(&path, path.ptr, ".gitted");
 
-			if (!git_str_oom(&path) && p_access(path.ptr, F_OK) == 0) {
-				git_str_joinpath(&out_f, workdir, scan);
-				git_str_rtrim(&out_f);
-				git_str_joinpath(&out_f, out_f.ptr, ".git");
+			if (!git3_str_oom(&path) && p_access(path.ptr, F_OK) == 0) {
+				git3_str_joinpath(&out_f, workdir, scan);
+				git3_str_rtrim(&out_f);
+				git3_str_joinpath(&out_f, out_f.ptr, ".git");
 
-				if (!git_str_oom(&out_f))
+				if (!git3_str_oom(&out_f))
 					p_rename(path.ptr, out_f.ptr);
 			}
 		}
 
 		/* copy non-"url =" lines verbatim */
-		if (git__prefixcmp(scan, "url =") != 0) {
+		if (git3__prefixcmp(scan, "url =") != 0) {
 			fputs(line, out);
 			continue;
 		}
@@ -56,18 +56,18 @@ void rewrite_gitmodules(const char *workdir)
 		while (*scan == ' ') scan++;
 
 		if (*scan == '.') {
-			git_str_joinpath(&path, workdir, scan);
-			git_str_rtrim(&path);
+			git3_str_joinpath(&path, workdir, scan);
+			git3_str_rtrim(&path);
 		} else if (!*scan || *scan == '\n') {
-			git_str_joinpath(&path, workdir, "../testrepo.git");
+			git3_str_joinpath(&path, workdir, "../testrepo.git");
 		} else {
 			fputs(line, out);
 			continue;
 		}
 
-		git_fs_path_prettify(&path, path.ptr, NULL);
-		git_str_putc(&path, '\n');
-		cl_assert(!git_str_oom(&path));
+		git3_fs_path_prettify(&path, path.ptr, NULL);
+		git3_str_putc(&path, '\n');
+		cl_assert(!git3_str_oom(&path));
 
 		fwrite(line, scan - line, sizeof(char), out);
 		fputs(path.ptr, out);
@@ -78,9 +78,9 @@ void rewrite_gitmodules(const char *workdir)
 
 	cl_must_pass(p_unlink(in_f.ptr));
 
-	git_str_dispose(&in_f);
-	git_str_dispose(&out_f);
-	git_str_dispose(&path);
+	git3_str_dispose(&in_f);
+	git3_str_dispose(&out_f);
+	git3_str_dispose(&path);
 }
 
 static void cleanup_fixture_submodules(void *payload)
@@ -91,48 +91,48 @@ static void cleanup_fixture_submodules(void *payload)
 		cl_fixture_cleanup(payload);
 }
 
-git_repository *setup_fixture_submodules(void)
+git3_repository *setup_fixture_submodules(void)
 {
-	git_repository *repo = cl_git_sandbox_init("submodules");
+	git3_repository *repo = cl_git_sandbox_init("submodules");
 
 	cl_fixture_sandbox("testrepo.git");
 
-	rewrite_gitmodules(git_repository_workdir(repo));
+	rewrite_gitmodules(git3_repository_workdir(repo));
 	p_rename("submodules/testrepo/.gitted", "submodules/testrepo/.git");
 
 	cl_set_cleanup(cleanup_fixture_submodules, "testrepo.git");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
-git_repository *setup_fixture_submod2(void)
+git3_repository *setup_fixture_submod2(void)
 {
-	git_repository *repo = cl_git_sandbox_init("submod2");
+	git3_repository *repo = cl_git_sandbox_init("submod2");
 
 	cl_fixture_sandbox("submod2_target");
 	p_rename("submod2_target/.gitted", "submod2_target/.git");
 
-	rewrite_gitmodules(git_repository_workdir(repo));
+	rewrite_gitmodules(git3_repository_workdir(repo));
 	p_rename("submod2/not-submodule/.gitted", "submod2/not-submodule/.git");
 	p_rename("submod2/not/.gitted", "submod2/not/.git");
 
 	cl_set_cleanup(cleanup_fixture_submodules, "submod2_target");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
-git_repository *setup_fixture_submod3(void)
+git3_repository *setup_fixture_submod3(void)
 {
-	git_repository *repo = cl_git_sandbox_init("submod3");
+	git3_repository *repo = cl_git_sandbox_init("submod3");
 
 	cl_fixture_sandbox("submod2_target");
 	p_rename("submod2_target/.gitted", "submod2_target/.git");
 
-	rewrite_gitmodules(git_repository_workdir(repo));
+	rewrite_gitmodules(git3_repository_workdir(repo));
 	p_rename("submod3/One/.gitted", "submod3/One/.git");
 	p_rename("submod3/TWO/.gitted", "submod3/TWO/.git");
 	p_rename("submod3/three/.gitted", "submod3/three/.git");
@@ -146,44 +146,44 @@ git_repository *setup_fixture_submod3(void)
 
 	cl_set_cleanup(cleanup_fixture_submodules, "submod2_target");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
-git_repository *setup_fixture_super(void)
+git3_repository *setup_fixture_super(void)
 {
-	git_repository *repo = cl_git_sandbox_init("super");
+	git3_repository *repo = cl_git_sandbox_init("super");
 
 	cl_fixture_sandbox("sub.git");
 	p_mkdir("super/sub", 0777);
 
-	rewrite_gitmodules(git_repository_workdir(repo));
+	rewrite_gitmodules(git3_repository_workdir(repo));
 
 	cl_set_cleanup(cleanup_fixture_submodules, "sub.git");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
-git_repository *setup_fixture_submodule_simple(void)
+git3_repository *setup_fixture_submodule_simple(void)
 {
-	git_repository *repo = cl_git_sandbox_init("submodule_simple");
+	git3_repository *repo = cl_git_sandbox_init("submodule_simple");
 
 	cl_fixture_sandbox("testrepo.git");
 	p_mkdir("submodule_simple/testrepo", 0777);
 
 	cl_set_cleanup(cleanup_fixture_submodules, "testrepo.git");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
-git_repository *setup_fixture_submodule_with_path(void)
+git3_repository *setup_fixture_submodule_with_path(void)
 {
-	git_repository *repo = cl_git_sandbox_init("submodule_with_path");
+	git3_repository *repo = cl_git_sandbox_init("submodule_with_path");
 
 	cl_fixture_sandbox("testrepo.git");
 	p_mkdir("submodule_with_path/lib", 0777);
@@ -191,55 +191,55 @@ git_repository *setup_fixture_submodule_with_path(void)
 
 	cl_set_cleanup(cleanup_fixture_submodules, "testrepo.git");
 
-	cl_git_pass(git_repository_reinit_filesystem(repo, 1));
+	cl_git_pass(git3_repository_reinit_filesystem(repo, 1));
 
 	return repo;
 }
 
 void assert__submodule_exists(
-	git_repository *repo, const char *name,
+	git3_repository *repo, const char *name,
 	const char *msg, const char *file, const char *func, int line)
 {
-	git_submodule *sm;
-	int error = git_submodule_lookup(&sm, repo, name);
+	git3_submodule *sm;
+	int error = git3_submodule_lookup(&sm, repo, name);
 	if (error)
 		cl_git_report_failure(error, 0, file, func, line, msg);
 	cl_assert_at_line(sm != NULL, file, func, line);
-	git_submodule_free(sm);
+	git3_submodule_free(sm);
 }
 
 void refute__submodule_exists(
-	git_repository *repo, const char *name, int expected_error,
+	git3_repository *repo, const char *name, int expected_error,
 	const char *msg, const char *file, const char *func, int line)
 {
 	clar__assert_equal(
 		file, func, line, msg, 1, "%i",
-		expected_error, (int)(git_submodule_lookup(NULL, repo, name)));
+		expected_error, (int)(git3_submodule_lookup(NULL, repo, name)));
 }
 
-unsigned int get_submodule_status(git_repository *repo, const char *name)
+unsigned int get_submodule_status(git3_repository *repo, const char *name)
 {
 	unsigned int status = 0;
 
 	assert(repo && name);
 
-	cl_git_pass(git_submodule_status(&status, repo, name, GIT_SUBMODULE_IGNORE_UNSPECIFIED));
+	cl_git_pass(git3_submodule_status(&status, repo, name, GIT3_SUBMODULE_IGNORE_UNSPECIFIED));
 
 	return status;
 }
 
-static int print_submodules(git_submodule *sm, const char *name, void *p)
+static int print_submodules(git3_submodule *sm, const char *name, void *p)
 {
 	unsigned int loc = 0;
-	GIT_UNUSED(p);
-	git_submodule_location(&loc, sm);
+	GIT3_UNUSED(p);
+	git3_submodule_location(&loc, sm);
 	fprintf(stderr, "# submodule %s (at %s) flags %x\n",
-		name, git_submodule_path(sm), loc);
+		name, git3_submodule_path(sm), loc);
 	return 0;
 }
 
-void dump_submodules(git_repository *repo)
+void dump_submodules(git3_repository *repo)
 {
-	git_submodule_foreach(repo, print_submodules, NULL);
+	git3_submodule_foreach(repo, print_submodules, NULL);
 }
 

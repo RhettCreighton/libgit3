@@ -1,5 +1,5 @@
-#ifndef __CLAR_LIBGIT2__
-#define __CLAR_LIBGIT2__
+#ifndef __CLAR_LIBGIT3__
+#define __CLAR_LIBGIT3__
 
 #include "clar.h"
 #include <git3.h>
@@ -11,7 +11,7 @@
  * Replace for `clar_must_pass` that passes the last library error as the
  * test failure message.
  *
- * Use this wrapper around all `git_` library calls that return error codes!
+ * Use this wrapper around all `git3_` library calls that return error codes!
  */
 #define cl_git_pass(expr) cl_git_expect((expr), 0, __FILE__, __func__, __LINE__)
 
@@ -19,19 +19,19 @@
 
 #define cl_git_expect(expr, expected, file, func, line) do { \
 	int _lg2_error; \
-	git_error_clear(); \
+	git3_error_clear(); \
 	if ((_lg2_error = (expr)) != expected) \
 		cl_git_report_failure(_lg2_error, expected, file, func, line, "Function call failed: " #expr); \
 	} while (0)
 
 /**
  * Wrapper for `clar_must_fail` -- this one is
- * just for consistency. Use with `git_` library
+ * just for consistency. Use with `git3_` library
  * calls that are supposed to fail!
  */
 #define cl_git_fail(expr) do { \
 	if ((expr) == 0) \
-		git_error_clear(), \
+		git3_error_clear(), \
 		cl_git_report_failure(0, 0, __FILE__, __func__, __LINE__, "Function call succeeded: " #expr); \
 	} while (0)
 
@@ -41,7 +41,7 @@
 #define cl_win32_pass(expr) do { \
 	int _win32_res; \
 	if ((_win32_res = (expr)) == 0) { \
-		git_error_set(GIT_ERROR_OS, "Returned: %d, system error code: %lu", _win32_res, GetLastError()); \
+		git3_error_set(GIT3_ERROR_OS, "Returned: %d, system error code: %lu", _win32_res, GetLastError()); \
 		cl_git_report_failure(_win32_res, 0, __FILE__, __func__, __LINE__, "System call failed: " #expr); \
 	} \
 	} while(0)
@@ -65,28 +65,28 @@ typedef struct {
 	char error_msg[4096];
 } cl_git_thread_err;
 
-#ifdef GIT_THREADS
+#ifdef GIT3_THREADS
 # define cl_git_thread_pass(threaderr, expr) cl_git_thread_pass_(threaderr, (expr), __FILE__, __func__, __LINE__)
 #else
 # define cl_git_thread_pass(threaderr, expr) cl_git_pass(expr)
 #endif
 
 #define cl_git_thread_pass_(__threaderr, __expr, __file, __func, __line) do { \
-	git_error_clear(); \
+	git3_error_clear(); \
 	if ((((cl_git_thread_err *)__threaderr)->error = (__expr)) != 0) { \
-		const git_error *_last = git_error_last(); \
+		const git3_error *_last = git3_error_last(); \
 		((cl_git_thread_err *)__threaderr)->file = __file; \
 		((cl_git_thread_err *)__threaderr)->func = __func; \
 		((cl_git_thread_err *)__threaderr)->line = __line; \
 		((cl_git_thread_err *)__threaderr)->expr = "Function call failed: " #__expr; \
 		p_snprintf(((cl_git_thread_err *)__threaderr)->error_msg, 4096, "thread 0x%" PRIxZ " - error %d - %s", \
-			git_thread_currentid(), ((cl_git_thread_err *)__threaderr)->error, \
+			git3_thread_currentid(), ((cl_git_thread_err *)__threaderr)->error, \
 			_last ? _last->message : "<no message>"); \
-		git_thread_exit(__threaderr); \
+		git3_thread_exit(__threaderr); \
 	} \
 	} while (0)
 
-GIT_INLINE(void) cl_git_thread_check(void *data)
+GIT3_INLINE(void) cl_git_thread_check(void *data)
 {
 	cl_git_thread_err *threaderr = (cl_git_thread_err *)data;
 	if (threaderr->error != 0)
@@ -98,7 +98,7 @@ void cl_git_report_failure(int, int, const char *, const char *, int, const char
 #define cl_assert_at_line(expr,file,func,line) \
 	clar__assert((expr) != 0, file, func, line, "Expression is not true: " #expr, NULL, 1)
 
-GIT_INLINE(void) clar__assert_in_range(
+GIT3_INLINE(void) clar__assert_in_range(
 	int lo, int val, int hi,
 	const char *file, const char *func, int line,
 	const char *err, int should_abort)
@@ -133,31 +133,31 @@ void clar__assert_equal_file(
 	const char *func,
 	int line);
 
-GIT_INLINE(void) clar__assert_equal_oid(
+GIT3_INLINE(void) clar__assert_equal_oid(
 	const char *file, const char *func, int line, const char *desc,
-	const git_oid *one, const git_oid *two)
+	const git3_oid *one, const git3_oid *two)
 {
 
-	if (git_oid_equal(one, two))
+	if (git3_oid_equal(one, two))
 		return;
 
-	if (git_oid_type(one) != git_oid_type(two)) {
+	if (git3_oid_type(one) != git3_oid_type(two)) {
 		char err[64];
 
-		snprintf(err, 64, "different oid types: %d vs %d", git_oid_type(one), git_oid_type(two));
+		snprintf(err, 64, "different oid types: %d vs %d", git3_oid_type(one), git3_oid_type(two));
 		clar__fail(file, func, line, desc, err, 1);
-	} else if (git_oid_type(one) == GIT_OID_SHA1) {
+	} else if (git3_oid_type(one) == GIT3_OID_SHA1) {
 		char err[] = "\"........................................\" != \"........................................\"";
-		git_oid_fmt(&err[1], one);
-		git_oid_fmt(&err[47], two);
+		git3_oid_fmt(&err[1], one);
+		git3_oid_fmt(&err[47], two);
 
 		clar__fail(file, func, line, desc, err, 1);
-#ifdef GIT_EXPERIMENTAL_SHA256
-	} else if (one->type == GIT_OID_SHA256) {
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	} else if (one->type == GIT3_OID_SHA256) {
 		char err[] = "\"................................................................\" != \"................................................................\"";
 
-		git_oid_fmt(&err[1], one);
-		git_oid_fmt(&err[71], one);
+		git3_oid_fmt(&err[1], one);
+		git3_oid_fmt(&err[71], one);
 
 		clar__fail(file, func, line, desc, err, 1);
 #endif
@@ -166,14 +166,14 @@ GIT_INLINE(void) clar__assert_equal_oid(
 	}
 }
 
-GIT_INLINE(void) clar__assert_equal_oidstr(
+GIT3_INLINE(void) clar__assert_equal_oidstr(
 	const char *file, const char *func, int line, const char *desc,
-	const char *one_str, const git_oid *two)
+	const char *one_str, const git3_oid *two)
 {
-	git_oid one;
-	git_oid_t oid_type = git_oid_type(two);
+	git3_oid one;
+	git3_oid_t oid_type = git3_oid_type(two);
 
-	if (git_oid_from_prefix(&one, one_str, git_oid_hexsize(oid_type), oid_type) < 0) {
+	if (git3_oid_from_prefix(&one, one_str, git3_oid_hexsize(oid_type), oid_type) < 0) {
 		clar__fail(file, func, line, desc, "could not parse oid string", 1);
 	} else {
 		clar__assert_equal_oid(file, func, line, desc, &one, two);
@@ -218,10 +218,10 @@ int cl_rename(const char *source, const char *dest);
 
 /* Git sandbox setup helpers */
 
-git_repository *cl_git_sandbox_init(const char *sandbox);
-git_repository *cl_git_sandbox_init_new(const char *name);
+git3_repository *cl_git_sandbox_init(const char *sandbox);
+git3_repository *cl_git_sandbox_init_new(const char *name);
 void cl_git_sandbox_cleanup(void);
-git_repository *cl_git_sandbox_reopen(void);
+git3_repository *cl_git_sandbox_reopen(void);
 
 /*
  * build a sandbox-relative from path segments
@@ -239,27 +239,27 @@ int cl_git_remove_placeholders(const char *directory_path, const char *filename)
 
 /* commit creation helpers */
 void cl_repo_commit_from_index(
-	git_oid *out,
-	git_repository *repo,
-	git_signature *sig,
-	git_time_t time,
+	git3_oid *out,
+	git3_repository *repo,
+	git3_signature *sig,
+	git3_time_t time,
 	const char *msg);
 
 /* config setting helpers */
-void cl_repo_set_bool(git_repository *repo, const char *cfg, int value);
-int cl_repo_get_bool(git_repository *repo, const char *cfg);
+void cl_repo_set_bool(git3_repository *repo, const char *cfg, int value);
+int cl_repo_get_bool(git3_repository *repo, const char *cfg);
 
-void cl_repo_set_int(git_repository *repo, const char *cfg, int value);
-int cl_repo_get_int(git_repository *repo, const char *cfg);
+void cl_repo_set_int(git3_repository *repo, const char *cfg, int value);
+int cl_repo_get_int(git3_repository *repo, const char *cfg);
 
-void cl_repo_set_string(git_repository *repo, const char *cfg, const char *value);
+void cl_repo_set_string(git3_repository *repo, const char *cfg, const char *value);
 
 /*
  * set up a fake "home" directory -- automatically configures cleanup
  * function to restore the home directory, although you can call it
  * explicitly if you wish (with NULL).
  */
-void cl_fake_homedir(git_str *);
+void cl_fake_homedir(git3_str *);
 void cl_fake_homedir_cleanup(void *);
 
 /*
@@ -267,20 +267,20 @@ void cl_fake_homedir_cleanup(void *);
  * configures cleanup function to restore the global config
  * although you can call it explicitly if you wish (with NULL).
  */
-void cl_fake_globalconfig(git_str *);
+void cl_fake_globalconfig(git3_str *);
 void cl_fake_globalconfig_cleanup(void *);
 
 void cl_sandbox_set_homedir(const char *);
 void cl_sandbox_set_search_path_defaults(void);
 void cl_sandbox_disable_ownership_validation(void);
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 # define cl_msleep(x) Sleep(x)
 #else
 # define cl_msleep(x) usleep(1000 * (x))
 #endif
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 bool cl_sandbox_supports_8dot3(void);
 #endif
 

@@ -4,7 +4,7 @@
  * This could be run in the main loop whilst the application waits for
  * the indexing to finish in a worker thread
  */
-static int index_cb(const git_indexer_progress *stats, void *data)
+static int index_cb(const git3_indexer_progress *stats, void *data)
 {
 	(void)data;
 	printf("\rProcessing %u of %u", stats->indexed_objects, stats->total_objects);
@@ -12,10 +12,10 @@ static int index_cb(const git_indexer_progress *stats, void *data)
 	return 0;
 }
 
-int lg2_index_pack(git_repository *repo, int argc, char **argv)
+int lg2_index_pack(git3_repository *repo, int argc, char **argv)
 {
-	git_indexer *idx;
-	git_indexer_progress stats = {0, 0};
+	git3_indexer *idx;
+	git3_indexer_progress stats = {0, 0};
 	int error;
 	int fd;
 	ssize_t read_bytes;
@@ -28,10 +28,10 @@ int lg2_index_pack(git_repository *repo, int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	error = git_indexer_new(&idx, ".", NULL);
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	error = git3_indexer_new(&idx, ".", NULL);
 #else
-	error = git_indexer_new(&idx, ".", 0, NULL, NULL);
+	error = git3_indexer_new(&idx, ".", 0, NULL, NULL);
 #endif
 
 	if (error < 0) {
@@ -50,7 +50,7 @@ int lg2_index_pack(git_repository *repo, int argc, char **argv)
 		if (read_bytes < 0)
 			break;
 
-		if ((error = git_indexer_append(idx, buf, read_bytes, &stats)) < 0)
+		if ((error = git3_indexer_append(idx, buf, read_bytes, &stats)) < 0)
 			goto cleanup;
 
 		index_cb(&stats, NULL);
@@ -62,15 +62,15 @@ int lg2_index_pack(git_repository *repo, int argc, char **argv)
 		goto cleanup;
 	}
 
-	if ((error = git_indexer_commit(idx, &stats)) < 0)
+	if ((error = git3_indexer_commit(idx, &stats)) < 0)
 		goto cleanup;
 
 	printf("\rIndexing %u of %u\n", stats.indexed_objects, stats.total_objects);
 
-	puts(git_indexer_name(idx));
+	puts(git3_indexer_name(idx));
 
  cleanup:
 	close(fd);
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 	return error;
 }

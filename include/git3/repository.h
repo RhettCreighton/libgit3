@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_repository_h__
@@ -15,13 +15,13 @@
 #include "commit.h"
 
 /**
- * @file git2/repository.h
+ * @file git3/repository.h
  * @brief The repository stores revisions for a source tree
- * @defgroup git_repository The repository stores revisions for a source tree
+ * @defgroup git3_repository The repository stores revisions for a source tree
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Open a git repository.
@@ -32,15 +32,15 @@ GIT_BEGIN_DECL
  * The method will automatically detect if 'path' is a normal
  * or bare repository or fail is 'path' is neither.
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
  * @param[out] out pointer to the repo which will be opened
  * @param path the path to the repository
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_open(git_repository **out, const char *path);
+GIT3_EXTERN(int) git3_repository_open(git3_repository **out, const char *path);
 /**
  * Open working tree as a repository
  *
@@ -51,7 +51,7 @@ GIT_EXTERN(int) git_repository_open(git_repository **out, const char *path);
  * @param wt Working tree to open
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_open_from_worktree(git_repository **out, git_worktree *wt);
+GIT3_EXTERN(int) git3_repository_open_from_worktree(git3_repository **out, git3_worktree *wt);
 
 /**
  * Create a "fake" repository to wrap an object database
@@ -64,9 +64,9 @@ GIT_EXTERN(int) git_repository_open_from_worktree(git_repository **out, git_work
  * @param odb the object database to wrap
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_wrap_odb(
-	git_repository **out,
-	git_odb *odb);
+GIT3_EXTERN(int) git3_repository_wrap_odb(
+	git3_repository **out,
+	git3_odb *odb);
 
 /**
  * Look for a git repository and copy its path in the given buffer.
@@ -78,11 +78,11 @@ GIT_EXTERN(int) git_repository_wrap_odb(
  * The method will automatically detect if the repository is bare
  * (if there is a repository).
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
- * @param out A pointer to a user-allocated git_buf which will contain
+ * @param out A pointer to a user-allocated git3_buf which will contain
  * the found path.
  *
  * @param start_path The base path where the lookup starts.
@@ -90,7 +90,7 @@ GIT_EXTERN(int) git_repository_wrap_odb(
  * @param across_fs If true, then the lookup will not stop when a
  * filesystem device change is detected while exploring parent directories.
  *
- * @param ceiling_dirs A GIT_PATH_LIST_SEPARATOR separated list of
+ * @param ceiling_dirs A GIT3_PATH_LIST_SEPARATOR separated list of
  * absolute symbolic link free paths. The lookup will stop when any
  * of this paths is reached. Note that the lookup always performs on
  * start_path no matter start_path appears in ceiling_dirs ceiling_dirs
@@ -98,14 +98,14 @@ GIT_EXTERN(int) git_repository_wrap_odb(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_discover(
-		git_buf *out,
+GIT3_EXTERN(int) git3_repository_discover(
+		git3_buf *out,
 		const char *start_path,
 		int across_fs,
 		const char *ceiling_dirs);
 
 /**
- * Option flags for `git_repository_open_ext`.
+ * Option flags for `git3_repository_open_ext`.
  */
 typedef enum {
 	/**
@@ -113,7 +113,7 @@ typedef enum {
 	 * start_path. Do not walk up from the start_path looking at parent
 	 * directories.
 	 */
-	GIT_REPOSITORY_OPEN_NO_SEARCH = (1 << 0),
+	GIT3_REPOSITORY_OPEN_NO_SEARCH = (1 << 0),
 
 	/**
 	 * Unless this flag is set, open will not continue searching across
@@ -122,45 +122,45 @@ typedef enum {
 	 * "/home/user/source/" will not return "/.git/" as the found repo if
 	 * "/" is a different filesystem than "/home".
 	 */
-	GIT_REPOSITORY_OPEN_CROSS_FS  = (1 << 1),
+	GIT3_REPOSITORY_OPEN_CROSS_FS  = (1 << 1),
 
 	/**
 	 * Open repository as a bare repo regardless of core.bare config, and
 	 * defer loading config file for faster setup.
-	 * Unlike `git_repository_open_bare`, this can follow gitlinks.
+	 * Unlike `git3_repository_open_bare`, this can follow gitlinks.
 	 */
-	GIT_REPOSITORY_OPEN_BARE      = (1 << 2),
+	GIT3_REPOSITORY_OPEN_BARE      = (1 << 2),
 
 	/**
 	 * Do not check for a repository by appending /.git to the start_path;
 	 * only open the repository if start_path itself points to the git
 	 * directory.
 	 */
-	GIT_REPOSITORY_OPEN_NO_DOTGIT = (1 << 3),
+	GIT3_REPOSITORY_OPEN_NO_DOTGIT = (1 << 3),
 
 	/**
 	 * Find and open a git repository, respecting the environment variables
 	 * used by the git command-line tools.
-	 * If set, `git_repository_open_ext` will ignore the other flags and
+	 * If set, `git3_repository_open_ext` will ignore the other flags and
 	 * the `ceiling_dirs` argument, and will allow a NULL `path` to use
-	 * `GIT_DIR` or search from the current directory.
-	 * The search for a repository will respect $GIT_CEILING_DIRECTORIES and
-	 * $GIT_DISCOVERY_ACROSS_FILESYSTEM.  The opened repository will
-	 * respect $GIT_INDEX_FILE, $GIT_NAMESPACE, $GIT_OBJECT_DIRECTORY, and
-	 * $GIT_ALTERNATE_OBJECT_DIRECTORIES.
-	 * In the future, this flag will also cause `git_repository_open_ext`
-	 * to respect $GIT_WORK_TREE and $GIT_COMMON_DIR; currently,
-	 * `git_repository_open_ext` with this flag will error out if either
-	 * $GIT_WORK_TREE or $GIT_COMMON_DIR is set.
+	 * `GIT3_DIR` or search from the current directory.
+	 * The search for a repository will respect $GIT3_CEILING_DIRECTORIES and
+	 * $GIT3_DISCOVERY_ACROSS_FILESYSTEM.  The opened repository will
+	 * respect $GIT3_INDEX_FILE, $GIT3_NAMESPACE, $GIT3_OBJECT_DIRECTORY, and
+	 * $GIT3_ALTERNATE_OBJECT_DIRECTORIES.
+	 * In the future, this flag will also cause `git3_repository_open_ext`
+	 * to respect $GIT3_WORK_TREE and $GIT3_COMMON_DIR; currently,
+	 * `git3_repository_open_ext` with this flag will error out if either
+	 * $GIT3_WORK_TREE or $GIT3_COMMON_DIR is set.
 	 */
-	GIT_REPOSITORY_OPEN_FROM_ENV  = (1 << 4)
-} git_repository_open_flag_t;
+	GIT3_REPOSITORY_OPEN_FROM_ENV  = (1 << 4)
+} git3_repository_open_flag_t;
 
 /**
  * Find and open a repository with extended controls.
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
  * @param[out] out Pointer to the repo which will be opened.  This can
@@ -169,17 +169,17 @@ typedef enum {
  * @param path Path to open as git repository.  If the flags
  *        permit "searching", then this can be a path to a subdirectory
  *        inside the working directory of the repository. May be NULL if
- *        flags is GIT_REPOSITORY_OPEN_FROM_ENV.
- * @param flags A combination of the GIT_REPOSITORY_OPEN flags above.
- * @param ceiling_dirs A GIT_PATH_LIST_SEPARATOR delimited list of path
+ *        flags is GIT3_REPOSITORY_OPEN_FROM_ENV.
+ * @param flags A combination of the GIT3_REPOSITORY_OPEN flags above.
+ * @param ceiling_dirs A GIT3_PATH_LIST_SEPARATOR delimited list of path
  *        prefixes at which the search for a containing repository should
  *        terminate.
- * @return 0 on success, GIT_ENOTFOUND if no repository could be found,
+ * @return 0 on success, GIT3_ENOTFOUND if no repository could be found,
  *        or -1 if there was a repository but open failed for some reason
  *        (such as repo corruption or system errors).
  */
-GIT_EXTERN(int) git_repository_open_ext(
-	git_repository **out,
+GIT3_EXTERN(int) git3_repository_open_ext(
+	git3_repository **out,
 	const char *path,
 	unsigned int flags,
 	const char *ceiling_dirs);
@@ -191,28 +191,28 @@ GIT_EXTERN(int) git_repository_open_ext(
  * if you're e.g. hosting git repositories and need to access them
  * efficiently
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
  * @param[out] out Pointer to the repo which will be opened.
  * @param bare_path Direct path to the bare repository
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_repository_open_bare(git_repository **out, const char *bare_path);
+GIT3_EXTERN(int) git3_repository_open_bare(git3_repository **out, const char *bare_path);
 
 /**
  * Free a previously allocated repository
  *
  * Note that after a repository is free'd, all the objects it has spawned
  * will still exist until they are manually closed by the user
- * with `git_object_free`, but accessing any of the attributes of
+ * with `git3_object_free`, but accessing any of the attributes of
  * an object without a backing repository will result in undefined
  * behavior
  *
  * @param repo repository handle to close. If NULL nothing occurs.
  */
-GIT_EXTERN(void) git_repository_free(git_repository *repo);
+GIT3_EXTERN(void) git3_repository_free(git3_repository *repo);
 
 /**
  * Creates a new Git repository in the given folder.
@@ -220,8 +220,8 @@ GIT_EXTERN(void) git_repository_free(git_repository *repo);
  * TODO:
  *	- Reinit the repository
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
  * @param[out] out pointer to the repo which will be created or reinitialized
@@ -233,15 +233,15 @@ GIT_EXTERN(void) git_repository_free(git_repository *repo);
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_init(
-	git_repository **out,
+GIT3_EXTERN(int) git3_repository_init(
+	git3_repository **out,
 	const char *path,
 	unsigned is_bare);
 
 /**
- * Option flags for `git_repository_init_ext`.
+ * Option flags for `git3_repository_init_ext`.
  *
- * These flags configure extra behaviors to `git_repository_init_ext`.
+ * These flags configure extra behaviors to `git3_repository_init_ext`.
  * In every case, the default behavior is the zero value (i.e. flag is
  * not set). Just OR the flag values together for the `flags` parameter
  * when initializing a new repo.
@@ -250,13 +250,13 @@ typedef enum {
 	/**
 	 * Create a bare repository with no working directory.
 	 */
-	GIT_REPOSITORY_INIT_BARE              = (1u << 0),
+	GIT3_REPOSITORY_INIT_BARE              = (1u << 0),
 
 	/**
-	 * Return an GIT_EEXISTS error if the repo_path appears to already be
+	 * Return an GIT3_EEXISTS error if the repo_path appears to already be
 	 * an git repository.
 	 */
-	GIT_REPOSITORY_INIT_NO_REINIT         = (1u << 1),
+	GIT3_REPOSITORY_INIT_NO_REINIT         = (1u << 1),
 
 	/**
 	 * Make the repo_path (and workdir_path) as needed. Init is always willing
@@ -264,33 +264,33 @@ typedef enum {
 	 * init to create the trailing component of the repo and workdir paths
 	 * as needed.
 	 */
-	GIT_REPOSITORY_INIT_MKDIR             = (1u << 3),
+	GIT3_REPOSITORY_INIT_MKDIR             = (1u << 3),
 
 	/**
 	 * Recursively make all components of the repo and workdir paths as
 	 * necessary.
 	 */
-	GIT_REPOSITORY_INIT_MKPATH            = (1u << 4),
+	GIT3_REPOSITORY_INIT_MKPATH            = (1u << 4),
 
 	/**
-	 * libgit2 normally uses internal templates to initialize a new repo.
+	 * libgit3 normally uses internal templates to initialize a new repo.
 	 * This flags enables external templates, looking the "template_path" from
 	 * the options if set, or the `init.templatedir` global config if not,
 	 * or falling back on "/usr/share/git-core/templates" if it exists.
 	 */
-	GIT_REPOSITORY_INIT_EXTERNAL_TEMPLATE = (1u << 5),
+	GIT3_REPOSITORY_INIT_EXTERNAL_TEMPLATE = (1u << 5),
 
 	/**
 	 * If an alternate workdir is specified, use relative paths for the gitdir
 	 * and core.worktree.
 	 */
-	GIT_REPOSITORY_INIT_RELATIVE_GITLINK  = (1u << 6)
-} git_repository_init_flag_t;
+	GIT3_REPOSITORY_INIT_RELATIVE_GITLINK  = (1u << 6)
+} git3_repository_init_flag_t;
 
 /**
- * Mode options for `git_repository_init_ext`.
+ * Mode options for `git3_repository_init_ext`.
  *
- * Set the mode field of the `git_repository_init_options` structure
+ * Set the mode field of the `git3_repository_init_options` structure
  * either to the custom mode that you would like, or to one of the
  * defined modes.
  */
@@ -298,36 +298,36 @@ typedef enum {
 	/**
 	 * Use permissions configured by umask - the default.
 	 */
-	GIT_REPOSITORY_INIT_SHARED_UMASK = 0,
+	GIT3_REPOSITORY_INIT_SHARED_UMASK = 0,
 
 	/**
 	 * Use "--shared=group" behavior, chmod'ing the new repo to be group
 	 * writable and "g+sx" for sticky group assignment.
 	 */
-	GIT_REPOSITORY_INIT_SHARED_GROUP = 0002775,
+	GIT3_REPOSITORY_INIT_SHARED_GROUP = 0002775,
 
 	/**
 	 * Use "--shared=all" behavior, adding world readability.
 	 */
-	GIT_REPOSITORY_INIT_SHARED_ALL   = 0002777
-} git_repository_init_mode_t;
+	GIT3_REPOSITORY_INIT_SHARED_ALL   = 0002777
+} git3_repository_init_mode_t;
 
 /**
- * Extended options structure for `git_repository_init_ext`.
+ * Extended options structure for `git3_repository_init_ext`.
  *
- * This contains extra options for `git_repository_init_ext` that enable
+ * This contains extra options for `git3_repository_init_ext` that enable
  * additional initialization features.
  */
 typedef struct {
 	unsigned int version;
 
 	/**
-	 * Combination of GIT_REPOSITORY_INIT flags above.
+	 * Combination of GIT3_REPOSITORY_INIT flags above.
 	 */
 	uint32_t    flags;
 
 	/**
-	 * Set to one of the standard GIT_REPOSITORY_INIT_SHARED_... constants
+	 * Set to one of the standard GIT3_REPOSITORY_INIT_SHARED_... constants
 	 * above, or to a custom value that you would like.
 	 */
 	uint32_t    mode;
@@ -348,7 +348,7 @@ typedef struct {
 	const char *description;
 
 	/**
-	 * When GIT_REPOSITORY_INIT_EXTERNAL_TEMPLATE is set, this contains
+	 * When GIT3_REPOSITORY_INIT_EXTERNAL_TEMPLATE is set, this contains
 	 * the path to use for the template directory. If this is NULL, the config
 	 * or default directory options will be used instead.
 	 */
@@ -369,34 +369,34 @@ typedef struct {
 	 */
 	const char *origin_url;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	/**
 	 *
 	 * Type of object IDs to use for this repository, or 0 for
 	 * default (currently SHA1).
 	 */
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 #endif
-} git_repository_init_options;
+} git3_repository_init_options;
 
-/** Current version for the `git_repository_init_options` structure */
-#define GIT_REPOSITORY_INIT_OPTIONS_VERSION 1
+/** Current version for the `git3_repository_init_options` structure */
+#define GIT3_REPOSITORY_INIT_OPTIONS_VERSION 1
 
-/** Static constructor for `git_repository_init_options` */
-#define GIT_REPOSITORY_INIT_OPTIONS_INIT {GIT_REPOSITORY_INIT_OPTIONS_VERSION}
+/** Static constructor for `git3_repository_init_options` */
+#define GIT3_REPOSITORY_INIT_OPTIONS_INIT {GIT3_REPOSITORY_INIT_OPTIONS_VERSION}
 
 /**
- * Initialize git_repository_init_options structure
+ * Initialize git3_repository_init_options structure
  *
- * Initializes a `git_repository_init_options` with default values. Equivalent to
- * creating an instance with `GIT_REPOSITORY_INIT_OPTIONS_INIT`.
+ * Initializes a `git3_repository_init_options` with default values. Equivalent to
+ * creating an instance with `GIT3_REPOSITORY_INIT_OPTIONS_INIT`.
  *
- * @param opts The `git_repository_init_options` struct to initialize.
- * @param version The struct version; pass `GIT_REPOSITORY_INIT_OPTIONS_VERSION`.
+ * @param opts The `git3_repository_init_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_REPOSITORY_INIT_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_repository_init_options_init(
-	git_repository_init_options *opts,
+GIT3_EXTERN(int) git3_repository_init_options_init(
+	git3_repository_init_options *opts,
 	unsigned int version);
 
 /**
@@ -407,34 +407,34 @@ GIT_EXTERN(int) git_repository_init_options_init(
  * auto-detect the case sensitivity of the file system and if the
  * file system supports file mode bits correctly.
  *
- * Note that the libgit2 library _must_ be initialized using
- * `git_libgit3_init` before any APIs can be called, including
+ * Note that the libgit3 library _must_ be initialized using
+ * `git3_libgit3_init` before any APIs can be called, including
  * this one.
  *
  * @param out Pointer to the repo which will be created or reinitialized.
  * @param repo_path The path to the repository.
- * @param opts Pointer to git_repository_init_options struct.
+ * @param opts Pointer to git3_repository_init_options struct.
  * @return 0 or an error code on failure.
  */
-GIT_EXTERN(int) git_repository_init_ext(
-	git_repository **out,
+GIT3_EXTERN(int) git3_repository_init_ext(
+	git3_repository **out,
 	const char *repo_path,
-	git_repository_init_options *opts);
+	git3_repository_init_options *opts);
 
 /**
  * Retrieve and resolve the reference pointed at by HEAD.
  *
- * The returned `git_reference` will be owned by caller and
- * `git_reference_free()` must be called when done with it to release the
+ * The returned `git3_reference` will be owned by caller and
+ * `git3_reference_free()` must be called when done with it to release the
  * allocated memory and prevent a leak.
  *
  * @param[out] out pointer to the reference which will be retrieved
  * @param repo a repository object
  *
- * @return 0 on success, GIT_EUNBORNBRANCH when HEAD points to a non existing
- * branch, GIT_ENOTFOUND when HEAD is missing; an error code otherwise
+ * @return 0 on success, GIT3_EUNBORNBRANCH when HEAD points to a non existing
+ * branch, GIT3_ENOTFOUND when HEAD is missing; an error code otherwise
  */
-GIT_EXTERN(int) git_repository_head(git_reference **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_head(git3_reference **out, git3_repository *repo);
 
 /**
  * Retrieve the referenced HEAD for the worktree
@@ -444,7 +444,7 @@ GIT_EXTERN(int) git_repository_head(git_reference **out, git_repository *repo);
  * @param name name of the worktree to retrieve HEAD for
  * @return 0 when successful, error-code otherwise
  */
-GIT_EXTERN(int) git_repository_head_for_worktree(git_reference **out, git_repository *repo,
+GIT3_EXTERN(int) git3_repository_head_for_worktree(git3_reference **out, git3_repository *repo,
 	const char *name);
 
 /**
@@ -457,7 +457,7 @@ GIT_EXTERN(int) git_repository_head_for_worktree(git_reference **out, git_reposi
  * @return 1 if HEAD is detached, 0 if it's not; error code if there
  * was an error.
  */
-GIT_EXTERN(int) git_repository_head_detached(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_head_detached(git3_repository *repo);
 
 /**
  * Check if a worktree's HEAD is detached
@@ -470,7 +470,7 @@ GIT_EXTERN(int) git_repository_head_detached(git_repository *repo);
  * @return 1 if HEAD is detached, 0 if its not; error code if
  *  there was an error
  */
-GIT_EXTERN(int) git_repository_head_detached_for_worktree(git_repository *repo,
+GIT3_EXTERN(int) git3_repository_head_detached_for_worktree(git3_repository *repo,
 	const char *name);
 
 /**
@@ -483,7 +483,7 @@ GIT_EXTERN(int) git_repository_head_detached_for_worktree(git_repository *repo,
  * @return 1 if the current branch is unborn, 0 if it's not; error
  * code if there was an error
  */
-GIT_EXTERN(int) git_repository_head_unborn(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_head_unborn(git3_repository *repo);
 
 /**
  * Check if a repository is empty
@@ -497,29 +497,29 @@ GIT_EXTERN(int) git_repository_head_unborn(git_repository *repo);
  * @return 1 if the repository is empty, 0 if it isn't, error code
  * if the repository is corrupted
  */
-GIT_EXTERN(int) git_repository_is_empty(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_is_empty(git3_repository *repo);
 
 /**
  * List of items which belong to the git repository layout
  */
 typedef enum {
-	GIT_REPOSITORY_ITEM_GITDIR,
-	GIT_REPOSITORY_ITEM_WORKDIR,
-	GIT_REPOSITORY_ITEM_COMMONDIR,
-	GIT_REPOSITORY_ITEM_INDEX,
-	GIT_REPOSITORY_ITEM_OBJECTS,
-	GIT_REPOSITORY_ITEM_REFS,
-	GIT_REPOSITORY_ITEM_PACKED_REFS,
-	GIT_REPOSITORY_ITEM_REMOTES,
-	GIT_REPOSITORY_ITEM_CONFIG,
-	GIT_REPOSITORY_ITEM_INFO,
-	GIT_REPOSITORY_ITEM_HOOKS,
-	GIT_REPOSITORY_ITEM_LOGS,
-	GIT_REPOSITORY_ITEM_MODULES,
-	GIT_REPOSITORY_ITEM_WORKTREES,
-	GIT_REPOSITORY_ITEM_WORKTREE_CONFIG,
-	GIT_REPOSITORY_ITEM__LAST
-} git_repository_item_t;
+	GIT3_REPOSITORY_ITEM_GITDIR,
+	GIT3_REPOSITORY_ITEM_WORKDIR,
+	GIT3_REPOSITORY_ITEM_COMMONDIR,
+	GIT3_REPOSITORY_ITEM_INDEX,
+	GIT3_REPOSITORY_ITEM_OBJECTS,
+	GIT3_REPOSITORY_ITEM_REFS,
+	GIT3_REPOSITORY_ITEM_PACKED_REFS,
+	GIT3_REPOSITORY_ITEM_REMOTES,
+	GIT3_REPOSITORY_ITEM_CONFIG,
+	GIT3_REPOSITORY_ITEM_INFO,
+	GIT3_REPOSITORY_ITEM_HOOKS,
+	GIT3_REPOSITORY_ITEM_LOGS,
+	GIT3_REPOSITORY_ITEM_MODULES,
+	GIT3_REPOSITORY_ITEM_WORKTREES,
+	GIT3_REPOSITORY_ITEM_WORKTREE_CONFIG,
+	GIT3_REPOSITORY_ITEM__LAST
+} git3_repository_item_t;
 
 /**
  * Get the location of a specific repository file or directory
@@ -528,14 +528,14 @@ typedef enum {
  * item. It will thereby honor things like the repository's
  * common directory, gitdir, etc. In case a file path cannot
  * exist for a given item (e.g. the working directory of a bare
- * repository), GIT_ENOTFOUND is returned.
+ * repository), GIT3_ENOTFOUND is returned.
  *
  * @param out Buffer to store the path at
  * @param repo Repository to get path for
  * @param item The repository item for which to retrieve the path
- * @return 0, GIT_ENOTFOUND if the path cannot exist or an error code
+ * @return 0, GIT3_ENOTFOUND if the path cannot exist or an error code
  */
-GIT_EXTERN(int) git_repository_item_path(git_buf *out, const git_repository *repo, git_repository_item_t item);
+GIT3_EXTERN(int) git3_repository_item_path(git3_buf *out, const git3_repository *repo, git3_repository_item_t item);
 
 /**
  * Get the path of this repository
@@ -546,7 +546,7 @@ GIT_EXTERN(int) git_repository_item_path(git_buf *out, const git_repository *rep
  * @param repo A repository object
  * @return the path to the repository
  */
-GIT_EXTERN(const char *) git_repository_path(const git_repository *repo);
+GIT3_EXTERN(const char *) git3_repository_path(const git3_repository *repo);
 
 /**
  * Get the path of the working directory for this repository
@@ -557,7 +557,7 @@ GIT_EXTERN(const char *) git_repository_path(const git_repository *repo);
  * @param repo A repository object
  * @return the path to the working dir, if it exists
  */
-GIT_EXTERN(const char *) git_repository_workdir(const git_repository *repo);
+GIT3_EXTERN(const char *) git3_repository_workdir(const git3_repository *repo);
 
 /**
  * Get the path of the shared common directory for this repository.
@@ -569,7 +569,7 @@ GIT_EXTERN(const char *) git_repository_workdir(const git_repository *repo);
  * @param repo A repository object
  * @return the path to the common dir
  */
-GIT_EXTERN(const char *) git_repository_commondir(const git_repository *repo);
+GIT3_EXTERN(const char *) git3_repository_commondir(const git3_repository *repo);
 
 /**
  * Set the path to the working directory for this repository
@@ -588,8 +588,8 @@ GIT_EXTERN(const char *) git_repository_commondir(const git_repository *repo);
  *        "core.worktree" (if workdir is not the parent of the .git directory)
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_set_workdir(
-	git_repository *repo, const char *workdir, int update_gitlink);
+GIT3_EXTERN(int) git3_repository_set_workdir(
+	git3_repository *repo, const char *workdir, int update_gitlink);
 
 /**
  * Check if a repository is bare
@@ -597,7 +597,7 @@ GIT_EXTERN(int) git_repository_set_workdir(
  * @param repo Repo to test
  * @return 1 if the repository is bare, 0 otherwise.
  */
-GIT_EXTERN(int) git_repository_is_bare(const git_repository *repo);
+GIT3_EXTERN(int) git3_repository_is_bare(const git3_repository *repo);
 
 /**
  * Check if a repository is a linked work tree
@@ -605,7 +605,7 @@ GIT_EXTERN(int) git_repository_is_bare(const git_repository *repo);
  * @param repo Repo to test
  * @return 1 if the repository is a linked work tree, 0 otherwise.
  */
-GIT_EXTERN(int) git_repository_is_worktree(const git_repository *repo);
+GIT3_EXTERN(int) git3_repository_is_worktree(const git3_repository *repo);
 
 /**
  * Get the configuration file for this repository.
@@ -621,7 +621,7 @@ GIT_EXTERN(int) git_repository_is_worktree(const git_repository *repo);
  * @param repo A repository object
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_config(git_config **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_config(git3_config **out, git3_repository *repo);
 
 /**
  * Get a snapshot of the repository's configuration
@@ -637,7 +637,7 @@ GIT_EXTERN(int) git_repository_config(git_config **out, git_repository *repo);
  * @param repo the repository
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_config_snapshot(git_config **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_config_snapshot(git3_config **out, git3_repository *repo);
 
 /**
  * Get the Object Database for this repository.
@@ -653,7 +653,7 @@ GIT_EXTERN(int) git_repository_config_snapshot(git_config **out, git_repository 
  * @param repo A repository object
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_odb(git_odb **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_odb(git3_odb **out, git3_repository *repo);
 
 /**
  * Get the Reference Database Backend for this repository.
@@ -669,7 +669,7 @@ GIT_EXTERN(int) git_repository_odb(git_odb **out, git_repository *repo);
  * @param repo A repository object
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_refdb(git_refdb **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_refdb(git3_refdb **out, git3_repository *repo);
 
 /**
  * Get the Index file for this repository.
@@ -685,7 +685,7 @@ GIT_EXTERN(int) git_repository_refdb(git_refdb **out, git_repository *repo);
  * @param repo A repository object
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_repository_index(git_index **out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_index(git3_index **out, git3_repository *repo);
 
 /**
  * Retrieve git's prepared message
@@ -699,21 +699,21 @@ GIT_EXTERN(int) git_repository_index(git_index **out, git_repository *repo);
  * Use this function to get the contents of this file. Don't forget to
  * remove the file after you create the commit.
  *
- * @param out git_buf to write data into
+ * @param out git3_buf to write data into
  * @param repo Repository to read prepared message from
- * @return 0, GIT_ENOTFOUND if no message exists or an error code
+ * @return 0, GIT3_ENOTFOUND if no message exists or an error code
  */
-GIT_EXTERN(int) git_repository_message(git_buf *out, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_message(git3_buf *out, git3_repository *repo);
 
 /**
  * Remove git's prepared message.
  *
- * Remove the message that `git_repository_message` retrieves.
+ * Remove the message that `git3_repository_message` retrieves.
  *
  * @param repo Repository to remove prepared message from.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_repository_message_remove(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_message_remove(git3_repository *repo);
 
 /**
  * Remove all the metadata associated with an ongoing command like merge,
@@ -722,23 +722,23 @@ GIT_EXTERN(int) git_repository_message_remove(git_repository *repo);
  * @param repo A repository object
  * @return 0 on success, or error
  */
-GIT_EXTERN(int) git_repository_state_cleanup(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_state_cleanup(git3_repository *repo);
 
 /**
  * Callback used to iterate over each FETCH_HEAD entry
  *
- * @see git_repository_fetchhead_foreach
+ * @see git3_repository_fetchhead_foreach
  *
  * @param ref_name The reference name
  * @param remote_url The remote URL
  * @param oid The reference target OID
  * @param is_merge Was the reference the result of a merge
- * @param payload Payload passed to git_repository_fetchhead_foreach
+ * @param payload Payload passed to git3_repository_fetchhead_foreach
  * @return non-zero to terminate the iteration
  */
-typedef int GIT_CALLBACK(git_repository_fetchhead_foreach_cb)(const char *ref_name,
+typedef int GIT3_CALLBACK(git3_repository_fetchhead_foreach_cb)(const char *ref_name,
 	const char *remote_url,
-	const git_oid *oid,
+	const git3_oid *oid,
 	unsigned int is_merge,
 	void *payload);
 
@@ -750,24 +750,24 @@ typedef int GIT_CALLBACK(git_repository_fetchhead_foreach_cb)(const char *ref_na
  * @param repo A repository object
  * @param callback Callback function
  * @param payload Pointer to callback data (optional)
- * @return 0 on success, non-zero callback return value, GIT_ENOTFOUND if
+ * @return 0 on success, non-zero callback return value, GIT3_ENOTFOUND if
  *         there is no FETCH_HEAD file, or other error code.
  */
-GIT_EXTERN(int) git_repository_fetchhead_foreach(
-	git_repository *repo,
-	git_repository_fetchhead_foreach_cb callback,
+GIT3_EXTERN(int) git3_repository_fetchhead_foreach(
+	git3_repository *repo,
+	git3_repository_fetchhead_foreach_cb callback,
 	void *payload);
 
 /**
  * Callback used to iterate over each MERGE_HEAD entry
  *
- * @see git_repository_mergehead_foreach
+ * @see git3_repository_mergehead_foreach
  *
  * @param oid The merge OID
- * @param payload Payload passed to git_repository_mergehead_foreach
+ * @param payload Payload passed to git3_repository_mergehead_foreach
  * @return non-zero to terminate the iteration
  */
-typedef int GIT_CALLBACK(git_repository_mergehead_foreach_cb)(const git_oid *oid,
+typedef int GIT3_CALLBACK(git3_repository_mergehead_foreach_cb)(const git3_oid *oid,
 	void *payload);
 
 /**
@@ -779,19 +779,19 @@ typedef int GIT_CALLBACK(git_repository_mergehead_foreach_cb)(const git_oid *oid
  * @param repo A repository object
  * @param callback Callback function
  * @param payload Pointer to callback data (optional)
- * @return 0 on success, non-zero callback return value, GIT_ENOTFOUND if
+ * @return 0 on success, non-zero callback return value, GIT3_ENOTFOUND if
  *         there is no MERGE_HEAD file, or other error code.
  */
-GIT_EXTERN(int) git_repository_mergehead_foreach(
-	git_repository *repo,
-	git_repository_mergehead_foreach_cb callback,
+GIT3_EXTERN(int) git3_repository_mergehead_foreach(
+	git3_repository *repo,
+	git3_repository_mergehead_foreach_cb callback,
 	void *payload);
 
 /**
  * Calculate hash of file using repository filtering rules.
  *
  * If you simply want to calculate the hash of a file on disk with no filters,
- * you can just use the `git_odb_hashfile()` API.  However, if you want to
+ * you can just use the `git3_odb_hashfile()` API.  However, if you want to
  * hash a file in the repository and you want to apply filtering rules (e.g.
  * crlf filters) before generating the SHA, then use this function.
  *
@@ -804,7 +804,7 @@ GIT_EXTERN(int) git_repository_mergehead_foreach(
  * @param path Path to file on disk whose contents should be hashed.  This
  *             may be an absolute path or a relative path, in which case it
  *             will be treated as a path within the working directory.
- * @param type The object type to hash as (e.g. GIT_OBJECT_BLOB)
+ * @param type The object type to hash as (e.g. GIT3_OBJECT_BLOB)
  * @param as_path The path to use to look up filtering rules. If this is
  *             an empty string then no filters will be applied when
  *             calculating the hash. If this is `NULL` and the `path`
@@ -812,11 +812,11 @@ GIT_EXTERN(int) git_repository_mergehead_foreach(
  *             directory, then the `path` will be used.
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_repository_hashfile(
-	git_oid *out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_repository_hashfile(
+	git3_oid *out,
+	git3_repository *repo,
 	const char *path,
-	git_object_t type,
+	git3_object_t type,
 	const char *as_path);
 
 /**
@@ -837,15 +837,15 @@ GIT_EXTERN(int) git_repository_hashfile(
  * @param refname Canonical name of the reference the HEAD should point at
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_repository_set_head(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_repository_set_head(
+	git3_repository *repo,
 	const char *refname);
 
 /**
  * Make the repository HEAD directly point to the Commit.
  *
  * If the provided committish cannot be found in the repository, the HEAD
- * is unaltered and GIT_ENOTFOUND is returned.
+ * is unaltered and GIT3_ENOTFOUND is returned.
  *
  * If the provided committish cannot be peeled into a commit, the HEAD
  * is unaltered and -1 is returned.
@@ -857,27 +857,27 @@ GIT_EXTERN(int) git_repository_set_head(
  * @param committish Object id of the Commit the HEAD should point to
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_repository_set_head_detached(
-	git_repository *repo,
-	const git_oid *committish);
+GIT3_EXTERN(int) git3_repository_set_head_detached(
+	git3_repository *repo,
+	const git3_oid *committish);
 
 /**
  * Make the repository HEAD directly point to the Commit.
  *
- * This behaves like `git_repository_set_head_detached()` but takes an
+ * This behaves like `git3_repository_set_head_detached()` but takes an
  * annotated commit, which lets you specify which extended sha syntax
  * string was specified by a user, allowing for more exact reflog
  * messages.
  *
- * See the documentation for `git_repository_set_head_detached()`.
+ * See the documentation for `git3_repository_set_head_detached()`.
  *
  * @param repo Repository pointer
  * @param committish annotated commit to point HEAD to
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_repository_set_head_detached_from_annotated(
-	git_repository *repo,
-	const git_annotated_commit *committish);
+GIT3_EXTERN(int) git3_repository_set_head_detached_from_annotated(
+	git3_repository *repo,
+	const git3_annotated_commit *committish);
 
 /**
  * Detach the HEAD.
@@ -893,11 +893,11 @@ GIT_EXTERN(int) git_repository_set_head_detached_from_annotated(
  * Otherwise, the HEAD will be detached and point to the peeled Commit.
  *
  * @param repo Repository pointer
- * @return 0 on success, GIT_EUNBORNBRANCH when HEAD points to a non existing
+ * @return 0 on success, GIT3_EUNBORNBRANCH when HEAD points to a non existing
  * branch or an error code
  */
-GIT_EXTERN(int) git_repository_detach_head(
-	git_repository *repo);
+GIT3_EXTERN(int) git3_repository_detach_head(
+	git3_repository *repo);
 
 /**
  * Repository state
@@ -906,19 +906,19 @@ GIT_EXTERN(int) git_repository_detach_head(
  * based on the current operation which is ongoing.
  */
 typedef enum {
-	GIT_REPOSITORY_STATE_NONE,
-	GIT_REPOSITORY_STATE_MERGE,
-	GIT_REPOSITORY_STATE_REVERT,
-	GIT_REPOSITORY_STATE_REVERT_SEQUENCE,
-	GIT_REPOSITORY_STATE_CHERRYPICK,
-	GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE,
-	GIT_REPOSITORY_STATE_BISECT,
-	GIT_REPOSITORY_STATE_REBASE,
-	GIT_REPOSITORY_STATE_REBASE_INTERACTIVE,
-	GIT_REPOSITORY_STATE_REBASE_MERGE,
-	GIT_REPOSITORY_STATE_APPLY_MAILBOX,
-	GIT_REPOSITORY_STATE_APPLY_MAILBOX_OR_REBASE
-} git_repository_state_t;
+	GIT3_REPOSITORY_STATE_NONE,
+	GIT3_REPOSITORY_STATE_MERGE,
+	GIT3_REPOSITORY_STATE_REVERT,
+	GIT3_REPOSITORY_STATE_REVERT_SEQUENCE,
+	GIT3_REPOSITORY_STATE_CHERRYPICK,
+	GIT3_REPOSITORY_STATE_CHERRYPICK_SEQUENCE,
+	GIT3_REPOSITORY_STATE_BISECT,
+	GIT3_REPOSITORY_STATE_REBASE,
+	GIT3_REPOSITORY_STATE_REBASE_INTERACTIVE,
+	GIT3_REPOSITORY_STATE_REBASE_MERGE,
+	GIT3_REPOSITORY_STATE_APPLY_MAILBOX,
+	GIT3_REPOSITORY_STATE_APPLY_MAILBOX_OR_REBASE
+} git3_repository_state_t;
 
 /**
  * Determines the status of a git repository - ie, whether an operation
@@ -927,7 +927,7 @@ typedef enum {
  * @param repo Repository pointer
  * @return The state of the repository
  */
-GIT_EXTERN(int) git_repository_state(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_state(git3_repository *repo);
 
 /**
  * Sets the active namespace for this Git Repository
@@ -941,7 +941,7 @@ GIT_EXTERN(int) git_repository_state(git_repository *repo);
  *	use `foo` as the namespace.
  *	@return 0 on success, -1 on error
  */
-GIT_EXTERN(int) git_repository_set_namespace(git_repository *repo, const char *nmspace);
+GIT3_EXTERN(int) git3_repository_set_namespace(git3_repository *repo, const char *nmspace);
 
 /**
  * Get the currently active namespace for this repository
@@ -949,7 +949,7 @@ GIT_EXTERN(int) git_repository_set_namespace(git_repository *repo, const char *n
  * @param repo The repo
  * @return the active namespace, or NULL if there isn't one
  */
-GIT_EXTERN(const char *) git_repository_get_namespace(git_repository *repo);
+GIT3_EXTERN(const char *) git3_repository_get_namespace(git3_repository *repo);
 
 
 /**
@@ -958,7 +958,7 @@ GIT_EXTERN(const char *) git_repository_get_namespace(git_repository *repo);
  * @param repo The repository
  * @return 1 if shallow, zero if not
  */
-GIT_EXTERN(int) git_repository_is_shallow(git_repository *repo);
+GIT3_EXTERN(int) git3_repository_is_shallow(git3_repository *repo);
 
 /**
  * Retrieve the configured identity to use for reflogs
@@ -971,7 +971,7 @@ GIT_EXTERN(int) git_repository_is_shallow(git_repository *repo);
  * @param repo the repository
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_ident(const char **name, const char **email, const git_repository *repo);
+GIT3_EXTERN(int) git3_repository_ident(const char **name, const char **email, const git3_repository *repo);
 
 /**
  * Set the identity to be used for writing reflogs
@@ -985,7 +985,7 @@ GIT_EXTERN(int) git_repository_ident(const char **name, const char **email, cons
  * @param email the email to use for the reflog entries
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_repository_set_ident(git_repository *repo, const char *name, const char *email);
+GIT3_EXTERN(int) git3_repository_set_ident(git3_repository *repo, const char *name, const char *email);
 
 /**
  * Gets the object type used by this repository.
@@ -993,20 +993,20 @@ GIT_EXTERN(int) git_repository_set_ident(git_repository *repo, const char *name,
  * @param repo the repository
  * @return the object id type
  */
-GIT_EXTERN(git_oid_t) git_repository_oid_type(git_repository *repo);
+GIT3_EXTERN(git3_oid_t) git3_repository_oid_type(git3_repository *repo);
 
 /**
  * Gets the parents of the next commit, given the current repository state.
  * Generally, this is the HEAD commit, except when performing a merge, in
  * which case it is two or more commits.
  *
- * @param commits a `git_commitarray` that will contain the commit parents
+ * @param commits a `git3_commitarray` that will contain the commit parents
  * @param repo the repository
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_repository_commit_parents(git_commitarray *commits, git_repository *repo);
+GIT3_EXTERN(int) git3_repository_commit_parents(git3_commitarray *commits, git3_repository *repo);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

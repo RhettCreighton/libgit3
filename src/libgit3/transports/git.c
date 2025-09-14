@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,32 +12,32 @@
 #include "streams/socket.h"
 #include "git3/sys/transport.h"
 
-#define OWNING_SUBTRANSPORT(s) ((git_subtransport *)(s)->parent.subtransport)
+#define OWNING_SUBTRANSPORT(s) ((git3_subtransport *)(s)->parent.subtransport)
 
 static const char prefix_git[] = "git://";
 static const char cmd_uploadpack[] = "git-upload-pack";
 static const char cmd_receivepack[] = "git-receive-pack";
 
 typedef struct {
-	git_smart_subtransport_stream parent;
-	git_stream *io;
+	git3_smart_subtransport_stream parent;
+	git3_stream *io;
 	const char *cmd;
 	char *url;
 	unsigned sent_command : 1;
-} git_proto_stream;
+} git3_proto_stream;
 
 typedef struct {
-	git_smart_subtransport parent;
-	git_transport *owner;
-	git_proto_stream *current_stream;
-} git_subtransport;
+	git3_smart_subtransport parent;
+	git3_transport *owner;
+	git3_proto_stream *current_stream;
+} git3_subtransport;
 
 /*
  * Create a git protocol request.
  *
- * For example: 0035git-upload-pack /libgit2/libgit2\0host=github.com\0
+ * For example: 0035git-upload-pack /libgit3/libgit3\0host=github.com\0
  */
-static int gen_proto(git_str *request, const char *cmd, const char *url)
+static int gen_proto(git3_str *request, const char *cmd, const char *url)
 {
 	char *delim, *repo;
 	char host[] = "host=";
@@ -45,7 +45,7 @@ static int gen_proto(git_str *request, const char *cmd, const char *url)
 
 	delim = strchr(url, '/');
 	if (delim == NULL) {
-		git_error_set(GIT_ERROR_NET, "malformed URL");
+		git3_error_set(GIT3_ERROR_NET, "malformed URL");
 		return -1;
 	}
 
@@ -59,43 +59,43 @@ static int gen_proto(git_str *request, const char *cmd, const char *url)
 
 	len = 4 + strlen(cmd) + 1 + strlen(repo) + 1 + strlen(host) + (delim - url) + 1;
 
-	git_str_grow(request, len);
-	git_str_printf(request, "%04x%s %s%c%s",
+	git3_str_grow(request, len);
+	git3_str_printf(request, "%04x%s %s%c%s",
 		(unsigned int)(len & 0x0FFFF), cmd, repo, 0, host);
-	git_str_put(request, url, delim - url);
-	git_str_putc(request, '\0');
+	git3_str_put(request, url, delim - url);
+	git3_str_putc(request, '\0');
 
-	if (git_str_oom(request))
+	if (git3_str_oom(request))
 		return -1;
 
 	return 0;
 }
 
-static int send_command(git_proto_stream *s)
+static int send_command(git3_proto_stream *s)
 {
-	git_str request = GIT_STR_INIT;
+	git3_str request = GIT3_STR_INIT;
 	int error;
 
 	if ((error = gen_proto(&request, s->cmd, s->url)) < 0)
 		goto cleanup;
 
-	if ((error = git_stream__write_full(s->io, request.ptr, request.size, 0)) < 0)
+	if ((error = git3_stream__write_full(s->io, request.ptr, request.size, 0)) < 0)
 		goto cleanup;
 
 	s->sent_command = 1;
 
 cleanup:
-	git_str_dispose(&request);
+	git3_str_dispose(&request);
 	return error;
 }
 
-static int git_proto_stream_read(
-	git_smart_subtransport_stream *stream,
+static int git3_proto_stream_read(
+	git3_smart_subtransport_stream *stream,
 	char *buffer,
 	size_t buf_size,
 	size_t *bytes_read)
 {
-	git_proto_stream *s = (git_proto_stream *)stream;
+	git3_proto_stream *s = (git3_proto_stream *)stream;
 	ssize_t ret;
 	int error;
 
@@ -104,7 +104,7 @@ static int git_proto_stream_read(
 	if (!s->sent_command && (error = send_command(s)) < 0)
 		return error;
 
-	ret = git_stream_read(s->io, buffer, min(buf_size, INT_MAX));
+	ret = git3_stream_read(s->io, buffer, min(buf_size, INT_MAX));
 
 	if (ret < 0)
 		return -1;
@@ -113,111 +113,111 @@ static int git_proto_stream_read(
 	return 0;
 }
 
-static int git_proto_stream_write(
-	git_smart_subtransport_stream *stream,
+static int git3_proto_stream_write(
+	git3_smart_subtransport_stream *stream,
 	const char *buffer,
 	size_t len)
 {
-	git_proto_stream *s = (git_proto_stream *)stream;
+	git3_proto_stream *s = (git3_proto_stream *)stream;
 	int error;
 
 	if (!s->sent_command && (error = send_command(s)) < 0)
 		return error;
 
-	return git_stream__write_full(s->io, buffer, len, 0);
+	return git3_stream__write_full(s->io, buffer, len, 0);
 }
 
-static void git_proto_stream_free(git_smart_subtransport_stream *stream)
+static void git3_proto_stream_free(git3_smart_subtransport_stream *stream)
 {
-	git_proto_stream *s;
-	git_subtransport *t;
+	git3_proto_stream *s;
+	git3_subtransport *t;
 
 	if (!stream)
 		return;
 
-	s = (git_proto_stream *)stream;
+	s = (git3_proto_stream *)stream;
 	t = OWNING_SUBTRANSPORT(s);
 
 	t->current_stream = NULL;
 
-	git_stream_close(s->io);
-	git_stream_free(s->io);
-	git__free(s->url);
-	git__free(s);
+	git3_stream_close(s->io);
+	git3_stream_free(s->io);
+	git3__free(s->url);
+	git3__free(s);
 }
 
-static int git_proto_stream_alloc(
-	git_subtransport *t,
+static int git3_proto_stream_alloc(
+	git3_subtransport *t,
 	const char *url,
 	const char *cmd,
 	const char *host,
 	const char *port,
-	git_smart_subtransport_stream **stream)
+	git3_smart_subtransport_stream **stream)
 {
-	git_proto_stream *s;
+	git3_proto_stream *s;
 
 	if (!stream)
 		return -1;
 
-	s = git__calloc(1, sizeof(git_proto_stream));
-	GIT_ERROR_CHECK_ALLOC(s);
+	s = git3__calloc(1, sizeof(git3_proto_stream));
+	GIT3_ERROR_CHECK_ALLOC(s);
 
 	s->parent.subtransport = &t->parent;
-	s->parent.read = git_proto_stream_read;
-	s->parent.write = git_proto_stream_write;
-	s->parent.free = git_proto_stream_free;
+	s->parent.read = git3_proto_stream_read;
+	s->parent.write = git3_proto_stream_write;
+	s->parent.free = git3_proto_stream_free;
 
 	s->cmd = cmd;
-	s->url = git__strdup(url);
+	s->url = git3__strdup(url);
 
 	if (!s->url) {
-		git__free(s);
+		git3__free(s);
 		return -1;
 	}
 
-	if ((git_socket_stream_new(&s->io, host, port)) < 0)
+	if ((git3_socket_stream_new(&s->io, host, port)) < 0)
 		return -1;
 
-	GIT_ERROR_CHECK_VERSION(s->io, GIT_STREAM_VERSION, "git_stream");
+	GIT3_ERROR_CHECK_VERSION(s->io, GIT3_STREAM_VERSION, "git3_stream");
 
 	*stream = &s->parent;
 	return 0;
 }
 
 static int _git_uploadpack_ls(
-	git_subtransport *t,
+	git3_subtransport *t,
 	const char *url,
-	git_smart_subtransport_stream **stream)
+	git3_smart_subtransport_stream **stream)
 {
-	git_net_url urldata = GIT_NET_URL_INIT;
+	git3_net_url urldata = GIT3_NET_URL_INIT;
 	const char *stream_url = url;
 	const char *host, *port;
-	git_proto_stream *s;
+	git3_proto_stream *s;
 	int error;
 
 	*stream = NULL;
 
-	if (!git__prefixcmp(url, prefix_git))
+	if (!git3__prefixcmp(url, prefix_git))
 		stream_url += strlen(prefix_git);
 
-	if ((error = git_net_url_parse(&urldata, url)) < 0)
+	if ((error = git3_net_url_parse(&urldata, url)) < 0)
 		return error;
 
 	host = urldata.host;
-	port = urldata.port ? urldata.port : GIT_DEFAULT_PORT;
+	port = urldata.port ? urldata.port : GIT3_DEFAULT_PORT;
 
-	error = git_proto_stream_alloc(t, stream_url, cmd_uploadpack, host, port, stream);
+	error = git3_proto_stream_alloc(t, stream_url, cmd_uploadpack, host, port, stream);
 
-	git_net_url_dispose(&urldata);
+	git3_net_url_dispose(&urldata);
 
 	if (error < 0) {
-		git_proto_stream_free(*stream);
+		git3_proto_stream_free(*stream);
 		return error;
 	}
 
-	s = (git_proto_stream *) *stream;
-	if ((error = git_stream_connect(s->io)) < 0) {
-		git_proto_stream_free(*stream);
+	s = (git3_proto_stream *) *stream;
+	if ((error = git3_stream_connect(s->io)) < 0) {
+		git3_proto_stream_free(*stream);
 		return error;
 	}
 
@@ -227,50 +227,50 @@ static int _git_uploadpack_ls(
 }
 
 static int _git_uploadpack(
-	git_subtransport *t,
+	git3_subtransport *t,
 	const char *url,
-	git_smart_subtransport_stream **stream)
+	git3_smart_subtransport_stream **stream)
 {
-	GIT_UNUSED(url);
+	GIT3_UNUSED(url);
 
 	if (t->current_stream) {
 		*stream = &t->current_stream->parent;
 		return 0;
 	}
 
-	git_error_set(GIT_ERROR_NET, "must call UPLOADPACK_LS before UPLOADPACK");
+	git3_error_set(GIT3_ERROR_NET, "must call UPLOADPACK_LS before UPLOADPACK");
 	return -1;
 }
 
 static int _git_receivepack_ls(
-	git_subtransport *t,
+	git3_subtransport *t,
 	const char *url,
-	git_smart_subtransport_stream **stream)
+	git3_smart_subtransport_stream **stream)
 {
-	git_net_url urldata = GIT_NET_URL_INIT;
+	git3_net_url urldata = GIT3_NET_URL_INIT;
 	const char *stream_url = url;
-	git_proto_stream *s;
+	git3_proto_stream *s;
 	int error;
 
 	*stream = NULL;
-	if (!git__prefixcmp(url, prefix_git))
+	if (!git3__prefixcmp(url, prefix_git))
 		stream_url += strlen(prefix_git);
 
-	if ((error = git_net_url_parse(&urldata, url)) < 0)
+	if ((error = git3_net_url_parse(&urldata, url)) < 0)
 		return error;
 
-	error = git_proto_stream_alloc(t, stream_url, cmd_receivepack, urldata.host, urldata.port, stream);
+	error = git3_proto_stream_alloc(t, stream_url, cmd_receivepack, urldata.host, urldata.port, stream);
 
-	git_net_url_dispose(&urldata);
+	git3_net_url_dispose(&urldata);
 
 	if (error < 0) {
-		git_proto_stream_free(*stream);
+		git3_proto_stream_free(*stream);
 		return error;
 	}
 
-	s = (git_proto_stream *) *stream;
+	s = (git3_proto_stream *) *stream;
 
-	if ((error = git_stream_connect(s->io)) < 0)
+	if ((error = git3_stream_connect(s->io)) < 0)
 		return error;
 
 	t->current_stream = s;
@@ -279,40 +279,40 @@ static int _git_receivepack_ls(
 }
 
 static int _git_receivepack(
-	git_subtransport *t,
+	git3_subtransport *t,
 	const char *url,
-	git_smart_subtransport_stream **stream)
+	git3_smart_subtransport_stream **stream)
 {
-	GIT_UNUSED(url);
+	GIT3_UNUSED(url);
 
 	if (t->current_stream) {
 		*stream = &t->current_stream->parent;
 		return 0;
 	}
 
-	git_error_set(GIT_ERROR_NET, "must call RECEIVEPACK_LS before RECEIVEPACK");
+	git3_error_set(GIT3_ERROR_NET, "must call RECEIVEPACK_LS before RECEIVEPACK");
 	return -1;
 }
 
 static int _git_action(
-	git_smart_subtransport_stream **stream,
-	git_smart_subtransport *subtransport,
+	git3_smart_subtransport_stream **stream,
+	git3_smart_subtransport *subtransport,
 	const char *url,
-	git_smart_service_t action)
+	git3_smart_service_t action)
 {
-	git_subtransport *t = (git_subtransport *) subtransport;
+	git3_subtransport *t = (git3_subtransport *) subtransport;
 
 	switch (action) {
-		case GIT_SERVICE_UPLOADPACK_LS:
+		case GIT3_SERVICE_UPLOADPACK_LS:
 			return _git_uploadpack_ls(t, url, stream);
 
-		case GIT_SERVICE_UPLOADPACK:
+		case GIT3_SERVICE_UPLOADPACK:
 			return _git_uploadpack(t, url, stream);
 
-		case GIT_SERVICE_RECEIVEPACK_LS:
+		case GIT3_SERVICE_RECEIVEPACK_LS:
 			return _git_receivepack_ls(t, url, stream);
 
-		case GIT_SERVICE_RECEIVEPACK:
+		case GIT3_SERVICE_RECEIVEPACK:
 			return _git_receivepack(t, url, stream);
 	}
 
@@ -320,41 +320,41 @@ static int _git_action(
 	return -1;
 }
 
-static int _git_close(git_smart_subtransport *subtransport)
+static int _git_close(git3_smart_subtransport *subtransport)
 {
-	git_subtransport *t = (git_subtransport *) subtransport;
+	git3_subtransport *t = (git3_subtransport *) subtransport;
 
-	GIT_ASSERT(!t->current_stream);
+	GIT3_ASSERT(!t->current_stream);
 
-	GIT_UNUSED(t);
+	GIT3_UNUSED(t);
 
 	return 0;
 }
 
-static void _git_free(git_smart_subtransport *subtransport)
+static void _git_free(git3_smart_subtransport *subtransport)
 {
-	git_subtransport *t = (git_subtransport *) subtransport;
+	git3_subtransport *t = (git3_subtransport *) subtransport;
 
-	git__free(t);
+	git3__free(t);
 }
 
-int git_smart_subtransport_git(git_smart_subtransport **out, git_transport *owner, void *param)
+int git3_smart_subtransport_git(git3_smart_subtransport **out, git3_transport *owner, void *param)
 {
-	git_subtransport *t;
+	git3_subtransport *t;
 
-	GIT_UNUSED(param);
+	GIT3_UNUSED(param);
 
 	if (!out)
 		return -1;
 
-	t = git__calloc(1, sizeof(git_subtransport));
-	GIT_ERROR_CHECK_ALLOC(t);
+	t = git3__calloc(1, sizeof(git3_subtransport));
+	GIT3_ERROR_CHECK_ALLOC(t);
 
 	t->owner = owner;
 	t->parent.action = _git_action;
 	t->parent.close = _git_close;
 	t->parent.free = _git_free;
 
-	*out = (git_smart_subtransport *) t;
+	*out = (git3_smart_subtransport *) t;
 	return 0;
 }

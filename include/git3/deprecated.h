@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_deprecated_h__
@@ -39,9 +39,9 @@
 #include "credential_helpers.h"
 
 /*
- * Users can avoid deprecated functions by defining `GIT_DEPRECATE_HARD`.
+ * Users can avoid deprecated functions by defining `GIT3_DEPRECATE_HARD`.
  */
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 
 /*
  * The credential structures are now opaque by default, and their
@@ -51,12 +51,12 @@
 #include "sys/credential.h"
 
 /**
- * @file git2/deprecated.h
+ * @file git3/deprecated.h
  * @brief Deprecated functions and values
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** @name Deprecated Attribute Constants
  *
@@ -69,24 +69,24 @@ GIT_BEGIN_DECL
  */
 /**@{*/
 
-/** @deprecated use GIT_ATTR_VALUE_UNSPECIFIED */
-#define GIT_ATTR_UNSPECIFIED_T GIT_ATTR_VALUE_UNSPECIFIED
-/** @deprecated use GIT_ATTR_VALUE_TRUE */
-#define GIT_ATTR_TRUE_T GIT_ATTR_VALUE_TRUE
-/** @deprecated use GIT_ATTR_VALUE_FALSE */
-#define GIT_ATTR_FALSE_T GIT_ATTR_VALUE_FALSE
-/** @deprecated use GIT_ATTR_VALUE_STRING */
-#define GIT_ATTR_VALUE_T GIT_ATTR_VALUE_STRING
+/** @deprecated use GIT3_ATTR_VALUE_UNSPECIFIED */
+#define GIT3_ATTR_UNSPECIFIED_T GIT3_ATTR_VALUE_UNSPECIFIED
+/** @deprecated use GIT3_ATTR_VALUE_TRUE */
+#define GIT3_ATTR_TRUE_T GIT3_ATTR_VALUE_TRUE
+/** @deprecated use GIT3_ATTR_VALUE_FALSE */
+#define GIT3_ATTR_FALSE_T GIT3_ATTR_VALUE_FALSE
+/** @deprecated use GIT3_ATTR_VALUE_STRING */
+#define GIT3_ATTR_VALUE_T GIT3_ATTR_VALUE_STRING
 
-/** @deprecated use GIT_ATTR_IS_TRUE */
-#define GIT_ATTR_TRUE(attr) GIT_ATTR_IS_TRUE(attr)
-/** @deprecated use GIT_ATTR_IS_FALSE */
-#define GIT_ATTR_FALSE(attr) GIT_ATTR_IS_FALSE(attr)
-/** @deprecated use GIT_ATTR_IS_UNSPECIFIED */
-#define GIT_ATTR_UNSPECIFIED(attr) GIT_ATTR_IS_UNSPECIFIED(attr)
+/** @deprecated use GIT3_ATTR_IS_TRUE */
+#define GIT3_ATTR_TRUE(attr) GIT3_ATTR_IS_TRUE(attr)
+/** @deprecated use GIT3_ATTR_IS_FALSE */
+#define GIT3_ATTR_FALSE(attr) GIT3_ATTR_IS_FALSE(attr)
+/** @deprecated use GIT3_ATTR_IS_UNSPECIFIED */
+#define GIT3_ATTR_UNSPECIFIED(attr) GIT3_ATTR_IS_UNSPECIFIED(attr)
 
-/** @deprecated use git_attr_value_t */
-typedef git_attr_value_t git_attr_t;
+/** @deprecated use git3_attr_value_t */
+typedef git3_attr_value_t git3_attr_t;
 
 /**@}*/
 
@@ -101,29 +101,29 @@ typedef git_attr_value_t git_attr_t;
  */
 /**@{*/
 
-/** @deprecated use GIT_BLOB_FILTER_ATTRIBUTES_FROM_HEAD */
-#define GIT_BLOB_FILTER_ATTTRIBUTES_FROM_HEAD GIT_BLOB_FILTER_ATTRIBUTES_FROM_HEAD
+/** @deprecated use GIT3_BLOB_FILTER_ATTRIBUTES_FROM_HEAD */
+#define GIT3_BLOB_FILTER_ATTTRIBUTES_FROM_HEAD GIT3_BLOB_FILTER_ATTRIBUTES_FROM_HEAD
 
-GIT_EXTERN(int) git_blob_create_fromworkdir(git_oid *id, git_repository *repo, const char *relative_path);
-GIT_EXTERN(int) git_blob_create_fromdisk(git_oid *id, git_repository *repo, const char *path);
-GIT_EXTERN(int) git_blob_create_fromstream(
-	git_writestream **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_blob_create_fromworkdir(git3_oid *id, git3_repository *repo, const char *relative_path);
+GIT3_EXTERN(int) git3_blob_create_fromdisk(git3_oid *id, git3_repository *repo, const char *path);
+GIT3_EXTERN(int) git3_blob_create_fromstream(
+	git3_writestream **out,
+	git3_repository *repo,
 	const char *hintpath);
-GIT_EXTERN(int) git_blob_create_fromstream_commit(
-	git_oid *out,
-	git_writestream *stream);
-GIT_EXTERN(int) git_blob_create_frombuffer(
-	git_oid *id, git_repository *repo, const void *buffer, size_t len);
+GIT3_EXTERN(int) git3_blob_create_fromstream_commit(
+	git3_oid *out,
+	git3_writestream *stream);
+GIT3_EXTERN(int) git3_blob_create_frombuffer(
+	git3_oid *id, git3_repository *repo, const void *buffer, size_t len);
 
-/** Deprecated in favor of `git_blob_filter`.
+/** Deprecated in favor of `git3_blob_filter`.
  *
- * @deprecated Use git_blob_filter
- * @see git_blob_filter
+ * @deprecated Use git3_blob_filter
+ * @see git3_blob_filter
  */
-GIT_EXTERN(int) git_blob_filtered_content(
-	git_buf *out,
-	git_blob *blob,
+GIT3_EXTERN(int) git3_blob_filtered_content(
+	git3_buf *out,
+	git3_blob *blob,
 	const char *as_path,
 	int check_for_binary_data);
 
@@ -140,25 +140,25 @@ GIT_EXTERN(int) git_blob_filtered_content(
  */
 /**@{*/
 
-/** Deprecated in favor of `git_filter_list_stream_buffer`.
+/** Deprecated in favor of `git3_filter_list_stream_buffer`.
  *
- * @deprecated Use git_filter_list_stream_buffer
- * @see Use git_filter_list_stream_buffer
+ * @deprecated Use git3_filter_list_stream_buffer
+ * @see Use git3_filter_list_stream_buffer
  */
-GIT_EXTERN(int) git_filter_list_stream_data(
-	git_filter_list *filters,
-	git_buf *data,
-	git_writestream *target);
+GIT3_EXTERN(int) git3_filter_list_stream_data(
+	git3_filter_list *filters,
+	git3_buf *data,
+	git3_writestream *target);
 
-/** Deprecated in favor of `git_filter_list_apply_to_buffer`.
+/** Deprecated in favor of `git3_filter_list_apply_to_buffer`.
  *
- * @deprecated Use git_filter_list_apply_to_buffer
- * @see Use git_filter_list_apply_to_buffer
+ * @deprecated Use git3_filter_list_apply_to_buffer
+ * @see Use git3_filter_list_apply_to_buffer
  */
-GIT_EXTERN(int) git_filter_list_apply_to_data(
-	git_buf *out,
-	git_filter_list *filters,
-	git_buf *in);
+GIT3_EXTERN(int) git3_filter_list_apply_to_data(
+	git3_buf *out,
+	git3_filter_list *filters,
+	git3_buf *in);
 
 /**@}*/
 
@@ -175,17 +175,17 @@ GIT_EXTERN(int) git_filter_list_apply_to_data(
 
 /**
  * Write the contents of the tree builder as a tree object.
- * This is an alias of `git_treebuilder_write` and is preserved
+ * This is an alias of `git3_treebuilder_write` and is preserved
  * for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_treebuilder_write
- * @see git_treebuilder_write
+ * @deprecated Use git3_treebuilder_write
+ * @see git3_treebuilder_write
  */
-GIT_EXTERN(int) git_treebuilder_write_with_buffer(
-	git_oid *oid, git_treebuilder *bld, git_buf *tree);
+GIT3_EXTERN(int) git3_treebuilder_write_with_buffer(
+	git3_oid *oid, git3_treebuilder *bld, git3_buf *tree);
 
 /**@}*/
 
@@ -201,20 +201,20 @@ GIT_EXTERN(int) git_treebuilder_write_with_buffer(
 /**@{*/
 
 /**
- * Static initializer for git_buf from static buffer
+ * Static initializer for git3_buf from static buffer
  */
-#define GIT_BUF_INIT_CONST(STR,LEN) { (char *)(STR), 0, (size_t)(LEN) }
+#define GIT3_BUF_INIT_CONST(STR,LEN) { (char *)(STR), 0, (size_t)(LEN) }
 
 /**
  * Resize the buffer allocation to make more space.
  *
  * This will attempt to grow the buffer to accommodate the target size.
  *
- * If the buffer refers to memory that was not allocated by libgit2 (i.e.
+ * If the buffer refers to memory that was not allocated by libgit3 (i.e.
  * the `asize` field is zero), then `ptr` will be replaced with a newly
  * allocated block of data.  Be careful so that memory allocated by the
  * caller is not lost.  As a special variant, if you pass `target_size` as
- * 0 and the memory is not allocated by libgit2, this will allocate a new
+ * 0 and the memory is not allocated by libgit3, this will allocate a new
  * buffer of size `size` and copy the external data into it.
  *
  * Currently, this will never shrink a buffer, only expand it.
@@ -226,7 +226,7 @@ GIT_EXTERN(int) git_treebuilder_write_with_buffer(
  * @param target_size The desired available size
  * @return 0 on success, -1 on allocation failure
  */
-GIT_EXTERN(int) git_buf_grow(git_buf *buffer, size_t target_size);
+GIT3_EXTERN(int) git3_buf_grow(git3_buf *buffer, size_t target_size);
 
 /**
  * Set buffer to a copy of some raw data.
@@ -236,8 +236,8 @@ GIT_EXTERN(int) git_buf_grow(git_buf *buffer, size_t target_size);
  * @param datalen The length of the data to copy into the buffer
  * @return 0 on success, -1 on allocation failure
  */
-GIT_EXTERN(int) git_buf_set(
-	git_buf *buffer, const void *data, size_t datalen);
+GIT3_EXTERN(int) git3_buf_set(
+	git3_buf *buffer, const void *data, size_t datalen);
 
 /**
 * Check quickly if buffer looks like it contains binary data
@@ -245,7 +245,7 @@ GIT_EXTERN(int) git_buf_set(
 * @param buf Buffer to check
 * @return 1 if buffer looks like non-text data
 */
-GIT_EXTERN(int) git_buf_is_binary(const git_buf *buf);
+GIT3_EXTERN(int) git3_buf_is_binary(const git3_buf *buf);
 
 /**
 * Check quickly if buffer contains a NUL byte
@@ -253,19 +253,19 @@ GIT_EXTERN(int) git_buf_is_binary(const git_buf *buf);
 * @param buf Buffer to check
 * @return 1 if buffer contains a NUL byte
 */
-GIT_EXTERN(int) git_buf_contains_nul(const git_buf *buf);
+GIT3_EXTERN(int) git3_buf_contains_nul(const git3_buf *buf);
 
 /**
- * Free the memory referred to by the git_buf.  This is an alias of
- * `git_buf_dispose` and is preserved for backward compatibility.
+ * Free the memory referred to by the git3_buf.  This is an alias of
+ * `git3_buf_dispose` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_buf_dispose
- * @see git_buf_dispose
+ * @deprecated Use git3_buf_dispose
+ * @see git3_buf_dispose
  */
-GIT_EXTERN(void) git_buf_free(git_buf *buffer);
+GIT3_EXTERN(void) git3_buf_free(git3_buf *buffer);
 
 /**@}*/
 
@@ -276,15 +276,15 @@ GIT_EXTERN(void) git_buf_free(git_buf *buffer);
 /**
  * Provide a commit signature during commit creation.
  *
- * Callers should instead define a `git_commit_create_cb` that
- * generates a commit buffer using `git_commit_create_buffer`, sign
- * that buffer and call `git_commit_create_with_signature`.
+ * Callers should instead define a `git3_commit_create_cb` that
+ * generates a commit buffer using `git3_commit_create_buffer`, sign
+ * that buffer and call `git3_commit_create_with_signature`.
  *
- * @deprecated use a `git_commit_create_cb` instead
+ * @deprecated use a `git3_commit_create_cb` instead
  */
-typedef int (*git_commit_signing_cb)(
-	git_buf *signature,
-	git_buf *signature_field,
+typedef int (*git3_commit_signing_cb)(
+	git3_buf *signature,
+	git3_buf *signature_field,
 	const char *commit_content,
 	void *payload);
 
@@ -294,17 +294,17 @@ typedef int (*git_commit_signing_cb)(
  */
 /**@{*/
 
-/** @deprecated use GIT_CONFIGMAP_FALSE */
-#define GIT_CVAR_FALSE  GIT_CONFIGMAP_FALSE
-/** @deprecated use GIT_CONFIGMAP_TRUE */
-#define GIT_CVAR_TRUE   GIT_CONFIGMAP_TRUE
-/** @deprecated use GIT_CONFIGMAP_INT32 */
-#define GIT_CVAR_INT32  GIT_CONFIGMAP_INT32
-/** @deprecated use GIT_CONFIGMAP_STRING */
-#define GIT_CVAR_STRING GIT_CONFIGMAP_STRING
+/** @deprecated use GIT3_CONFIGMAP_FALSE */
+#define GIT3_CVAR_FALSE  GIT3_CONFIGMAP_FALSE
+/** @deprecated use GIT3_CONFIGMAP_TRUE */
+#define GIT3_CVAR_TRUE   GIT3_CONFIGMAP_TRUE
+/** @deprecated use GIT3_CONFIGMAP_INT32 */
+#define GIT3_CVAR_INT32  GIT3_CONFIGMAP_INT32
+/** @deprecated use GIT3_CONFIGMAP_STRING */
+#define GIT3_CVAR_STRING GIT3_CONFIGMAP_STRING
 
-/** @deprecated use git_cvar_map */
-typedef git_configmap git_cvar_map;
+/** @deprecated use git3_cvar_map */
+typedef git3_configmap git3_cvar_map;
 
 /**@}*/
 
@@ -324,21 +324,21 @@ typedef git_configmap git_cvar_map;
  */
 typedef enum {
 	/** Normal patch, the default */
-	GIT_DIFF_FORMAT_EMAIL_NONE = 0,
+	GIT3_DIFF_FORMAT_EMAIL_NONE = 0,
 
 	/** Don't insert "[PATCH]" in the subject header*/
-	GIT_DIFF_FORMAT_EMAIL_EXCLUDE_SUBJECT_PATCH_MARKER = (1 << 0)
-} git_diff_format_email_flags_t;
+	GIT3_DIFF_FORMAT_EMAIL_EXCLUDE_SUBJECT_PATCH_MARKER = (1 << 0)
+} git3_diff_format_email_flags_t;
 
 /**
  * Options for controlling the formatting of the generated e-mail.
  *
- * @deprecated use `git_email_create_options`
+ * @deprecated use `git3_email_create_options`
  */
 typedef struct {
 	unsigned int version;
 
-	/** see `git_diff_format_email_flags_t` above */
+	/** see `git3_diff_format_email_flags_t` above */
 	uint32_t flags;
 
 	/** This patch number */
@@ -348,7 +348,7 @@ typedef struct {
 	size_t total_patches;
 
 	/** id to use for the commit */
-	const git_oid *id;
+	const git3_oid *id;
 
 	/** Summary of the change */
 	const char *summary;
@@ -357,52 +357,52 @@ typedef struct {
 	const char *body;
 
 	/** Author of the change */
-	const git_signature *author;
-} git_diff_format_email_options;
+	const git3_signature *author;
+} git3_diff_format_email_options;
 
-/** @deprecated use `git_email_create_options` */
-#define GIT_DIFF_FORMAT_EMAIL_OPTIONS_VERSION 1
-/** @deprecated use `git_email_create_options` */
-#define GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT {GIT_DIFF_FORMAT_EMAIL_OPTIONS_VERSION, 0, 1, 1, NULL, NULL, NULL, NULL}
+/** @deprecated use `git3_email_create_options` */
+#define GIT3_DIFF_FORMAT_EMAIL_OPTIONS_VERSION 1
+/** @deprecated use `git3_email_create_options` */
+#define GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT {GIT3_DIFF_FORMAT_EMAIL_OPTIONS_VERSION, 0, 1, 1, NULL, NULL, NULL, NULL}
 
 /**
  * Create an e-mail ready patch from a diff.
  *
- * @deprecated git_email_create_from_diff
- * @see git_email_create_from_diff
+ * @deprecated git3_email_create_from_diff
+ * @see git3_email_create_from_diff
  */
-GIT_EXTERN(int) git_diff_format_email(
-	git_buf *out,
-	git_diff *diff,
-	const git_diff_format_email_options *opts);
+GIT3_EXTERN(int) git3_diff_format_email(
+	git3_buf *out,
+	git3_diff *diff,
+	const git3_diff_format_email_options *opts);
 
 /**
  * Create an e-mail ready patch for a commit.
  *
- * @deprecated git_email_create_from_commit
- * @see git_email_create_from_commit
+ * @deprecated git3_email_create_from_commit
+ * @see git3_email_create_from_commit
  */
-GIT_EXTERN(int) git_diff_commit_as_email(
-	git_buf *out,
-	git_repository *repo,
-	git_commit *commit,
+GIT3_EXTERN(int) git3_diff_commit_as_email(
+	git3_buf *out,
+	git3_repository *repo,
+	git3_commit *commit,
 	size_t patch_no,
 	size_t total_patches,
 	uint32_t flags,
-	const git_diff_options *diff_opts);
+	const git3_diff_options *diff_opts);
 
 /**
- * Initialize git_diff_format_email_options structure
+ * Initialize git3_diff_format_email_options structure
  *
- * Initializes a `git_diff_format_email_options` with default values. Equivalent
- * to creating an instance with GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT.
+ * Initializes a `git3_diff_format_email_options` with default values. Equivalent
+ * to creating an instance with GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT.
  *
- * @param opts The `git_blame_options` struct to initialize.
- * @param version The struct version; pass `GIT_DIFF_FORMAT_EMAIL_OPTIONS_VERSION`.
+ * @param opts The `git3_blame_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_DIFF_FORMAT_EMAIL_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_diff_format_email_options_init(
-	git_diff_format_email_options *opts,
+GIT3_EXTERN(int) git3_diff_format_email_options_init(
+	git3_diff_format_email_options *opts,
 	unsigned int version);
 
 /**@}*/
@@ -418,125 +418,125 @@ GIT_EXTERN(int) git_diff_format_email_options_init(
  */
 /**@{*/
 
-/** @deprecated use `GIT_ERROR_NONE` */
-#define GITERR_NONE GIT_ERROR_NONE
-/** @deprecated use `GIT_ERROR_NOMEMORY` */
-#define GITERR_NOMEMORY GIT_ERROR_NOMEMORY
-/** @deprecated use `GIT_ERROR_OS` */
-#define GITERR_OS GIT_ERROR_OS
-/** @deprecated use `GIT_ERROR_INVALID` */
-#define GITERR_INVALID GIT_ERROR_INVALID
-/** @deprecated use `GIT_ERROR_REFERENCE` */
-#define GITERR_REFERENCE GIT_ERROR_REFERENCE
-/** @deprecated use `GIT_ERROR_ZLIB` */
-#define GITERR_ZLIB GIT_ERROR_ZLIB
-/** @deprecated use `GIT_ERROR_REPOSITORY` */
-#define GITERR_REPOSITORY GIT_ERROR_REPOSITORY
-/** @deprecated use `GIT_ERROR_CONFIG` */
-#define GITERR_CONFIG GIT_ERROR_CONFIG
-/** @deprecated use `GIT_ERROR_REGEX` */
-#define GITERR_REGEX GIT_ERROR_REGEX
-/** @deprecated use `GIT_ERROR_ODB` */
-#define GITERR_ODB GIT_ERROR_ODB
-/** @deprecated use `GIT_ERROR_INDEX` */
-#define GITERR_INDEX GIT_ERROR_INDEX
-/** @deprecated use `GIT_ERROR_OBJECT` */
-#define GITERR_OBJECT GIT_ERROR_OBJECT
-/** @deprecated use `GIT_ERROR_NET` */
-#define GITERR_NET GIT_ERROR_NET
-/** @deprecated use `GIT_ERROR_TAG` */
-#define GITERR_TAG GIT_ERROR_TAG
-/** @deprecated use `GIT_ERROR_TREE` */
-#define GITERR_TREE GIT_ERROR_TREE
-/** @deprecated use `GIT_ERROR_INDEXER` */
-#define GITERR_INDEXER GIT_ERROR_INDEXER
-/** @deprecated use `GIT_ERROR_SSL` */
-#define GITERR_SSL GIT_ERROR_SSL
-/** @deprecated use `GIT_ERROR_SUBMODULE` */
-#define GITERR_SUBMODULE GIT_ERROR_SUBMODULE
-/** @deprecated use `GIT_ERROR_THREAD` */
-#define GITERR_THREAD GIT_ERROR_THREAD
-/** @deprecated use `GIT_ERROR_STASH` */
-#define GITERR_STASH GIT_ERROR_STASH
-/** @deprecated use `GIT_ERROR_CHECKOUT` */
-#define GITERR_CHECKOUT GIT_ERROR_CHECKOUT
-/** @deprecated use `GIT_ERROR_FETCHHEAD` */
-#define GITERR_FETCHHEAD GIT_ERROR_FETCHHEAD
-/** @deprecated use `GIT_ERROR_MERGE` */
-#define GITERR_MERGE GIT_ERROR_MERGE
-/** @deprecated use `GIT_ERROR_SSH` */
-#define GITERR_SSH GIT_ERROR_SSH
-/** @deprecated use `GIT_ERROR_FILTER` */
-#define GITERR_FILTER GIT_ERROR_FILTER
-/** @deprecated use `GIT_ERROR_REVERT` */
-#define GITERR_REVERT GIT_ERROR_REVERT
-/** @deprecated use `GIT_ERROR_CALLBACK` */
-#define GITERR_CALLBACK GIT_ERROR_CALLBACK
-/** @deprecated use `GIT_ERROR_CHERRYPICK` */
-#define GITERR_CHERRYPICK GIT_ERROR_CHERRYPICK
-/** @deprecated use `GIT_ERROR_DESCRIBE` */
-#define GITERR_DESCRIBE GIT_ERROR_DESCRIBE
-/** @deprecated use `GIT_ERROR_REBASE` */
-#define GITERR_REBASE GIT_ERROR_REBASE
-/** @deprecated use `GIT_ERROR_FILESYSTEM` */
-#define GITERR_FILESYSTEM GIT_ERROR_FILESYSTEM
-/** @deprecated use `GIT_ERROR_PATCH` */
-#define GITERR_PATCH GIT_ERROR_PATCH
-/** @deprecated use `GIT_ERROR_WORKTREE` */
-#define GITERR_WORKTREE GIT_ERROR_WORKTREE
-/** @deprecated use `GIT_ERROR_SHA1` */
-#define GITERR_SHA1 GIT_ERROR_SHA1
-/** @deprecated use `GIT_ERROR_SHA` */
-#define GIT_ERROR_SHA1 GIT_ERROR_SHA
+/** @deprecated use `GIT3_ERROR_NONE` */
+#define GITERR_NONE GIT3_ERROR_NONE
+/** @deprecated use `GIT3_ERROR_NOMEMORY` */
+#define GITERR_NOMEMORY GIT3_ERROR_NOMEMORY
+/** @deprecated use `GIT3_ERROR_OS` */
+#define GITERR_OS GIT3_ERROR_OS
+/** @deprecated use `GIT3_ERROR_INVALID` */
+#define GITERR_INVALID GIT3_ERROR_INVALID
+/** @deprecated use `GIT3_ERROR_REFERENCE` */
+#define GITERR_REFERENCE GIT3_ERROR_REFERENCE
+/** @deprecated use `GIT3_ERROR_ZLIB` */
+#define GITERR_ZLIB GIT3_ERROR_ZLIB
+/** @deprecated use `GIT3_ERROR_REPOSITORY` */
+#define GITERR_REPOSITORY GIT3_ERROR_REPOSITORY
+/** @deprecated use `GIT3_ERROR_CONFIG` */
+#define GITERR_CONFIG GIT3_ERROR_CONFIG
+/** @deprecated use `GIT3_ERROR_REGEX` */
+#define GITERR_REGEX GIT3_ERROR_REGEX
+/** @deprecated use `GIT3_ERROR_ODB` */
+#define GITERR_ODB GIT3_ERROR_ODB
+/** @deprecated use `GIT3_ERROR_INDEX` */
+#define GITERR_INDEX GIT3_ERROR_INDEX
+/** @deprecated use `GIT3_ERROR_OBJECT` */
+#define GITERR_OBJECT GIT3_ERROR_OBJECT
+/** @deprecated use `GIT3_ERROR_NET` */
+#define GITERR_NET GIT3_ERROR_NET
+/** @deprecated use `GIT3_ERROR_TAG` */
+#define GITERR_TAG GIT3_ERROR_TAG
+/** @deprecated use `GIT3_ERROR_TREE` */
+#define GITERR_TREE GIT3_ERROR_TREE
+/** @deprecated use `GIT3_ERROR_INDEXER` */
+#define GITERR_INDEXER GIT3_ERROR_INDEXER
+/** @deprecated use `GIT3_ERROR_SSL` */
+#define GITERR_SSL GIT3_ERROR_SSL
+/** @deprecated use `GIT3_ERROR_SUBMODULE` */
+#define GITERR_SUBMODULE GIT3_ERROR_SUBMODULE
+/** @deprecated use `GIT3_ERROR_THREAD` */
+#define GITERR_THREAD GIT3_ERROR_THREAD
+/** @deprecated use `GIT3_ERROR_STASH` */
+#define GITERR_STASH GIT3_ERROR_STASH
+/** @deprecated use `GIT3_ERROR_CHECKOUT` */
+#define GITERR_CHECKOUT GIT3_ERROR_CHECKOUT
+/** @deprecated use `GIT3_ERROR_FETCHHEAD` */
+#define GITERR_FETCHHEAD GIT3_ERROR_FETCHHEAD
+/** @deprecated use `GIT3_ERROR_MERGE` */
+#define GITERR_MERGE GIT3_ERROR_MERGE
+/** @deprecated use `GIT3_ERROR_SSH` */
+#define GITERR_SSH GIT3_ERROR_SSH
+/** @deprecated use `GIT3_ERROR_FILTER` */
+#define GITERR_FILTER GIT3_ERROR_FILTER
+/** @deprecated use `GIT3_ERROR_REVERT` */
+#define GITERR_REVERT GIT3_ERROR_REVERT
+/** @deprecated use `GIT3_ERROR_CALLBACK` */
+#define GITERR_CALLBACK GIT3_ERROR_CALLBACK
+/** @deprecated use `GIT3_ERROR_CHERRYPICK` */
+#define GITERR_CHERRYPICK GIT3_ERROR_CHERRYPICK
+/** @deprecated use `GIT3_ERROR_DESCRIBE` */
+#define GITERR_DESCRIBE GIT3_ERROR_DESCRIBE
+/** @deprecated use `GIT3_ERROR_REBASE` */
+#define GITERR_REBASE GIT3_ERROR_REBASE
+/** @deprecated use `GIT3_ERROR_FILESYSTEM` */
+#define GITERR_FILESYSTEM GIT3_ERROR_FILESYSTEM
+/** @deprecated use `GIT3_ERROR_PATCH` */
+#define GITERR_PATCH GIT3_ERROR_PATCH
+/** @deprecated use `GIT3_ERROR_WORKTREE` */
+#define GITERR_WORKTREE GIT3_ERROR_WORKTREE
+/** @deprecated use `GIT3_ERROR_SHA1` */
+#define GITERR_SHA1 GIT3_ERROR_SHA1
+/** @deprecated use `GIT3_ERROR_SHA` */
+#define GIT3_ERROR_SHA1 GIT3_ERROR_SHA
 
 /**
- * Return the last `git_error` object that was generated for the
- * current thread.  This is an alias of `git_error_last` and is
+ * Return the last `git3_error` object that was generated for the
+ * current thread.  This is an alias of `git3_error_last` and is
  * preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_error_last
- * @see git_error_last
+ * @deprecated Use git3_error_last
+ * @see git3_error_last
  */
-GIT_EXTERN(const git_error *) giterr_last(void);
+GIT3_EXTERN(const git3_error *) giterr_last(void);
 
 /**
- * Clear the last error.  This is an alias of `git_error_last` and is
+ * Clear the last error.  This is an alias of `git3_error_last` and is
  * preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_error_clear
- * @see git_error_clear
+ * @deprecated Use git3_error_clear
+ * @see git3_error_clear
  */
-GIT_EXTERN(void) giterr_clear(void);
+GIT3_EXTERN(void) giterr_clear(void);
 
 /**
  * Sets the error message to the given string.  This is an alias of
- * `git_error_set_str` and is preserved for backward compatibility.
+ * `git3_error_set_str` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_error_set_str
- * @see git_error_set_str
+ * @deprecated Use git3_error_set_str
+ * @see git3_error_set_str
  */
-GIT_EXTERN(void) giterr_set_str(int error_class, const char *string);
+GIT3_EXTERN(void) giterr_set_str(int error_class, const char *string);
 
 /**
  * Indicates that an out-of-memory situation occurred.  This is an alias
- * of `git_error_set_oom` and is preserved for backward compatibility.
+ * of `git3_error_set_oom` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_error_set_oom
- * @see git_error_set_oom
+ * @deprecated Use git3_error_set_oom
+ * @see git3_error_set_oom
  */
-GIT_EXTERN(void) giterr_set_oom(void);
+GIT3_EXTERN(void) giterr_set_oom(void);
 
 /**@}*/
 
@@ -551,68 +551,68 @@ GIT_EXTERN(void) giterr_set_oom(void);
  */
 /**@{*/
 
-/* The git_idxentry_extended_flag_t enum */
-/** @deprecated use `GIT_INDEX_ENTRY_NAMEMASK` */
-#define GIT_IDXENTRY_NAMEMASK          GIT_INDEX_ENTRY_NAMEMASK
-/** @deprecated use `GIT_INDEX_ENTRY_STAGEMASK` */
-#define GIT_IDXENTRY_STAGEMASK         GIT_INDEX_ENTRY_STAGEMASK
-/** @deprecated use `GIT_INDEX_ENTRY_STAGESHIFT` */
-#define GIT_IDXENTRY_STAGESHIFT        GIT_INDEX_ENTRY_STAGESHIFT
+/* The git3_idxentry_extended_flag_t enum */
+/** @deprecated use `GIT3_INDEX_ENTRY_NAMEMASK` */
+#define GIT3_IDXENTRY_NAMEMASK          GIT3_INDEX_ENTRY_NAMEMASK
+/** @deprecated use `GIT3_INDEX_ENTRY_STAGEMASK` */
+#define GIT3_IDXENTRY_STAGEMASK         GIT3_INDEX_ENTRY_STAGEMASK
+/** @deprecated use `GIT3_INDEX_ENTRY_STAGESHIFT` */
+#define GIT3_IDXENTRY_STAGESHIFT        GIT3_INDEX_ENTRY_STAGESHIFT
 
-/* The git_indxentry_flag_t enum */
-/** @deprecated use `GIT_INDEX_ENTRY_EXTENDED` */
-#define GIT_IDXENTRY_EXTENDED          GIT_INDEX_ENTRY_EXTENDED
-/** @deprecated use `GIT_INDEX_ENTRY_VALID` */
-#define GIT_IDXENTRY_VALID             GIT_INDEX_ENTRY_VALID
+/* The git3_indxentry_flag_t enum */
+/** @deprecated use `GIT3_INDEX_ENTRY_EXTENDED` */
+#define GIT3_IDXENTRY_EXTENDED          GIT3_INDEX_ENTRY_EXTENDED
+/** @deprecated use `GIT3_INDEX_ENTRY_VALID` */
+#define GIT3_IDXENTRY_VALID             GIT3_INDEX_ENTRY_VALID
 
-/** @deprecated use `GIT_INDEX_ENTRY_STAGE` */
-#define GIT_IDXENTRY_STAGE(E)          GIT_INDEX_ENTRY_STAGE(E)
-/** @deprecated use `GIT_INDEX_ENTRY_STAGE_SET` */
-#define GIT_IDXENTRY_STAGE_SET(E,S)    GIT_INDEX_ENTRY_STAGE_SET(E,S)
+/** @deprecated use `GIT3_INDEX_ENTRY_STAGE` */
+#define GIT3_IDXENTRY_STAGE(E)          GIT3_INDEX_ENTRY_STAGE(E)
+/** @deprecated use `GIT3_INDEX_ENTRY_STAGE_SET` */
+#define GIT3_IDXENTRY_STAGE_SET(E,S)    GIT3_INDEX_ENTRY_STAGE_SET(E,S)
 
-/* The git_idxentry_extended_flag_t enum */
-/** @deprecated use `GIT_INDEX_ENTRY_INTENT_TO_ADD` */
-#define GIT_IDXENTRY_INTENT_TO_ADD     GIT_INDEX_ENTRY_INTENT_TO_ADD
-/** @deprecated use `GIT_INDEX_ENTRY_SKIP_WORKTREE` */
-#define GIT_IDXENTRY_SKIP_WORKTREE     GIT_INDEX_ENTRY_SKIP_WORKTREE
-/** @deprecated use `GIT_INDEX_ENTRY_INTENT_TO_ADD | GIT_INDEX_ENTRY_SKIP_WORKTREE` */
-#define GIT_IDXENTRY_EXTENDED_FLAGS    (GIT_INDEX_ENTRY_INTENT_TO_ADD | GIT_INDEX_ENTRY_SKIP_WORKTREE)
+/* The git3_idxentry_extended_flag_t enum */
+/** @deprecated use `GIT3_INDEX_ENTRY_INTENT_TO_ADD` */
+#define GIT3_IDXENTRY_INTENT_TO_ADD     GIT3_INDEX_ENTRY_INTENT_TO_ADD
+/** @deprecated use `GIT3_INDEX_ENTRY_SKIP_WORKTREE` */
+#define GIT3_IDXENTRY_SKIP_WORKTREE     GIT3_INDEX_ENTRY_SKIP_WORKTREE
+/** @deprecated use `GIT3_INDEX_ENTRY_INTENT_TO_ADD | GIT3_INDEX_ENTRY_SKIP_WORKTREE` */
+#define GIT3_IDXENTRY_EXTENDED_FLAGS    (GIT3_INDEX_ENTRY_INTENT_TO_ADD | GIT3_INDEX_ENTRY_SKIP_WORKTREE)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_EXTENDED2         (1 << 15)
+#define GIT3_IDXENTRY_EXTENDED2         (1 << 15)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_UPDATE            (1 << 0)
+#define GIT3_IDXENTRY_UPDATE            (1 << 0)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_REMOVE            (1 << 1)
+#define GIT3_IDXENTRY_REMOVE            (1 << 1)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_UPTODATE          (1 << 2)
+#define GIT3_IDXENTRY_UPTODATE          (1 << 2)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_ADDED             (1 << 3)
+#define GIT3_IDXENTRY_ADDED             (1 << 3)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_HASHED            (1 << 4)
+#define GIT3_IDXENTRY_HASHED            (1 << 4)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_UNHASHED          (1 << 5)
+#define GIT3_IDXENTRY_UNHASHED          (1 << 5)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_WT_REMOVE         (1 << 6)
+#define GIT3_IDXENTRY_WT_REMOVE         (1 << 6)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_CONFLICTED        (1 << 7)
+#define GIT3_IDXENTRY_CONFLICTED        (1 << 7)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_UNPACKED          (1 << 8)
+#define GIT3_IDXENTRY_UNPACKED          (1 << 8)
 /** @deprecated this value is not public */
-#define GIT_IDXENTRY_NEW_SKIP_WORKTREE (1 << 9)
+#define GIT3_IDXENTRY_NEW_SKIP_WORKTREE (1 << 9)
 
-/* The git_index_capability_t enum */
-/** @deprecated use `GIT_INDEX_CAPABILITY_IGNORE_CASE` */
-#define GIT_INDEXCAP_IGNORE_CASE       GIT_INDEX_CAPABILITY_IGNORE_CASE
-/** @deprecated use `GIT_INDEX_CAPABILITY_NO_FILEMODE` */
-#define GIT_INDEXCAP_NO_FILEMODE       GIT_INDEX_CAPABILITY_NO_FILEMODE
-/** @deprecated use `GIT_INDEX_CAPABILITY_NO_SYMLINKS` */
-#define GIT_INDEXCAP_NO_SYMLINKS       GIT_INDEX_CAPABILITY_NO_SYMLINKS
-/** @deprecated use `GIT_INDEX_CAPABILITY_FROM_OWNER` */
-#define GIT_INDEXCAP_FROM_OWNER        GIT_INDEX_CAPABILITY_FROM_OWNER
+/* The git3_index_capability_t enum */
+/** @deprecated use `GIT3_INDEX_CAPABILITY_IGNORE_CASE` */
+#define GIT3_INDEXCAP_IGNORE_CASE       GIT3_INDEX_CAPABILITY_IGNORE_CASE
+/** @deprecated use `GIT3_INDEX_CAPABILITY_NO_FILEMODE` */
+#define GIT3_INDEXCAP_NO_FILEMODE       GIT3_INDEX_CAPABILITY_NO_FILEMODE
+/** @deprecated use `GIT3_INDEX_CAPABILITY_NO_SYMLINKS` */
+#define GIT3_INDEXCAP_NO_SYMLINKS       GIT3_INDEX_CAPABILITY_NO_SYMLINKS
+/** @deprecated use `GIT3_INDEX_CAPABILITY_FROM_OWNER` */
+#define GIT3_INDEXCAP_FROM_OWNER        GIT3_INDEX_CAPABILITY_FROM_OWNER
 
-GIT_EXTERN(int) git_index_add_frombuffer(
-	git_index *index,
-	const git_index_entry *entry,
+GIT3_EXTERN(int) git3_index_add_frombuffer(
+	git3_index *index,
+	const git3_index_entry *entry,
 	const void *buffer, size_t len);
 
 /**@}*/
@@ -627,29 +627,29 @@ GIT_EXTERN(int) git_index_add_frombuffer(
  */
 /**@{*/
 
-/** @deprecate use `git_object_t` */
-#define git_otype git_object_t
+/** @deprecate use `git3_object_t` */
+#define git3_otype git3_object_t
 
-/** @deprecate use `GIT_OBJECT_ANY` */
-#define GIT_OBJ_ANY GIT_OBJECT_ANY
-/** @deprecate use `GIT_OBJECT_INVALID` */
-#define GIT_OBJ_BAD GIT_OBJECT_INVALID
+/** @deprecate use `GIT3_OBJECT_ANY` */
+#define GIT3_OBJ_ANY GIT3_OBJECT_ANY
+/** @deprecate use `GIT3_OBJECT_INVALID` */
+#define GIT3_OBJ_BAD GIT3_OBJECT_INVALID
 /** @deprecated this value is not public */
-#define GIT_OBJ__EXT1 0
-/** @deprecate use `GIT_OBJECT_COMMIT` */
-#define GIT_OBJ_COMMIT GIT_OBJECT_COMMIT
-/** @deprecate use `GIT_OBJECT_TREE` */
-#define GIT_OBJ_TREE GIT_OBJECT_TREE
-/** @deprecate use `GIT_OBJECT_BLOB` */
-#define GIT_OBJ_BLOB GIT_OBJECT_BLOB
-/** @deprecate use `GIT_OBJECT_TAG` */
-#define GIT_OBJ_TAG GIT_OBJECT_TAG
+#define GIT3_OBJ__EXT1 0
+/** @deprecate use `GIT3_OBJECT_COMMIT` */
+#define GIT3_OBJ_COMMIT GIT3_OBJECT_COMMIT
+/** @deprecate use `GIT3_OBJECT_TREE` */
+#define GIT3_OBJ_TREE GIT3_OBJECT_TREE
+/** @deprecate use `GIT3_OBJECT_BLOB` */
+#define GIT3_OBJ_BLOB GIT3_OBJECT_BLOB
+/** @deprecate use `GIT3_OBJECT_TAG` */
+#define GIT3_OBJ_TAG GIT3_OBJECT_TAG
 /** @deprecated this value is not public */
-#define GIT_OBJ__EXT2 5
-/** @deprecate use `GIT_OBJECT_OFS_DELTA` */
-#define GIT_OBJ_OFS_DELTA GIT_OBJECT_OFS_DELTA
-/** @deprecate use `GIT_OBJECT_REF_DELTA` */
-#define GIT_OBJ_REF_DELTA GIT_OBJECT_REF_DELTA
+#define GIT3_OBJ__EXT2 5
+/** @deprecate use `GIT3_OBJECT_OFS_DELTA` */
+#define GIT3_OBJ_OFS_DELTA GIT3_OBJECT_OFS_DELTA
+/** @deprecate use `GIT3_OBJECT_REF_DELTA` */
+#define GIT3_OBJ_REF_DELTA GIT3_OBJECT_REF_DELTA
 
 /**
  * Get the size in bytes for the structure which
@@ -657,23 +657,23 @@ GIT_EXTERN(int) git_index_add_frombuffer(
  * object type.
  *
  * For all the core types, this would the equivalent
- * of calling `sizeof(git_commit)` if the core types
+ * of calling `sizeof(git3_commit)` if the core types
  * were not opaque on the external API.
  *
  * @param type object type to get its size
  * @return size in bytes of the object
  */
-GIT_EXTERN(size_t) git_object__size(git_object_t type);
+GIT3_EXTERN(size_t) git3_object__size(git3_object_t type);
 
 /**
- * Determine if the given git_object_t is a valid object type.
+ * Determine if the given git3_object_t is a valid object type.
  *
- * @deprecated use `git_object_type_is_valid`
+ * @deprecated use `git3_object_type_is_valid`
  *
  * @param type object type to test.
  * @return 1 if the type represents a valid object type, 0 otherwise
  */
-GIT_EXTERN(int) git_object_typeisloose(git_object_t type);
+GIT3_EXTERN(int) git3_object_typeisloose(git3_object_t type);
 
 /**@}*/
 
@@ -690,11 +690,11 @@ GIT_EXTERN(int) git_object_typeisloose(git_object_t type);
 /**
  * Ensure the remote name is well-formed.
  *
- * @deprecated Use git_remote_name_is_valid
+ * @deprecated Use git3_remote_name_is_valid
  * @param remote_name name to be checked.
  * @return 1 if the reference name is acceptable; 0 if it isn't
  */
-GIT_EXTERN(int) git_remote_is_valid_name(const char *remote_name);
+GIT3_EXTERN(int) git3_remote_is_valid_name(const char *remote_name);
 
 /**@}*/
 
@@ -710,28 +710,28 @@ GIT_EXTERN(int) git_remote_is_valid_name(const char *remote_name);
 /**@{*/
 
  /** Basic type of any Git reference. */
-/** @deprecate use `git_reference_t` */
-#define git_ref_t git_reference_t
-/** @deprecate use `git_reference_format_t` */
-#define git_reference_normalize_t git_reference_format_t
+/** @deprecate use `git3_reference_t` */
+#define git3_ref_t git3_reference_t
+/** @deprecate use `git3_reference_format_t` */
+#define git3_reference_normalize_t git3_reference_format_t
 
-/** @deprecate use `GIT_REFERENCE_INVALID` */
-#define GIT_REF_INVALID GIT_REFERENCE_INVALID
-/** @deprecate use `GIT_REFERENCE_DIRECT` */
-#define GIT_REF_OID GIT_REFERENCE_DIRECT
-/** @deprecate use `GIT_REFERENCE_SYMBOLIC` */
-#define GIT_REF_SYMBOLIC GIT_REFERENCE_SYMBOLIC
-/** @deprecate use `GIT_REFERENCE_ALL` */
-#define GIT_REF_LISTALL GIT_REFERENCE_ALL
+/** @deprecate use `GIT3_REFERENCE_INVALID` */
+#define GIT3_REF_INVALID GIT3_REFERENCE_INVALID
+/** @deprecate use `GIT3_REFERENCE_DIRECT` */
+#define GIT3_REF_OID GIT3_REFERENCE_DIRECT
+/** @deprecate use `GIT3_REFERENCE_SYMBOLIC` */
+#define GIT3_REF_SYMBOLIC GIT3_REFERENCE_SYMBOLIC
+/** @deprecate use `GIT3_REFERENCE_ALL` */
+#define GIT3_REF_LISTALL GIT3_REFERENCE_ALL
 
-/** @deprecate use `GIT_REFERENCE_FORMAT_NORMAL` */
-#define GIT_REF_FORMAT_NORMAL GIT_REFERENCE_FORMAT_NORMAL
-/** @deprecate use `GIT_REFERENCE_FORMAT_ALLOW_ONELEVEL` */
-#define GIT_REF_FORMAT_ALLOW_ONELEVEL GIT_REFERENCE_FORMAT_ALLOW_ONELEVEL
-/** @deprecate use `GIT_REFERENCE_FORMAT_REFSPEC_PATTERN` */
-#define GIT_REF_FORMAT_REFSPEC_PATTERN GIT_REFERENCE_FORMAT_REFSPEC_PATTERN
-/** @deprecate use `GIT_REFERENCE_FORMAT_REFSPEC_SHORTHAND` */
-#define GIT_REF_FORMAT_REFSPEC_SHORTHAND GIT_REFERENCE_FORMAT_REFSPEC_SHORTHAND
+/** @deprecate use `GIT3_REFERENCE_FORMAT_NORMAL` */
+#define GIT3_REF_FORMAT_NORMAL GIT3_REFERENCE_FORMAT_NORMAL
+/** @deprecate use `GIT3_REFERENCE_FORMAT_ALLOW_ONELEVEL` */
+#define GIT3_REF_FORMAT_ALLOW_ONELEVEL GIT3_REFERENCE_FORMAT_ALLOW_ONELEVEL
+/** @deprecate use `GIT3_REFERENCE_FORMAT_REFSPEC_PATTERN` */
+#define GIT3_REF_FORMAT_REFSPEC_PATTERN GIT3_REFERENCE_FORMAT_REFSPEC_PATTERN
+/** @deprecate use `GIT3_REFERENCE_FORMAT_REFSPEC_SHORTHAND` */
+#define GIT3_REF_FORMAT_REFSPEC_SHORTHAND GIT3_REFERENCE_FORMAT_REFSPEC_SHORTHAND
 
 /**
  * Ensure the reference name is well-formed.
@@ -744,15 +744,15 @@ GIT_EXTERN(int) git_remote_is_valid_name(const char *remote_name);
  *    the characters '~', '^', ':', '\\', '?', '[', and '*', and the
  *    sequences ".." and "@{" which have special meaning to revparse.
  *
- * @deprecated Use git_reference_name_is_valid
+ * @deprecated Use git3_reference_name_is_valid
  * @param refname name to be checked.
  * @return 1 if the reference name is acceptable; 0 if it isn't
  */
-GIT_EXTERN(int) git_reference_is_valid_name(const char *refname);
+GIT3_EXTERN(int) git3_reference_is_valid_name(const char *refname);
 
-GIT_EXTERN(int) git_tag_create_frombuffer(
-	git_oid *oid,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_tag_create_frombuffer(
+	git3_oid *oid,
+	git3_repository *repo,
 	const char *buffer,
 	int force);
 
@@ -765,9 +765,9 @@ GIT_EXTERN(int) git_tag_create_frombuffer(
 
 /**
  * @deprecated This option is deprecated; it is now implied when
- * a separate working directory is specified to `git_repository_init`.
+ * a separate working directory is specified to `git3_repository_init`.
  */
-#define GIT_REPOSITORY_INIT_NO_DOTGIT_DIR 0
+#define GIT3_REPOSITORY_INIT_NO_DOTGIT3_DIR 0
 
 /** @name Deprecated Revspec Constants
  *
@@ -780,14 +780,14 @@ GIT_EXTERN(int) git_tag_create_frombuffer(
  */
 /**@{*/
 
-typedef git_revspec_t git_revparse_mode_t;
+typedef git3_revspec_t git3_revparse_mode_t;
 
-/** @deprecated use `GIT_REVSPEC_SINGLE` */
-#define GIT_REVPARSE_SINGLE GIT_REVSPEC_SINGLE
-/** @deprecated use `GIT_REVSPEC_RANGE` */
-#define GIT_REVPARSE_RANGE GIT_REVSPEC_RANGE
-/** @deprecated use `GIT_REVSPEC_MERGE_BASE` */
-#define GIT_REVPARSE_MERGE_BASE GIT_REVSPEC_MERGE_BASE
+/** @deprecated use `GIT3_REVSPEC_SINGLE` */
+#define GIT3_REVPARSE_SINGLE GIT3_REVSPEC_SINGLE
+/** @deprecated use `GIT3_REVSPEC_RANGE` */
+#define GIT3_REVPARSE_RANGE GIT3_REVSPEC_RANGE
+/** @deprecated use `GIT3_REVSPEC_MERGE_BASE` */
+#define GIT3_REVPARSE_MERGE_BASE GIT3_REVSPEC_MERGE_BASE
 
 /**@}*/
 
@@ -801,81 +801,81 @@ typedef git_revspec_t git_revparse_mode_t;
  */
 /**@{*/
 
-typedef git_credential git_cred;
-typedef git_credential_userpass_plaintext git_cred_userpass_plaintext;
-typedef git_credential_username git_cred_username;
-typedef git_credential_default git_cred_default;
-typedef git_credential_ssh_key git_cred_ssh_key;
-typedef git_credential_ssh_interactive git_cred_ssh_interactive;
-typedef git_credential_ssh_custom git_cred_ssh_custom;
+typedef git3_credential git3_cred;
+typedef git3_credential_userpass_plaintext git3_cred_userpass_plaintext;
+typedef git3_credential_username git3_cred_username;
+typedef git3_credential_default git3_cred_default;
+typedef git3_credential_ssh_key git3_cred_ssh_key;
+typedef git3_credential_ssh_interactive git3_cred_ssh_interactive;
+typedef git3_credential_ssh_custom git3_cred_ssh_custom;
 
-typedef git_credential_acquire_cb git_cred_acquire_cb;
-typedef git_credential_sign_cb git_cred_sign_callback;
-typedef git_credential_sign_cb git_cred_sign_cb;
-typedef git_credential_ssh_interactive_cb git_cred_ssh_interactive_callback;
-typedef git_credential_ssh_interactive_cb git_cred_ssh_interactive_cb;
+typedef git3_credential_acquire_cb git3_cred_acquire_cb;
+typedef git3_credential_sign_cb git3_cred_sign_callback;
+typedef git3_credential_sign_cb git3_cred_sign_cb;
+typedef git3_credential_ssh_interactive_cb git3_cred_ssh_interactive_callback;
+typedef git3_credential_ssh_interactive_cb git3_cred_ssh_interactive_cb;
 
-/** @deprecated use `git_credential_t` */
-#define git_credtype_t git_credential_t
+/** @deprecated use `git3_credential_t` */
+#define git3_credtype_t git3_credential_t
 
-/** @deprecated use `GIT_CREDENTIAL_USERPASS_PLAINTEXT` */
-#define GIT_CREDTYPE_USERPASS_PLAINTEXT GIT_CREDENTIAL_USERPASS_PLAINTEXT
-/** @deprecated use `GIT_CREDENTIAL_SSH_KEY` */
-#define GIT_CREDTYPE_SSH_KEY GIT_CREDENTIAL_SSH_KEY
-/** @deprecated use `GIT_CREDENTIAL_SSH_CUSTOM` */
-#define GIT_CREDTYPE_SSH_CUSTOM GIT_CREDENTIAL_SSH_CUSTOM
-/** @deprecated use `GIT_CREDENTIAL_DEFAULT` */
-#define GIT_CREDTYPE_DEFAULT GIT_CREDENTIAL_DEFAULT
-/** @deprecated use `GIT_CREDENTIAL_SSH_INTERACTIVE` */
-#define GIT_CREDTYPE_SSH_INTERACTIVE GIT_CREDENTIAL_SSH_INTERACTIVE
-/** @deprecated use `GIT_CREDENTIAL_USERNAME` */
-#define GIT_CREDTYPE_USERNAME GIT_CREDENTIAL_USERNAME
-/** @deprecated use `GIT_CREDENTIAL_SSH_MEMORY` */
-#define GIT_CREDTYPE_SSH_MEMORY GIT_CREDENTIAL_SSH_MEMORY
+/** @deprecated use `GIT3_CREDENTIAL_USERPASS_PLAINTEXT` */
+#define GIT3_CREDTYPE_USERPASS_PLAINTEXT GIT3_CREDENTIAL_USERPASS_PLAINTEXT
+/** @deprecated use `GIT3_CREDENTIAL_SSH_KEY` */
+#define GIT3_CREDTYPE_SSH_KEY GIT3_CREDENTIAL_SSH_KEY
+/** @deprecated use `GIT3_CREDENTIAL_SSH_CUSTOM` */
+#define GIT3_CREDTYPE_SSH_CUSTOM GIT3_CREDENTIAL_SSH_CUSTOM
+/** @deprecated use `GIT3_CREDENTIAL_DEFAULT` */
+#define GIT3_CREDTYPE_DEFAULT GIT3_CREDENTIAL_DEFAULT
+/** @deprecated use `GIT3_CREDENTIAL_SSH_INTERACTIVE` */
+#define GIT3_CREDTYPE_SSH_INTERACTIVE GIT3_CREDENTIAL_SSH_INTERACTIVE
+/** @deprecated use `GIT3_CREDENTIAL_USERNAME` */
+#define GIT3_CREDTYPE_USERNAME GIT3_CREDENTIAL_USERNAME
+/** @deprecated use `GIT3_CREDENTIAL_SSH_MEMORY` */
+#define GIT3_CREDTYPE_SSH_MEMORY GIT3_CREDENTIAL_SSH_MEMORY
 
-GIT_EXTERN(void) git_cred_free(git_credential *cred);
-GIT_EXTERN(int) git_cred_has_username(git_credential *cred);
-GIT_EXTERN(const char *) git_cred_get_username(git_credential *cred);
-GIT_EXTERN(int) git_cred_userpass_plaintext_new(
-	git_credential **out,
+GIT3_EXTERN(void) git3_cred_free(git3_credential *cred);
+GIT3_EXTERN(int) git3_cred_has_username(git3_credential *cred);
+GIT3_EXTERN(const char *) git3_cred_get_username(git3_credential *cred);
+GIT3_EXTERN(int) git3_cred_userpass_plaintext_new(
+	git3_credential **out,
 	const char *username,
 	const char *password);
-GIT_EXTERN(int) git_cred_default_new(git_credential **out);
-GIT_EXTERN(int) git_cred_username_new(git_credential **out, const char *username);
-GIT_EXTERN(int) git_cred_ssh_key_new(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_default_new(git3_credential **out);
+GIT3_EXTERN(int) git3_cred_username_new(git3_credential **out, const char *username);
+GIT3_EXTERN(int) git3_cred_ssh_key_new(
+	git3_credential **out,
 	const char *username,
 	const char *publickey,
 	const char *privatekey,
 	const char *passphrase);
-GIT_EXTERN(int) git_cred_ssh_key_memory_new(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_ssh_key_memory_new(
+	git3_credential **out,
 	const char *username,
 	const char *publickey,
 	const char *privatekey,
 	const char *passphrase);
-GIT_EXTERN(int) git_cred_ssh_interactive_new(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_ssh_interactive_new(
+	git3_credential **out,
 	const char *username,
-	git_credential_ssh_interactive_cb prompt_callback,
+	git3_credential_ssh_interactive_cb prompt_callback,
 	void *payload);
-GIT_EXTERN(int) git_cred_ssh_key_from_agent(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_ssh_key_from_agent(
+	git3_credential **out,
 	const char *username);
-GIT_EXTERN(int) git_cred_ssh_custom_new(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_ssh_custom_new(
+	git3_credential **out,
 	const char *username,
 	const char *publickey,
 	size_t publickey_len,
-	git_credential_sign_cb sign_callback,
+	git3_credential_sign_cb sign_callback,
 	void *payload);
 
 /* Deprecated Credential Helper Types */
 
-typedef git_credential_userpass_payload git_cred_userpass_payload;
+typedef git3_credential_userpass_payload git3_cred_userpass_payload;
 
-GIT_EXTERN(int) git_cred_userpass(
-	git_credential **out,
+GIT3_EXTERN(int) git3_cred_userpass(
+	git3_credential **out,
 	const char *url,
 	const char *user_from_url,
 	unsigned int allowed_types,
@@ -893,7 +893,7 @@ GIT_EXTERN(int) git_cred_userpass(
  */
 /**@{*/
 
-typedef git_trace_cb git_trace_callback;
+typedef git3_trace_cb git3_trace_callback;
 
 /**@}*/
 
@@ -908,13 +908,13 @@ typedef git_trace_cb git_trace_callback;
 /**@{*/
 
 /** Deprecated OID "raw size" definition - now uses SHA3-256 */
-# define GIT_OID_RAWSZ    GIT_OID_SHA3_256_SIZE
+# define GIT3_OID_RAWSZ    GIT3_OID_SHA3_256_SIZE
 /** Deprecated OID "hex size" definition - now uses SHA3-256 */
-# define GIT_OID_HEXSZ    GIT_OID_SHA3_256_HEXSIZE
+# define GIT3_OID_HEXSZ    GIT3_OID_SHA3_256_HEXSIZE
 /** Deprecated OID "hex zero" definition - now uses SHA3-256 */
-# define GIT_OID_HEX_ZERO GIT_OID_SHA3_256_HEXZERO
+# define GIT3_OID_HEX_ZERO GIT3_OID_SHA3_256_HEXZERO
 
-GIT_EXTERN(int) git_oid_iszero(const git_oid *id);
+GIT3_EXTERN(int) git3_oid_iszero(const git3_oid *id);
 
 /**@}*/
 
@@ -929,16 +929,16 @@ GIT_EXTERN(int) git_oid_iszero(const git_oid *id);
 /**@{*/
 
 /**
- * Free the memory referred to by the git_oidarray.  This is an alias of
- * `git_oidarray_dispose` and is preserved for backward compatibility.
+ * Free the memory referred to by the git3_oidarray.  This is an alias of
+ * `git3_oidarray_dispose` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_oidarray_dispose
- * @see git_oidarray_dispose
+ * @deprecated Use git3_oidarray_dispose
+ * @see git3_oidarray_dispose
  */
-GIT_EXTERN(void) git_oidarray_free(git_oidarray *array);
+GIT3_EXTERN(void) git3_oidarray_free(git3_oidarray *array);
 
 /**@}*/
 
@@ -959,7 +959,7 @@ GIT_EXTERN(void) git_oidarray_free(git_oidarray *array);
  * This type is deprecated, but there is no plan to remove this
  * type definition at this time.
  */
-typedef git_indexer_progress git_transfer_progress;
+typedef git3_indexer_progress git3_transfer_progress;
 
 /**
  * Type definition for progress callbacks during indexing.
@@ -967,7 +967,7 @@ typedef git_indexer_progress git_transfer_progress;
  * This type is deprecated, but there is no plan to remove this
  * type definition at this time.
  */
-typedef git_indexer_progress_cb git_transfer_progress_cb;
+typedef git3_indexer_progress_cb git3_transfer_progress_cb;
 
 /**
  * Type definition for push transfer progress callbacks.
@@ -975,15 +975,15 @@ typedef git_indexer_progress_cb git_transfer_progress_cb;
  * This type is deprecated, but there is no plan to remove this
  * type definition at this time.
  */
-typedef git_push_transfer_progress_cb git_push_transfer_progress;
+typedef git3_push_transfer_progress_cb git3_push_transfer_progress;
 
  /** The type of a remote completion event */
-#define git_remote_completion_type git_remote_completion_t
+#define git3_remote_completion_type git3_remote_completion_t
 
 /**
  * Callback for listing the remote heads
  */
-typedef int GIT_CALLBACK(git_headlist_cb)(git_remote_head *rhead, void *payload);
+typedef int GIT3_CALLBACK(git3_headlist_cb)(git3_remote_head *rhead, void *payload);
 
 /**@}*/
 
@@ -1007,19 +1007,19 @@ typedef int GIT_CALLBACK(git_headlist_cb)(git_remote_head *rhead, void *payload)
  * @param src source
  * @return 0 on success, < 0 on allocation failure
  */
-GIT_EXTERN(int) git_strarray_copy(git_strarray *tgt, const git_strarray *src);
+GIT3_EXTERN(int) git3_strarray_copy(git3_strarray *tgt, const git3_strarray *src);
 
 /**
- * Free the memory referred to by the git_strarray.  This is an alias of
- * `git_strarray_dispose` and is preserved for backward compatibility.
+ * Free the memory referred to by the git3_strarray.  This is an alias of
+ * `git3_strarray_dispose` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Use git_strarray_dispose
- * @see git_strarray_dispose
+ * @deprecated Use git3_strarray_dispose
+ * @see git3_strarray_dispose
  */
-GIT_EXTERN(void) git_strarray_free(git_strarray *array);
+GIT3_EXTERN(void) git3_strarray_free(git3_strarray *array);
 
 /**@}*/
 
@@ -1033,11 +1033,11 @@ GIT_EXTERN(void) git_strarray_free(git_strarray *array);
  */
 /**@{*/
 
-#define LIBGIT2_VER_MAJOR      LIBGIT2_VERSION_MAJOR
-#define LIBGIT2_VER_MINOR      LIBGIT2_VERSION_MINOR
-#define LIBGIT2_VER_REVISION   LIBGIT2_VERSION_REVISION
-#define LIBGIT2_VER_PATCH      LIBGIT2_VERSION_PATCH
-#define LIBGIT2_VER_PRERELEASE LIBGIT2_VERSION_PRERELEASE
+#define LIBGIT3_VER_MAJOR      LIBGIT3_VERSION_MAJOR
+#define LIBGIT3_VER_MINOR      LIBGIT3_VERSION_MINOR
+#define LIBGIT3_VER_REVISION   LIBGIT3_VERSION_REVISION
+#define LIBGIT3_VER_PATCH      LIBGIT3_VERSION_PATCH
+#define LIBGIT3_VER_PRERELEASE LIBGIT3_VERSION_PRERELEASE
 
 /**@}*/
 
@@ -1051,37 +1051,37 @@ GIT_EXTERN(void) git_strarray_free(git_strarray *array);
  */
 /**@{*/
 
-GIT_EXTERN(int) git_blame_init_options(git_blame_options *opts, unsigned int version);
-GIT_EXTERN(int) git_checkout_init_options(git_checkout_options *opts, unsigned int version);
-GIT_EXTERN(int) git_cherrypick_init_options(git_cherrypick_options *opts, unsigned int version);
-GIT_EXTERN(int) git_clone_init_options(git_clone_options *opts, unsigned int version);
-GIT_EXTERN(int) git_describe_init_options(git_describe_options *opts, unsigned int version);
-GIT_EXTERN(int) git_describe_init_format_options(git_describe_format_options *opts, unsigned int version);
-GIT_EXTERN(int) git_diff_init_options(git_diff_options *opts, unsigned int version);
-GIT_EXTERN(int) git_diff_find_init_options(git_diff_find_options *opts, unsigned int version);
-GIT_EXTERN(int) git_diff_format_email_init_options(git_diff_format_email_options *opts, unsigned int version);
-GIT_EXTERN(int) git_diff_patchid_init_options(git_diff_patchid_options *opts, unsigned int version);
-GIT_EXTERN(int) git_fetch_init_options(git_fetch_options *opts, unsigned int version);
-GIT_EXTERN(int) git_indexer_init_options(git_indexer_options *opts, unsigned int version);
-GIT_EXTERN(int) git_merge_init_options(git_merge_options *opts, unsigned int version);
-GIT_EXTERN(int) git_merge_file_init_input(git_merge_file_input *input, unsigned int version);
-GIT_EXTERN(int) git_merge_file_init_options(git_merge_file_options *opts, unsigned int version);
-GIT_EXTERN(int) git_proxy_init_options(git_proxy_options *opts, unsigned int version);
-GIT_EXTERN(int) git_push_init_options(git_push_options *opts, unsigned int version);
-GIT_EXTERN(int) git_rebase_init_options(git_rebase_options *opts, unsigned int version);
-GIT_EXTERN(int) git_remote_create_init_options(git_remote_create_options *opts, unsigned int version);
-GIT_EXTERN(int) git_repository_init_init_options(git_repository_init_options *opts, unsigned int version);
-GIT_EXTERN(int) git_revert_init_options(git_revert_options *opts, unsigned int version);
-GIT_EXTERN(int) git_stash_apply_init_options(git_stash_apply_options *opts, unsigned int version);
-GIT_EXTERN(int) git_status_init_options(git_status_options *opts, unsigned int version);
-GIT_EXTERN(int) git_submodule_update_init_options(git_submodule_update_options *opts, unsigned int version);
-GIT_EXTERN(int) git_worktree_add_init_options(git_worktree_add_options *opts, unsigned int version);
-GIT_EXTERN(int) git_worktree_prune_init_options(git_worktree_prune_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_blame_init_options(git3_blame_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_checkout_init_options(git3_checkout_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_cherrypick_init_options(git3_cherrypick_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_clone_init_options(git3_clone_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_describe_init_options(git3_describe_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_describe_init_format_options(git3_describe_format_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_diff_init_options(git3_diff_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_diff_find_init_options(git3_diff_find_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_diff_format_email_init_options(git3_diff_format_email_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_diff_patchid_init_options(git3_diff_patchid_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_fetch_init_options(git3_fetch_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_indexer_init_options(git3_indexer_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_merge_init_options(git3_merge_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_merge_file_init_input(git3_merge_file_input *input, unsigned int version);
+GIT3_EXTERN(int) git3_merge_file_init_options(git3_merge_file_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_proxy_init_options(git3_proxy_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_push_init_options(git3_push_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_rebase_init_options(git3_rebase_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_remote_create_init_options(git3_remote_create_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_repository_init_init_options(git3_repository_init_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_revert_init_options(git3_revert_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_stash_apply_init_options(git3_stash_apply_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_status_init_options(git3_status_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_submodule_update_init_options(git3_submodule_update_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_worktree_add_init_options(git3_worktree_add_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_worktree_prune_init_options(git3_worktree_prune_options *opts, unsigned int version);
 
 /**@}*/
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif
 

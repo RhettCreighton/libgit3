@@ -1,15 +1,15 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 static void assert_found(const char *haystack, const char *needle, size_t expected_pos)
 {
-	cl_assert_equal_p(git__memmem(haystack, haystack ? strlen(haystack) : 0,
+	cl_assert_equal_p(git3__memmem(haystack, haystack ? strlen(haystack) : 0,
 				      needle, needle ? strlen(needle) : 0),
 			  haystack + expected_pos);
 }
 
 static void assert_absent(const char *haystack, const char *needle)
 {
-	cl_assert_equal_p(git__memmem(haystack, haystack ? strlen(haystack) : 0,
+	cl_assert_equal_p(git3__memmem(haystack, haystack ? strlen(haystack) : 0,
 				      needle, needle ? strlen(needle) : 0),
 			  NULL);
 }

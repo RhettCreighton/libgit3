@@ -1,5 +1,5 @@
 #include "clar.h"
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "futils.h"
 #include "git3/revert.h"
@@ -8,7 +8,7 @@
 
 #define TEST_REPO_PATH "revert"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 /* Fixture setup and teardown */
 void test_revert_bare__initialize(void)
@@ -23,9 +23,9 @@ void test_revert_bare__cleanup(void)
 
 void test_revert_bare__automerge(void)
 {
-	git_commit *head_commit, *revert_commit;
-	git_oid head_oid, revert_oid;
-	git_index *index;
+	git3_commit *head_commit, *revert_commit;
+	git3_oid head_oid, revert_oid;
+	git3_index *index;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "caf99de3a49827117bb66721010eac461b06a80c", 0, "file1.txt" },
@@ -34,26 +34,26 @@ void test_revert_bare__automerge(void)
 		{ 0100644, "0f5bfcf58c558d865da6be0281d7795993646cee", 0, "file6.txt" },
 	};
 
-	git_oid_from_string(&head_oid, "72333f47d4e83616630ff3b0ffe4c0faebcc3c45", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&head_commit, repo, &head_oid));
+	git3_oid_from_string(&head_oid, "72333f47d4e83616630ff3b0ffe4c0faebcc3c45", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&head_commit, repo, &head_oid));
 
-	git_oid_from_string(&revert_oid, "d1d403d22cbe24592d725f442835cf46fe60c8ac", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&revert_commit, repo, &revert_oid));
+	git3_oid_from_string(&revert_oid, "d1d403d22cbe24592d725f442835cf46fe60c8ac", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&revert_commit, repo, &revert_oid));
 
-	cl_git_pass(git_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
+	cl_git_pass(git3_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
 	cl_assert(merge_test_index(index, merge_index_entries, 4));
 
-	git_commit_free(revert_commit);
-	git_commit_free(head_commit);
-	git_index_free(index);
+	git3_commit_free(revert_commit);
+	git3_commit_free(head_commit);
+	git3_index_free(index);
 }
 
 void test_revert_bare__conflicts(void)
 {
-	git_reference *head_ref;
-	git_commit *head_commit, *revert_commit;
-	git_oid revert_oid;
-	git_index *index;
+	git3_reference *head_ref;
+	git3_commit *head_commit, *revert_commit;
+	git3_oid revert_oid;
+	git3_index *index;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "7731926a337c4eaba1e2187d90ebfa0a93659382", 1, "file1.txt" },
@@ -64,43 +64,43 @@ void test_revert_bare__conflicts(void)
 		{ 0100644, "0f5bfcf58c558d865da6be0281d7795993646cee", 0, "file6.txt" },
 	};
 
-	git_oid_from_string(&revert_oid, "72333f47d4e83616630ff3b0ffe4c0faebcc3c45", GIT_OID_SHA1);
+	git3_oid_from_string(&revert_oid, "72333f47d4e83616630ff3b0ffe4c0faebcc3c45", GIT3_OID_SHA1);
 
-	cl_git_pass(git_repository_head(&head_ref, repo));
-	cl_git_pass(git_reference_peel((git_object **)&head_commit, head_ref, GIT_OBJECT_COMMIT));
+	cl_git_pass(git3_repository_head(&head_ref, repo));
+	cl_git_pass(git3_reference_peel((git3_object **)&head_commit, head_ref, GIT3_OBJECT_COMMIT));
 
-	cl_git_pass(git_commit_lookup(&revert_commit, repo, &revert_oid));
-	cl_git_pass(git_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
+	cl_git_pass(git3_commit_lookup(&revert_commit, repo, &revert_oid));
+	cl_git_pass(git3_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
 
-	cl_assert(git_index_has_conflicts(index));
+	cl_assert(git3_index_has_conflicts(index));
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_commit_free(revert_commit);
-	git_commit_free(head_commit);
-	git_reference_free(head_ref);
-	git_index_free(index);
+	git3_commit_free(revert_commit);
+	git3_commit_free(head_commit);
+	git3_reference_free(head_ref);
+	git3_index_free(index);
 }
 
 void test_revert_bare__orphan(void)
 {
-	git_commit *head_commit, *revert_commit;
-	git_oid head_oid, revert_oid;
-	git_index *index;
+	git3_commit *head_commit, *revert_commit;
+	git3_oid head_oid, revert_oid;
+	git3_index *index;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "296a6d3be1dff05c5d1f631d2459389fa7b619eb", 0, "file-mainline.txt" },
 	};
 
-	git_oid_from_string(&head_oid, "39467716290f6df775a91cdb9a4eb39295018145", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&head_commit, repo, &head_oid));
+	git3_oid_from_string(&head_oid, "39467716290f6df775a91cdb9a4eb39295018145", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&head_commit, repo, &head_oid));
 
-	git_oid_from_string(&revert_oid, "ebb03002cee5d66c7732dd06241119fe72ab96a5", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&revert_commit, repo, &revert_oid));
+	git3_oid_from_string(&revert_oid, "ebb03002cee5d66c7732dd06241119fe72ab96a5", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&revert_commit, repo, &revert_oid));
 
-	cl_git_pass(git_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
+	cl_git_pass(git3_revert_commit(&index, repo, revert_commit, head_commit, 0, NULL));
 	cl_assert(merge_test_index(index, merge_index_entries, 1));
 
-	git_commit_free(revert_commit);
-	git_commit_free(head_commit);
-	git_index_free(index);
+	git3_commit_free(revert_commit);
+	git3_commit_free(head_commit);
+	git3_index_free(index);
 }

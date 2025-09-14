@@ -1,10 +1,10 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/merge.h"
 #include "merge.h"
 #include "../merge_helpers.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-recursive"
 
@@ -20,8 +20,8 @@ void test_merge_trees_recursive__cleanup(void)
 
 void test_merge_trees_recursive__one_base_commit(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "dea7215f259b2cced87d1bda6c72f8b4ce37a2ff", 0, "asparagus.txt" },
@@ -36,13 +36,13 @@ void test_merge_trees_recursive__one_base_commit(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__one_base_commit_norecursive(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "dea7215f259b2cced87d1bda6c72f8b4ce37a2ff", 0, "asparagus.txt" },
@@ -53,19 +53,19 @@ void test_merge_trees_recursive__one_base_commit_norecursive(void)
 		{ 0100644, "94d2c01087f48213bd157222d54edfefd77c9bba", 0, "veal.txt" },
 	};
 
-	opts.flags |= GIT_MERGE_NO_RECURSIVE;
+	opts.flags |= GIT3_MERGE_NO_RECURSIVE;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchA-1", "branchA-2", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__two_base_commits(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -80,13 +80,13 @@ void test_merge_trees_recursive__two_base_commits(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__two_base_commits_norecursive(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -99,19 +99,19 @@ void test_merge_trees_recursive__two_base_commits_norecursive(void)
 		{ 0100644, "4e21d2d63357bde5027d1625f5ec6b430cdeb143", 3, "veal.txt" },
 	};
 
-	opts.flags |= GIT_MERGE_NO_RECURSIVE;
+	opts.flags |= GIT3_MERGE_NO_RECURSIVE;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchB-1", "branchB-2", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__two_levels_of_multiple_bases(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -126,13 +126,13 @@ void test_merge_trees_recursive__two_levels_of_multiple_bases(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__two_levels_of_multiple_bases_norecursive(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -145,19 +145,19 @@ void test_merge_trees_recursive__two_levels_of_multiple_bases_norecursive(void)
 		{ 0100644, "68a2e1ee61a23a4728fe6b35580fbbbf729df370", 3, "veal.txt" },
 	};
 
-	opts.flags |= GIT_MERGE_NO_RECURSIVE;
+	opts.flags |= GIT3_MERGE_NO_RECURSIVE;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchC-1", "branchC-2", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__three_levels_of_multiple_bases(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -172,13 +172,13 @@ void test_merge_trees_recursive__three_levels_of_multiple_bases(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__three_levels_of_multiple_bases_norecursive(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -191,19 +191,19 @@ void test_merge_trees_recursive__three_levels_of_multiple_bases_norecursive(void
 		{ 0100644, "5e8747f5200fac0f945a07daf6163ca9cb1a8da9", 3, "veal.txt" },
 	};
 
-	opts.flags |= GIT_MERGE_NO_RECURSIVE;
+	opts.flags |= GIT3_MERGE_NO_RECURSIVE;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchD-2", "branchD-1", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__three_base_commits(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -218,13 +218,13 @@ void test_merge_trees_recursive__three_base_commits(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__three_base_commits_norecursive(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -237,19 +237,19 @@ void test_merge_trees_recursive__three_base_commits_norecursive(void)
 		{ 0100644, "a7b066537e6be7109abfe4ff97b675d4e077da20", 0, "veal.txt" },
 	};
 
-	opts.flags |= GIT_MERGE_NO_RECURSIVE;
+	opts.flags |= GIT3_MERGE_NO_RECURSIVE;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchE-1", "branchE-2", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_recursive__conflict(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -266,7 +266,7 @@ void test_merge_trees_recursive__conflict(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* 
@@ -279,8 +279,8 @@ void test_merge_trees_recursive__conflict(void)
  */
 void test_merge_trees_recursive__oh_so_many_levels_of_recursion(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -295,7 +295,7 @@ void test_merge_trees_recursive__oh_so_many_levels_of_recursion(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* Branch H-1 and H-2 have two common ancestors (aa9e263, 6ef31d3).  The two
@@ -303,8 +303,8 @@ void test_merge_trees_recursive__oh_so_many_levels_of_recursion(void)
  */
 void test_merge_trees_recursive__conflicting_merge_base(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -321,7 +321,7 @@ void test_merge_trees_recursive__conflicting_merge_base(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* Branch H-1 and H-2 have two common ancestors (aa9e263, 6ef31d3).  The two
@@ -330,8 +330,8 @@ void test_merge_trees_recursive__conflicting_merge_base(void)
  */
 void test_merge_trees_recursive__conflicting_merge_base_with_diff3(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -344,13 +344,13 @@ void test_merge_trees_recursive__conflicting_merge_base_with_diff3(void)
 		{ 0100644, "d604c75019c282144bdbbf3fd3462ba74b240efc", 3, "veal.txt" },
 	};
 
-	opts.file_flags |= GIT_MERGE_FILE_STYLE_DIFF3;
+	opts.file_flags |= GIT3_MERGE_FILE_STYLE_DIFF3;
 
 	cl_git_pass(merge_commits_from_branches(&index, repo, "branchH-2", "branchH-1", &opts));
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* Branch I-1 and I-2 have two common ancestors (aa9e263, 6ef31d3).  The two
@@ -359,8 +359,8 @@ void test_merge_trees_recursive__conflicting_merge_base_with_diff3(void)
  */
 void test_merge_trees_recursive__conflicting_merge_base_since_resolved(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -375,7 +375,7 @@ void test_merge_trees_recursive__conflicting_merge_base_since_resolved(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 6));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* There are multiple levels of criss-cross merges, and multiple recursive
@@ -385,8 +385,8 @@ void test_merge_trees_recursive__conflicting_merge_base_since_resolved(void)
  */
 void test_merge_trees_recursive__recursionlimit(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -405,7 +405,7 @@ void test_merge_trees_recursive__recursionlimit(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* There are multiple levels of criss-cross merges.  This ensures
@@ -417,8 +417,8 @@ void test_merge_trees_recursive__recursionlimit(void)
  */
 void test_merge_trees_recursive__merge_base_for_virtual_commit(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "1bde1883de4977ea3e664b315da951d1f614c3b1", 0, "targetfile.txt" },
@@ -431,7 +431,7 @@ void test_merge_trees_recursive__merge_base_for_virtual_commit(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 4));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 /* This test is the same as above, but the graph is constructed such
@@ -440,8 +440,8 @@ void test_merge_trees_recursive__merge_base_for_virtual_commit(void)
  */
 void test_merge_trees_recursive__merge_base_for_virtual_commit_2(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "4a06b258fed8a4d15967ec4253ae7366b70f727d", 0, "targetfile.txt" },
@@ -454,5 +454,5 @@ void test_merge_trees_recursive__merge_base_for_virtual_commit_2(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 4));
 
-	git_index_free(index);
+	git3_index_free(index);
 }

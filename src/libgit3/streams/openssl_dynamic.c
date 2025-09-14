@@ -1,14 +1,14 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "streams/openssl.h"
 #include "streams/openssl_dynamic.h"
 
-#ifdef GIT_HTTPS_OPENSSL_DYNAMIC
+#ifdef GIT3_HTTPS_OPENSSL_DYNAMIC
 
 #include "runtime.h"
 
@@ -95,7 +95,7 @@ void (*sk_free)(void *sk);
 
 static void *openssl_handle;
 
-GIT_INLINE(void *) openssl_sym(int *err, const char *name, bool required)
+GIT3_INLINE(void *) openssl_sym(int *err, const char *name, bool required)
 {
 	void *symbol;
 
@@ -106,7 +106,7 @@ GIT_INLINE(void *) openssl_sym(int *err, const char *name, bool required)
 
 	if ((symbol = dlsym(openssl_handle, name)) == NULL && required) {
 		const char *msg = dlerror();
-		git_error_set(GIT_ERROR_SSL, "could not load ssl function '%s': %s", name, msg ? msg : "unknown error");
+		git3_error_set(GIT3_ERROR_SSL, "could not load ssl function '%s': %s", name, msg ? msg : "unknown error");
 		*err = -1;
 	}
 
@@ -119,7 +119,7 @@ static void dynamic_shutdown(void)
 	openssl_handle = NULL;
 }
 
-int git_openssl_stream_dynamic_init(void)
+int git3_openssl_stream_dynamic_init(void)
 {
 	int err = 0;
 
@@ -130,7 +130,7 @@ int git_openssl_stream_dynamic_init(void)
 	    (openssl_handle = dlopen("libssl.so.10", RTLD_NOW)) == NULL &&
 	    (openssl_handle = dlopen("libssl.so.3", RTLD_NOW)) == NULL &&
 	    (openssl_handle = dlopen("libssl.3.dylib", RTLD_NOW)) == NULL) {
-		git_error_set(GIT_ERROR_SSL, "could not load ssl libraries");
+		git3_error_set(GIT3_ERROR_SSL, "could not load ssl libraries");
 		return -1;
 	}
 
@@ -230,7 +230,7 @@ int git_openssl_stream_dynamic_init(void)
 		    !CRYPTO_set_locking_callback ||
 		    !CRYPTO_THREADID_set_callback ||
 		    !CRYPTO_THREADID_set_numeric) {
-			git_error_set(GIT_ERROR_SSL, "could not load legacy openssl initialization functions");
+			git3_error_set(GIT3_ERROR_SSL, "could not load legacy openssl initialization functions");
 			goto on_error;
 		}
 	}
@@ -260,7 +260,7 @@ int git_openssl_stream_dynamic_init(void)
 
 	if (!ASN1_STRING_get0_data) {
 		if (!ASN1_STRING_data) {
-			git_error_set(GIT_ERROR_SSL, "could not load legacy openssl string function");
+			git3_error_set(GIT3_ERROR_SSL, "could not load legacy openssl string function");
 			goto on_error;
 		}
 
@@ -270,11 +270,11 @@ int git_openssl_stream_dynamic_init(void)
 	if ((!OPENSSL_sk_num && !sk_num) ||
 	    (!OPENSSL_sk_value && !sk_value) ||
 	    (!OPENSSL_sk_free && !sk_free)) {
-		git_error_set(GIT_ERROR_SSL, "could not load legacy openssl stack functions");
+		git3_error_set(GIT3_ERROR_SSL, "could not load legacy openssl stack functions");
 		goto on_error;
 	}
 
-	if (git_runtime_shutdown_register(dynamic_shutdown) != 0)
+	if (git3_runtime_shutdown_register(dynamic_shutdown) != 0)
 		goto on_error;
 
 	return 0;
@@ -292,7 +292,7 @@ int sk_GENERAL_NAME_num(const GENERAL_NAME *sk)
 	else if (sk_num)
 		return sk_num(sk);
 
-	GIT_ASSERT_WITH_RETVAL(false, 0);
+	GIT3_ASSERT_WITH_RETVAL(false, 0);
 	return 0;
 }
 
@@ -303,7 +303,7 @@ GENERAL_NAME *sk_GENERAL_NAME_value(const GENERAL_NAME *sk, int i)
 	else if (sk_value)
 		return sk_value(sk, i);
 
-	GIT_ASSERT_WITH_RETVAL(false, NULL);
+	GIT3_ASSERT_WITH_RETVAL(false, NULL);
 	return NULL;
 }
 
@@ -315,4 +315,4 @@ void GENERAL_NAMES_free(GENERAL_NAME *sk)
 		sk_free(sk);
 }
 
-#endif /* GIT_HTTPS_OPENSSL_DYNAMIC */
+#endif /* GIT3_HTTPS_OPENSSL_DYNAMIC */

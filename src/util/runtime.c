@@ -1,19 +1,19 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 #include "runtime.h"
 
-static git_runtime_shutdown_fn shutdown_callback[32];
-static git_atomic32 shutdown_callback_count;
+static git3_runtime_shutdown_fn shutdown_callback[32];
+static git3_atomic32 shutdown_callback_count;
 
-static git_atomic32 init_count;
+static git3_atomic32 init_count;
 
-static int init_common(git_runtime_init_fn init_fns[], size_t cnt)
+static int init_common(git3_runtime_init_fn init_fns[], size_t cnt)
 {
 	size_t i;
 	int ret;
@@ -24,34 +24,34 @@ static int init_common(git_runtime_init_fn init_fns[], size_t cnt)
 			break;
 	}
 
-	GIT_MEMORY_BARRIER;
+	GIT3_MEMORY_BARRIER;
 
 	return ret;
 }
 
 static void shutdown_common(void)
 {
-	git_runtime_shutdown_fn cb;
+	git3_runtime_shutdown_fn cb;
 	int pos;
 
-	for (pos = git_atomic32_get(&shutdown_callback_count);
+	for (pos = git3_atomic32_get(&shutdown_callback_count);
 	     pos > 0;
-	     pos = git_atomic32_dec(&shutdown_callback_count)) {
-		cb = git_atomic_swap(shutdown_callback[pos - 1], NULL);
+	     pos = git3_atomic32_dec(&shutdown_callback_count)) {
+		cb = git3_atomic_swap(shutdown_callback[pos - 1], NULL);
 
 		if (cb != NULL)
 			cb();
 	}
 }
 
-int git_runtime_shutdown_register(git_runtime_shutdown_fn callback)
+int git3_runtime_shutdown_register(git3_runtime_shutdown_fn callback)
 {
-	int count = git_atomic32_inc(&shutdown_callback_count);
+	int count = git3_atomic32_inc(&shutdown_callback_count);
 
 	if (count > (int)ARRAY_SIZE(shutdown_callback) || count == 0) {
-		git_error_set(GIT_ERROR_INVALID,
+		git3_error_set(GIT3_ERROR_INVALID,
 		              "too many shutdown callbacks registered");
-		git_atomic32_dec(&shutdown_callback_count);
+		git3_atomic32_dec(&shutdown_callback_count);
 		return -1;
 	}
 
@@ -60,7 +60,7 @@ int git_runtime_shutdown_register(git_runtime_shutdown_fn callback)
 	return 0;
 }
 
-#if defined(GIT_THREADS) && defined(GIT_WIN32)
+#if defined(GIT3_THREADS) && defined(GIT3_WIN32)
 
 /*
  * On Win32, we use a spinlock to provide locking semantics.  This is
@@ -68,19 +68,19 @@ int git_runtime_shutdown_register(git_runtime_shutdown_fn callback)
  */
 static volatile LONG init_spinlock = 0;
 
-GIT_INLINE(int) init_lock(void)
+GIT3_INLINE(int) init_lock(void)
 {
 	while (InterlockedCompareExchange(&init_spinlock, 1, 0)) { Sleep(0); }
 	return 0;
 }
 
-GIT_INLINE(int) init_unlock(void)
+GIT3_INLINE(int) init_unlock(void)
 {
 	InterlockedExchange(&init_spinlock, 0);
 	return 0;
 }
 
-#elif defined(GIT_THREADS) && defined(_POSIX_THREADS)
+#elif defined(GIT3_THREADS) && defined(_POSIX_THREADS)
 
 /*
  * On POSIX, we need to use a proper mutex for locking.  We might prefer
@@ -89,26 +89,26 @@ GIT_INLINE(int) init_unlock(void)
  */
 static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-GIT_INLINE(int) init_lock(void)
+GIT3_INLINE(int) init_lock(void)
 {
 	return pthread_mutex_lock(&init_mutex) == 0 ? 0 : -1;
 }
 
-GIT_INLINE(int) init_unlock(void)
+GIT3_INLINE(int) init_unlock(void)
 {
 	return pthread_mutex_unlock(&init_mutex) == 0 ? 0 : -1;
 }
 
-#elif defined(GIT_THREADS)
+#elif defined(GIT3_THREADS)
 # error unknown threading model
 #else
 
-# define init_lock() git__noop()
-# define init_unlock() git__noop()
+# define init_lock() git3__noop()
+# define init_unlock() git3__noop()
 
 #endif
 
-int git_runtime_init(git_runtime_init_fn init_fns[], size_t cnt)
+int git3_runtime_init(git3_runtime_init_fn init_fns[], size_t cnt)
 {
 	int ret;
 
@@ -116,7 +116,7 @@ int git_runtime_init(git_runtime_init_fn init_fns[], size_t cnt)
 		return -1;
 
 	/* Only do work on a 0 -> 1 transition of the refcount */
-	if ((ret = git_atomic32_inc(&init_count)) == 1) {
+	if ((ret = git3_atomic32_inc(&init_count)) == 1) {
 		if (init_common(init_fns, cnt) < 0)
 			ret = -1;
 	}
@@ -127,14 +127,14 @@ int git_runtime_init(git_runtime_init_fn init_fns[], size_t cnt)
 	return ret;
 }
 
-int git_runtime_init_count(void)
+int git3_runtime_init_count(void)
 {
 	int ret;
 
 	if (init_lock() < 0)
 		return -1;
 
-	ret = git_atomic32_get(&init_count);
+	ret = git3_atomic32_get(&init_count);
 
 	if (init_unlock() < 0)
 		return -1;
@@ -142,7 +142,7 @@ int git_runtime_init_count(void)
 	return ret;
 }
 
-int git_runtime_shutdown(void)
+int git3_runtime_shutdown(void)
 {
 	int ret;
 
@@ -151,7 +151,7 @@ int git_runtime_shutdown(void)
 		return -1;
 
 	/* Only do work on a 1 -> 0 transition of the refcount */
-	if ((ret = git_atomic32_dec(&init_count)) == 0)
+	if ((ret = git3_atomic32_dec(&init_count)) == 0)
 		shutdown_common();
 
 	/* Exit the lock */

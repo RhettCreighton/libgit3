@@ -1,21 +1,21 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_helpers.h"
 #include "git3/sys/diff.h"
 
-git_tree *resolve_commit_oid_to_tree(
-	git_repository *repo,
+git3_tree *resolve_commit_oid_to_tree(
+	git3_repository *repo,
 	const char *partial_oid)
 {
 	size_t len = strlen(partial_oid);
-	git_oid oid;
-	git_object *obj = NULL;
-	git_tree *tree = NULL;
+	git3_oid oid;
+	git3_object *obj = NULL;
+	git3_tree *tree = NULL;
 
-	if (git_oid_from_prefix(&oid, partial_oid, len, GIT_OID_SHA1) == 0)
-		cl_git_pass(git_object_lookup_prefix(&obj, repo, &oid, len, GIT_OBJECT_ANY));
+	if (git3_oid_from_prefix(&oid, partial_oid, len, GIT3_OID_SHA1) == 0)
+		cl_git_pass(git3_object_lookup_prefix(&obj, repo, &oid, len, GIT3_OBJECT_ANY));
 
-	cl_git_pass(git_object_peel((git_object **) &tree, obj, GIT_OBJECT_TREE));
-	git_object_free(obj);
+	cl_git_pass(git3_object_peel((git3_object **) &tree, obj, GIT3_OBJECT_TREE));
+	git3_object_free(obj);
 	return tree;
 }
 
@@ -23,15 +23,15 @@ static char diff_pick_suffix(int mode)
 {
 	if (S_ISDIR(mode))
 		return '/';
-	else if (GIT_PERMS_IS_EXEC(mode))
+	else if (GIT3_PERMS_IS_EXEC(mode))
 		return '*';
 	else
 		return ' ';
 }
 
-static void fprintf_delta(FILE *fp, const git_diff_delta *delta, float progress)
+static void fprintf_delta(FILE *fp, const git3_diff_delta *delta, float progress)
 {
-	char code = git_diff_status_char(delta->status);
+	char code = git3_diff_status_char(delta->status);
 	char old_suffix = diff_pick_suffix(delta->old_file.mode);
 	char new_suffix = diff_pick_suffix(delta->new_file.mode);
 
@@ -49,7 +49,7 @@ static void fprintf_delta(FILE *fp, const git_diff_delta *delta, float progress)
 }
 
 int diff_file_cb(
-	const git_diff_delta *delta,
+	const git3_diff_delta *delta,
 	float progress,
 	void *payload)
 {
@@ -65,10 +65,10 @@ int diff_file_cb(
 
 	e->files++;
 
-	if ((delta->flags & GIT_DIFF_FLAG_BINARY) != 0)
+	if ((delta->flags & GIT3_DIFF_FLAG_BINARY) != 0)
 		e->files_binary++;
 
-	cl_assert(delta->status <= GIT_DELTA_CONFLICTED);
+	cl_assert(delta->status <= GIT3_DELTA_CONFLICTED);
 
 	e->file_status[delta->status] += 1;
 
@@ -76,7 +76,7 @@ int diff_file_cb(
 }
 
 int diff_print_file_cb(
-	const git_diff_delta *delta,
+	const git3_diff_delta *delta,
 	float progress,
 	void *payload)
 {
@@ -92,26 +92,26 @@ int diff_print_file_cb(
 }
 
 int diff_binary_cb(
-	const git_diff_delta *delta,
-	const git_diff_binary *binary,
+	const git3_diff_delta *delta,
+	const git3_diff_binary *binary,
 	void *payload)
 {
-	GIT_UNUSED(delta);
-	GIT_UNUSED(binary);
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(delta);
+	GIT3_UNUSED(binary);
+	GIT3_UNUSED(payload);
 
 	return 0;
 }
 
 int diff_hunk_cb(
-	const git_diff_delta *delta,
-	const git_diff_hunk *hunk,
+	const git3_diff_delta *delta,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
 	diff_expects *e = payload;
 	const char *scan = hunk->header, *scan_end = scan + hunk->header_len;
 
-	GIT_UNUSED(delta);
+	GIT3_UNUSED(delta);
 
 	/* confirm no NUL bytes in header text */
 	while (scan < scan_end)
@@ -124,28 +124,28 @@ int diff_hunk_cb(
 }
 
 int diff_line_cb(
-	const git_diff_delta *delta,
-	const git_diff_hunk *hunk,
-	const git_diff_line *line,
+	const git3_diff_delta *delta,
+	const git3_diff_hunk *hunk,
+	const git3_diff_line *line,
 	void *payload)
 {
 	diff_expects *e = payload;
 
-	GIT_UNUSED(delta);
-	GIT_UNUSED(hunk);
+	GIT3_UNUSED(delta);
+	GIT3_UNUSED(hunk);
 
 	e->lines++;
 	switch (line->origin) {
-	case GIT_DIFF_LINE_CONTEXT:
-	case GIT_DIFF_LINE_CONTEXT_EOFNL: /* techically not a line */
+	case GIT3_DIFF_LINE_CONTEXT:
+	case GIT3_DIFF_LINE_CONTEXT_EOFNL: /* techically not a line */
 		e->line_ctxt++;
 		break;
-	case GIT_DIFF_LINE_ADDITION:
-	case GIT_DIFF_LINE_ADD_EOFNL: /* technically not a line add */
+	case GIT3_DIFF_LINE_ADDITION:
+	case GIT3_DIFF_LINE_ADD_EOFNL: /* technically not a line add */
 		e->line_adds++;
 		break;
-	case GIT_DIFF_LINE_DELETION:
-	case GIT_DIFF_LINE_DEL_EOFNL: /* technically not a line delete */
+	case GIT3_DIFF_LINE_DELETION:
+	case GIT3_DIFF_LINE_DEL_EOFNL: /* technically not a line delete */
 		e->line_dels++;
 		break;
 	default:
@@ -155,111 +155,111 @@ int diff_line_cb(
 }
 
 int diff_foreach_via_iterator(
-	git_diff *diff,
-	git_diff_file_cb file_cb,
-	git_diff_binary_cb binary_cb,
-	git_diff_hunk_cb hunk_cb,
-	git_diff_line_cb line_cb,
+	git3_diff *diff,
+	git3_diff_file_cb file_cb,
+	git3_diff_binary_cb binary_cb,
+	git3_diff_hunk_cb hunk_cb,
+	git3_diff_line_cb line_cb,
 	void *data)
 {
-	size_t d, num_d = git_diff_num_deltas(diff);
+	size_t d, num_d = git3_diff_num_deltas(diff);
 
-	GIT_UNUSED(binary_cb);
+	GIT3_UNUSED(binary_cb);
 
 	for (d = 0; d < num_d; ++d) {
-		git_patch *patch;
-		const git_diff_delta *delta;
+		git3_patch *patch;
+		const git3_diff_delta *delta;
 		size_t h, num_h;
 
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
-		cl_assert((delta = git_patch_get_delta(patch)) != NULL);
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
+		cl_assert((delta = git3_patch_get_delta(patch)) != NULL);
 
 		/* call file_cb for this file */
 		if (file_cb != NULL && file_cb(delta, (float)d / num_d, data) != 0) {
-			git_patch_free(patch);
+			git3_patch_free(patch);
 			goto abort;
 		}
 
 		/* if there are no changes, then the patch will be NULL */
 		if (!patch) {
-			cl_assert(delta->status == GIT_DELTA_UNMODIFIED ||
-					  (delta->flags & GIT_DIFF_FLAG_BINARY) != 0);
+			cl_assert(delta->status == GIT3_DELTA_UNMODIFIED ||
+					  (delta->flags & GIT3_DIFF_FLAG_BINARY) != 0);
 			continue;
 		}
 
 		if (!hunk_cb && !line_cb) {
-			git_patch_free(patch);
+			git3_patch_free(patch);
 			continue;
 		}
 
-		num_h = git_patch_num_hunks(patch);
+		num_h = git3_patch_num_hunks(patch);
 
 		for (h = 0; h < num_h; h++) {
-			const git_diff_hunk *hunk;
+			const git3_diff_hunk *hunk;
 			size_t l, num_l;
 
-			cl_git_pass(git_patch_get_hunk(&hunk, &num_l, patch, h));
+			cl_git_pass(git3_patch_get_hunk(&hunk, &num_l, patch, h));
 
 			if (hunk_cb && hunk_cb(delta, hunk, data) != 0) {
-				git_patch_free(patch);
+				git3_patch_free(patch);
 				goto abort;
 			}
 
 			for (l = 0; l < num_l; ++l) {
-				const git_diff_line *line;
+				const git3_diff_line *line;
 
-				cl_git_pass(git_patch_get_line_in_hunk(&line, patch, h, l));
+				cl_git_pass(git3_patch_get_line_in_hunk(&line, patch, h, l));
 
 				if (line_cb &&
 					line_cb(delta, hunk, line, data) != 0) {
-					git_patch_free(patch);
+					git3_patch_free(patch);
 					goto abort;
 				}
 			}
 		}
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
 	return 0;
 
 abort:
-	git_error_clear();
-	return GIT_EUSER;
+	git3_error_clear();
+	return GIT3_EUSER;
 }
 
-void diff_print(FILE *fp, git_diff *diff)
+void diff_print(FILE *fp, git3_diff *diff)
 {
 	cl_git_pass(
-		git_diff_print(diff, GIT_DIFF_FORMAT_PATCH,
-			git_diff_print_callback__to_file_handle, fp ? fp : stderr));
+		git3_diff_print(diff, GIT3_DIFF_FORMAT_PATCH,
+			git3_diff_print_callback__to_file_handle, fp ? fp : stderr));
 }
 
-void diff_print_raw(FILE *fp, git_diff *diff)
+void diff_print_raw(FILE *fp, git3_diff *diff)
 {
 	cl_git_pass(
-		git_diff_print(diff, GIT_DIFF_FORMAT_RAW,
-			git_diff_print_callback__to_file_handle, fp ? fp : stderr));
+		git3_diff_print(diff, GIT3_DIFF_FORMAT_RAW,
+			git3_diff_print_callback__to_file_handle, fp ? fp : stderr));
 }
 
-static size_t num_modified_deltas(git_diff *diff)
+static size_t num_modified_deltas(git3_diff *diff)
 {
-	const git_diff_delta *delta;
+	const git3_diff_delta *delta;
 	size_t i, cnt = 0;
 
-	for (i = 0; i < git_diff_num_deltas(diff); i++) {
-		delta = git_diff_get_delta(diff, i);
+	for (i = 0; i < git3_diff_num_deltas(diff); i++) {
+		delta = git3_diff_get_delta(diff, i);
 
-		if (delta->status != GIT_DELTA_UNMODIFIED)
+		if (delta->status != GIT3_DELTA_UNMODIFIED)
 			cnt++;
 	}
 
 	return cnt;
 }
 
-void diff_assert_equal(git_diff *a, git_diff *b)
+void diff_assert_equal(git3_diff *a, git3_diff *b)
 {
-	const git_diff_delta *ad, *bd;
+	const git3_diff_delta *ad, *bd;
 	size_t i, j;
 
 	assert(a && b);
@@ -267,16 +267,16 @@ void diff_assert_equal(git_diff *a, git_diff *b)
 	cl_assert_equal_i(num_modified_deltas(a), num_modified_deltas(b));
 
 	for (i = 0, j = 0;
-		i < git_diff_num_deltas(a) && j < git_diff_num_deltas(b); ) {
+		i < git3_diff_num_deltas(a) && j < git3_diff_num_deltas(b); ) {
 
-		ad = git_diff_get_delta(a, i);
-		bd = git_diff_get_delta(b, j);
+		ad = git3_diff_get_delta(a, i);
+		bd = git3_diff_get_delta(b, j);
 
-		if (ad->status == GIT_DELTA_UNMODIFIED) {
+		if (ad->status == GIT3_DELTA_UNMODIFIED) {
 			i++;
 			continue;
 		}
-		if (bd->status == GIT_DELTA_UNMODIFIED) {
+		if (bd->status == GIT3_DELTA_UNMODIFIED) {
 			j++;
 			continue;
 		}
@@ -315,9 +315,9 @@ void diff_assert_equal(git_diff *a, git_diff *b)
 }
 
 int diff_from_buffer(
-	git_diff **out,
+	git3_diff **out,
 	const char *content,
 	size_t content_len)
 {
-	return git_diff_from_buffer(out, content, content_len);
+	return git3_diff_from_buffer(out, content, content_len);
 }

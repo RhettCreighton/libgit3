@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_oidarray_h__
@@ -11,33 +11,33 @@
 #include "oid.h"
 
 /**
- * @file git2/oidarray.h
+ * @file git3/oidarray.h
  * @brief An array of object IDs
- * @defgroup git_oidarray Arrays of object IDs
+ * @defgroup git3_oidarray Arrays of object IDs
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** Array of object ids */
-typedef struct git_oidarray {
-	git_oid *ids;
+typedef struct git3_oidarray {
+	git3_oid *ids;
 	size_t count;
-} git_oidarray;
+} git3_oidarray;
 
 /**
  * Free the object IDs contained in an oid_array.  This method should
- * be called on `git_oidarray` objects that were provided by the
+ * be called on `git3_oidarray` objects that were provided by the
  * library.  Not doing so will result in a memory leak.
  *
- * This does not free the `git_oidarray` itself, since the library will
+ * This does not free the `git3_oidarray` itself, since the library will
  * never allocate that object directly itself.
  *
- * @param array git_oidarray from which to free oid data
+ * @param array git3_oidarray from which to free oid data
  */
-GIT_EXTERN(void) git_oidarray_dispose(git_oidarray *array);
+GIT3_EXTERN(void) git3_oidarray_dispose(git3_oidarray *array);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

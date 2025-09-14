@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "repository.h"
 #include "backend_helpers.h"
 
-static git_repository *_repo;
+static git3_repository *_repo;
 static fake_backend *_fake;
 
 #define NONEXISTING_HASH "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
@@ -13,28 +13,28 @@ static const fake_object _objects[] = {
 	{ NULL, NULL }
 };
 
-static git_oid _nonexisting_oid;
-static git_oid _existing_oid;
+static git3_oid _nonexisting_oid;
+static git3_oid _existing_oid;
 
 static void setup_repository_and_backend(void)
 {
-	git_odb *odb = NULL;
-	git_odb_backend *backend = NULL;
+	git3_odb *odb = NULL;
+	git3_odb_backend *backend = NULL;
 
 	_repo = cl_git_sandbox_init("testrepo.git");
 
 	cl_git_pass(build_fake_backend(&backend, _objects, true));
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
-	cl_git_pass(git_odb_add_backend(odb, backend, 10));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
+	cl_git_pass(git3_odb_add_backend(odb, backend, 10));
 
 	_fake = (fake_backend *)backend;
 }
 
 void test_odb_backend_refreshing__initialize(void)
 {
-	git_oid_from_string(&_nonexisting_oid, NONEXISTING_HASH, GIT_OID_SHA1);
-	git_oid_from_string(&_existing_oid, EXISTING_HASH, GIT_OID_SHA1);
+	git3_oid_from_string(&_nonexisting_oid, NONEXISTING_HASH, GIT3_OID_SHA1);
+	git3_oid_from_string(&_existing_oid, EXISTING_HASH, GIT3_OID_SHA1);
 	setup_repository_and_backend();
 }
 
@@ -45,10 +45,10 @@ void test_odb_backend_refreshing__cleanup(void)
 
 void test_odb_backend_refreshing__exists_is_invoked_twice_on_failure(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
-	cl_assert_equal_b(false, git_odb_exists(odb, &_nonexisting_oid));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
+	cl_assert_equal_b(false, git3_odb_exists(odb, &_nonexisting_oid));
 
 	cl_assert_equal_i(2, _fake->exists_calls);
 	cl_assert_equal_i(1, _fake->refresh_calls);
@@ -56,11 +56,11 @@ void test_odb_backend_refreshing__exists_is_invoked_twice_on_failure(void)
 
 void test_odb_backend_refreshing__read_is_invoked_twice_on_failure(void)
 {
-	git_object *obj;
+	git3_object *obj;
 
 	cl_git_fail_with(
-		git_object_lookup(&obj, _repo, &_nonexisting_oid, GIT_OBJECT_ANY),
-		GIT_ENOTFOUND);
+		git3_object_lookup(&obj, _repo, &_nonexisting_oid, GIT3_OBJECT_ANY),
+		GIT3_ENOTFOUND);
 
 	cl_assert_equal_i(2, _fake->read_calls);
 	cl_assert_equal_i(1, _fake->refresh_calls);
@@ -68,11 +68,11 @@ void test_odb_backend_refreshing__read_is_invoked_twice_on_failure(void)
 
 void test_odb_backend_refreshing__readprefix_is_invoked_twice_on_failure(void)
 {
-	git_object *obj;
+	git3_object *obj;
 
 	cl_git_fail_with(
-		git_object_lookup_prefix(&obj, _repo, &_nonexisting_oid, 7, GIT_OBJECT_ANY),
-		GIT_ENOTFOUND);
+		git3_object_lookup_prefix(&obj, _repo, &_nonexisting_oid, 7, GIT3_OBJECT_ANY),
+		GIT3_ENOTFOUND);
 
 	cl_assert_equal_i(2, _fake->read_prefix_calls);
 	cl_assert_equal_i(1, _fake->refresh_calls);
@@ -80,15 +80,15 @@ void test_odb_backend_refreshing__readprefix_is_invoked_twice_on_failure(void)
 
 void test_odb_backend_refreshing__readheader_is_invoked_twice_on_failure(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 	size_t len;
-	git_object_t type;
+	git3_object_t type;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
 
 	cl_git_fail_with(
-		git_odb_read_header(&len, &type, odb, &_nonexisting_oid),
-		GIT_ENOTFOUND);
+		git3_odb_read_header(&len, &type, odb, &_nonexisting_oid),
+		GIT3_ENOTFOUND);
 
 	cl_assert_equal_i(2, _fake->read_header_calls);
 	cl_assert_equal_i(1, _fake->refresh_calls);
@@ -96,10 +96,10 @@ void test_odb_backend_refreshing__readheader_is_invoked_twice_on_failure(void)
 
 void test_odb_backend_refreshing__exists_is_invoked_once_on_success(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
-	cl_assert_equal_b(true, git_odb_exists(odb, &_existing_oid));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
+	cl_assert_equal_b(true, git3_odb_exists(odb, &_existing_oid));
 
 	cl_assert_equal_i(1, _fake->exists_calls);
 	cl_assert_equal_i(0, _fake->refresh_calls);
@@ -107,37 +107,37 @@ void test_odb_backend_refreshing__exists_is_invoked_once_on_success(void)
 
 void test_odb_backend_refreshing__read_is_invoked_once_on_success(void)
 {
-	git_object *obj;
+	git3_object *obj;
 
-	cl_git_pass(git_object_lookup(&obj, _repo, &_existing_oid, GIT_OBJECT_ANY));
+	cl_git_pass(git3_object_lookup(&obj, _repo, &_existing_oid, GIT3_OBJECT_ANY));
 
 	cl_assert_equal_i(1, _fake->read_calls);
 	cl_assert_equal_i(0, _fake->refresh_calls);
 
-	git_object_free(obj);
+	git3_object_free(obj);
 }
 
 void test_odb_backend_refreshing__readprefix_is_invoked_once_on_success(void)
 {
-	git_object *obj;
+	git3_object *obj;
 
-	cl_git_pass(git_object_lookup_prefix(&obj, _repo, &_existing_oid, 7, GIT_OBJECT_ANY));
+	cl_git_pass(git3_object_lookup_prefix(&obj, _repo, &_existing_oid, 7, GIT3_OBJECT_ANY));
 
 	cl_assert_equal_i(1, _fake->read_prefix_calls);
 	cl_assert_equal_i(0, _fake->refresh_calls);
 
-	git_object_free(obj);
+	git3_object_free(obj);
 }
 
 void test_odb_backend_refreshing__readheader_is_invoked_once_on_success(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 	size_t len;
-	git_object_t type;
+	git3_object_t type;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
 
-	cl_git_pass(git_odb_read_header(&len, &type, odb, &_existing_oid));
+	cl_git_pass(git3_odb_read_header(&len, &type, odb, &_existing_oid));
 
 	cl_assert_equal_i(1, _fake->read_header_calls);
 	cl_assert_equal_i(0, _fake->refresh_calls);
@@ -145,11 +145,11 @@ void test_odb_backend_refreshing__readheader_is_invoked_once_on_success(void)
 
 void test_odb_backend_refreshing__read_is_invoked_twice_when_revparsing_a_full_oid(void)
 {
-	git_object *obj;
+	git3_object *obj;
 
 	cl_git_fail_with(
-		git_revparse_single(&obj, _repo, "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
-		GIT_ENOTFOUND);
+		git3_revparse_single(&obj, _repo, "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"),
+		GIT3_ENOTFOUND);
 
 	cl_assert_equal_i(2, _fake->read_calls);
 	cl_assert_equal_i(1, _fake->refresh_calls);
@@ -157,20 +157,20 @@ void test_odb_backend_refreshing__read_is_invoked_twice_when_revparsing_a_full_o
 
 void test_odb_backend_refreshing__refresh_is_invoked(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
-	cl_assert_equal_i(0, git_odb_refresh(odb));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
+	cl_assert_equal_i(0, git3_odb_refresh(odb));
 
 	cl_assert_equal_i(1, _fake->refresh_calls);
 }
 
 void test_odb_backend_refreshing__refresh_suppressed_with_no_refresh(void)
 {
-	git_odb *odb;
+	git3_odb *odb;
 
-	cl_git_pass(git_repository_odb__weakptr(&odb, _repo));
-	cl_assert_equal_b(false, git_odb_exists_ext(odb, &_nonexisting_oid, GIT_ODB_LOOKUP_NO_REFRESH));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, _repo));
+	cl_assert_equal_b(false, git3_odb_exists_ext(odb, &_nonexisting_oid, GIT3_ODB_LOOKUP_NO_REFRESH));
 
 	cl_assert_equal_i(0, _fake->refresh_calls);
 }

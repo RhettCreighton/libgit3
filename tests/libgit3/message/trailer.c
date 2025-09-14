@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
-static void assert_trailers(const char *message, git_message_trailer *trailers)
+static void assert_trailers(const char *message, git3_message_trailer *trailers)
 {
-	git_message_trailer_array arr;
+	git3_message_trailer_array arr;
 	size_t i, count;
 
-	int rc = git_message_trailers(&arr, message);
+	int rc = git3_message_trailers(&arr, message);
 
 	cl_assert_equal_i(0, rc);
 
@@ -19,12 +19,12 @@ static void assert_trailers(const char *message, git_message_trailer *trailers)
 		cl_assert_equal_s(arr.trailers[i].value, trailers[i].value);
 	}
 
-	git_message_trailer_array_free(&arr);
+	git3_message_trailer_array_free(&arr);
 }
 
 void test_message_trailer__simple(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Signed-off-by", "foo@bar.com"},
 		{"Signed-off-by", "someone@else.com"},
 		{NULL, NULL},
@@ -40,7 +40,7 @@ void test_message_trailer__simple(void)
 
 void test_message_trailer__no_whitespace(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Key", "value"},
 		{NULL, NULL},
 	};
@@ -54,7 +54,7 @@ void test_message_trailer__no_whitespace(void)
 
 void test_message_trailer__extra_whitespace(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Key", "value"},
 		{NULL, NULL},
 	};
@@ -68,7 +68,7 @@ void test_message_trailer__extra_whitespace(void)
 
 void test_message_trailer__no_newline(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Key", "value"},
 		{NULL, NULL},
 	};
@@ -82,7 +82,7 @@ void test_message_trailer__no_newline(void)
 
 void test_message_trailer__not_last_paragraph(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{NULL, NULL},
 	};
 
@@ -97,7 +97,7 @@ void test_message_trailer__not_last_paragraph(void)
 
 void test_message_trailer__conflicts(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Key", "value"},
 		{NULL, NULL},
 	};
@@ -114,7 +114,7 @@ void test_message_trailer__conflicts(void)
 
 void test_message_trailer__patch(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Key", "value"},
 		{NULL, NULL},
 	};
@@ -131,7 +131,7 @@ void test_message_trailer__patch(void)
 
 void test_message_trailer__continuation(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"A", "b\n c"},
 		{"D", "e\n f: g h"},
 		{"I", "j"},
@@ -151,7 +151,7 @@ void test_message_trailer__continuation(void)
 
 void test_message_trailer__invalid(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{"Signed-off-by", "some@one.com"},
 		{"Another", "trailer"},
 		{NULL, NULL},
@@ -168,7 +168,7 @@ void test_message_trailer__invalid(void)
 
 void test_message_trailer__ignores_dashes(void)
 {
-	git_message_trailer trailers[] = {
+	git3_message_trailer trailers[] = {
 		{ "Signed-off-by", "some@one.com" },
 		{ "Another", "trailer" },
 		{ NULL, NULL },

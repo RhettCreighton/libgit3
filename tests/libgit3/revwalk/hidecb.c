@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 /*
 *   a4a7dce [0] Merge branch 'master' into br2
 |\
@@ -22,209 +22,209 @@ static const char *commit_strs[] = {
 
 #define commit_count 6
 
-static git_oid commit_ids[commit_count];
-static git_oid _head_id;
-static git_repository *_repo;
+static git3_oid commit_ids[commit_count];
+static git3_oid _head_id;
+static git3_repository *_repo;
 
 
 void test_revwalk_hidecb__initialize(void)
 {
 	int i;
 
-	cl_git_pass(git_repository_open(&_repo, cl_fixture("testrepo.git")));
-	cl_git_pass(git_oid_from_string(&_head_id, commit_head, GIT_OID_SHA1));
+	cl_git_pass(git3_repository_open(&_repo, cl_fixture("testrepo.git")));
+	cl_git_pass(git3_oid_from_string(&_head_id, commit_head, GIT3_OID_SHA1));
 
 	for (i = 0; i < commit_count; i++)
-		cl_git_pass(git_oid_from_string(&commit_ids[i], commit_strs[i], GIT_OID_SHA1));
+		cl_git_pass(git3_oid_from_string(&commit_ids[i], commit_strs[i], GIT3_OID_SHA1));
 
 }
 
 void test_revwalk_hidecb__cleanup(void)
 {
-	git_repository_free(_repo);
+	git3_repository_free(_repo);
 	_repo = NULL;
 }
 
 /* Hide all commits */
-static int hide_every_commit_cb(const git_oid *commit_id, void *data)
+static int hide_every_commit_cb(const git3_oid *commit_id, void *data)
 {
-	GIT_UNUSED(commit_id);
-	GIT_UNUSED(data);
+	GIT3_UNUSED(commit_id);
+	GIT3_UNUSED(data);
 
 	return 1;
 }
 
 /* Do not hide anything */
-static int hide_none_cb(const git_oid *commit_id, void *data)
+static int hide_none_cb(const git3_oid *commit_id, void *data)
 {
-	GIT_UNUSED(commit_id);
-	GIT_UNUSED(data);
+	GIT3_UNUSED(commit_id);
+	GIT3_UNUSED(data);
 
 	return 0;
 }
 
 /* Hide some commits */
-static int hide_commit_cb(const git_oid *commit_id, void *data)
+static int hide_commit_cb(const git3_oid *commit_id, void *data)
 {
-	GIT_UNUSED(commit_id);
-	GIT_UNUSED(data);
+	GIT3_UNUSED(commit_id);
+	GIT3_UNUSED(data);
 
-	return (git_oid_cmp(commit_id, &commit_ids[5]) == 0);
+	return (git3_oid_cmp(commit_id, &commit_ids[5]) == 0);
 }
 
 /* In payload data, pointer to a commit id is passed */
-static int hide_commit_use_payload_cb(const git_oid *commit_id, void *data)
+static int hide_commit_use_payload_cb(const git3_oid *commit_id, void *data)
 {
-	git_oid *hide_commit_id = data;
+	git3_oid *hide_commit_id = data;
 
-	return (git_oid_cmp(commit_id, hide_commit_id) == 0);
+	return (git3_oid_cmp(commit_id, hide_commit_id) == 0);
 }
 
 void test_revwalk_hidecb__hide_all_cb(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
 
-	/* First call to git_revwalk_next should return GIT_ITEROVER */
-	cl_assert_equal_i(GIT_ITEROVER, git_revwalk_next(&id, walk));
+	/* First call to git3_revwalk_next should return GIT3_ITEROVER */
+	cl_assert_equal_i(GIT3_ITEROVER, git3_revwalk_next(&id, walk));
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 
 void test_revwalk_hidecb__hide_none_cb(void)
 {
-	git_revwalk *walk;
+	git3_revwalk *walk;
 	int i, error;
-	git_oid id;
+	git3_oid id;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
 
 	/* It should return all 6 commits */
 	i = 0;
-	while ((error = git_revwalk_next(&id, walk)) == 0)
+	while ((error = git3_revwalk_next(&id, walk)) == 0)
 		i++;
 
 	cl_assert_equal_i(i, 6);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 void test_revwalk_hidecb__unset_cb_before_walk(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 	int i, error;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, NULL, NULL));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, NULL, NULL));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
 
 	/* It should return all 6 commits */
 	i = 0;
-	while ((error = git_revwalk_next(&id, walk)) == 0)
+	while ((error = git3_revwalk_next(&id, walk)) == 0)
 		i++;
 
 	cl_assert_equal_i(i, 6);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 void test_revwalk_hidecb__change_cb_before_walk(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_every_commit_cb, NULL));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
 
-	/* First call to git_revwalk_next should return GIT_ITEROVER */
-	cl_assert_equal_i(GIT_ITEROVER, git_revwalk_next(&id, walk));
+	/* First call to git3_revwalk_next should return GIT3_ITEROVER */
+	cl_assert_equal_i(GIT3_ITEROVER, git3_revwalk_next(&id, walk));
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 void test_revwalk_hidecb__add_hide_cb_during_walking(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 	int error;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
 
 	/* Start walking without adding hide callback */
-	cl_git_pass(git_revwalk_next(&id, walk));
+	cl_git_pass(git3_revwalk_next(&id, walk));
 
 	/* Now add hide callback */
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_none_cb, NULL));
 
 	/* walk should be reset */
-	error = git_revwalk_next(&id, walk);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	error = git3_revwalk_next(&id, walk);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 void test_revwalk_hidecb__hide_some_commits(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 	int i, error;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
-	git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL);
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
+	git3_revwalk_sorting(walk, GIT3_SORT_TOPOLOGICAL);
 
 	/* Add hide callback */
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_commit_cb, NULL));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_commit_cb, NULL));
 
 	i = 0;
-	while ((error = git_revwalk_next(&id, walk)) == 0) {
+	while ((error = git3_revwalk_next(&id, walk)) == 0) {
 		cl_assert_equal_oid(&commit_ids[i], &id);
 		i++;
 	}
 
 	cl_assert_equal_i(i, 4);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 
 void test_revwalk_hidecb__test_payload(void)
 {
-	git_revwalk *walk;
-	git_oid id;
+	git3_revwalk *walk;
+	git3_oid id;
 	int i, error;
 
-	cl_git_pass(git_revwalk_new(&walk, _repo));
-	cl_git_pass(git_revwalk_push(walk, &_head_id));
-	git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL);
+	cl_git_pass(git3_revwalk_new(&walk, _repo));
+	cl_git_pass(git3_revwalk_push(walk, &_head_id));
+	git3_revwalk_sorting(walk, GIT3_SORT_TOPOLOGICAL);
 
 	/* Add hide callback, pass id of parent of initial commit as payload data */
-	cl_git_pass(git_revwalk_add_hide_cb(walk, hide_commit_use_payload_cb, &commit_ids[5]));
+	cl_git_pass(git3_revwalk_add_hide_cb(walk, hide_commit_use_payload_cb, &commit_ids[5]));
 
 	i = 0;
-	while ((error = git_revwalk_next(&id, walk)) == 0) {
+	while ((error = git3_revwalk_next(&id, walk)) == 0) {
 		cl_assert_equal_oid(&commit_ids[i], &id);
 		i++;
 	}
 
 	/* walker should return four commits */
 	cl_assert_equal_i(i, 4);
-	cl_assert_equal_i(error, GIT_ITEROVER);
+	cl_assert_equal_i(error, GIT3_ITEROVER);
 
-	git_revwalk_free(walk);
+	git3_revwalk_free(walk);
 }
 

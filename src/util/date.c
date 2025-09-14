@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 
-#ifndef GIT_WIN32
+#ifndef GIT3_WIN32
 #include <sys/time.h>
 #endif
 
@@ -31,7 +31,7 @@ typedef enum {
 /*
  * This is like mktime, but without normalization of tm_wday and tm_yday.
  */
-static git_time_t tm_to_time_t(const struct tm *tm)
+static git3_time_t tm_to_time_t(const struct tm *tm)
 {
 	static const int mdays[] = {
 	    0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334
@@ -129,9 +129,9 @@ static size_t match_string(const char *date, const char *str)
 	for (i = 0; *date; date++, str++, i++) {
 		if (*date == *str)
 			continue;
-		if (git__toupper(*date) == git__toupper(*str))
+		if (git3__toupper(*date) == git3__toupper(*str))
 			continue;
-		if (!git__isalnum(*date))
+		if (!git3__isalnum(*date))
 			break;
 		return 0;
 	}
@@ -143,7 +143,7 @@ static int skip_alpha(const char *date)
 	int i = 0;
 	do {
 		i++;
-	} while (git__isalpha(date[i]));
+	} while (git3__isalpha(date[i]));
 	return i;
 }
 
@@ -205,7 +205,7 @@ static int is_date(int year, int month, int day, struct tm *now_tm, time_t now, 
 	if (month > 0 && month < 13 && day > 0 && day < 32) {
 		struct tm check = *tm;
 		struct tm *r = (now_tm ? &check : tm);
-		git_time_t specified;
+		git3_time_t specified;
 
 		r->tm_mon = month - 1;
 		r->tm_mday = day;
@@ -251,7 +251,7 @@ static size_t match_multi_number(unsigned long num, char c, const char *date, ch
 
 	num2 = strtol(end+1, &end, 10);
 	num3 = -1;
-	if (*end == c && git__isdigit(end[1]))
+	if (*end == c && git3__isdigit(end[1]))
 		num3 = strtol(end+1, &end, 10);
 
 	/* Time? Date? */
@@ -349,7 +349,7 @@ static size_t match_digit(const char *date, struct tm *tm, int *offset, int *tm_
 	case '.':
 	case '/':
 	case '-':
-		if (git__isdigit(end[1])) {
+		if (git3__isdigit(end[1])) {
 			size_t match = match_multi_number(num, *end, date, end, tm);
 			if (match)
 				return match;
@@ -364,7 +364,7 @@ static size_t match_digit(const char *date, struct tm *tm, int *offset, int *tm_
 	n = 0;
 	do {
 		n++;
-	} while (git__isdigit(date[n]));
+	} while (git3__isdigit(date[n]));
 
 	/* Four-digit year or a timezone? */
 	if (n == 4) {
@@ -455,7 +455,7 @@ static size_t match_tz(const char *date, int *offp)
  * Parse a string like "0 +0000" as ancient timestamp near epoch, but
  * only when it appears not as part of any other string.
  */
-static int match_object_header_date(const char *date, git_time_t *timestamp, int *offset)
+static int match_object_header_date(const char *date, git3_time_t *timestamp, int *offset)
 {
 	char *end;
 	unsigned long stamp;
@@ -480,11 +480,11 @@ static int match_object_header_date(const char *date, git_time_t *timestamp, int
 
 /* Gr. strptime is crap for this; it doesn't have a way to require RFC2822
    (i.e. English) day/month names, and it doesn't work correctly with %z. */
-static int parse_date_basic(const char *date, git_time_t *timestamp, int *offset)
+static int parse_date_basic(const char *date, git3_time_t *timestamp, int *offset)
 {
 	struct tm tm;
 	int tm_gmt;
-	git_time_t dummy_timestamp;
+	git3_time_t dummy_timestamp;
 	int dummy_offset;
 
 	if (!timestamp)
@@ -514,11 +514,11 @@ static int parse_date_basic(const char *date, git_time_t *timestamp, int *offset
 		if (!c || c == '\n')
 			break;
 
-		if (git__isalpha(c))
+		if (git3__isalpha(c))
 			match = match_alpha(date, &tm, offset);
-		else if (git__isdigit(c))
+		else if (git3__isdigit(c))
 			match = match_digit(date, &tm, offset, &tm_gmt);
-		else if ((c == '-' || c == '+') && git__isdigit(date[1]))
+		else if ((c == '-' || c == '+') && git3__isdigit(date[1]))
 			match = match_tz(date, offset);
 
 		if (!match) {
@@ -534,7 +534,7 @@ static int parse_date_basic(const char *date, git_time_t *timestamp, int *offset
 	if (*offset == -1)
 		*offset = (int)((time_t)*timestamp - mktime(&tm)) / 60;
 
-	if (*timestamp == (git_time_t)-1)
+	if (*timestamp == (git3_time_t)-1)
 		return -1;
 
 	if (!tm_gmt)
@@ -547,7 +547,7 @@ static int parse_date_basic(const char *date, git_time_t *timestamp, int *offset
  * Relative time update (eg "2 days ago").  If we haven't set the time
  * yet, we need to set it from current time.
  */
-static git_time_t update_tm(struct tm *tm, struct tm *now, unsigned long sec)
+static git3_time_t update_tm(struct tm *tm, struct tm *now, unsigned long sec)
 {
 	time_t n;
 
@@ -568,13 +568,13 @@ static git_time_t update_tm(struct tm *tm, struct tm *now, unsigned long sec)
 
 static void date_now(struct tm *tm, struct tm *now, int *num)
 {
-   GIT_UNUSED(num);
+   GIT3_UNUSED(num);
 	update_tm(tm, now, 0);
 }
 
 static void date_yesterday(struct tm *tm, struct tm *now, int *num)
 {
-   GIT_UNUSED(num);
+   GIT3_UNUSED(num);
 	update_tm(tm, now, 24*60*60);
 }
 
@@ -589,19 +589,19 @@ static void date_time(struct tm *tm, struct tm *now, int hour)
 
 static void date_midnight(struct tm *tm, struct tm *now, int *num)
 {
-   GIT_UNUSED(num);
+   GIT3_UNUSED(num);
 	date_time(tm, now, 0);
 }
 
 static void date_noon(struct tm *tm, struct tm *now, int *num)
 {
-   GIT_UNUSED(num);
+   GIT3_UNUSED(num);
 	date_time(tm, now, 12);
 }
 
 static void date_tea(struct tm *tm, struct tm *now, int *num)
 {
-   GIT_UNUSED(num);
+   GIT3_UNUSED(num);
 	date_time(tm, now, 17);
 }
 
@@ -609,7 +609,7 @@ static void date_pm(struct tm *tm, struct tm *now, int *num)
 {
 	int hour, n = *num;
 	*num = 0;
-   GIT_UNUSED(now);
+   GIT3_UNUSED(now);
 
 	hour = tm->tm_hour;
 	if (n) {
@@ -624,7 +624,7 @@ static void date_am(struct tm *tm, struct tm *now, int *num)
 {
 	int hour, n = *num;
 	*num = 0;
-   GIT_UNUSED(now);
+   GIT3_UNUSED(now);
 
 	hour = tm->tm_hour;
 	if (n) {
@@ -638,8 +638,8 @@ static void date_am(struct tm *tm, struct tm *now, int *num)
 static void date_never(struct tm *tm, struct tm *now, int *num)
 {
 	time_t n = 0;
-   GIT_UNUSED(now);
-   GIT_UNUSED(num);
+   GIT3_UNUSED(now);
+   GIT3_UNUSED(num);
 	p_localtime_r(&n, tm);
 }
 
@@ -682,7 +682,7 @@ static const char *approxidate_alpha(const char *date, struct tm *tm, struct tm 
 	const char *end = date;
 	int i;
 
-	while (git__isalpha(*++end))
+	while (git3__isalpha(*++end))
 		/* scan to non-alpha */;
 
 	for (i = 0; i < 12; i++) {
@@ -783,7 +783,7 @@ static const char *approxidate_digit(const char *date, struct tm *tm, int *num)
 	case '.':
 	case '/':
 	case '-':
-		if (git__isdigit(end[1])) {
+		if (git3__isdigit(end[1])) {
 			size_t match = match_multi_number(number, *end, date, end, tm);
 			if (match)
 				return date + match;
@@ -823,7 +823,7 @@ static void pending_number(struct tm *tm, int *num)
 	}
 }
 
-static git_time_t approxidate_str(const char *date,
+static git3_time_t approxidate_str(const char *date,
 	time_t time_sec,
 	int *error_ret)
 {
@@ -843,13 +843,13 @@ static git_time_t approxidate_str(const char *date,
 		if (!c)
 			break;
 		date++;
-		if (git__isdigit(c)) {
+		if (git3__isdigit(c)) {
 			pending_number(&tm, &number);
 			date = approxidate_digit(date-1, &tm, &number);
 			touched = 1;
 			continue;
 		}
-		if (git__isalpha(c))
+		if (git3__isalpha(c))
 			date = approxidate_alpha(date-1, &tm, &now, &number, &touched);
 	}
 	pending_number(&tm, &number);
@@ -858,10 +858,10 @@ static git_time_t approxidate_str(const char *date,
 	return update_tm(&tm, &now, 0);
 }
 
-int git_date_offset_parse(git_time_t *out, int *out_offset, const char *date)
+int git3_date_offset_parse(git3_time_t *out, int *out_offset, const char *date)
 {
 	time_t time_sec;
-	git_time_t timestamp;
+	git3_time_t timestamp;
 	int offset, error_ret=0;
 
 	if (!parse_date_basic(date, &timestamp, &offset)) {
@@ -877,26 +877,26 @@ int git_date_offset_parse(git_time_t *out, int *out_offset, const char *date)
 	return error_ret;
 }
 
-int git_date_parse(git_time_t *out, const char *date)
+int git3_date_parse(git3_time_t *out, const char *date)
 {
 	int offset;
 
-	return git_date_offset_parse(out, &offset, date);
+	return git3_date_offset_parse(out, &offset, date);
 }
 
-int git_date_rfc2822_fmt(git_str *out, git_time_t time, int offset)
+int git3_date_rfc2822_fmt(git3_str *out, git3_time_t time, int offset)
 {
 	time_t t;
 	struct tm gmt;
 
-	GIT_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(out);
 
 	t = (time_t) (time + offset * 60);
 
 	if (p_gmtime_r(&t, &gmt) == NULL)
 		return -1;
 
-	return git_str_printf(out, "%.3s, %u %.3s %.4u %02u:%02u:%02u %+03d%02d",
+	return git3_str_printf(out, "%.3s, %u %.3s %.4u %02u:%02u:%02u %+03d%02d",
 		weekday_names[gmt.tm_wday],
 		gmt.tm_mday,
 		month_names[gmt.tm_mon],

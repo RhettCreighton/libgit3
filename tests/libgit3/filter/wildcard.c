@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "blob.h"
 #include "filter.h"
@@ -6,9 +6,9 @@
 #include "git3/sys/repository.h"
 #include "custom_helpers.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
-static git_filter *create_wildcard_filter(void);
+static git3_filter *create_wildcard_filter(void);
 
 #define DATA_LEN 32
 
@@ -35,8 +35,8 @@ static unsigned char flipped[] = {
 
 void test_filter_wildcard__initialize(void)
 {
-	cl_git_pass(git_filter_register(
-		"wildcard", create_wildcard_filter(), GIT_FILTER_DRIVER_PRIORITY));
+	cl_git_pass(git3_filter_register(
+		"wildcard", create_wildcard_filter(), GIT3_FILTER_DRIVER_PRIORITY));
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
 
@@ -50,37 +50,37 @@ void test_filter_wildcard__initialize(void)
 
 void test_filter_wildcard__cleanup(void)
 {
-	cl_git_pass(git_filter_unregister("wildcard"));
+	cl_git_pass(git3_filter_unregister("wildcard"));
 
 	cl_git_sandbox_cleanup();
 	g_repo = NULL;
 }
 
 static int wildcard_filter_check(
-	git_filter  *self,
+	git3_filter  *self,
 	void **payload,
-	const git_filter_source *src,
+	const git3_filter_source *src,
 	const char **attr_values)
 {
-	GIT_UNUSED(self);
-	GIT_UNUSED(src);
+	GIT3_UNUSED(self);
+	GIT3_UNUSED(src);
 
 	if (strcmp(attr_values[0], "wcflip") == 0 ||
 		strcmp(attr_values[0], "wcreverse") == 0) {
-		*payload = git__strdup(attr_values[0]);
-		GIT_ERROR_CHECK_ALLOC(*payload);
+		*payload = git3__strdup(attr_values[0]);
+		GIT3_ERROR_CHECK_ALLOC(*payload);
 		return 0;
 	}
 
-	return GIT_PASSTHROUGH;
+	return GIT3_PASSTHROUGH;
 }
 
 static int wildcard_filter_apply(
-	git_filter     *self,
+	git3_filter     *self,
 	void          **payload,
-	git_str        *to,
-	const git_str  *from,
-	const git_filter_source *source)
+	git3_str        *to,
+	const git3_str  *from,
+	const git3_filter_source *source)
 {
 	const char *filtername = *payload;
 
@@ -90,37 +90,37 @@ static int wildcard_filter_apply(
 		return reverse_filter_apply(self, payload, to, from, source);
 
 	cl_fail("Unexpected attribute");
-	return GIT_PASSTHROUGH;
+	return GIT3_PASSTHROUGH;
 }
 
 static int wildcard_filter_stream(
-	git_writestream **out,
-	git_filter *self,
+	git3_writestream **out,
+	git3_filter *self,
 	void **payload,
-	const git_filter_source *src,
-	git_writestream *next)
+	const git3_filter_source *src,
+	git3_writestream *next)
 {
-	return git_filter_buffered_stream_new(out,
+	return git3_filter_buffered_stream_new(out,
 		self, wildcard_filter_apply, NULL, payload, src, next);
 }
 
-static void wildcard_filter_cleanup(git_filter *self, void *payload)
+static void wildcard_filter_cleanup(git3_filter *self, void *payload)
 {
-	GIT_UNUSED(self);
-	git__free(payload);
+	GIT3_UNUSED(self);
+	git3__free(payload);
 }
 
-static void wildcard_filter_free(git_filter *f)
+static void wildcard_filter_free(git3_filter *f)
 {
-	git__free(f);
+	git3__free(f);
 }
 
-static git_filter *create_wildcard_filter(void)
+static git3_filter *create_wildcard_filter(void)
 {
-	git_filter *filter = git__calloc(1, sizeof(git_filter));
+	git3_filter *filter = git3__calloc(1, sizeof(git3_filter));
 	cl_assert(filter);
 
-	filter->version = GIT_FILTER_VERSION;
+	filter->version = GIT3_FILTER_VERSION;
 	filter->attributes = "filter=*";
 	filter->check = wildcard_filter_check;
 	filter->stream = wildcard_filter_stream;
@@ -132,57 +132,57 @@ static git_filter *create_wildcard_filter(void)
 
 void test_filter_wildcard__reverse(void)
 {
-	git_filter_list *fl;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *fl;
+	git3_buf out = GIT3_BUF_INIT;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "hero-reverse-foo", GIT_FILTER_TO_ODB, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "hero-reverse-foo", GIT3_FILTER_TO_ODB, 0));
 
-	cl_git_pass(git_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
+	cl_git_pass(git3_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
 
 	cl_assert_equal_i(DATA_LEN, out.size);
 
 	cl_assert_equal_i(
 		0, memcmp(reversed, out.ptr, out.size));
 
-	git_filter_list_free(fl);
-	git_buf_dispose(&out);
+	git3_filter_list_free(fl);
+	git3_buf_dispose(&out);
 }
 
 void test_filter_wildcard__flip(void)
 {
-	git_filter_list *fl;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *fl;
+	git3_buf out = GIT3_BUF_INIT;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "hero-flip-foo", GIT_FILTER_TO_ODB, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "hero-flip-foo", GIT3_FILTER_TO_ODB, 0));
 
-	cl_git_pass(git_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
+	cl_git_pass(git3_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
 
 	cl_assert_equal_i(DATA_LEN, out.size);
 
 	cl_assert_equal_i(
 		0, memcmp(flipped, out.ptr, out.size));
 
-	git_filter_list_free(fl);
-	git_buf_dispose(&out);
+	git3_filter_list_free(fl);
+	git3_buf_dispose(&out);
 }
 
 void test_filter_wildcard__none(void)
 {
-	git_filter_list *fl;
-	git_buf out = GIT_BUF_INIT;
+	git3_filter_list *fl;
+	git3_buf out = GIT3_BUF_INIT;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, "none-foo", GIT_FILTER_TO_ODB, 0));
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, "none-foo", GIT3_FILTER_TO_ODB, 0));
 
-	cl_git_pass(git_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
+	cl_git_pass(git3_filter_list_apply_to_buffer(&out, fl, (char *)input, DATA_LEN));
 
 	cl_assert_equal_i(DATA_LEN, out.size);
 
 	cl_assert_equal_i(
 		0, memcmp(input, out.ptr, out.size));
 
-	git_filter_list_free(fl);
-	git_buf_dispose(&out);
+	git3_filter_list_free(fl);
+	git3_buf_dispose(&out);
 }

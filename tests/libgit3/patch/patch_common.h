@@ -422,18 +422,18 @@
 	"Author: Edward Thomson <ethomson@edwardthomson.com>\n" \
 	"Date:   Wed Jun 14 13:31:20 2017 +0200\n" \
 	"\n" \
-	"    CHANGELOG: document git_filter_init and GIT_FILTER_INIT\n" \
+	"    CHANGELOG: document git3_filter_init and GIT3_FILTER_INIT\n" \
 	"\n" \
 	"diff --git a/CHANGELOG.md b/CHANGELOG.md\n" \
 	"index 1b9e0c90a..24ecba426 100644\n" \
 	"--- a/CHANGELOG.md\n" \
 	"+++ b/CHANGELOG.md\n" \
 	"@@ -96,6 +96,9 @@ v0.26\n" \
-	" * `git_transport_smart_proxy_options()' enables you to get the proxy options for\n" \
+	" * `git3_transport_smart_proxy_options()' enables you to get the proxy options for\n" \
 	"   smart transports.\n" \
 	"\n" \
-	"+* The `GIT_FILTER_INIT` macro and the `git_filter_init` function are provided\n" \
-	"+  to initialize a `git_filter` structure.\n" \
+	"+* The `GIT3_FILTER_INIT` macro and the `git3_filter_init` function are provided\n" \
+	"+  to initialize a `git3_filter` structure.\n" \
 	"+\n" \
 	" ### Breaking API changes\n" \
 	"\n" \
@@ -767,7 +767,7 @@
 	"-is additional context\n" \
 	" below it!\n" \
 
-#define PATCH_CORRUPT_GIT_HEADER \
+#define PATCH_CORRUPT_GIT3_HEADER \
 	"diff --git a/file.txt\n" \
 	"index 9432026..0f39b9a 100644\n" \
 	"--- a/file.txt\n" \

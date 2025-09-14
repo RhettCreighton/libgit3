@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "delta.h"
 
@@ -8,7 +8,7 @@ void test_delta_apply__read_at_off(void)
 	void *out;
 	size_t outlen;
 
-	cl_git_fail(git_delta_apply(&out, &outlen, base, sizeof(base), delta, sizeof(delta)));
+	cl_git_fail(git3_delta_apply(&out, &outlen, base, sizeof(base), delta, sizeof(delta)));
 }
 
 void test_delta_apply__read_after_limit(void)
@@ -17,5 +17,5 @@ void test_delta_apply__read_after_limit(void)
 	void *out;
 	size_t outlen;
 
-	cl_git_fail(git_delta_apply(&out, &outlen, base, sizeof(base), delta, sizeof(delta)));
+	cl_git_fail(git3_delta_apply(&out, &outlen, base, sizeof(base), delta, sizeof(delta)));
 }

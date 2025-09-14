@@ -485,14 +485,14 @@
 	"+Hello, world.\n"
 
 void validate_apply_workdir(
-	git_repository *repo,
+	git3_repository *repo,
 	struct merge_index_entry *workdir_entries,
 	size_t workdir_cnt);
 
 void validate_apply_index(
-	git_repository *repo,
+	git3_repository *repo,
 	struct merge_index_entry *index_entries,
 	size_t index_cnt);
 
-void validate_index_unchanged(git_repository *repo);
-void validate_workdir_unchanged(git_repository *repo);
+void validate_index_unchanged(git3_repository *repo);
+void validate_workdir_unchanged(git3_repository *repo);

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_refdb_h__
@@ -13,32 +13,32 @@
 #include "refs.h"
 
 /**
- * @file git2/refdb.h
+ * @file git3/refdb.h
  * @brief A database for references (branches and tags)
- * @defgroup git_refdb A database for references (branches and tags)
+ * @defgroup git3_refdb A database for references (branches and tags)
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Create a new reference database with no backends.
  *
  * Before the Ref DB can be used for read/writing, a custom database
- * backend must be manually set using `git_refdb_set_backend()`
+ * backend must be manually set using `git3_refdb_set_backend()`
  *
  * @param out location to store the database pointer, if opened.
  *			Set to NULL if the open failed.
  * @param repo the repository
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_refdb_new(git_refdb **out, git_repository *repo);
+GIT3_EXTERN(int) git3_refdb_new(git3_refdb **out, git3_repository *repo);
 
 /**
  * Create a new reference database and automatically add
  * the default backends:
  *
- *  - git_refdb_dir: read and write loose and packed refs
+ *  - git3_refdb_dir: read and write loose and packed refs
  *      from disk, assuming the repository dir as the folder
  *
  * @param out location to store the database pointer, if opened.
@@ -46,7 +46,7 @@ GIT_EXTERN(int) git_refdb_new(git_refdb **out, git_repository *repo);
  * @param repo the repository
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_refdb_open(git_refdb **out, git_repository *repo);
+GIT3_EXTERN(int) git3_refdb_open(git3_refdb **out, git3_repository *repo);
 
 /**
  * Suggests that the given refdb compress or optimize its references.
@@ -56,16 +56,16 @@ GIT_EXTERN(int) git_refdb_open(git_refdb **out, git_repository *repo);
  * @param refdb The reference database to optimize.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_refdb_compress(git_refdb *refdb);
+GIT3_EXTERN(int) git3_refdb_compress(git3_refdb *refdb);
 
 /**
  * Close an open reference database.
  *
  * @param refdb reference database pointer or NULL
  */
-GIT_EXTERN(void) git_refdb_free(git_refdb *refdb);
+GIT3_EXTERN(void) git3_refdb_free(git3_refdb *refdb);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

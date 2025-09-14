@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_email_h__
@@ -13,13 +13,13 @@
 #include "git3/types.h"
 
 /**
- * @file git2/sys/email.h
+ * @file git3/sys/email.h
  * @brief Advanced git email creation routines
- * @defgroup git_email Advanced git email creation routines
+ * @defgroup git3_email Advanced git email creation routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Create a diff for a commit in mbox format for sending via email.
@@ -35,18 +35,18 @@ GIT_BEGIN_DECL
  * @param opts email creation options
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_email_create_from_diff(
-	git_buf *out,
-	git_diff *diff,
+GIT3_EXTERN(int) git3_email_create_from_diff(
+	git3_buf *out,
+	git3_diff *diff,
 	size_t patch_idx,
 	size_t patch_count,
-	const git_oid *commit_id,
+	const git3_oid *commit_id,
 	const char *summary,
 	const char *body,
-	const git_signature *author,
-	const git_email_create_options *opts);
+	const git3_signature *author,
+	const git3_email_create_options *opts);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

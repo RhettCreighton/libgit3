@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "patch.h"
 #include "patch_parse.h"
 
@@ -11,16 +11,16 @@
 
 static void patch_print_from_patchfile(const char *data, size_t len)
 {
-	git_patch *patch;
-	git_buf buf = GIT_BUF_INIT;
+	git3_patch *patch;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	cl_git_pass(git_patch_from_buffer(&patch, data, len, NULL));
-	cl_git_pass(git_patch_to_buf(&buf, patch));
+	cl_git_pass(git3_patch_from_buffer(&patch, data, len, NULL));
+	cl_git_pass(git3_patch_to_buf(&buf, patch));
 
 	cl_assert_equal_s(data, buf.ptr);
 
-	git_patch_free(patch);
-	git_buf_dispose(&buf);
+	git3_patch_free(patch);
+	git3_buf_dispose(&buf);
 }
 
 void test_patch_print__change_middle(void)

@@ -1,16 +1,16 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "utf8.h"
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 /*
- * git_utf8_iterate is taken from the utf8proc project,
+ * git3_utf8_iterate is taken from the utf8proc project,
  * http://www.public-software-group.org/utf8proc
  *
  * Copyright (c) 2009 Public Software Group e. V., Berlin, Germany
@@ -73,7 +73,7 @@ static int utf8_charlen(const uint8_t *str, size_t str_len)
 	return (int)length;
 }
 
-int git_utf8_iterate(uint32_t *out, const char *_str, size_t str_len)
+int git3_utf8_iterate(uint32_t *out, const char *_str, size_t str_len)
 {
 	const uint8_t *str = (const uint8_t *)_str;
 	uint32_t uc = 0;
@@ -114,7 +114,7 @@ int git_utf8_iterate(uint32_t *out, const char *_str, size_t str_len)
 	return length;
 }
 
-size_t git_utf8_char_length(const char *_str, size_t str_len)
+size_t git3_utf8_char_length(const char *_str, size_t str_len)
 {
 	const uint8_t *str = (const uint8_t *)_str;
 	size_t offset = 0, count = 0;
@@ -132,7 +132,7 @@ size_t git_utf8_char_length(const char *_str, size_t str_len)
 	return count;
 }
 
-size_t git_utf8_valid_buf_length(const char *_str, size_t str_len)
+size_t git3_utf8_valid_buf_length(const char *_str, size_t str_len)
 {
 	const uint8_t *str = (const uint8_t *)_str;
 	size_t offset = 0;

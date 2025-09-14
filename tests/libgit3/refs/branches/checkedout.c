@@ -1,17 +1,17 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "refs.h"
 #include "worktree/worktree_helpers.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
-static void assert_checked_out(git_repository *repo, const char *branch, int checked_out)
+static void assert_checked_out(git3_repository *repo, const char *branch, int checked_out)
 {
-	git_reference *ref;
+	git3_reference *ref;
 
-	cl_git_pass(git_reference_lookup(&ref, repo, branch));
-	cl_assert(git_branch_is_checked_out(ref) == checked_out);
+	cl_git_pass(git3_reference_lookup(&ref, repo, branch));
+	cl_assert(git3_branch_is_checked_out(ref) == checked_out);
 
-	git_reference_free(ref);
+	git3_reference_free(ref);
 }
 
 void test_refs_branches_checkedout__simple_repo(void)

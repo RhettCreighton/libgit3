@@ -1,10 +1,10 @@
 #include "clar.h"
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/email.h"
 
 #include "diff_generate.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 void test_email_create__initialize(void)
 {
@@ -17,43 +17,43 @@ void test_email_create__cleanup(void)
 }
 
 static void email_for_commit(
-	git_buf *out,
+	git3_buf *out,
 	const char *commit_id,
-	git_email_create_options *opts)
+	git3_email_create_options *opts)
 {
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_diff *diff = NULL;
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_diff *diff = NULL;
 
-	git_oid_from_string(&oid, commit_id, GIT_OID_SHA1);
+	git3_oid_from_string(&oid, commit_id, GIT3_OID_SHA1);
 
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
 
-	cl_git_pass(git_email_create_from_commit(out, commit, opts));
+	cl_git_pass(git3_email_create_from_commit(out, commit, opts));
 
-	git_diff_free(diff);
-	git_commit_free(commit);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
 }
 
 static void assert_email_match(
 	const char *expected,
 	const char *commit_id,
-	git_email_create_options *opts)
+	git3_email_create_options *opts)
 {
-	git_buf buf = GIT_BUF_INIT;
+	git3_buf buf = GIT3_BUF_INIT;
 
 	email_for_commit(&buf, commit_id, opts);
 	cl_assert_equal_s(expected, buf.ptr);
 
-	git_buf_dispose(&buf);
+	git3_buf_dispose(&buf);
 }
 
 static void assert_subject_match(
 	const char *expected,
 	const char *commit_id,
-	git_email_create_options *opts)
+	git3_email_create_options *opts)
 {
-	git_buf buf = GIT_BUF_INIT;
+	git3_buf buf = GIT3_BUF_INIT;
 	char *subject, *nl;
 
 	email_for_commit(&buf, commit_id, opts);
@@ -66,7 +66,7 @@ static void assert_subject_match(
 
 	cl_assert_equal_s(expected, subject);
 
-	git_buf_dispose(&buf);
+	git3_buf_dispose(&buf);
 }
 
 void test_email_create__commit(void)
@@ -107,7 +107,7 @@ void test_email_create__commit(void)
 	"+_file1.txt_\n" \
 	" file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(
@@ -150,7 +150,7 @@ void test_email_create__rename(void)
 	" file1.txt\n" \
 	" _file1.txt_\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(expected, "6e05acc5a5dab507d91a0a0cc0fb05a3dd98892d", NULL);
@@ -218,11 +218,11 @@ void test_email_create__rename_as_add_delete(void)
 	"+_file1.txt_\n" \
 	"+file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
-	git_email_create_options opts = GIT_EMAIL_CREATE_OPTIONS_INIT;
-	opts.flags |= GIT_EMAIL_CREATE_NO_RENAMES;
+	git3_email_create_options opts = GIT3_EMAIL_CREATE_OPTIONS_INIT;
+	opts.flags |= GIT3_EMAIL_CREATE_NO_RENAMES;
 
 	assert_email_match(expected, "6e05acc5a5dab507d91a0a0cc0fb05a3dd98892d", &opts);
 }
@@ -249,7 +249,7 @@ void test_email_create__binary(void)
 	"Kc${Nk-~s>u4FC%O\n" \
 	"\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(expected, "8d7523f6fcb2404257889abe0d96f093d9f524f9", NULL);
@@ -271,11 +271,11 @@ void test_email_create__binary_not_included(void)
 	"index bd474b2..9ac35ff 100644\n" \
 	"Binary files a/binary.bin and b/binary.bin differ\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
-	git_email_create_options opts = GIT_EMAIL_CREATE_OPTIONS_INIT;
-	opts.diff_opts.flags &= ~GIT_DIFF_SHOW_BINARY;
+	git3_email_create_options opts = GIT3_EMAIL_CREATE_OPTIONS_INIT;
+	opts.diff_opts.flags &= ~GIT3_DIFF_SHOW_BINARY;
 
 	assert_email_match(expected, "8d7523f6fcb2404257889abe0d96f093d9f524f9", &opts);
 }
@@ -306,7 +306,7 @@ void test_email_create__custom_summary_and_body(void)
 	" file3\n" \
 	"+file3\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	const char *summary = "This is a subject\nwith\nnewlines";
@@ -316,36 +316,36 @@ void test_email_create__custom_summary_and_body(void)
 	"\n" \
 	"Also test if new paragraphs are included correctly.";
 
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_diff *diff = NULL;
-	git_buf buf = GIT_BUF_INIT;
-	git_email_create_options opts = GIT_EMAIL_CREATE_OPTIONS_INIT;
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_diff *diff = NULL;
+	git3_buf buf = GIT3_BUF_INIT;
+	git3_email_create_options opts = GIT3_EMAIL_CREATE_OPTIONS_INIT;
 
 	opts.subject_prefix = "PPPPPATCH";
 
-	git_oid_from_string(&oid, "627e7e12d87e07a83fad5b6bfa25e86ead4a5270", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	cl_git_pass(git_diff__commit(&diff, repo, commit, NULL));
-	cl_git_pass(git_email_create_from_diff(&buf, diff, 2, 4, &oid, summary, body, git_commit_author(commit), &opts));
+	git3_oid_from_string(&oid, "627e7e12d87e07a83fad5b6bfa25e86ead4a5270", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_diff__commit(&diff, repo, commit, NULL));
+	cl_git_pass(git3_email_create_from_diff(&buf, diff, 2, 4, &oid, summary, body, git3_commit_author(commit), &opts));
 
 	cl_assert_equal_s(expected, buf.ptr);
 
-	git_diff_free(diff);
-	git_commit_free(commit);
-	git_buf_dispose(&buf);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
+	git3_buf_dispose(&buf);
 }
 
 void test_email_create__commit_subjects(void)
 {
-	git_email_create_options opts = GIT_EMAIL_CREATE_OPTIONS_INIT;
+	git3_email_create_options opts = GIT3_EMAIL_CREATE_OPTIONS_INIT;
 
 	assert_subject_match("[PATCH] Modify some content", "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
 
 	opts.reroll_number = 42;
 	assert_subject_match("[PATCH v42] Modify some content", "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
 
-	opts.flags |= GIT_EMAIL_CREATE_ALWAYS_NUMBER;
+	opts.flags |= GIT3_EMAIL_CREATE_ALWAYS_NUMBER;
 	assert_subject_match("[PATCH v42 1/1] Modify some content", "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
 
 	opts.start_number = 9;
@@ -360,6 +360,6 @@ void test_email_create__commit_subjects(void)
 	opts.start_number = 0;
 	assert_subject_match("[1/1] Modify some content", "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
 
-	opts.flags = GIT_EMAIL_CREATE_OMIT_NUMBERS;
+	opts.flags = GIT3_EMAIL_CREATE_OMIT_NUMBERS;
 	assert_subject_match("Modify some content", "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
 }

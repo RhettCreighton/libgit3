@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_odb_backend_h__
@@ -12,13 +12,13 @@
 #include "indexer.h"
 
 /**
- * @file git2/backend.h
+ * @file git3/backend.h
  * @brief Object database backends manage the storage of git objects
- * @defgroup git_odb Git object database routines
+ * @defgroup git3_odb Git object database routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** Options for configuring a packfile object backend. */
 typedef struct {
@@ -28,28 +28,28 @@ typedef struct {
 	 * Type of object IDs to use for this object database, or
 	 * 0 for default (currently SHA1).
 	 */
-	git_oid_t oid_type;
-} git_odb_backend_pack_options;
+	git3_oid_t oid_type;
+} git3_odb_backend_pack_options;
 
 /** The current version of the diff options structure */
-#define GIT_ODB_BACKEND_PACK_OPTIONS_VERSION 1
+#define GIT3_ODB_BACKEND_PACK_OPTIONS_VERSION 1
 
 /**
  * Stack initializer for odb pack backend options.  Alternatively use
- * `git_odb_backend_pack_options_init` programmatic initialization.
+ * `git3_odb_backend_pack_options_init` programmatic initialization.
  */
-#define GIT_ODB_BACKEND_PACK_OPTIONS_INIT \
-	{ GIT_ODB_BACKEND_PACK_OPTIONS_VERSION }
+#define GIT3_ODB_BACKEND_PACK_OPTIONS_INIT \
+	{ GIT3_ODB_BACKEND_PACK_OPTIONS_VERSION }
 
 typedef enum {
-	GIT_ODB_BACKEND_LOOSE_FSYNC = (1 << 0)
-} git_odb_backend_loose_flag_t;
+	GIT3_ODB_BACKEND_LOOSE_FSYNC = (1 << 0)
+} git3_odb_backend_loose_flag_t;
 
 /** Options for configuring a loose object backend. */
 typedef struct {
 	unsigned int version; /**< version for the struct */
 
-	/** A combination of the `git_odb_backend_loose_flag_t` types. */
+	/** A combination of the `git3_odb_backend_loose_flag_t` types. */
 	uint32_t flags;
 
 	/**
@@ -71,24 +71,24 @@ typedef struct {
 	 * Type of object IDs to use for this object database, or
 	 * 0 for default (currently SHA1).
 	 */
-	git_oid_t oid_type;
-} git_odb_backend_loose_options;
+	git3_oid_t oid_type;
+} git3_odb_backend_loose_options;
 
 /** The current version of the diff options structure */
-#define GIT_ODB_BACKEND_LOOSE_OPTIONS_VERSION 1
+#define GIT3_ODB_BACKEND_LOOSE_OPTIONS_VERSION 1
 
 /**
  * Stack initializer for odb loose backend options.  Alternatively use
- * `git_odb_backend_loose_options_init` programmatic initialization.
+ * `git3_odb_backend_loose_options_init` programmatic initialization.
  */
-#define GIT_ODB_BACKEND_LOOSE_OPTIONS_INIT \
-	{ GIT_ODB_BACKEND_LOOSE_OPTIONS_VERSION, 0, -1 }
+#define GIT3_ODB_BACKEND_LOOSE_OPTIONS_INIT \
+	{ GIT3_ODB_BACKEND_LOOSE_OPTIONS_VERSION, 0, -1 }
 
 /*
  * Constructors for in-box ODB backends.
  */
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 
 /**
  * Create a backend for a directory containing packfiles.
@@ -98,10 +98,10 @@ typedef struct {
  * @param opts the options to use when creating the pack backend
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_pack(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_pack(
+	git3_odb_backend **out,
 	const char *objects_dir,
-	const git_odb_backend_pack_options *opts);
+	const git3_odb_backend_pack_options *opts);
 
 /**
  * Create a backend for a single packfile.
@@ -111,10 +111,10 @@ GIT_EXTERN(int) git_odb_backend_pack(
  * @param opts the options to use when creating the pack backend
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_one_pack(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_one_pack(
+	git3_odb_backend **out,
 	const char *index_file,
-	const git_odb_backend_pack_options *opts);
+	const git3_odb_backend_pack_options *opts);
 
 /**
  * Create a backend for loose objects
@@ -125,10 +125,10 @@ GIT_EXTERN(int) git_odb_backend_one_pack(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_loose(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_loose(
+	git3_odb_backend **out,
 	const char *objects_dir,
-	git_odb_backend_loose_options *opts);
+	git3_odb_backend_loose_options *opts);
 
 #else
 
@@ -139,8 +139,8 @@ GIT_EXTERN(int) git_odb_backend_loose(
  * @param objects_dir the Git repository's objects directory
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_pack(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_pack(
+	git3_odb_backend **out,
 	const char *objects_dir);
 
 /**
@@ -153,8 +153,8 @@ GIT_EXTERN(int) git_odb_backend_pack(
  * @param index_file path to the packfile's .idx file
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_one_pack(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_one_pack(
+	git3_odb_backend **out,
 	const char *index_file);
 
 /**
@@ -168,8 +168,8 @@ GIT_EXTERN(int) git_odb_backend_one_pack(
  * @param file_mode permission to use when creating directories, or 0 for default
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_odb_backend_loose(
-	git_odb_backend **out,
+GIT3_EXTERN(int) git3_odb_backend_loose(
+	git3_odb_backend **out,
 	const char *objects_dir,
 	int compression_level,
 	int do_fsync,
@@ -180,10 +180,10 @@ GIT_EXTERN(int) git_odb_backend_loose(
 
 /** Streaming mode */
 typedef enum {
-	GIT_STREAM_RDONLY = (1 << 1),
-	GIT_STREAM_WRONLY = (1 << 2),
-	GIT_STREAM_RW = (GIT_STREAM_RDONLY | GIT_STREAM_WRONLY)
-} git_odb_stream_t;
+	GIT3_STREAM_RDONLY = (1 << 1),
+	GIT3_STREAM_WRONLY = (1 << 2),
+	GIT3_STREAM_RW = (GIT3_STREAM_RDONLY | GIT3_STREAM_WRONLY)
+} git3_odb_stream_t;
 
 /**
  * A stream to read/write from a backend.
@@ -193,27 +193,27 @@ typedef enum {
  * calculating the object's id and all `finalize_write` needs to do is
  * store the object with the id it is passed.
  */
-struct git_odb_stream {
-	git_odb_backend *backend;
+struct git3_odb_stream {
+	git3_odb_backend *backend;
 	unsigned int mode;
 	void *hash_ctx;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	git_oid_t oid_type;
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	git3_oid_t oid_type;
 #endif
 
-	git_object_size_t declared_size;
-	git_object_size_t received_bytes;
+	git3_object_size_t declared_size;
+	git3_object_size_t received_bytes;
 
 	/**
 	 * Write at most `len` bytes into `buffer` and advance the stream.
 	 */
-	int GIT_CALLBACK(read)(git_odb_stream *stream, char *buffer, size_t len);
+	int GIT3_CALLBACK(read)(git3_odb_stream *stream, char *buffer, size_t len);
 
 	/**
 	 * Write `len` bytes from `buffer` into the stream.
 	 */
-	int GIT_CALLBACK(write)(git_odb_stream *stream, const char *buffer, size_t len);
+	int GIT3_CALLBACK(write)(git3_odb_stream *stream, const char *buffer, size_t len);
 
 	/**
 	 * Store the contents of the stream as an object with the id
@@ -223,9 +223,9 @@ struct git_odb_stream {
 	 * - an error occurs earlier with the `write` callback,
 	 * - the object referred to by `oid` already exists in any backend, or
 	 * - the final number of received bytes differs from the size declared
-	 *   with `git_odb_open_wstream()`
+	 *   with `git3_odb_open_wstream()`
 	 */
-	int GIT_CALLBACK(finalize_write)(git_odb_stream *stream, const git_oid *oid);
+	int GIT3_CALLBACK(finalize_write)(git3_odb_stream *stream, const git3_oid *oid);
 
 	/**
 	 * Free the stream's memory.
@@ -233,19 +233,19 @@ struct git_odb_stream {
 	 * This method might be called without a call to `finalize_write` if
 	 * an error occurs or if the object is already present in the ODB.
 	 */
-	void GIT_CALLBACK(free)(git_odb_stream *stream);
+	void GIT3_CALLBACK(free)(git3_odb_stream *stream);
 };
 
 /** A stream to write a pack file to the ODB */
-struct git_odb_writepack {
-	git_odb_backend *backend;
+struct git3_odb_writepack {
+	git3_odb_backend *backend;
 
-	int GIT_CALLBACK(append)(git_odb_writepack *writepack, const void *data, size_t size, git_indexer_progress *stats);
-	int GIT_CALLBACK(commit)(git_odb_writepack *writepack, git_indexer_progress *stats);
-	void GIT_CALLBACK(free)(git_odb_writepack *writepack);
+	int GIT3_CALLBACK(append)(git3_odb_writepack *writepack, const void *data, size_t size, git3_indexer_progress *stats);
+	int GIT3_CALLBACK(commit)(git3_odb_writepack *writepack, git3_indexer_progress *stats);
+	void GIT3_CALLBACK(free)(git3_odb_writepack *writepack);
 };
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

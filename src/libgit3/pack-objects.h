@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -20,24 +20,24 @@
 #include "git3/oid.h"
 #include "git3/pack.h"
 
-#define GIT_PACK_WINDOW 10 /* number of objects to possibly delta against */
-#define GIT_PACK_DEPTH 50 /* max delta depth */
-#define GIT_PACK_DELTA_CACHE_SIZE (256 * 1024 * 1024)
-#define GIT_PACK_DELTA_CACHE_LIMIT 1000
-#define GIT_PACK_BIG_FILE_THRESHOLD (512 * 1024 * 1024)
+#define GIT3_PACK_WINDOW 10 /* number of objects to possibly delta against */
+#define GIT3_PACK_DEPTH 50 /* max delta depth */
+#define GIT3_PACK_DELTA_CACHE_SIZE (256 * 1024 * 1024)
+#define GIT3_PACK_DELTA_CACHE_LIMIT 1000
+#define GIT3_PACK_BIG_FILE_THRESHOLD (512 * 1024 * 1024)
 
-typedef struct git_pobject {
-	git_oid id;
-	git_object_t type;
+typedef struct git3_pobject {
+	git3_oid id;
+	git3_object_t type;
 	off64_t offset;
 
 	size_t size;
 
 	unsigned int hash; /* name hint hash */
 
-	struct git_pobject *delta; /* delta base object */
-	struct git_pobject *delta_child; /* deltified objects who bases me */
-	struct git_pobject *delta_sibling; /* other deltified objects
+	struct git3_pobject *delta; /* delta base object */
+	struct git3_pobject *delta_child; /* deltified objects who bases me */
+	struct git3_pobject *delta_sibling; /* other deltified objects
 					    * who uses the same base as
 					    * me */
 
@@ -49,21 +49,21 @@ typedef struct git_pobject {
 	             recursing:1,
 	             tagged:1,
 	             filled:1;
-} git_pobject;
+} git3_pobject;
 
 typedef struct walk_object walk_object;
 
-GIT_HASHMAP_OID_STRUCT(git_packbuilder_pobjectmap, git_pobject *);
-GIT_HASHMAP_OID_STRUCT(git_packbuilder_walk_objectmap, walk_object *);
+GIT3_HASHMAP_OID_STRUCT(git3_packbuilder_pobjectmap, git3_pobject *);
+GIT3_HASHMAP_OID_STRUCT(git3_packbuilder_walk_objectmap, walk_object *);
 
-struct git_packbuilder {
-	git_repository *repo; /* associated repository */
-	git_odb *odb; /* associated object database */
+struct git3_packbuilder {
+	git3_repository *repo; /* associated repository */
+	git3_odb *odb; /* associated object database */
 
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 
-	git_hash_ctx ctx;
-	git_zstream zstream;
+	git3_hash_ctx ctx;
+	git3_zstream zstream;
 
 	uint32_t nr_objects,
 		nr_deltified,
@@ -72,21 +72,21 @@ struct git_packbuilder {
 
 	size_t nr_alloc;
 
-	git_pobject *object_list;
+	git3_pobject *object_list;
 
-	git_packbuilder_pobjectmap object_ix;
-	git_packbuilder_walk_objectmap walk_objects;
-	git_pool object_pool;
+	git3_packbuilder_pobjectmap object_ix;
+	git3_packbuilder_walk_objectmap walk_objects;
+	git3_pool object_pool;
 
-#ifndef GIT_DEPRECATE_HARD
-	git_oid pack_oid; /* hash of written pack */
+#ifndef GIT3_DEPRECATE_HARD
+	git3_oid pack_oid; /* hash of written pack */
 #endif
 	char *pack_name; /* name of written pack */
 
 	/* synchronization objects */
-	git_mutex cache_mutex;
-	git_mutex progress_mutex;
-	git_cond progress_cond;
+	git3_mutex cache_mutex;
+	git3_mutex progress_mutex;
+	git3_cond progress_cond;
 
 	/* configs */
 	size_t delta_cache_size;
@@ -97,7 +97,7 @@ struct git_packbuilder {
 
 	unsigned int nr_threads; /* nr of threads to use */
 
-	git_packbuilder_progress progress_cb;
+	git3_packbuilder_progress progress_cb;
 	void *progress_cb_payload;
 
 	/* the time progress was last reported, in millisecond ticks */
@@ -110,8 +110,8 @@ struct git_packbuilder {
 	volatile int failure;
 };
 
-int git_packbuilder__write_buf(git_str *buf, git_packbuilder *pb);
-int git_packbuilder__prepare(git_packbuilder *pb);
+int git3_packbuilder__write_buf(git3_str *buf, git3_packbuilder *pb);
+int git3_packbuilder__prepare(git3_packbuilder *pb);
 
 
 #endif

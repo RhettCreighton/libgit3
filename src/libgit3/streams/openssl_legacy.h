@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_streams_openssl_legacy_h__
@@ -9,7 +9,7 @@
 
 #include "streams/openssl_dynamic.h"
 
-#if defined(GIT_HTTPS_OPENSSL) && !defined(GIT_HTTPS_OPENSSL_DYNAMIC)
+#if defined(GIT3_HTTPS_OPENSSL) && !defined(GIT3_HTTPS_OPENSSL_DYNAMIC)
 # include <openssl/ssl.h>
 # include <openssl/err.h>
 # include <openssl/x509v3.h>
@@ -17,11 +17,11 @@
 
 # if (defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER < 0x10100000L) || \
      (defined(LIBRESSL_VERSION_NUMBER) && LIBRESSL_VERSION_NUMBER < 0x20700000L)
-#  define GIT_HTTPS_OPENSSL_LEGACY
+#  define GIT3_HTTPS_OPENSSL_LEGACY
 # endif
 #endif
 
-#if defined(GIT_HTTPS_OPENSSL_LEGACY) && !defined(GIT_HTTPS_OPENSSL_DYNAMIC)
+#if defined(GIT3_HTTPS_OPENSSL_LEGACY) && !defined(GIT3_HTTPS_OPENSSL_DYNAMIC)
 # define OPENSSL_init_ssl OPENSSL_init_ssl__legacy
 # define BIO_meth_new BIO_meth_new__legacy
 # define BIO_meth_free BIO_meth_free__legacy
@@ -39,7 +39,7 @@
 # define ASN1_STRING_get0_data ASN1_STRING_get0_data__legacy
 #endif
 
-#if defined(GIT_HTTPS_OPENSSL_LEGACY) || defined(GIT_HTTPS_OPENSSL_DYNAMIC)
+#if defined(GIT3_HTTPS_OPENSSL_LEGACY) || defined(GIT3_HTTPS_OPENSSL_DYNAMIC)
 
 extern int OPENSSL_init_ssl__legacy(uint64_t opts, const void *settings);
 extern BIO_METHOD *BIO_meth_new__legacy(int type, const char *name);

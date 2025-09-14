@@ -1,10 +1,10 @@
 #include "clar.h"
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "common.h"
 #include "mailmap.h"
 
-static git_mailmap *mailmap = NULL;
+static git3_mailmap *mailmap = NULL;
 
 const char TEST_MAILMAP[] =
 	"Foo bar <foo@bar.com> <foo@baz.com>  \n"
@@ -27,27 +27,27 @@ struct {
 
 void test_mailmap_basic__initialize(void)
 {
-	cl_git_pass(git_mailmap_from_buffer(
+	cl_git_pass(git3_mailmap_from_buffer(
 		&mailmap, TEST_MAILMAP, strlen(TEST_MAILMAP)));
 }
 
 void test_mailmap_basic__cleanup(void)
 {
-	git_mailmap_free(mailmap);
+	git3_mailmap_free(mailmap);
 	mailmap = NULL;
 }
 
 void test_mailmap_basic__entry(void)
 {
 	size_t idx;
-	const git_mailmap_entry *entry;
+	const git3_mailmap_entry *entry;
 
 	/* Check that we have the expected # of entries */
-	cl_assert_equal_sz(ARRAY_SIZE(expected), git_vector_length(&mailmap->entries));
+	cl_assert_equal_sz(ARRAY_SIZE(expected), git3_vector_length(&mailmap->entries));
 
 	for (idx = 0; idx < ARRAY_SIZE(expected); ++idx) {
 		/* Try to look up each entry and make sure they match */
-		entry = git_mailmap_entry_lookup(
+		entry = git3_mailmap_entry_lookup(
 			mailmap, expected[idx].replace_name, expected[idx].replace_email);
 
 		cl_assert(entry);
@@ -60,14 +60,14 @@ void test_mailmap_basic__entry(void)
 
 void test_mailmap_basic__lookup_not_found(void)
 {
-	const git_mailmap_entry *entry = git_mailmap_entry_lookup(
+	const git3_mailmap_entry *entry = git3_mailmap_entry_lookup(
 		mailmap, "Whoever", "doesnotexist@fo.com");
 	cl_assert(!entry);
 }
 
 void test_mailmap_basic__lookup(void)
 {
-	const git_mailmap_entry *entry = git_mailmap_entry_lookup(
+	const git3_mailmap_entry *entry = git3_mailmap_entry_lookup(
 		mailmap, "Typoed the name once", "foo@baz.com");
 	cl_assert(entry);
 	cl_assert_equal_s(entry->real_name, "Foo bar");
@@ -77,7 +77,7 @@ void test_mailmap_basic__empty_email_query(void)
 {
 	const char *name;
 	const char *email;
-	cl_git_pass(git_mailmap_resolve(
+	cl_git_pass(git3_mailmap_resolve(
 		&name, &email, mailmap, "Author name", "otheremail@foo.com"));
 	cl_assert_equal_s(name, "Author name");
 	cl_assert_equal_s(email, "email@foo.com");
@@ -87,13 +87,13 @@ void test_mailmap_basic__name_matching(void)
 {
 	const char *name;
 	const char *email;
-	cl_git_pass(git_mailmap_resolve(
+	cl_git_pass(git3_mailmap_resolve(
 		&name, &email, mailmap, "Other Name", "yetanotheremail@foo.com"));
 
 	cl_assert_equal_s(name, "Other Name");
 	cl_assert_equal_s(email, "email@foo.com");
 
-	cl_git_pass(git_mailmap_resolve(
+	cl_git_pass(git3_mailmap_resolve(
 		&name, &email, mailmap,
 		"Other Name That Doesn't Match", "yetanotheremail@foo.com"));
 	cl_assert_equal_s(name, "Other Name That Doesn't Match");

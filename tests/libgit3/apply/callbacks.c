@@ -1,21 +1,21 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "apply_helpers.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-recursive"
 
 void test_apply_callbacks__initialize(void)
 {
-	git_oid oid;
-	git_commit *commit;
+	git3_oid oid;
+	git3_commit *commit;
 
 	repo = cl_git_sandbox_init(TEST_REPO_PATH);
 
-	git_oid_from_string(&oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	cl_git_pass(git_reset(repo, (git_object *)commit, GIT_RESET_HARD, NULL));
-	git_commit_free(commit);
+	git3_oid_from_string(&oid, "539bd011c4822c560c1d17cab095006b7a10f707", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_reset(repo, (git3_object *)commit, GIT3_RESET_HARD, NULL));
+	git3_commit_free(commit);
 }
 
 void test_apply_callbacks__cleanup(void)
@@ -23,9 +23,9 @@ void test_apply_callbacks__cleanup(void)
 	cl_git_sandbox_cleanup();
 }
 
-static int delta_abort_cb(const git_diff_delta *delta, void *payload)
+static int delta_abort_cb(const git3_diff_delta *delta, void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	if (!strcmp(delta->old_file.path, "veal.txt"))
 		return -99;
@@ -35,25 +35,25 @@ static int delta_abort_cb(const git_diff_delta *delta, void *payload)
 
 void test_apply_callbacks__delta_aborts(void)
 {
-	git_diff *diff;
-	git_apply_options opts = GIT_APPLY_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_apply_options opts = GIT3_APPLY_OPTIONS_INIT;
 
 	opts.delta_cb = delta_abort_cb;
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_MODIFY_TWO_FILES, strlen(DIFF_MODIFY_TWO_FILES)));
 	cl_git_fail_with(-99,
-		git_apply(repo, diff, GIT_APPLY_LOCATION_INDEX, &opts));
+		git3_apply(repo, diff, GIT3_APPLY_LOCATION_INDEX, &opts));
 
 	validate_index_unchanged(repo);
 	validate_workdir_unchanged(repo);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
-static int delta_skip_cb(const git_diff_delta *delta, void *payload)
+static int delta_skip_cb(const git3_diff_delta *delta, void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	if (!strcmp(delta->old_file.path, "asparagus.txt"))
 		return 1;
@@ -63,8 +63,8 @@ static int delta_skip_cb(const git_diff_delta *delta, void *payload)
 
 void test_apply_callbacks__delta_can_skip(void)
 {
-	git_diff *diff;
-	git_apply_options opts = GIT_APPLY_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_apply_options opts = GIT3_APPLY_OPTIONS_INIT;
 
 	struct merge_index_entry workdir_expected[] = {
 		{ 0100644, "f51658077d85f2264fa179b4d0848268cb3475c3", 0, "asparagus.txt" },
@@ -81,26 +81,26 @@ void test_apply_callbacks__delta_can_skip(void)
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_MODIFY_TWO_FILES, strlen(DIFF_MODIFY_TWO_FILES)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_WORKDIR, &opts));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_WORKDIR, &opts));
 
 	validate_index_unchanged(repo);
 	validate_apply_workdir(repo, workdir_expected, workdir_expected_cnt);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
-static int hunk_skip_odds_cb(const git_diff_hunk *hunk, void *payload)
+static int hunk_skip_odds_cb(const git3_diff_hunk *hunk, void *payload)
 {
 	int *count = (int *)payload;
-	GIT_UNUSED(hunk);
+	GIT3_UNUSED(hunk);
 
 	return ((*count)++ % 2 == 1);
 }
 
 void test_apply_callbacks__hunk_can_skip(void)
 {
-	git_diff *diff;
-	git_apply_options opts = GIT_APPLY_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_apply_options opts = GIT3_APPLY_OPTIONS_INIT;
 	int count = 0;
 
 	struct merge_index_entry workdir_expected[] = {
@@ -119,10 +119,10 @@ void test_apply_callbacks__hunk_can_skip(void)
 
 	cl_git_pass(diff_from_buffer(&diff,
 		DIFF_MANY_CHANGES_ONE, strlen(DIFF_MANY_CHANGES_ONE)));
-	cl_git_pass(git_apply(repo, diff, GIT_APPLY_LOCATION_WORKDIR, &opts));
+	cl_git_pass(git3_apply(repo, diff, GIT3_APPLY_LOCATION_WORKDIR, &opts));
 
 	validate_index_unchanged(repo);
 	validate_apply_workdir(repo, workdir_expected, workdir_expected_cnt);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }

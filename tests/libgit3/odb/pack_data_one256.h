@@ -1,5 +1,5 @@
 /* Just a few to make sure it's working, the rest is tested already */
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 static const char *packed_objects_one256[] = {
 	"ea926306b1bab6d3f25f45609907eb6dff91a1460b25e63bf4a0494c70e7a269",
 	"d048ba2ef4fafa502a44cbc1a50cd58359b9bc243b84a08f541a08ca5f621137",

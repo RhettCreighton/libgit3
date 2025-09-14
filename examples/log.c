@@ -1,7 +1,7 @@
 /*
- * libgit2 "log" example - shows how to walk history and get commit info
+ * libgit3 "log" example - shows how to walk history and get commit info
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,7 +15,7 @@
 #include "common.h"
 
 /**
- * This example demonstrates the libgit2 rev walker APIs to roughly
+ * This example demonstrates the libgit3 rev walker APIs to roughly
  * simulate the output of `git log` and a few of command line arguments.
  * `git log` has many many options and this only shows a few of them.
  *
@@ -27,16 +27,16 @@
  *
  * This does have:
  *
- * - Examples of translating command line arguments to equivalent libgit2
+ * - Examples of translating command line arguments to equivalent libgit3
  *   revwalker configuration calls
  * - Simplified options to apply pathspec limits and to show basic diffs
  */
 
 /** log_state represents walker being configured while handling options */
 struct log_state {
-	git_repository *repo;
+	git3_repository *repo;
 	const char *repodir;
-	git_revwalk *walker;
+	git3_revwalk *walker;
 	int hide;
 	int sorting;
 	int revisions;
@@ -44,7 +44,7 @@ struct log_state {
 
 /** utility functions that are called to configure the walker */
 static void set_sorting(struct log_state *s, unsigned int sort_mode);
-static void push_rev(struct log_state *s, git_object *obj, int hide);
+static void push_rev(struct log_state *s, git3_object *obj, int hide);
 static int add_revision(struct log_state *s, const char *revstr);
 
 /** log_options holds other command line options that affect log output */
@@ -54,8 +54,8 @@ struct log_options {
 	int show_log_size;
 	int skip, limit;
 	int min_parents, max_parents;
-	git_time_t before;
-	git_time_t after;
+	git3_time_t before;
+	git3_time_t after;
 	const char *author;
 	const char *committer;
 	const char *grep;
@@ -64,23 +64,23 @@ struct log_options {
 /** utility functions that parse options and help with log output */
 static int parse_options(
 	struct log_state *s, struct log_options *opt, int argc, char **argv);
-static void print_time(const git_time *intime, const char *prefix);
-static void print_commit(git_commit *commit, struct log_options *opts);
-static int match_with_parent(git_commit *commit, int i, git_diff_options *);
+static void print_time(const git3_time *intime, const char *prefix);
+static void print_commit(git3_commit *commit, struct log_options *opts);
+static int match_with_parent(git3_commit *commit, int i, git3_diff_options *);
 
 /** utility functions for filtering */
-static int signature_matches(const git_signature *sig, const char *filter);
-static int log_message_matches(const git_commit *commit, const char *filter);
+static int signature_matches(const git3_signature *sig, const char *filter);
+static int log_message_matches(const git3_commit *commit, const char *filter);
 
-int lg2_log(git_repository *repo, int argc, char *argv[])
+int lg2_log(git3_repository *repo, int argc, char *argv[])
 {
 	int i, count = 0, printed = 0, parents, last_arg;
 	struct log_state s;
 	struct log_options opt;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_pathspec *ps = NULL;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_pathspec *ps = NULL;
 
 	memset(&s, 0, sizeof(s));
 
@@ -91,7 +91,7 @@ int lg2_log(git_repository *repo, int argc, char *argv[])
 	diffopts.pathspec.strings = &argv[last_arg];
 	diffopts.pathspec.count	  = argc - last_arg;
 	if (diffopts.pathspec.count > 0)
-		check_lg2(git_pathspec_new(&ps, &diffopts.pathspec),
+		check_lg2(git3_pathspec_new(&ps, &diffopts.pathspec),
 			"Building pathspec", NULL);
 
 	if (!s.revisions)
@@ -101,11 +101,11 @@ int lg2_log(git_repository *repo, int argc, char *argv[])
 
 	printed = count = 0;
 
-	for (; !git_revwalk_next(&oid, s.walker); git_commit_free(commit)) {
-		check_lg2(git_commit_lookup(&commit, s.repo, &oid),
+	for (; !git3_revwalk_next(&oid, s.walker); git3_commit_free(commit)) {
+		check_lg2(git3_commit_lookup(&commit, s.repo, &oid),
 			"Failed to look up commit", NULL);
 
-		parents = (int)git_commit_parentcount(commit);
+		parents = (int)git3_commit_parentcount(commit);
 		if (parents < opt.min_parents)
 			continue;
 		if (opt.max_parents > 0 && parents > opt.max_parents)
@@ -115,12 +115,12 @@ int lg2_log(git_repository *repo, int argc, char *argv[])
 			int unmatched = parents;
 
 			if (parents == 0) {
-				git_tree *tree;
-				check_lg2(git_commit_tree(&tree, commit), "Get tree", NULL);
-				if (git_pathspec_match_tree(
-						NULL, tree, GIT_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
+				git3_tree *tree;
+				check_lg2(git3_commit_tree(&tree, commit), "Get tree", NULL);
+				if (git3_pathspec_match_tree(
+						NULL, tree, GIT3_PATHSPEC_NO_MATCH_ERROR, ps) != 0)
 					unmatched = 1;
-				git_tree_free(tree);
+				git3_tree_free(tree);
 			} else if (parents == 1) {
 				unmatched = match_with_parent(commit, 0, &diffopts) ? 0 : 1;
 			} else {
@@ -134,10 +134,10 @@ int lg2_log(git_repository *repo, int argc, char *argv[])
 				continue;
 		}
 
-		if (!signature_matches(git_commit_author(commit), opt.author))
+		if (!signature_matches(git3_commit_author(commit), opt.author))
 			continue;
 
-		if (!signature_matches(git_commit_committer(commit), opt.committer))
+		if (!signature_matches(git3_commit_committer(commit), opt.committer))
 			continue;
 
 		if (!log_message_matches(commit, opt.grep))
@@ -146,47 +146,47 @@ int lg2_log(git_repository *repo, int argc, char *argv[])
 		if (count++ < opt.skip)
 			continue;
 		if (opt.limit != -1 && printed++ >= opt.limit) {
-			git_commit_free(commit);
+			git3_commit_free(commit);
 			break;
 		}
 
 		print_commit(commit, &opt);
 
 		if (opt.show_diff) {
-			git_tree *a = NULL, *b = NULL;
-			git_diff *diff = NULL;
+			git3_tree *a = NULL, *b = NULL;
+			git3_diff *diff = NULL;
 
 			if (parents > 1)
 				continue;
-			check_lg2(git_commit_tree(&b, commit), "Get tree", NULL);
+			check_lg2(git3_commit_tree(&b, commit), "Get tree", NULL);
 			if (parents == 1) {
-				git_commit *parent;
-				check_lg2(git_commit_parent(&parent, commit, 0), "Get parent", NULL);
-				check_lg2(git_commit_tree(&a, parent), "Tree for parent", NULL);
-				git_commit_free(parent);
+				git3_commit *parent;
+				check_lg2(git3_commit_parent(&parent, commit, 0), "Get parent", NULL);
+				check_lg2(git3_commit_tree(&a, parent), "Tree for parent", NULL);
+				git3_commit_free(parent);
 			}
 
-			check_lg2(git_diff_tree_to_tree(
-				&diff, git_commit_owner(commit), a, b, &diffopts),
+			check_lg2(git3_diff_tree_to_tree(
+				&diff, git3_commit_owner(commit), a, b, &diffopts),
 				"Diff commit with parent", NULL);
 			check_lg2(
-                git_diff_print(diff, GIT_DIFF_FORMAT_PATCH, diff_output, NULL),
+                git3_diff_print(diff, GIT3_DIFF_FORMAT_PATCH, diff_output, NULL),
 				"Displaying diff", NULL);
 
-			git_diff_free(diff);
-			git_tree_free(a);
-			git_tree_free(b);
+			git3_diff_free(diff);
+			git3_tree_free(a);
+			git3_tree_free(b);
 		}
 	}
 
-	git_pathspec_free(ps);
-	git_revwalk_free(s.walker);
+	git3_pathspec_free(ps);
+	git3_revwalk_free(s.walker);
 
 	return 0;
 }
 
-/** Determine if the given git_signature does not contain the filter text. */
-static int signature_matches(const git_signature *sig, const char *filter) {
+/** Determine if the given git3_signature does not contain the filter text. */
+static int signature_matches(const git3_signature *sig, const char *filter) {
 	if (filter == NULL)
 		return 1;
 
@@ -198,13 +198,13 @@ static int signature_matches(const git_signature *sig, const char *filter) {
 	return 0;
 }
 
-static int log_message_matches(const git_commit *commit, const char *filter) {
+static int log_message_matches(const git3_commit *commit, const char *filter) {
 	const char *message = NULL;
 
 	if (filter == NULL)
 		return 1;
 
-	if ((message = git_commit_message(commit)) != NULL &&
+	if ((message = git3_commit_message(commit)) != NULL &&
 		strstr(message, filter) != NULL)
 		return 1;
 
@@ -212,34 +212,34 @@ static int log_message_matches(const git_commit *commit, const char *filter) {
 }
 
 /** Push object (for hide or show) onto revwalker. */
-static void push_rev(struct log_state *s, git_object *obj, int hide)
+static void push_rev(struct log_state *s, git3_object *obj, int hide)
 {
 	hide = s->hide ^ hide;
 
 	/** Create revwalker on demand if it doesn't already exist. */
 	if (!s->walker) {
-		check_lg2(git_revwalk_new(&s->walker, s->repo),
+		check_lg2(git3_revwalk_new(&s->walker, s->repo),
 			"Could not create revision walker", NULL);
-		git_revwalk_sorting(s->walker, s->sorting);
+		git3_revwalk_sorting(s->walker, s->sorting);
 	}
 
 	if (!obj)
-		check_lg2(git_revwalk_push_head(s->walker),
+		check_lg2(git3_revwalk_push_head(s->walker),
 			"Could not find repository HEAD", NULL);
 	else if (hide)
-		check_lg2(git_revwalk_hide(s->walker, git_object_id(obj)),
+		check_lg2(git3_revwalk_hide(s->walker, git3_object_id(obj)),
 			"Reference does not refer to a commit", NULL);
 	else
-		check_lg2(git_revwalk_push(s->walker, git_object_id(obj)),
+		check_lg2(git3_revwalk_push(s->walker, git3_object_id(obj)),
 			"Reference does not refer to a commit", NULL);
 
-	git_object_free(obj);
+	git3_object_free(obj);
 }
 
 /** Parse revision string and add revs to walker. */
 static int add_revision(struct log_state *s, const char *revstr)
 {
-	git_revspec revs;
+	git3_revspec revs;
 	int hide = 0;
 
 	if (!revstr) {
@@ -248,26 +248,26 @@ static int add_revision(struct log_state *s, const char *revstr)
 	}
 
 	if (*revstr == '^') {
-		revs.flags = GIT_REVSPEC_SINGLE;
+		revs.flags = GIT3_REVSPEC_SINGLE;
 		hide = !hide;
 
-		if (git_revparse_single(&revs.from, s->repo, revstr + 1) < 0)
+		if (git3_revparse_single(&revs.from, s->repo, revstr + 1) < 0)
 			return -1;
-	} else if (git_revparse(&revs, s->repo, revstr) < 0)
+	} else if (git3_revparse(&revs, s->repo, revstr) < 0)
 		return -1;
 
-	if ((revs.flags & GIT_REVSPEC_SINGLE) != 0)
+	if ((revs.flags & GIT3_REVSPEC_SINGLE) != 0)
 		push_rev(s, revs.from, hide);
 	else {
 		push_rev(s, revs.to, hide);
 
-		if ((revs.flags & GIT_REVSPEC_MERGE_BASE) != 0) {
-			git_oid base;
-			check_lg2(git_merge_base(&base, s->repo,
-				git_object_id(revs.from), git_object_id(revs.to)),
+		if ((revs.flags & GIT3_REVSPEC_MERGE_BASE) != 0) {
+			git3_oid base;
+			check_lg2(git3_merge_base(&base, s->repo,
+				git3_object_id(revs.from), git3_object_id(revs.to)),
 				"Could not find merge base", revstr);
 			check_lg2(
-				git_object_lookup(&revs.to, s->repo, &base, GIT_OBJECT_COMMIT),
+				git3_object_lookup(&revs.to, s->repo, &base, GIT3_OBJECT_COMMIT),
 				"Could not find merge base commit", NULL);
 
 			push_rev(s, revs.to, hide);
@@ -285,25 +285,25 @@ static void set_sorting(struct log_state *s, unsigned int sort_mode)
 	/** Open repo on demand if it isn't already open. */
 	if (!s->repo) {
 		if (!s->repodir) s->repodir = ".";
-		check_lg2(git_repository_open_ext(&s->repo, s->repodir, 0, NULL),
+		check_lg2(git3_repository_open_ext(&s->repo, s->repodir, 0, NULL),
 			"Could not open repository", s->repodir);
 	}
 
 	/** Create revwalker on demand if it doesn't already exist. */
 	if (!s->walker)
-		check_lg2(git_revwalk_new(&s->walker, s->repo),
+		check_lg2(git3_revwalk_new(&s->walker, s->repo),
 			"Could not create revision walker", NULL);
 
-	if (sort_mode == GIT_SORT_REVERSE)
-		s->sorting = s->sorting ^ GIT_SORT_REVERSE;
+	if (sort_mode == GIT3_SORT_REVERSE)
+		s->sorting = s->sorting ^ GIT3_SORT_REVERSE;
 	else
-		s->sorting = sort_mode | (s->sorting & GIT_SORT_REVERSE);
+		s->sorting = sort_mode | (s->sorting & GIT3_SORT_REVERSE);
 
-	git_revwalk_sorting(s->walker, s->sorting);
+	git3_revwalk_sorting(s->walker, s->sorting);
 }
 
-/** Helper to format a git_time value like Git. */
-static void print_time(const git_time *intime, const char *prefix)
+/** Helper to format a git3_time value like Git. */
+static void print_time(const git3_time *intime, const char *prefix)
 {
 	char sign, out[32];
 	struct tm *intm;
@@ -330,14 +330,14 @@ static void print_time(const git_time *intime, const char *prefix)
 }
 
 /** Helper to print a commit object. */
-static void print_commit(git_commit *commit, struct log_options *opts)
+static void print_commit(git3_commit *commit, struct log_options *opts)
 {
-	char buf[GIT_OID_SHA1_HEXSIZE + 1];
+	char buf[GIT3_OID_SHA1_HEXSIZE + 1];
 	int i, count;
-	const git_signature *sig;
+	const git3_signature *sig;
 	const char *scan, *eol;
 
-	git_oid_tostr(buf, sizeof(buf), git_commit_id(commit));
+	git3_oid_tostr(buf, sizeof(buf), git3_commit_id(commit));
 
 	if (opts->show_oneline) {
 		printf("%s ", buf);
@@ -345,26 +345,26 @@ static void print_commit(git_commit *commit, struct log_options *opts)
 		printf("commit %s\n", buf);
 
 		if (opts->show_log_size) {
-			printf("log size %d\n", (int)strlen(git_commit_message(commit)));
+			printf("log size %d\n", (int)strlen(git3_commit_message(commit)));
 		}
 
-		if ((count = (int)git_commit_parentcount(commit)) > 1) {
+		if ((count = (int)git3_commit_parentcount(commit)) > 1) {
 			printf("Merge:");
 			for (i = 0; i < count; ++i) {
-				git_oid_tostr(buf, 8, git_commit_parent_id(commit, i));
+				git3_oid_tostr(buf, 8, git3_commit_parent_id(commit, i));
 				printf(" %s", buf);
 			}
 			printf("\n");
 		}
 
-		if ((sig = git_commit_author(commit)) != NULL) {
+		if ((sig = git3_commit_author(commit)) != NULL) {
 			printf("Author: %s <%s>\n", sig->name, sig->email);
 			print_time(&sig->when, "Date:   ");
 		}
 		printf("\n");
 	}
 
-	for (scan = git_commit_message(commit); scan && *scan; ) {
+	for (scan = git3_commit_message(commit); scan && *scan; ) {
 		for (eol = scan; *eol && *eol != '\n'; ++eol) /* find eol */;
 
 		if (opts->show_oneline)
@@ -380,27 +380,27 @@ static void print_commit(git_commit *commit, struct log_options *opts)
 }
 
 /** Helper to find how many files in a commit changed from its nth parent. */
-static int match_with_parent(git_commit *commit, int i, git_diff_options *opts)
+static int match_with_parent(git3_commit *commit, int i, git3_diff_options *opts)
 {
-	git_commit *parent;
-	git_tree *a, *b;
-	git_diff *diff;
+	git3_commit *parent;
+	git3_tree *a, *b;
+	git3_diff *diff;
 	int ndeltas;
 
 	check_lg2(
-		git_commit_parent(&parent, commit, (size_t)i), "Get parent", NULL);
-	check_lg2(git_commit_tree(&a, parent), "Tree for parent", NULL);
-	check_lg2(git_commit_tree(&b, commit), "Tree for commit", NULL);
+		git3_commit_parent(&parent, commit, (size_t)i), "Get parent", NULL);
+	check_lg2(git3_commit_tree(&a, parent), "Tree for parent", NULL);
+	check_lg2(git3_commit_tree(&b, commit), "Tree for commit", NULL);
 	check_lg2(
-		git_diff_tree_to_tree(&diff, git_commit_owner(commit), a, b, opts),
+		git3_diff_tree_to_tree(&diff, git3_commit_owner(commit), a, b, opts),
 		"Checking diff between parent and commit", NULL);
 
-	ndeltas = (int)git_diff_num_deltas(diff);
+	ndeltas = (int)git3_diff_num_deltas(diff);
 
-	git_diff_free(diff);
-	git_tree_free(a);
-	git_tree_free(b);
-	git_commit_free(parent);
+	git3_diff_free(diff);
+	git3_tree_free(a);
+	git3_tree_free(b);
+	git3_commit_free(parent);
 
 	return ndeltas > 0;
 }
@@ -421,7 +421,7 @@ static int parse_options(
 	struct log_state *s, struct log_options *opt, int argc, char **argv)
 {
 	struct args_info args = ARGS_INFO_INIT;
-	s->sorting = GIT_SORT_TIME;
+	s->sorting = GIT3_SORT_TIME;
 
 	memset(opt, 0, sizeof(*opt));
 	opt->max_parents = -1;
@@ -440,11 +440,11 @@ static int parse_options(
 			break;
 		}
 		else if (!strcmp(a, "--date-order"))
-			set_sorting(s, GIT_SORT_TIME);
+			set_sorting(s, GIT3_SORT_TIME);
 		else if (!strcmp(a, "--topo-order"))
-			set_sorting(s, GIT_SORT_TOPOLOGICAL);
+			set_sorting(s, GIT3_SORT_TOPOLOGICAL);
 		else if (!strcmp(a, "--reverse"))
-			set_sorting(s, GIT_SORT_REVERSE);
+			set_sorting(s, GIT3_SORT_REVERSE);
 		else if (match_str_arg(&opt->author, &args, "--author"))
 			/** Found valid --author */
 			;

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -9,25 +9,25 @@
 
 #include <ctype.h>
 
-const char *git_config_escapes = "ntb\"\\";
-const char *git_config_escaped = "\n\t\b\"\\";
+const char *git3_config_escapes = "ntb\"\\";
+const char *git3_config_escaped = "\n\t\b\"\\";
 
-static void set_parse_error(git_config_parser *reader, int col, const char *error_str)
+static void set_parse_error(git3_config_parser *reader, int col, const char *error_str)
 {
 	if (col)
-		git_error_set(GIT_ERROR_CONFIG,
+		git3_error_set(GIT3_ERROR_CONFIG,
 		              "failed to parse config file: %s (in %s:%"PRIuZ", column %d)",
 		              error_str, reader->path, reader->ctx.line_num, col);
 	else
-		git_error_set(GIT_ERROR_CONFIG,
+		git3_error_set(GIT3_ERROR_CONFIG,
 		              "failed to parse config file: %s (in %s:%"PRIuZ")",
 		              error_str, reader->path, reader->ctx.line_num);
 }
 
 
-GIT_INLINE(int) config_keychar(char c)
+GIT3_INLINE(int) config_keychar(char c)
 {
-	return git__isalnum(c) || c == '-';
+	return git3__isalnum(c) || c == '-';
 }
 
 static int strip_comments(char *line, int in_quotes)
@@ -53,7 +53,7 @@ static int strip_comments(char *line, int in_quotes)
 	}
 
 	/* skip any space at the end */
-	while (ptr > line && git__isspace(ptr[-1])) {
+	while (ptr > line && git3__isspace(ptr[-1])) {
 		ptr--;
 	}
 	ptr[0] = '\0';
@@ -62,16 +62,16 @@ static int strip_comments(char *line, int in_quotes)
 }
 
 
-static int parse_subsection_header(git_config_parser *reader, const char *line, size_t pos, const char *base_name, char **section_name)
+static int parse_subsection_header(git3_config_parser *reader, const char *line, size_t pos, const char *base_name, char **section_name)
 {
 	int c, rpos;
 	const char *first_quote, *last_quote;
 	const char *line_start = line;
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 	size_t quoted_len, alloc_len, base_name_len = strlen(base_name);
 
 	/* Skip any additional whitespace before our section name */
-	while (git__isspace(line[pos]))
+	while (git3__isspace(line[pos]))
 		pos++;
 
 	/* We should be at the first quotation mark. */
@@ -94,11 +94,11 @@ static int parse_subsection_header(git_config_parser *reader, const char *line, 
 		goto end_error;
 	}
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&alloc_len, base_name_len, quoted_len);
-	GIT_ERROR_CHECK_ALLOC_ADD(&alloc_len, alloc_len, 2);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&alloc_len, base_name_len, quoted_len);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&alloc_len, alloc_len, 2);
 
-	if (git_str_grow(&buf, alloc_len) < 0 ||
-	    git_str_printf(&buf, "%s.", base_name) < 0)
+	if (git3_str_grow(&buf, alloc_len) < 0 ||
+	    git3_str_printf(&buf, "%s.", base_name) < 0)
 		goto end_error;
 
 	rpos = 0;
@@ -132,30 +132,30 @@ static int parse_subsection_header(git_config_parser *reader, const char *line, 
 			break;
 		}
 
-		git_str_putc(&buf, (char)c);
+		git3_str_putc(&buf, (char)c);
 		c = line[++rpos];
 	} while (line + rpos < last_quote);
 
 end_parse:
-	if (git_str_oom(&buf))
+	if (git3_str_oom(&buf))
 		goto end_error;
 
 	if (line[rpos] != '"' || line[rpos + 1] != ']') {
 		set_parse_error(reader, rpos, "unexpected text after closing quotes");
-		git_str_dispose(&buf);
+		git3_str_dispose(&buf);
 		return -1;
 	}
 
-	*section_name = git_str_detach(&buf);
+	*section_name = git3_str_detach(&buf);
 	return (int)(&line[rpos + 2] - line_start); /* rpos is at the closing quote */
 
 end_error:
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
 	return -1;
 }
 
-static int parse_section_header(git_config_parser *reader, char **section_out)
+static int parse_section_header(git3_config_parser *reader, char **section_out)
 {
 	char *name, *name_end;
 	int name_length, pos;
@@ -164,38 +164,38 @@ static int parse_section_header(git_config_parser *reader, char **section_out)
 	char c;
 	size_t line_len;
 
-	git_parse_advance_ws(&reader->ctx);
-	line = git__strndup(reader->ctx.line, reader->ctx.line_len);
+	git3_parse_advance_ws(&reader->ctx);
+	line = git3__strndup(reader->ctx.line, reader->ctx.line_len);
 	if (line == NULL)
 		return -1;
 
 	/* find the end of the variable's name */
 	name_end = strrchr(line, ']');
 	if (name_end == NULL) {
-		git__free(line);
+		git3__free(line);
 		set_parse_error(reader, 0, "missing ']' in section header");
 		return -1;
 	}
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&line_len, (size_t)(name_end - line), 1);
-	name = git__malloc(line_len);
-	GIT_ERROR_CHECK_ALLOC(name);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&line_len, (size_t)(name_end - line), 1);
+	name = git3__malloc(line_len);
+	GIT3_ERROR_CHECK_ALLOC(name);
 
 	name_length = 0;
 	pos = 0;
 
 	/* Make sure we were given a section header */
 	c = line[pos++];
-	GIT_ASSERT(c == '[');
+	GIT3_ASSERT(c == '[');
 
 	c = line[pos++];
 
 	do {
-		if (git__isspace(c)){
+		if (git3__isspace(c)){
 			name[name_length] = '\0';
 			result = parse_subsection_header(reader, line, pos, name, section_out);
-			git__free(line);
-			git__free(name);
+			git3__free(line);
+			git3__free(name);
 			return result;
 		}
 
@@ -204,7 +204,7 @@ static int parse_section_header(git_config_parser *reader, char **section_out)
 			goto fail_parse;
 		}
 
-		name[name_length++] = (char)git__tolower(c);
+		name[name_length++] = (char)git3__tolower(c);
 
 	} while ((c = line[pos++]) != ']');
 
@@ -213,7 +213,7 @@ static int parse_section_header(git_config_parser *reader, char **section_out)
 		goto fail_parse;
 	}
 
-	git__free(line);
+	git3__free(line);
 
 	name[name_length] = 0;
 	*section_out = name;
@@ -221,19 +221,19 @@ static int parse_section_header(git_config_parser *reader, char **section_out)
 	return pos;
 
 fail_parse:
-	git__free(line);
-	git__free(name);
+	git3__free(line);
+	git3__free(name);
 	return -1;
 }
 
-static int skip_bom(git_parse_ctx *parser)
+static int skip_bom(git3_parse_ctx *parser)
 {
-	git_str buf = GIT_STR_INIT_CONST(parser->content, parser->content_len);
-	git_str_bom_t bom;
-	int bom_offset = git_str_detect_bom(&bom, &buf);
+	git3_str buf = GIT3_STR_INIT_CONST(parser->content, parser->content_len);
+	git3_str_bom_t bom;
+	int bom_offset = git3_str_detect_bom(&bom, &buf);
 
-	if (bom == GIT_STR_BOM_UTF8)
-		git_parse_advance_chars(parser, bom_offset);
+	if (bom == GIT3_STR_BOM_UTF8)
+		git3_parse_advance_chars(parser, bom_offset);
 
 	/* TODO: reference implementation is pretty stupid with BoM */
 
@@ -287,8 +287,8 @@ static int unescape_line(char **out, bool *is_multi, const char *ptr, int *quote
 
 	*is_multi = false;
 
-	if (GIT_ADD_SIZET_OVERFLOW(&alloc_len, ptr_len, 1) ||
-		(str = git__malloc(alloc_len)) == NULL) {
+	if (GIT3_ADD_SIZET_OVERFLOW(&alloc_len, ptr_len, 1) ||
+		(str = git3__malloc(alloc_len)) == NULL) {
 		return -1;
 	}
 
@@ -308,11 +308,11 @@ static int unescape_line(char **out, bool *is_multi, const char *ptr, int *quote
 				*is_multi = true;
 				goto done;
 			}
-			if ((esc = strchr(git_config_escapes, *ptr)) != NULL) {
-				*fixed++ = git_config_escaped[esc - git_config_escapes];
+			if ((esc = strchr(git3_config_escapes, *ptr)) != NULL) {
+				*fixed++ = git3_config_escaped[esc - git3_config_escapes];
 			} else {
-				git__free(str);
-				git_error_set(GIT_ERROR_CONFIG, "invalid escape at %s", ptr);
+				git3__free(str);
+				git3_error_set(GIT3_ERROR_CONFIG, "invalid escape at %s", ptr);
 				return -1;
 			}
 		}
@@ -326,7 +326,7 @@ done:
 	return 0;
 }
 
-static int parse_multiline_variable(git_config_parser *reader, git_str *value, int in_quotes, size_t *line_len)
+static int parse_multiline_variable(git3_config_parser *reader, git3_str *value, int in_quotes, size_t *line_len)
 {
 	int quote_count;
 	bool multiline = true;
@@ -336,10 +336,10 @@ static int parse_multiline_variable(git_config_parser *reader, git_str *value, i
 		int error;
 
 		/* Check that the next line exists */
-		git_parse_advance_line(&reader->ctx);
-		line = git__strndup(reader->ctx.line, reader->ctx.line_len);
-		GIT_ERROR_CHECK_ALLOC(line);
-		if (GIT_ADD_SIZET_OVERFLOW(line_len, *line_len, reader->ctx.line_len)) {
+		git3_parse_advance_line(&reader->ctx);
+		line = git3__strndup(reader->ctx.line, reader->ctx.line_len);
+		GIT3_ERROR_CHECK_ALLOC(line);
+		if (GIT3_ADD_SIZET_OVERFLOW(line_len, *line_len, reader->ctx.line_len)) {
 			error = -1;
 			goto out;
 		}
@@ -363,31 +363,31 @@ static int parse_multiline_variable(git_config_parser *reader, git_str *value, i
 			goto out;
 
 		/* Add this line to the multiline var */
-		if ((error = git_str_puts(value, proc_line)) < 0)
+		if ((error = git3_str_puts(value, proc_line)) < 0)
 			goto out;
 
 next:
-		git__free(line);
-		git__free(proc_line);
+		git3__free(line);
+		git3__free(proc_line);
 		in_quotes = quote_count;
 		continue;
 
 out:
-		git__free(line);
-		git__free(proc_line);
+		git3__free(line);
+		git3__free(proc_line);
 		return error;
 	}
 
 	return 0;
 }
 
-GIT_INLINE(bool) is_namechar(char c)
+GIT3_INLINE(bool) is_namechar(char c)
 {
-	return git__isalnum(c) || c == '-';
+	return git3__isalnum(c) || c == '-';
 }
 
 static int parse_name(
-	char **name, const char **value, git_config_parser *reader, const char *line)
+	char **name, const char **value, git3_config_parser *reader, const char *line)
 {
 	const char *name_end = line, *value_start;
 
@@ -404,7 +404,7 @@ static int parse_name(
 
 	value_start = name_end;
 
-	while (*value_start && git__isspace(*value_start))
+	while (*value_start && git3__isspace(*value_start))
 		value_start++;
 
 	if (*value_start == '=') {
@@ -414,13 +414,13 @@ static int parse_name(
 		return -1;
 	}
 
-	if ((*name = git__strndup(line, name_end - line)) == NULL)
+	if ((*name = git3__strndup(line, name_end - line)) == NULL)
 		return -1;
 
 	return 0;
 }
 
-static int parse_variable(git_config_parser *reader, char **var_name, char **var_value, size_t *line_len)
+static int parse_variable(git3_config_parser *reader, char **var_name, char **var_value, size_t *line_len)
 {
 	const char *value_start = NULL;
 	char *line = NULL, *name = NULL, *value = NULL;
@@ -430,9 +430,9 @@ static int parse_variable(git_config_parser *reader, char **var_name, char **var
 	*var_name = NULL;
 	*var_value = NULL;
 
-	git_parse_advance_ws(&reader->ctx);
-	line = git__strndup(reader->ctx.line, reader->ctx.line_len);
-	GIT_ERROR_CHECK_ALLOC(line);
+	git3_parse_advance_ws(&reader->ctx);
+	line = git3__strndup(reader->ctx.line, reader->ctx.line_len);
+	GIT3_ERROR_CHECK_ALLOC(line);
 
 	quote_count = strip_comments(line, 0);
 
@@ -443,25 +443,25 @@ static int parse_variable(git_config_parser *reader, char **var_name, char **var
 	 * Now, let's try to parse the value
 	 */
 	if (value_start != NULL) {
-		while (git__isspace(value_start[0]))
+		while (git3__isspace(value_start[0]))
 			value_start++;
 
 		if ((error = unescape_line(&value, &multiline, value_start, NULL)) < 0)
 			goto out;
 
 		if (multiline) {
-			git_str multi_value = GIT_STR_INIT;
-			git_str_attach(&multi_value, value, 0);
+			git3_str multi_value = GIT3_STR_INIT;
+			git3_str_attach(&multi_value, value, 0);
 			value = NULL;
 
 			if (parse_multiline_variable(reader, &multi_value, quote_count % 2, line_len) < 0 ||
-			    git_str_oom(&multi_value)) {
+			    git3_str_oom(&multi_value)) {
 				error = -1;
-				git_str_dispose(&multi_value);
+				git3_str_dispose(&multi_value);
 				goto out;
 			}
 
-			value = git_str_detach(&multi_value);
+			value = git3_str_detach(&multi_value);
 		}
 	}
 
@@ -471,32 +471,32 @@ static int parse_variable(git_config_parser *reader, char **var_name, char **var
 	value = NULL;
 
 out:
-	git__free(name);
-	git__free(value);
-	git__free(line);
+	git3__free(name);
+	git3__free(value);
+	git3__free(line);
 	return error;
 }
 
-int git_config_parser_init(git_config_parser *out, const char *path, const char *data, size_t datalen)
+int git3_config_parser_init(git3_config_parser *out, const char *path, const char *data, size_t datalen)
 {
 	out->path = path;
-	return git_parse_ctx_init(&out->ctx, data, datalen);
+	return git3_parse_ctx_init(&out->ctx, data, datalen);
 }
 
-void git_config_parser_dispose(git_config_parser *parser)
+void git3_config_parser_dispose(git3_config_parser *parser)
 {
-	git_parse_ctx_clear(&parser->ctx);
+	git3_parse_ctx_clear(&parser->ctx);
 }
 
-int git_config_parse(
-	git_config_parser *parser,
-	git_config_parser_section_cb on_section,
-	git_config_parser_variable_cb on_variable,
-	git_config_parser_comment_cb on_comment,
-	git_config_parser_eof_cb on_eof,
+int git3_config_parse(
+	git3_config_parser *parser,
+	git3_config_parser_section_cb on_section,
+	git3_config_parser_variable_cb on_variable,
+	git3_config_parser_comment_cb on_comment,
+	git3_config_parser_eof_cb on_eof,
 	void *payload)
 {
-	git_parse_ctx *ctx;
+	git3_parse_ctx *ctx;
 	char *current_section = NULL, *var_name = NULL, *var_value = NULL;
 	int result = 0;
 
@@ -504,7 +504,7 @@ int git_config_parse(
 
 	skip_bom(ctx);
 
-	for (; ctx->remain_len > 0; git_parse_advance_line(ctx)) {
+	for (; ctx->remain_len > 0; git3_parse_advance_line(ctx)) {
 		const char *line_start;
 		size_t line_len;
 		char c;
@@ -518,20 +518,20 @@ int git_config_parse(
 		 * not exist, the first whitespace character. This is required
 		 * to preserve whitespaces when writing back the file.
 		 */
-		if (git_parse_peek(&c, ctx, GIT_PARSE_PEEK_SKIP_WHITESPACE) < 0 &&
-		    git_parse_peek(&c, ctx, 0) < 0)
+		if (git3_parse_peek(&c, ctx, GIT3_PARSE_PEEK_SKIP_WHITESPACE) < 0 &&
+		    git3_parse_peek(&c, ctx, 0) < 0)
 			continue;
 
 		switch (c) {
 		case '[': /* section header, new section begins */
-			git__free(current_section);
+			git3__free(current_section);
 			current_section = NULL;
 
 			result = parse_section_header(parser, &current_section);
 			if (result < 0)
 				break;
 
-			git_parse_advance_chars(ctx, result);
+			git3_parse_advance_chars(ctx, result);
 
 			if (on_section)
 				result = on_section(parser, current_section, line_start, line_len, payload);
@@ -542,7 +542,7 @@ int git_config_parse(
 			 * instead of moving forward.
 			 */
 
-			if (!git_parse_peek(&c, ctx, GIT_PARSE_PEEK_SKIP_WHITESPACE))
+			if (!git3_parse_peek(&c, ctx, GIT3_PARSE_PEEK_SKIP_WHITESPACE))
 				goto restart;
 
 			break;
@@ -561,8 +561,8 @@ int git_config_parse(
 		default: /* assume variable declaration */
 			if ((result = parse_variable(parser, &var_name, &var_value, &line_len)) == 0 && on_variable) {
 				result = on_variable(parser, current_section, var_name, var_value, line_start, line_len, payload);
-				git__free(var_name);
-				git__free(var_value);
+				git3__free(var_name);
+				git3__free(var_value);
 			}
 
 			break;
@@ -576,6 +576,6 @@ int git_config_parse(
 		result = on_eof(parser, current_section, payload);
 
 out:
-	git__free(current_section);
+	git3__free(current_section);
 	return result;
 }

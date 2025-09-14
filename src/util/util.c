@@ -1,15 +1,15 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "util.h"
 
-#include "git2_util.h"
+#include "git3_util.h"
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 # include "win32/utf-conv.h"
 # include "win32/w32_buffer.h"
 
@@ -18,7 +18,7 @@
 # endif
 # include <windows.h>
 
-# ifdef GIT_QSORT_MSC
+# ifdef GIT3_QSORT_MSC
 #  include <search.h>
 # endif
 #endif
@@ -31,7 +31,7 @@
 # include <sys/pstat.h>
 #endif
 
-int git__strntol64(int64_t *result, const char *nptr, size_t nptr_len, const char **endptr, int base)
+int git3__strntol64(int64_t *result, const char *nptr, size_t nptr_len, const char **endptr, int base)
 {
 	const char *p;
 	int64_t n, nn, v;
@@ -46,7 +46,7 @@ int git__strntol64(int64_t *result, const char *nptr, size_t nptr_len, const cha
 	/*
 	 * White space
 	 */
-	while (nptr_len && git__isspace(*p))
+	while (nptr_len && git3__isspace(*p))
 		p++, nptr_len--;
 
 	if (!nptr_len)
@@ -110,7 +110,7 @@ int git__strntol64(int64_t *result, const char *nptr, size_t nptr_len, const cha
 		if (v >= base)
 			break;
 		v = neg ? -v : v;
-		if (git__multiply_int64_overflow(&nn, n, base) || git__add_int64_overflow(&n, nn, v)) {
+		if (git3__multiply_int64_overflow(&nn, n, base) || git3__add_int64_overflow(&n, nn, v)) {
 			ovfl = 1;
 			/* Keep on iterating until the end of this number */
 			continue;
@@ -119,7 +119,7 @@ int git__strntol64(int64_t *result, const char *nptr, size_t nptr_len, const cha
 
 Return:
 	if (ndig == 0) {
-		git_error_set(GIT_ERROR_INVALID, "failed to convert string to long: not a number");
+		git3_error_set(GIT3_ERROR_INVALID, "failed to convert string to long: not a number");
 		return -1;
 	}
 
@@ -127,7 +127,7 @@ Return:
 		*endptr = p;
 
 	if (ovfl) {
-		git_error_set(GIT_ERROR_INVALID, "failed to convert string to long: overflow error");
+		git3_error_set(GIT3_ERROR_INVALID, "failed to convert string to long: overflow error");
 		return -1;
 	}
 
@@ -135,20 +135,20 @@ Return:
 	return 0;
 }
 
-int git__strntol32(int32_t *result, const char *nptr, size_t nptr_len, const char **endptr, int base)
+int git3__strntol32(int32_t *result, const char *nptr, size_t nptr_len, const char **endptr, int base)
 {
 	const char *tmp_endptr;
 	int32_t tmp_int;
 	int64_t tmp_long;
 	int error;
 
-	if ((error = git__strntol64(&tmp_long, nptr, nptr_len, &tmp_endptr, base)) < 0)
+	if ((error = git3__strntol64(&tmp_long, nptr, nptr_len, &tmp_endptr, base)) < 0)
 		return error;
 
 	tmp_int = tmp_long & 0xFFFFFFFF;
 	if (tmp_int != tmp_long) {
 		int len = (int)(tmp_endptr - nptr);
-		git_error_set(GIT_ERROR_INVALID, "failed to convert: '%.*s' is too large", len, nptr);
+		git3_error_set(GIT3_ERROR_INVALID, "failed to convert: '%.*s' is too large", len, nptr);
 		return -1;
 	}
 
@@ -159,20 +159,20 @@ int git__strntol32(int32_t *result, const char *nptr, size_t nptr_len, const cha
 	return error;
 }
 
-int git__strcasecmp(const char *a, const char *b)
+int git3__strcasecmp(const char *a, const char *b)
 {
-	while (*a && *b && git__tolower(*a) == git__tolower(*b))
+	while (*a && *b && git3__tolower(*a) == git3__tolower(*b))
 		++a, ++b;
-	return ((unsigned char)git__tolower(*a) - (unsigned char)git__tolower(*b));
+	return ((unsigned char)git3__tolower(*a) - (unsigned char)git3__tolower(*b));
 }
 
-int git__strcasesort_cmp(const char *a, const char *b)
+int git3__strcasesort_cmp(const char *a, const char *b)
 {
 	int cmp = 0;
 
 	while (*a && *b) {
 		if (*a != *b) {
-			if (git__tolower(*a) != git__tolower(*b))
+			if (git3__tolower(*a) != git3__tolower(*b))
 				break;
 			/* use case in sort order even if not in equivalence */
 			if (!cmp)
@@ -183,39 +183,39 @@ int git__strcasesort_cmp(const char *a, const char *b)
 	}
 
 	if (*a || *b)
-		return (unsigned char)git__tolower(*a) - (unsigned char)git__tolower(*b);
+		return (unsigned char)git3__tolower(*a) - (unsigned char)git3__tolower(*b);
 
 	return cmp;
 }
 
-int git__strncasecmp(const char *a, const char *b, size_t sz)
+int git3__strncasecmp(const char *a, const char *b, size_t sz)
 {
 	int al, bl;
 
 	do {
-		al = (unsigned char)git__tolower(*a);
-		bl = (unsigned char)git__tolower(*b);
+		al = (unsigned char)git3__tolower(*a);
+		bl = (unsigned char)git3__tolower(*b);
 		++a, ++b;
 	} while (--sz && al && al == bl);
 
 	return al - bl;
 }
 
-void git__strntolower(char *str, size_t len)
+void git3__strntolower(char *str, size_t len)
 {
 	size_t i;
 
 	for (i = 0; i < len; ++i) {
-		str[i] = (char)git__tolower(str[i]);
+		str[i] = (char)git3__tolower(str[i]);
 	}
 }
 
-void git__strtolower(char *str)
+void git3__strtolower(char *str)
 {
-	git__strntolower(str, strlen(str));
+	git3__strntolower(str, strlen(str));
 }
 
-GIT_INLINE(int) prefixcmp(const char *str, size_t str_n, const char *prefix, bool icase)
+GIT3_INLINE(int) prefixcmp(const char *str, size_t str_n, const char *prefix, bool icase)
 {
 	int s, p;
 
@@ -224,8 +224,8 @@ GIT_INLINE(int) prefixcmp(const char *str, size_t str_n, const char *prefix, boo
 		p = (unsigned char)*prefix++;
 
 		if (icase) {
-			s = git__tolower(s);
-			p = git__tolower(p);
+			s = git3__tolower(s);
+			p = git3__tolower(p);
 		}
 
 		if (!p)
@@ -238,7 +238,7 @@ GIT_INLINE(int) prefixcmp(const char *str, size_t str_n, const char *prefix, boo
 	return (0 - *prefix);
 }
 
-int git__prefixcmp(const char *str, const char *prefix)
+int git3__prefixcmp(const char *str, const char *prefix)
 {
 	unsigned char s, p;
 
@@ -254,22 +254,22 @@ int git__prefixcmp(const char *str, const char *prefix)
 	}
 }
 
-int git__prefixncmp(const char *str, size_t str_n, const char *prefix)
+int git3__prefixncmp(const char *str, size_t str_n, const char *prefix)
 {
 	return prefixcmp(str, str_n, prefix, false);
 }
 
-int git__prefixcmp_icase(const char *str, const char *prefix)
+int git3__prefixcmp_icase(const char *str, const char *prefix)
 {
 	return prefixcmp(str, SIZE_MAX, prefix, true);
 }
 
-int git__prefixncmp_icase(const char *str, size_t str_n, const char *prefix)
+int git3__prefixncmp_icase(const char *str, size_t str_n, const char *prefix)
 {
 	return prefixcmp(str, str_n, prefix, true);
 }
 
-int git__suffixcmp(const char *str, const char *suffix)
+int git3__suffixcmp(const char *str, const char *suffix)
 {
 	size_t a = strlen(str);
 	size_t b = strlen(suffix);
@@ -278,7 +278,7 @@ int git__suffixcmp(const char *str, const char *suffix)
 	return strcmp(str + (a - b), suffix);
 }
 
-char *git__strtok(char **end, const char *sep)
+char *git3__strtok(char **end, const char *sep)
 {
 	char *ptr = *end;
 
@@ -304,7 +304,7 @@ char *git__strtok(char **end, const char *sep)
 }
 
 /* Similar to strtok, but does not collapse repeated tokens. */
-char *git__strsep(char **end, const char *sep)
+char *git3__strsep(char **end, const char *sep)
 {
 	char *start = *end, *ptr = *end;
 
@@ -321,7 +321,7 @@ char *git__strsep(char **end, const char *sep)
 	return NULL;
 }
 
-size_t git__linenlen(const char *buffer, size_t buffer_len)
+size_t git3__linenlen(const char *buffer, size_t buffer_len)
 {
 	char *nl = memchr(buffer, '\n', buffer_len);
 	return nl ? (size_t)(nl - buffer) + 1 : buffer_len;
@@ -330,7 +330,7 @@ size_t git__linenlen(const char *buffer, size_t buffer_len)
 /*
  * Adapted Not So Naive algorithm from http://www-igm.univ-mlv.fr/~lecroq/string/
  */
-const void * git__memmem(const void *haystack, size_t haystacklen,
+const void * git3__memmem(const void *haystack, size_t haystacklen,
 			 const void *needle, size_t needlelen)
 {
 	const char *h, *n;
@@ -368,7 +368,7 @@ const void * git__memmem(const void *haystack, size_t haystacklen,
 	return NULL;
 }
 
-void git__hexdump(const char *buffer, size_t len)
+void git3__hexdump(const char *buffer, size_t len)
 {
 	static const size_t LINE_WIDTH = 16;
 
@@ -426,8 +426,8 @@ void git__hexdump(const char *buffer, size_t len)
 	printf("\n");
 }
 
-#ifdef GIT_LEGACY_HASH
-uint32_t git__hash(const void *key, int len, unsigned int seed)
+#ifdef GIT3_LEGACY_HASH
+uint32_t git3__hash(const void *key, int len, unsigned int seed)
 {
 	const uint32_t m = 0x5bd1e995;
 	const int r = 24;
@@ -470,12 +470,12 @@ uint32_t git__hash(const void *key, int len, unsigned int seed)
 
 	This code is on the public domain.
 */
-uint32_t git__hash(const void *key, int len, uint32_t seed)
+uint32_t git3__hash(const void *key, int len, uint32_t seed)
 {
 
 #define MURMUR_BLOCK() {\
 	k1 *= c1; \
-	k1 = git__rotl(k1,11);\
+	k1 = git3__rotl(k1,11);\
 	k1 *= c2;\
 	h1 ^= k1;\
 	h1 = h1*3 + 0x52dce729;\
@@ -554,7 +554,7 @@ uint32_t git__hash(const void *key, int len, uint32_t seed)
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-int git__bsearch(
+int git3__bsearch(
 	void **array,
 	size_t array_len,
 	const void *key,
@@ -581,10 +581,10 @@ int git__bsearch(
 	if (position)
 		*position = (base - array);
 
-	return (cmp == 0) ? 0 : GIT_ENOTFOUND;
+	return (cmp == 0) ? 0 : GIT3_ENOTFOUND;
 }
 
-int git__bsearch_r(
+int git3__bsearch_r(
 	void **array,
 	size_t array_len,
 	const void *key,
@@ -612,7 +612,7 @@ int git__bsearch_r(
 	if (position)
 		*position = (base - array);
 
-	return (cmp == 0) ? 0 : GIT_ENOTFOUND;
+	return (cmp == 0) ? 0 : GIT3_ENOTFOUND;
 }
 
 /**
@@ -621,17 +621,17 @@ int git__bsearch_r(
  * We don't want direct pointers to the CRT on Windows, we may
  * get stdcall conflicts.
  */
-int git__strcmp_cb(const void *a, const void *b)
+int git3__strcmp_cb(const void *a, const void *b)
 {
-	return git__strcmp((const char *)a, (const char *)b);
+	return git3__strcmp((const char *)a, (const char *)b);
 }
 
-int git__strcasecmp_cb(const void *a, const void *b)
+int git3__strcasecmp_cb(const void *a, const void *b)
 {
-	return git__strcasecmp((const char *)a, (const char *)b);
+	return git3__strcasecmp((const char *)a, (const char *)b);
 }
 
-int git__parse_bool(int *out, const char *value)
+int git3__parse_bool(int *out, const char *value)
 {
 	/* A missing value means true */
 	if (value == NULL ||
@@ -652,7 +652,7 @@ int git__parse_bool(int *out, const char *value)
 	return -1;
 }
 
-size_t git__unescape(char *str)
+size_t git3__unescape(char *str)
 {
 	char *scan, *pos = str;
 
@@ -673,25 +673,25 @@ size_t git__unescape(char *str)
 	return (pos - str);
 }
 
-#if defined(GIT_QSORT_MSC) || defined(GIT_QSORT_BSD)
+#if defined(GIT3_QSORT_MSC) || defined(GIT3_QSORT_BSD)
 typedef struct {
-	git__sort_r_cmp cmp;
+	git3__sort_r_cmp cmp;
 	void *payload;
-} git__qsort_r_glue;
+} git3__qsort_r_glue;
 
-static int GIT_LIBGIT2_CALL git__qsort_r_glue_cmp(
+static int GIT3_LIBGIT3_CALL git3__qsort_r_glue_cmp(
 	void *payload, const void *a, const void *b)
 {
-	git__qsort_r_glue *glue = payload;
+	git3__qsort_r_glue *glue = payload;
 	return glue->cmp(a, b, glue->payload);
 }
 #endif
 
 
-#if !defined(GIT_QSORT_BSD) && \
-    !defined(GIT_QSORT_GNU) && \
-    !defined(GIT_QSORT_C11) && \
-    !defined(GIT_QSORT_MSC)
+#if !defined(GIT3_QSORT_BSD) && \
+    !defined(GIT3_QSORT_GNU) && \
+    !defined(GIT3_QSORT_C11) && \
+    !defined(GIT3_QSORT_MSC)
 
 static void swap(uint8_t *a, uint8_t *b, size_t elsize)
 {
@@ -708,7 +708,7 @@ static void swap(uint8_t *a, uint8_t *b, size_t elsize)
 
 static void insertsort(
 	void *els, size_t nel, size_t elsize,
-	git__sort_r_cmp cmp, void *payload)
+	git3__sort_r_cmp cmp, void *payload)
 {
 	uint8_t *base = els;
 	uint8_t *end = base + nel * elsize;
@@ -721,65 +721,65 @@ static void insertsort(
 
 #endif
 
-void git__qsort_r(
-	void *els, size_t nel, size_t elsize, git__sort_r_cmp cmp, void *payload)
+void git3__qsort_r(
+	void *els, size_t nel, size_t elsize, git3__sort_r_cmp cmp, void *payload)
 {
-#if defined(GIT_QSORT_GNU)
+#if defined(GIT3_QSORT_GNU)
 	qsort_r(els, nel, elsize, cmp, payload);
-#elif defined(GIT_QSORT_C11)
+#elif defined(GIT3_QSORT_C11)
 	qsort_s(els, nel, elsize, cmp, payload);
-#elif defined(GIT_QSORT_BSD)
-	git__qsort_r_glue glue = { cmp, payload };
-	qsort_r(els, nel, elsize, &glue, git__qsort_r_glue_cmp);
-#elif defined(GIT_QSORT_MSC)
-	git__qsort_r_glue glue = { cmp, payload };
-	qsort_s(els, nel, elsize, git__qsort_r_glue_cmp, &glue);
+#elif defined(GIT3_QSORT_BSD)
+	git3__qsort_r_glue glue = { cmp, payload };
+	qsort_r(els, nel, elsize, &glue, git3__qsort_r_glue_cmp);
+#elif defined(GIT3_QSORT_MSC)
+	git3__qsort_r_glue glue = { cmp, payload };
+	qsort_s(els, nel, elsize, git3__qsort_r_glue_cmp, &glue);
 #else
 	insertsort(els, nel, elsize, cmp, payload);
 #endif
 }
 
-#ifdef GIT_WIN32
-int git__getenv(git_str *out, const char *name)
+#ifdef GIT3_WIN32
+int git3__getenv(git3_str *out, const char *name)
 {
 	wchar_t *wide_name = NULL, *wide_value = NULL;
 	DWORD value_len;
 	int error = -1;
 
-	git_str_clear(out);
+	git3_str_clear(out);
 
-	if (git_utf8_to_16_alloc(&wide_name, name) < 0)
+	if (git3_utf8_to_16_alloc(&wide_name, name) < 0)
 		return -1;
 
 	if ((value_len = GetEnvironmentVariableW(wide_name, NULL, 0)) > 0) {
-		wide_value = git__malloc(value_len * sizeof(wchar_t));
-		GIT_ERROR_CHECK_ALLOC(wide_value);
+		wide_value = git3__malloc(value_len * sizeof(wchar_t));
+		GIT3_ERROR_CHECK_ALLOC(wide_value);
 
 		value_len = GetEnvironmentVariableW(wide_name, wide_value, value_len);
 	}
 
 	if (value_len)
-		error = git_str_put_w(out, wide_value, value_len);
+		error = git3_str_put_w(out, wide_value, value_len);
 	else if (GetLastError() == ERROR_SUCCESS || GetLastError() == ERROR_ENVVAR_NOT_FOUND)
-		error = GIT_ENOTFOUND;
+		error = GIT3_ENOTFOUND;
 	else
-		git_error_set(GIT_ERROR_OS, "could not read environment variable '%s'", name);
+		git3_error_set(GIT3_ERROR_OS, "could not read environment variable '%s'", name);
 
-	git__free(wide_name);
-	git__free(wide_value);
+	git3__free(wide_name);
+	git3__free(wide_value);
 	return error;
 }
 #else
-int git__getenv(git_str *out, const char *name)
+int git3__getenv(git3_str *out, const char *name)
 {
 	const char *val = getenv(name);
 
-	git_str_clear(out);
+	git3_str_clear(out);
 
 	if (!val)
-		return GIT_ENOTFOUND;
+		return GIT3_ENOTFOUND;
 
-	return git_str_puts(out, val);
+	return git3_str_puts(out, val);
 }
 #endif
 
@@ -796,7 +796,7 @@ int git__getenv(git_str *out, const char *name)
 #	endif
 #endif
 
-int git__online_cpus(void)
+int git3__online_cpus(void)
 {
 #ifdef _SC_NPROCESSORS_ONLN
 	long ncpus;

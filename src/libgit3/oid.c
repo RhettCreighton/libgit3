@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -13,36 +13,36 @@
 #include <string.h>
 #include <limits.h>
 
-const git_oid git_oid__empty_blob_sha1 =
-	GIT_OID_INIT(GIT_OID_SHA1,
+const git3_oid git3_oid__empty_blob_sha1 =
+	GIT3_OID_INIT(GIT3_OID_SHA1,
 	  { 0xe6, 0x9d, 0xe2, 0x9b, 0xb2, 0xd1, 0xd6, 0x43, 0x4b, 0x8b,
 	    0x29, 0xae, 0x77, 0x5a, 0xd8, 0xc2, 0xe4, 0x8c, 0x53, 0x91 });
-const git_oid git_oid__empty_tree_sha1 =
-	GIT_OID_INIT(GIT_OID_SHA1,
+const git3_oid git3_oid__empty_tree_sha1 =
+	GIT3_OID_INIT(GIT3_OID_SHA1,
 	  { 0x4b, 0x82, 0x5d, 0xc6, 0x42, 0xcb, 0x6e, 0xb9, 0xa0, 0x60,
 	    0xe5, 0x4b, 0xf8, 0xd6, 0x92, 0x88, 0xfb, 0xee, 0x49, 0x04 });
 
 static int oid_error_invalid(const char *msg)
 {
-	git_error_set(GIT_ERROR_INVALID, "unable to parse OID - %s", msg);
+	git3_error_set(GIT3_ERROR_INVALID, "unable to parse OID - %s", msg);
 	return -1;
 }
 
-int git_oid_from_prefix(git_oid *out, const char *str, size_t len, git_oid_t type)
+int git3_oid_from_prefix(git3_oid *out, const char *str, size_t len, git3_oid_t type)
 {
 	size_t size, p;
 	int v;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(str);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(str);
 
-	if (!(size = git_oid_size(type)))
+	if (!(size = git3_oid_size(type)))
 		return oid_error_invalid("unknown type");
 
 	if (!len)
 		return oid_error_invalid("too short");
 
-	if (len > git_oid_hexsize(type))
+	if (len > git3_oid_hexsize(type))
 		return oid_error_invalid("too long");
 
 	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
@@ -50,7 +50,7 @@ int git_oid_from_prefix(git_oid *out, const char *str, size_t len, git_oid_t typ
 	memset(out->id, 0, size);
 
 	for (p = 0; p < len; p++) {
-		v = git__fromhex(str[p]);
+		v = git3__fromhex(str[p]);
 		if (v < 0)
 			return oid_error_invalid("contains invalid characters");
 
@@ -60,14 +60,14 @@ int git_oid_from_prefix(git_oid *out, const char *str, size_t len, git_oid_t typ
 	return 0;
 }
 
-int git_oid_from_string(git_oid *out, const char *str, git_oid_t type)
+int git3_oid_from_string(git3_oid *out, const char *str, git3_oid_t type)
 {
 	size_t hexsize;
 
-	if (!(hexsize = git_oid_hexsize(type)))
+	if (!(hexsize = git3_oid_hexsize(type)))
 		return oid_error_invalid("unknown type");
 
-	if (git_oid_from_prefix(out, str, hexsize, type) < 0)
+	if (git3_oid_from_prefix(out, str, hexsize, type) < 0)
 		return -1;
 
 	if (str[hexsize] != '\0')
@@ -76,11 +76,11 @@ int git_oid_from_string(git_oid *out, const char *str, git_oid_t type)
 	return 0;
 }
 
-int git_oid_from_raw(git_oid *out, const unsigned char *raw, git_oid_t type)
+int git3_oid_from_raw(git3_oid *out, const unsigned char *raw, git3_oid_t type)
 {
 	size_t size;
 
-	if (!(size = git_oid_size(type)))
+	if (!(size = git3_oid_size(type)))
 		return oid_error_invalid("unknown type");
 
 	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
@@ -89,26 +89,26 @@ int git_oid_from_raw(git_oid *out, const unsigned char *raw, git_oid_t type)
 	return 0;
 }
 
-int git_oid_fromstrn(
-	git_oid *out,
+int git3_oid_fromstrn(
+	git3_oid *out,
 	const char *str,
 	size_t length)
 {
 	/* For QED/libgit3: Use SHA3-256 by default, not SHA1 */
-	return git_oid_from_prefix(out, str, length, GIT_OID_SHA3_256);
+	return git3_oid_from_prefix(out, str, length, GIT3_OID_SHA3_256);
 }
 
-int git_oid_fromstrp(git_oid *out, const char *str)
+int git3_oid_fromstrp(git3_oid *out, const char *str)
 {
-	return git_oid_from_prefix(out, str, strlen(str), GIT_OID_SHA3_256);
+	return git3_oid_from_prefix(out, str, strlen(str), GIT3_OID_SHA3_256);
 }
 
-int git_oid_fromstr(git_oid *out, const char *str)
+int git3_oid_fromstr(git3_oid *out, const char *str)
 {
-	return git_oid_from_prefix(out, str, GIT_OID_SHA3_256_HEXSIZE, GIT_OID_SHA3_256);
+	return git3_oid_from_prefix(out, str, GIT3_OID_SHA3_256_HEXSIZE, GIT3_OID_SHA3_256);
 }
 
-int git_oid_nfmt(char *str, size_t n, const git_oid *oid)
+int git3_oid_nfmt(char *str, size_t n, const git3_oid *oid)
 {
 	size_t hex_size;
 
@@ -117,7 +117,7 @@ int git_oid_nfmt(char *str, size_t n, const git_oid *oid)
 		return 0;
 	}
 
-	if (!(hex_size = git_oid_hexsize(git_oid_type(oid))))
+	if (!(hex_size = git3_oid_hexsize(git3_oid_type(oid))))
 		return oid_error_invalid("unknown type");
 
 	if (n > hex_size) {
@@ -125,152 +125,152 @@ int git_oid_nfmt(char *str, size_t n, const git_oid *oid)
 		n = hex_size;
 	}
 
-	git_oid_fmt_substr(str, oid, 0, n);
+	git3_oid_fmt_substr(str, oid, 0, n);
 	return 0;
 }
 
-int git_oid_fmt(char *str, const git_oid *oid)
+int git3_oid_fmt(char *str, const git3_oid *oid)
 {
-	return git_oid_nfmt(str, git_oid_hexsize(git_oid_type(oid)), oid);
+	return git3_oid_nfmt(str, git3_oid_hexsize(git3_oid_type(oid)), oid);
 }
 
-int git_oid_pathfmt(char *str, const git_oid *oid)
+int git3_oid_pathfmt(char *str, const git3_oid *oid)
 {
 	size_t hex_size;
 
-	if (!(hex_size = git_oid_hexsize(git_oid_type(oid))))
+	if (!(hex_size = git3_oid_hexsize(git3_oid_type(oid))))
 		return oid_error_invalid("unknown type");
 
-	git_oid_fmt_substr(str, oid, 0, 2);
+	git3_oid_fmt_substr(str, oid, 0, 2);
 	str[2] = '/';
-	git_oid_fmt_substr(&str[3], oid, 2, (hex_size - 2));
+	git3_oid_fmt_substr(&str[3], oid, 2, (hex_size - 2));
 	return 0;
 }
 
-static git_tlsdata_key thread_str_key;
+static git3_tlsdata_key thread_str_key;
 
-static void GIT_SYSTEM_CALL thread_str_free(void *s)
+static void GIT3_SYSTEM_CALL thread_str_free(void *s)
 {
 	char *str = (char *)s;
-	git__free(str);
+	git3__free(str);
 }
 
 static void thread_str_global_shutdown(void)
 {
-	char *str = git_tlsdata_get(thread_str_key);
-	git_tlsdata_set(thread_str_key, NULL);
+	char *str = git3_tlsdata_get(thread_str_key);
+	git3_tlsdata_set(thread_str_key, NULL);
 
-	git__free(str);
-	git_tlsdata_dispose(thread_str_key);
+	git3__free(str);
+	git3_tlsdata_dispose(thread_str_key);
 }
 
-int git_oid_global_init(void)
+int git3_oid_global_init(void)
 {
-	if (git_tlsdata_init(&thread_str_key, thread_str_free) != 0)
+	if (git3_tlsdata_init(&thread_str_key, thread_str_free) != 0)
 		return -1;
 
-	return git_runtime_shutdown_register(thread_str_global_shutdown);
+	return git3_runtime_shutdown_register(thread_str_global_shutdown);
 }
 
-char *git_oid_tostr_s(const git_oid *oid)
+char *git3_oid_tostr_s(const git3_oid *oid)
 {
 	char *str;
 
-	if ((str = git_tlsdata_get(thread_str_key)) == NULL) {
-		if ((str = git__malloc(GIT_OID_MAX_HEXSIZE + 1)) == NULL)
+	if ((str = git3_tlsdata_get(thread_str_key)) == NULL) {
+		if ((str = git3__malloc(GIT3_OID_MAX_HEXSIZE + 1)) == NULL)
 			return NULL;
 
-		git_tlsdata_set(thread_str_key, str);
+		git3_tlsdata_set(thread_str_key, str);
 	}
 
-	git_oid_nfmt(str, git_oid_hexsize(git_oid_type(oid)) + 1, oid);
+	git3_oid_nfmt(str, git3_oid_hexsize(git3_oid_type(oid)) + 1, oid);
 	return str;
 }
 
-char *git_oid_allocfmt(const git_oid *oid)
+char *git3_oid_allocfmt(const git3_oid *oid)
 {
-	size_t hex_size = git_oid_hexsize(git_oid_type(oid));
-	char *str = git__malloc(hex_size + 1);
+	size_t hex_size = git3_oid_hexsize(git3_oid_type(oid));
+	char *str = git3__malloc(hex_size + 1);
 
 	if (!hex_size || !str)
 		return NULL;
 
-	if (git_oid_nfmt(str, hex_size + 1, oid) < 0) {
-		git__free(str);
+	if (git3_oid_nfmt(str, hex_size + 1, oid) < 0) {
+		git3__free(str);
 		return NULL;
 	}
 
 	return str;
 }
 
-char *git_oid_tostr(char *out, size_t n, const git_oid *oid)
+char *git3_oid_tostr(char *out, size_t n, const git3_oid *oid)
 {
 	size_t hex_size;
 
 	if (!out || n == 0)
 		return "";
 
-	hex_size = oid ? git_oid_hexsize(git_oid_type(oid)) : 0;
+	hex_size = oid ? git3_oid_hexsize(git3_oid_type(oid)) : 0;
 
 	if (n > hex_size + 1)
 		n = hex_size + 1;
 
-	git_oid_nfmt(out, n - 1, oid); /* allow room for terminating NUL */
+	git3_oid_nfmt(out, n - 1, oid); /* allow room for terminating NUL */
 	out[n - 1] = '\0';
 
 	return out;
 }
 
-int git_oid_fromraw(git_oid *out, const unsigned char *raw)
+int git3_oid_fromraw(git3_oid *out, const unsigned char *raw)
 {
-	return git_oid_from_raw(out, raw, GIT_OID_SHA1);
+	return git3_oid_from_raw(out, raw, GIT3_OID_SHA3_256);
 }
 
-int git_oid_cpy(git_oid *out, const git_oid *src)
+int git3_oid_cpy(git3_oid *out, const git3_oid *src)
 {
 	size_t size;
 
-	if (!(size = git_oid_size(git_oid_type(src))))
+	if (!(size = git3_oid_size(git3_oid_type(src))))
 		return oid_error_invalid("unknown type");
 
 	/* For QED/libgit3: Always set the type field for proper SHA3-256 support */
 	out->type = src->type;
 
-	return git_oid_raw_cpy(out->id, src->id, size);
+	return git3_oid_raw_cpy(out->id, src->id, size);
 }
 
-int git_oid_cmp(const git_oid *a, const git_oid *b)
+int git3_oid_cmp(const git3_oid *a, const git3_oid *b)
 {
-	return git_oid__cmp(a, b);
+	return git3_oid__cmp(a, b);
 }
 
-int git_oid_equal(const git_oid *a, const git_oid *b)
+int git3_oid_equal(const git3_oid *a, const git3_oid *b)
 {
-	return (git_oid__cmp(a, b) == 0);
+	return (git3_oid__cmp(a, b) == 0);
 }
 
-int git_oid_ncmp(const git_oid *oid_a, const git_oid *oid_b, size_t len)
+int git3_oid_ncmp(const git3_oid *oid_a, const git3_oid *oid_b, size_t len)
 {
 	/* For QED/libgit3: Always check the type field for proper SHA3-256 support */
 	if (oid_a->type != oid_b->type)
 		return oid_a->type - oid_b->type;
 
-	return git_oid_raw_ncmp(oid_a->id, oid_b->id, len);
+	return git3_oid_raw_ncmp(oid_a->id, oid_b->id, len);
 }
 
-int git_oid_strcmp(const git_oid *oid_a, const char *str)
+int git3_oid_strcmp(const git3_oid *oid_a, const char *str)
 {
 	const unsigned char *a;
 	unsigned char strval;
-	long size = (long)git_oid_size(git_oid_type(oid_a));
+	long size = (long)git3_oid_size(git3_oid_type(oid_a));
 	int hexval;
 
 	for (a = oid_a->id; *str && (a - oid_a->id) < size; ++a) {
-		if ((hexval = git__fromhex(*str++)) < 0)
+		if ((hexval = git3__fromhex(*str++)) < 0)
 			return -1;
 		strval = (unsigned char)(hexval << 4);
 		if (*str) {
-			if ((hexval = git__fromhex(*str++)) < 0)
+			if ((hexval = git3__fromhex(*str++)) < 0)
 				return -1;
 			strval |= hexval;
 		}
@@ -281,15 +281,15 @@ int git_oid_strcmp(const git_oid *oid_a, const char *str)
 	return 0;
 }
 
-int git_oid_streq(const git_oid *oid_a, const char *str)
+int git3_oid_streq(const git3_oid *oid_a, const char *str)
 {
-	return git_oid_strcmp(oid_a, str) == 0 ? 0 : -1;
+	return git3_oid_strcmp(oid_a, str) == 0 ? 0 : -1;
 }
 
-int git_oid_is_zero(const git_oid *oid_a)
+int git3_oid_is_zero(const git3_oid *oid_a)
 {
 	const unsigned char *a = oid_a->id;
-	size_t size = git_oid_size(git_oid_type(oid_a)), i;
+	size_t size = git3_oid_size(git3_oid_type(oid_a)), i;
 
 	/* For QED/libgit3: Always check the type field for proper SHA3-256 support */
 	if (!oid_a->type)
@@ -303,10 +303,10 @@ int git_oid_is_zero(const git_oid *oid_a)
 	return 1;
 }
 
-#ifndef GIT_DEPRECATE_HARD
-int git_oid_iszero(const git_oid *oid_a)
+#ifndef GIT3_DEPRECATE_HARD
+int git3_oid_iszero(const git3_oid *oid_a)
 {
-	return git_oid_is_zero(oid_a);
+	return git3_oid_is_zero(oid_a);
 }
 #endif
 
@@ -317,16 +317,16 @@ typedef union {
 	node_index children[16];
 } trie_node;
 
-struct git_oid_shorten {
+struct git3_oid_shorten {
 	trie_node *nodes;
 	size_t node_count, size;
 	int min_length, full;
 };
 
-static int resize_trie(git_oid_shorten *self, size_t new_size)
+static int resize_trie(git3_oid_shorten *self, size_t new_size)
 {
-	self->nodes = git__reallocarray(self->nodes, new_size, sizeof(trie_node));
-	GIT_ERROR_CHECK_ALLOC(self->nodes);
+	self->nodes = git3__reallocarray(self->nodes, new_size, sizeof(trie_node));
+	GIT3_ERROR_CHECK_ALLOC(self->nodes);
 
 	if (new_size > self->size) {
 		memset(&self->nodes[self->size], 0x0, (new_size - self->size) * sizeof(trie_node));
@@ -336,7 +336,7 @@ static int resize_trie(git_oid_shorten *self, size_t new_size)
 	return 0;
 }
 
-static trie_node *push_leaf(git_oid_shorten *os, node_index idx, int push_at, const char *oid)
+static trie_node *push_leaf(git3_oid_shorten *os, node_index idx, int push_at, const char *oid)
 {
 	trie_node *node, *leaf;
 	node_index idx_leaf;
@@ -362,18 +362,18 @@ static trie_node *push_leaf(git_oid_shorten *os, node_index idx, int push_at, co
 	return node;
 }
 
-git_oid_shorten *git_oid_shorten_new(size_t min_length)
+git3_oid_shorten *git3_oid_shorten_new(size_t min_length)
 {
-	git_oid_shorten *os;
+	git3_oid_shorten *os;
 
-	GIT_ASSERT_ARG_WITH_RETVAL((size_t)((int)min_length) == min_length, NULL);
+	GIT3_ASSERT_ARG_WITH_RETVAL((size_t)((int)min_length) == min_length, NULL);
 
-	os = git__calloc(1, sizeof(git_oid_shorten));
+	os = git3__calloc(1, sizeof(git3_oid_shorten));
 	if (os == NULL)
 		return NULL;
 
 	if (resize_trie(os, 16) < 0) {
-		git__free(os);
+		git3__free(os);
 		return NULL;
 	}
 
@@ -383,13 +383,13 @@ git_oid_shorten *git_oid_shorten_new(size_t min_length)
 	return os;
 }
 
-void git_oid_shorten_free(git_oid_shorten *os)
+void git3_oid_shorten_free(git3_oid_shorten *os)
 {
 	if (os == NULL)
 		return;
 
-	git__free(os->nodes);
-	git__free(os);
+	git3__free(os->nodes);
+	git3__free(os);
 }
 
 
@@ -437,14 +437,14 @@ void git_oid_shorten_free(git_oid_shorten *os)
  *
  *	This is a pretty good balance between performance and memory usage.
  */
-int git_oid_shorten_add(git_oid_shorten *os, const char *text_oid)
+int git3_oid_shorten_add(git3_oid_shorten *os, const char *text_oid)
 {
 	int i;
 	bool is_leaf;
 	node_index idx;
 
 	if (os->full) {
-		git_error_set(GIT_ERROR_INVALID, "unable to shorten OID - OID set full");
+		git3_error_set(GIT3_ERROR_INVALID, "unable to shorten OID - OID set full");
 		return -1;
 	}
 
@@ -454,12 +454,12 @@ int git_oid_shorten_add(git_oid_shorten *os, const char *text_oid)
 	idx = 0;
 	is_leaf = false;
 
-	for (i = 0; i < GIT_OID_SHA3_256_HEXSIZE; ++i) {
-		int c = git__fromhex(text_oid[i]);
+	for (i = 0; i < GIT3_OID_SHA3_256_HEXSIZE; ++i) {
+		int c = git3__fromhex(text_oid[i]);
 		trie_node *node;
 
 		if (c == -1) {
-			git_error_set(GIT_ERROR_INVALID, "unable to shorten OID - invalid hex value");
+			git3_error_set(GIT3_ERROR_INVALID, "unable to shorten OID - invalid hex value");
 			return -1;
 		}
 
@@ -471,10 +471,10 @@ int git_oid_shorten_add(git_oid_shorten *os, const char *text_oid)
 			tail = node->tail;
 			node->tail = NULL;
 
-			node = push_leaf(os, idx, git__fromhex(tail[0]), &tail[1]);
+			node = push_leaf(os, idx, git3__fromhex(tail[0]), &tail[1]);
 			if (node == NULL) {
 				if (os->full)
-					git_error_set(GIT_ERROR_INVALID, "unable to shorten OID - OID set full");
+					git3_error_set(GIT3_ERROR_INVALID, "unable to shorten OID - OID set full");
 				return -1;
 			}
 		}
@@ -482,7 +482,7 @@ int git_oid_shorten_add(git_oid_shorten *os, const char *text_oid)
 		if (node->children[c] == 0) {
 			if (push_leaf(os, idx, c, &text_oid[i + 1]) == NULL) {
 				if (os->full)
-					git_error_set(GIT_ERROR_INVALID, "unable to shorten OID - OID set full");
+					git3_error_set(GIT3_ERROR_INVALID, "unable to shorten OID - OID set full");
 				return -1;
 			}
 			break;

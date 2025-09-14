@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_object_h__
@@ -13,27 +13,27 @@
 #include "buffer.h"
 
 /**
- * @file git2/object.h
+ * @file git3/object.h
  * @brief Objects are blobs (files), trees (directories), commits, and annotated tags
- * @defgroup git_object Git revision object management routines
+ * @defgroup git3_object Git revision object management routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** Maximum size of a git object */
-#define GIT_OBJECT_SIZE_MAX UINT64_MAX
+#define GIT3_OBJECT_SIZE_MAX UINT64_MAX
 
 /**
  * Lookup a reference to one of the objects in a repository.
  *
  * The generated reference is owned by the repository and
- * should be closed with the `git_object_free` method
+ * should be closed with the `git3_object_free` method
  * instead of free'd manually.
  *
  * The 'type' parameter must match the type of the object
  * in the odb; the method will fail otherwise.
- * The special value 'GIT_OBJECT_ANY' may be passed to let
+ * The special value 'GIT3_OBJECT_ANY' may be passed to let
  * the method guess the object's type.
  *
  * @param object pointer to the looked-up object
@@ -42,11 +42,11 @@ GIT_BEGIN_DECL
  * @param type the type of the object
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_object_lookup(
-		git_object **object,
-		git_repository *repo,
-		const git_oid *id,
-		git_object_t type);
+GIT3_EXTERN(int) git3_object_lookup(
+		git3_object **object,
+		git3_repository *repo,
+		const git3_oid *id,
+		git3_object_t type);
 
 /**
  * Lookup a reference to one of the objects in a repository,
@@ -55,17 +55,17 @@ GIT_EXTERN(int) git_object_lookup(
  * The object obtained will be so that its identifier
  * matches the first 'len' hexadecimal characters
  * (packets of 4 bits) of the given `id`. `len` must be
- * at least `GIT_OID_MINPREFIXLEN`, and long enough to
+ * at least `GIT3_OID_MINPREFIXLEN`, and long enough to
  * identify a unique object matching the prefix; otherwise
  * the method will fail.
  *
  * The generated reference is owned by the repository and
- * should be closed with the `git_object_free` method
+ * should be closed with the `git3_object_free` method
  * instead of free'd manually.
  *
  * The `type` parameter must match the type of the object
  * in the odb; the method will fail otherwise.
- * The special value `GIT_OBJECT_ANY` may be passed to let
+ * The special value `GIT3_OBJECT_ANY` may be passed to let
  * the method guess the object's type.
  *
  * @param object_out pointer where to store the looked-up object
@@ -75,12 +75,12 @@ GIT_EXTERN(int) git_object_lookup(
  * @param type the type of the object
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_object_lookup_prefix(
-		git_object **object_out,
-		git_repository *repo,
-		const git_oid *id,
+GIT3_EXTERN(int) git3_object_lookup_prefix(
+		git3_object **object_out,
+		git3_repository *repo,
+		const git3_oid *id,
 		size_t len,
-		git_object_t type);
+		git3_object_t type);
 
 
 /**
@@ -93,11 +93,11 @@ GIT_EXTERN(int) git_object_lookup_prefix(
  * @param type type of object desired
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_object_lookup_bypath(
-		git_object **out,
-		const git_object *treeish,
+GIT3_EXTERN(int) git3_object_lookup_bypath(
+		git3_object **out,
+		const git3_object *treeish,
 		const char *path,
-		git_object_t type);
+		git3_object_t type);
 
 /**
  * Get the id (SHA1) of a repository object
@@ -105,7 +105,7 @@ GIT_EXTERN(int) git_object_lookup_bypath(
  * @param obj the repository object
  * @return the SHA1 id
  */
-GIT_EXTERN(const git_oid *) git_object_id(const git_object *obj);
+GIT3_EXTERN(const git3_oid *) git3_object_id(const git3_object *obj);
 
 /**
  * Get a short abbreviated OID string for the object
@@ -119,7 +119,7 @@ GIT_EXTERN(const git_oid *) git_object_id(const git_object *obj);
  * @param obj The object to get an ID for
  * @return 0 on success, <0 for error
  */
-GIT_EXTERN(int) git_object_short_id(git_buf *out, const git_object *obj);
+GIT3_EXTERN(int) git3_object_short_id(git3_buf *out, const git3_object *obj);
 
 /**
  * Get the object type of an object
@@ -127,12 +127,12 @@ GIT_EXTERN(int) git_object_short_id(git_buf *out, const git_object *obj);
  * @param obj the repository object
  * @return the object's type
  */
-GIT_EXTERN(git_object_t) git_object_type(const git_object *obj);
+GIT3_EXTERN(git3_object_t) git3_object_type(const git3_object *obj);
 
 /**
  * Get the repository that owns this object
  *
- * Freeing or calling `git_repository_close` on the
+ * Freeing or calling `git3_repository_close` on the
  * returned pointer will invalidate the actual object.
  *
  * Any other operation may be run on the repository without
@@ -141,13 +141,13 @@ GIT_EXTERN(git_object_t) git_object_type(const git_object *obj);
  * @param obj the object
  * @return the repository who owns this object
  */
-GIT_EXTERN(git_repository *) git_object_owner(const git_object *obj);
+GIT3_EXTERN(git3_repository *) git3_object_owner(const git3_object *obj);
 
 /**
  * Close an open object
  *
  * This method instructs the library to close an existing
- * object; note that git_objects are owned and cached by the repository
+ * object; note that git3_objects are owned and cached by the repository
  * so the object may or may not be freed after this library call,
  * depending on how aggressive is the caching mechanism used
  * by the repository.
@@ -158,7 +158,7 @@ GIT_EXTERN(git_repository *) git_object_owner(const git_object *obj);
  *
  * @param object the object to close
  */
-GIT_EXTERN(void) git_object_free(git_object *object);
+GIT3_EXTERN(void) git3_object_free(git3_object *object);
 
 /**
  * Convert an object type to its string representation.
@@ -169,51 +169,51 @@ GIT_EXTERN(void) git_object_free(git_object *object);
  * @param type object type to convert.
  * @return the corresponding string representation.
  */
-GIT_EXTERN(const char *) git_object_type2string(git_object_t type);
+GIT3_EXTERN(const char *) git3_object_type2string(git3_object_t type);
 
 /**
- * Convert a string object type representation to it's git_object_t.
+ * Convert a string object type representation to it's git3_object_t.
  *
  * @param str the string to convert.
- * @return the corresponding git_object_t.
+ * @return the corresponding git3_object_t.
  */
-GIT_EXTERN(git_object_t) git_object_string2type(const char *str);
+GIT3_EXTERN(git3_object_t) git3_object_string2type(const char *str);
 
 /**
- * Determine if the given git_object_t is a valid object type.
+ * Determine if the given git3_object_t is a valid object type.
  *
  * @param type object type to test.
  * @return 1 if the type represents a valid loose object type, 0 otherwise
  */
-GIT_EXTERN(int) git_object_type_is_valid(git_object_t type);
+GIT3_EXTERN(int) git3_object_type_is_valid(git3_object_t type);
 
 /**
  * Recursively peel an object until an object of the specified type is met.
  *
  * If the query cannot be satisfied due to the object model,
- * GIT_EINVALIDSPEC will be returned (e.g. trying to peel a blob to a
+ * GIT3_EINVALIDSPEC will be returned (e.g. trying to peel a blob to a
  * tree).
  *
- * If you pass `GIT_OBJECT_ANY` as the target type, then the object will
+ * If you pass `GIT3_OBJECT_ANY` as the target type, then the object will
  * be peeled until the type changes. A tag will be peeled until the
  * referenced object is no longer a tag, and a commit will be peeled
- * to a tree. Any other object type will return GIT_EINVALIDSPEC.
+ * to a tree. Any other object type will return GIT3_EINVALIDSPEC.
  *
  * If peeling a tag we discover an object which cannot be peeled to
- * the target type due to the object model, GIT_EPEEL will be
+ * the target type due to the object model, GIT3_EPEEL will be
  * returned.
  *
  * You must free the returned object.
  *
- * @param peeled Pointer to the peeled git_object
+ * @param peeled Pointer to the peeled git3_object
  * @param object The object to be processed
- * @param target_type The type of the requested object (a GIT_OBJECT_ value)
- * @return 0 on success, GIT_EINVALIDSPEC, GIT_EPEEL, or an error code
+ * @param target_type The type of the requested object (a GIT3_OBJECT_ value)
+ * @return 0 on success, GIT3_EINVALIDSPEC, GIT3_EPEEL, or an error code
  */
-GIT_EXTERN(int) git_object_peel(
-	git_object **peeled,
-	const git_object *object,
-	git_object_t target_type);
+GIT3_EXTERN(int) git3_object_peel(
+	git3_object **peeled,
+	const git3_object *object,
+	git3_object_t target_type);
 
 /**
  * Create an in-memory copy of a Git object. The copy must be
@@ -223,9 +223,9 @@ GIT_EXTERN(int) git_object_peel(
  * @param source Original object to copy
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_object_dup(git_object **dest, git_object *source);
+GIT3_EXTERN(int) git3_object_dup(git3_object **dest, git3_object *source);
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 /**
  * Analyzes a buffer of raw object content and determines its validity.
  * Tree, commit, and tag objects will be parsed and ensured that they
@@ -243,12 +243,12 @@ GIT_EXTERN(int) git_object_dup(git_object **dest, git_object *source);
  * @param oid_type The object ID type for the OIDs in the given buffer
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_object_rawcontent_is_valid(
+GIT3_EXTERN(int) git3_object_rawcontent_is_valid(
 	int *valid,
 	const char *buf,
 	size_t len,
-	git_object_t object_type,
-	git_oid_t oid_type);
+	git3_object_t object_type,
+	git3_oid_t oid_type);
 #else
 /**
  * Analyzes a buffer of raw object content and determines its validity.
@@ -266,14 +266,14 @@ GIT_EXTERN(int) git_object_rawcontent_is_valid(
  * @param object_type The type of the object in the buffer
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_object_rawcontent_is_valid(
+GIT3_EXTERN(int) git3_object_rawcontent_is_valid(
 	int *valid,
 	const char *buf,
 	size_t len,
-	git_object_t object_type);
+	git3_object_t object_type);
 #endif
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

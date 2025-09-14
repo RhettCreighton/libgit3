@@ -1,24 +1,24 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 static void expect_decode_pass(const char *expected, const char *encoded)
 {
-	git_str in = GIT_STR_INIT, out = GIT_STR_INIT;
+	git3_str in = GIT3_STR_INIT, out = GIT3_STR_INIT;
 
 	/*
 	 * ensure that we only read the given length of the input buffer
 	 * by putting garbage at the end.  this will ensure that we do
 	 * not, eg, rely on nul-termination or walk off the end of the buf.
 	 */
-	cl_git_pass(git_str_puts(&in, encoded));
-	cl_git_pass(git_str_PUTS(&in, "TRAILER"));
+	cl_git_pass(git3_str_puts(&in, encoded));
+	cl_git_pass(git3_str_PUTS(&in, "TRAILER"));
 
-	cl_git_pass(git_str_decode_percent(&out, in.ptr, strlen(encoded)));
+	cl_git_pass(git3_str_decode_percent(&out, in.ptr, strlen(encoded)));
 
-	cl_assert_equal_s(expected, git_str_cstr(&out));
-	cl_assert_equal_i(strlen(expected), git_str_len(&out));
+	cl_assert_equal_s(expected, git3_str_cstr(&out));
+	cl_assert_equal_i(strlen(expected), git3_str_len(&out));
 
-	git_str_dispose(&in);
-	git_str_dispose(&out);
+	git3_str_dispose(&in);
+	git3_str_dispose(&out);
 }
 
 void test_str_percent__decode_succeeds(void)

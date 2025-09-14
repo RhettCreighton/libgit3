@@ -1,14 +1,14 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "process.h"
 #include "vector.h"
 
-#ifdef GIT_WIN32
-static git_str result;
+#ifdef GIT3_WIN32
+static git3_str result;
 
 # define assert_cmdline(expected, given) do { \
-		cl_git_pass(git_process__cmdline(&result, given, ARRAY_SIZE(given))); \
+		cl_git_pass(git3_process__cmdline(&result, given, ARRAY_SIZE(given))); \
 		cl_assert_equal_s(expected, result.ptr); \
-		git_str_dispose(&result); \
+		git3_str_dispose(&result); \
 	} while(0)
 
 #endif
@@ -16,7 +16,7 @@ static git_str result;
 
 void test_process_win32__cmdline_is_whitespace_delimited(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	const char *one[] = { "one" };
 	const char *two[] = { "one", "two" };
 	const char *three[] = { "one", "two", "three" };
@@ -31,7 +31,7 @@ void test_process_win32__cmdline_is_whitespace_delimited(void)
 
 void test_process_win32__cmdline_escapes_whitespace(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	const char *spaces[] = { "one with spaces" };
 	const char *tabs[] = { "one\twith\ttabs" };
 	const char *multiple[] = { "one    with    many    spaces" };
@@ -44,7 +44,7 @@ void test_process_win32__cmdline_escapes_whitespace(void)
 
 void test_process_win32__cmdline_escapes_quotes(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	const char *one[] = { "echo", "\"hello world\"" };
 
 	assert_cmdline("echo \\\"hello\" \"world\\\"", one);
@@ -53,7 +53,7 @@ void test_process_win32__cmdline_escapes_quotes(void)
 
 void test_process_win32__cmdline_escapes_backslash(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	const char *one[] = { "foo\\bar", "foo\\baz" };
 	const char *two[] = { "c:\\program files\\foo bar\\foo bar.exe", "c:\\path\\to\\other\\", "/a", "/b" };
 

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_strlen_h__
@@ -13,7 +13,7 @@
 #endif
 
 #ifdef NO_STRNLEN
-GIT_INLINE(size_t) p_strnlen(const char *s, size_t maxlen) {
+GIT3_INLINE(size_t) p_strnlen(const char *s, size_t maxlen) {
 	const char *end = memchr(s, 0, maxlen);
 	return end ? (size_t)(end - s) : maxlen;
 }

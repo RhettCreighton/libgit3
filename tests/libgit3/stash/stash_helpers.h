@@ -1,8 +1,8 @@
 void setup_stash(
-	git_repository *repo,
-	git_signature *signature);
+	git3_repository *repo,
+	git3_signature *signature);
 
 void assert_status(
-	git_repository *repo,
+	git3_repository *repo,
 	const char *path,
 	int status_flags);

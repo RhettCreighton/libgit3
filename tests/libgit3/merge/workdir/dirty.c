@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/merge.h"
 #include "merge.h"
 #include "index.h"
@@ -22,8 +22,8 @@
 #define CHANGED_IN_BRANCH_FILE \
 	"changed in branch\n"
 
-static git_repository *repo;
-static git_index *repo_index;
+static git3_repository *repo;
+static git3_index *repo_index;
 
 static char *unaffected[][4] = {
 	{ "added-in-master.txt", NULL },
@@ -67,39 +67,39 @@ static char *result_contents[4][6] = {
 void test_merge_workdir_dirty__initialize(void)
 {
 	repo = cl_git_sandbox_init(TEST_REPO_PATH);
-	git_repository_index(&repo_index, repo);
+	git3_repository_index(&repo_index, repo);
 }
 
 void test_merge_workdir_dirty__cleanup(void)
 {
-	git_index_free(repo_index);
+	git3_index_free(repo_index);
 	cl_git_sandbox_cleanup();
 }
 
-static void set_core_autocrlf_to(git_repository *repo, bool value)
+static void set_core_autocrlf_to(git3_repository *repo, bool value)
 {
-	git_config *cfg;
+	git3_config *cfg;
 
-	cl_git_pass(git_repository_config(&cfg, repo));
-	cl_git_pass(git_config_set_bool(cfg, "core.autocrlf", value));
+	cl_git_pass(git3_repository_config(&cfg, repo));
+	cl_git_pass(git3_config_set_bool(cfg, "core.autocrlf", value));
 
-	git_config_free(cfg);
+	git3_config_free(cfg);
 }
 
 static int merge_branch(void)
 {
-	git_oid their_oids[1];
-	git_annotated_commit *their_head;
-	git_merge_options merge_opts = GIT_MERGE_OPTIONS_INIT;
-	git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
+	git3_oid their_oids[1];
+	git3_annotated_commit *their_head;
+	git3_merge_options merge_opts = GIT3_MERGE_OPTIONS_INIT;
+	git3_checkout_options checkout_opts = GIT3_CHECKOUT_OPTIONS_INIT;
 	int error;
 
-	cl_git_pass(git_oid_from_string(&their_oids[0], MERGE_BRANCH_OID, GIT_OID_SHA1));
-	cl_git_pass(git_annotated_commit_lookup(&their_head, repo, &their_oids[0]));
+	cl_git_pass(git3_oid_from_string(&their_oids[0], MERGE_BRANCH_OID, GIT3_OID_SHA1));
+	cl_git_pass(git3_annotated_commit_lookup(&their_head, repo, &their_oids[0]));
 
-	error = git_merge(repo, (const git_annotated_commit **)&their_head, 1, &merge_opts, &checkout_opts);
+	error = git3_merge(repo, (const git3_annotated_commit **)&their_head, 1, &merge_opts, &checkout_opts);
 
-	git_annotated_commit_free(their_head);
+	git3_annotated_commit_free(their_head);
 
 	return error;
 }
@@ -107,30 +107,30 @@ static int merge_branch(void)
 static void write_files(char *files[])
 {
 	char *filename;
-	git_str path = GIT_STR_INIT, content = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT, content = GIT3_STR_INIT;
 	size_t i;
 
 	for (i = 0, filename = files[i]; filename; filename = files[++i]) {
-		git_str_clear(&path);
-		git_str_clear(&content);
+		git3_str_clear(&path);
+		git3_str_clear(&content);
 
-		git_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename);
-		git_str_printf(&content, "This is a dirty file in the working directory!\n\n"
+		git3_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename);
+		git3_str_printf(&content, "This is a dirty file in the working directory!\n\n"
 			"It will not be staged!  Its filename is %s.\n", filename);
 
 		cl_git_mkfile(path.ptr, content.ptr);
 	}
 
-	git_str_dispose(&path);
-	git_str_dispose(&content);
+	git3_str_dispose(&path);
+	git3_str_dispose(&content);
 }
 
 static void hack_index(char *files[])
 {
 	char *filename;
 	struct stat statbuf;
-	git_str path = GIT_STR_INIT;
-	git_index_entry *entry;
+	git3_str path = GIT3_STR_INIT;
+	git3_index_entry *entry;
 	struct p_timeval times[2];
 	time_t now;
 	size_t i;
@@ -151,18 +151,18 @@ static void hack_index(char *files[])
 	times[1].tv_usec = 0;
 
 	for (i = 0, filename = files[i]; filename; filename = files[++i]) {
-		git_str_clear(&path);
+		git3_str_clear(&path);
 
-		cl_assert(entry = (git_index_entry *)
-			git_index_get_bypath(repo_index, filename, 0));
+		cl_assert(entry = (git3_index_entry *)
+			git3_index_get_bypath(repo_index, filename, 0));
 
-		cl_git_pass(git_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename));
+		cl_git_pass(git3_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename));
 		cl_git_pass(p_utimes(path.ptr, times));
 		cl_git_pass(p_stat(path.ptr, &statbuf));
 
 		entry->ctime.seconds = (int32_t)statbuf.st_ctime;
 		entry->mtime.seconds = (int32_t)statbuf.st_mtime;
-#if defined(GIT_NSEC)
+#if defined(GIT3_NSEC)
 		entry->ctime.nanoseconds = statbuf.st_ctime_nsec;
 		entry->mtime.nanoseconds = statbuf.st_mtime_nsec;
 #else
@@ -176,7 +176,7 @@ static void hack_index(char *files[])
 		entry->file_size = (uint32_t)statbuf.st_size;
 	}
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 static void stage_random_files(char *files[])
@@ -187,67 +187,67 @@ static void stage_random_files(char *files[])
 	write_files(files);
 
 	for (i = 0, filename = files[i]; filename; filename = files[++i])
-		cl_git_pass(git_index_add_bypath(repo_index, filename));
+		cl_git_pass(git3_index_add_bypath(repo_index, filename));
 }
 
 static void stage_content(char *content[])
 {
-	git_reference *head;
-	git_object *head_object;
-	git_str path = GIT_STR_INIT;
+	git3_reference *head;
+	git3_object *head_object;
+	git3_str path = GIT3_STR_INIT;
 	char *filename, *text;
 	size_t i;
 
-	cl_git_pass(git_repository_head(&head, repo));
-	cl_git_pass(git_reference_peel(&head_object, head, GIT_OBJECT_COMMIT));
-	cl_git_pass(git_reset(repo, head_object, GIT_RESET_HARD, NULL));
+	cl_git_pass(git3_repository_head(&head, repo));
+	cl_git_pass(git3_reference_peel(&head_object, head, GIT3_OBJECT_COMMIT));
+	cl_git_pass(git3_reset(repo, head_object, GIT3_RESET_HARD, NULL));
 
 	for (i = 0, filename = content[i], text = content[++i];
 		filename && text;
 		filename = content[++i], text = content[++i]) {
 
-		git_str_clear(&path);
+		git3_str_clear(&path);
 
-		cl_git_pass(git_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename));
+		cl_git_pass(git3_str_printf(&path, "%s/%s", TEST_REPO_PATH, filename));
 
 		cl_git_mkfile(path.ptr, text);
-		cl_git_pass(git_index_add_bypath(repo_index, filename));
+		cl_git_pass(git3_index_add_bypath(repo_index, filename));
 	}
 
-	git_object_free(head_object);
-	git_reference_free(head);
-	git_str_dispose(&path);
+	git3_object_free(head_object);
+	git3_reference_free(head);
+	git3_str_dispose(&path);
 }
 
 static int merge_dirty_files(char *dirty_files[])
 {
-	git_reference *head;
-	git_object *head_object;
+	git3_reference *head;
+	git3_object *head_object;
 	int error;
 
-	cl_git_pass(git_repository_head(&head, repo));
-	cl_git_pass(git_reference_peel(&head_object, head, GIT_OBJECT_COMMIT));
-	cl_git_pass(git_reset(repo, head_object, GIT_RESET_HARD, NULL));
+	cl_git_pass(git3_repository_head(&head, repo));
+	cl_git_pass(git3_reference_peel(&head_object, head, GIT3_OBJECT_COMMIT));
+	cl_git_pass(git3_reset(repo, head_object, GIT3_RESET_HARD, NULL));
 
 	write_files(dirty_files);
 
 	error = merge_branch();
 
-	git_object_free(head_object);
-	git_reference_free(head);
+	git3_object_free(head_object);
+	git3_reference_free(head);
 
 	return error;
 }
 
 static int merge_differently_filtered_files(char *files[])
 {
-	git_reference *head;
-	git_object *head_object;
+	git3_reference *head;
+	git3_object *head_object;
 	int error;
 
-	cl_git_pass(git_repository_head(&head, repo));
-	cl_git_pass(git_reference_peel(&head_object, head, GIT_OBJECT_COMMIT));
-	cl_git_pass(git_reset(repo, head_object, GIT_RESET_HARD, NULL));
+	cl_git_pass(git3_repository_head(&head, repo));
+	cl_git_pass(git3_reference_peel(&head_object, head, GIT3_OBJECT_COMMIT));
+	cl_git_pass(git3_reset(repo, head_object, GIT3_RESET_HARD, NULL));
 
 	/* Emulate checkout with a broken or misconfigured filter:  modify some
 	 * files on-disk and then update the index with the updated file size
@@ -262,12 +262,12 @@ static int merge_differently_filtered_files(char *files[])
 	write_files(files);
 	hack_index(files);
 
-	cl_git_pass(git_index_write(repo_index));
+	cl_git_pass(git3_index_write(repo_index));
 
 	error = merge_branch();
 
-	git_object_free(head_object);
-	git_reference_free(head);
+	git3_object_free(head_object);
+	git3_reference_free(head);
 
 	return error;
 }
@@ -289,19 +289,19 @@ void test_merge_workdir_dirty__unaffected_dirty_files_allowed(void)
 
 void test_merge_workdir_dirty__unstaged_deletes_maintained(void)
 {
-	git_reference *head;
-	git_object *head_object;
+	git3_reference *head;
+	git3_object *head_object;
 
-	cl_git_pass(git_repository_head(&head, repo));
-	cl_git_pass(git_reference_peel(&head_object, head, GIT_OBJECT_COMMIT));
-	cl_git_pass(git_reset(repo, head_object, GIT_RESET_HARD, NULL));
+	cl_git_pass(git3_repository_head(&head, repo));
+	cl_git_pass(git3_reference_peel(&head_object, head, GIT3_OBJECT_COMMIT));
+	cl_git_pass(git3_reset(repo, head_object, GIT3_RESET_HARD, NULL));
 
 	cl_git_pass(p_unlink("merge-resolve/unchanged.txt"));
 
 	cl_git_pass(merge_branch());
 
-	git_object_free(head_object);
-	git_reference_free(head);
+	git3_object_free(head_object);
+	git3_reference_free(head);
 }
 
 void test_merge_workdir_dirty__affected_dirty_files_disallowed(void)
@@ -335,7 +335,7 @@ void test_merge_workdir_dirty__identical_staged_files_allowed(void)
 	for (i = 0, content = result_contents[i]; content[0]; content = result_contents[++i]) {
 		stage_content(content);
 
-		cl_git_pass(git_index_write(repo_index));
+		cl_git_pass(git3_index_write(repo_index));
 		cl_git_pass(merge_branch());
 	}
 }

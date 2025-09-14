@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -10,70 +10,70 @@
 
 #include "transports/smart.h"
 
-int git_smart_subtransport_ssh(
-	git_smart_subtransport **out,
-	git_transport *owner,
+int git3_smart_subtransport_ssh(
+	git3_smart_subtransport **out,
+	git3_transport *owner,
 	void *param)
 {
-#ifdef GIT_SSH_LIBSSH2
-	return git_smart_subtransport_ssh_libssh2(out, owner, param);
-#elif GIT_SSH_EXEC
-	return git_smart_subtransport_ssh_exec(out, owner, param);
+#ifdef GIT3_SSH_LIBSSH2
+	return git3_smart_subtransport_ssh_libssh2(out, owner, param);
+#elif GIT3_SSH_EXEC
+	return git3_smart_subtransport_ssh_exec(out, owner, param);
 #else
-	GIT_UNUSED(out);
-	GIT_UNUSED(owner);
-	GIT_UNUSED(param);
+	GIT3_UNUSED(out);
+	GIT3_UNUSED(owner);
+	GIT3_UNUSED(param);
 
-	git_error_set(GIT_ERROR_INVALID, "cannot create SSH transport; library was built without SSH support");
+	git3_error_set(GIT3_ERROR_INVALID, "cannot create SSH transport; library was built without SSH support");
 	return -1;
 #endif
 }
 
-static int transport_set_paths(git_transport *t, git_strarray *paths)
+static int transport_set_paths(git3_transport *t, git3_strarray *paths)
 {
 	transport_smart *smart = (transport_smart *)t;
 
-#ifdef GIT_SSH_LIBSSH2
-	return git_smart_subtransport_ssh_libssh2_set_paths(
-		(git_smart_subtransport *)smart->wrapped,
+#ifdef GIT3_SSH_LIBSSH2
+	return git3_smart_subtransport_ssh_libssh2_set_paths(
+		(git3_smart_subtransport *)smart->wrapped,
 		paths->strings[0],
 		paths->strings[1]);
-#elif GIT_SSH_EXEC
-	return git_smart_subtransport_ssh_exec_set_paths(
-		(git_smart_subtransport *)smart->wrapped,
+#elif GIT3_SSH_EXEC
+	return git3_smart_subtransport_ssh_exec_set_paths(
+		(git3_smart_subtransport *)smart->wrapped,
 		paths->strings[0],
 		paths->strings[1]);
 #else
-	GIT_UNUSED(t);
-	GIT_UNUSED(smart);
-	GIT_UNUSED(paths);
+	GIT3_UNUSED(t);
+	GIT3_UNUSED(smart);
+	GIT3_UNUSED(paths);
 
-	GIT_ASSERT(!"cannot create SSH library; library was built without SSH support");
+	GIT3_ASSERT(!"cannot create SSH library; library was built without SSH support");
 	return -1;
 #endif
 }
 
-int git_transport_ssh_with_paths(
-	git_transport **out,
-	git_remote *owner,
+int git3_transport_ssh_with_paths(
+	git3_transport **out,
+	git3_remote *owner,
 	void *payload)
 {
-	git_strarray *paths = (git_strarray *) payload;
-	git_transport *transport;
+	git3_strarray *paths = (git3_strarray *) payload;
+	git3_transport *transport;
 	int error;
 
-	git_smart_subtransport_definition ssh_definition = {
-		git_smart_subtransport_ssh,
+	git3_smart_subtransport_definition ssh_definition = {
+		git3_smart_subtransport_ssh,
 		0, /* no RPC */
 		NULL
 	};
 
 	if (paths->count != 2) {
-		git_error_set(GIT_ERROR_SSH, "invalid ssh paths, must be two strings");
-		return GIT_EINVALIDSPEC;
+		git3_error_set(GIT3_ERROR_SSH, "invalid ssh paths, must be two strings");
+		return GIT3_EINVALIDSPEC;
 	}
 
-	if ((error = git_transport_smart(&transport, owner, &ssh_definition)) < 0)
+	if ((error = git3_transport_smart(&transport, owner, &ssh_definition)) < 0)
 		return error;
 
 	if ((error = transport_set_paths(transport, paths)) < 0)

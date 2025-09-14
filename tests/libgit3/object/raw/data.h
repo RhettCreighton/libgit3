@@ -274,50 +274,50 @@ static char *some_id = "fd8430bc864cfcd5f10e5590f8a447e01b942bfe";
 /*
  * In-memory objects
  */
-static git_rawobj tree_obj = {
+static git3_rawobj tree_obj = {
 	tree_data,
 	sizeof(tree_data),
-	GIT_OBJECT_TREE
+	GIT3_OBJECT_TREE
 };
 
-static git_rawobj tag_obj = {
+static git3_rawobj tag_obj = {
 	tag_data,
 	sizeof(tag_data),
-	GIT_OBJECT_TAG
+	GIT3_OBJECT_TAG
 };
 
-static git_rawobj zero_obj = {
+static git3_rawobj zero_obj = {
 	zero_data,
 	0,
-	GIT_OBJECT_BLOB
+	GIT3_OBJECT_BLOB
 };
 
-static git_rawobj one_obj = {
+static git3_rawobj one_obj = {
 	one_data,
 	sizeof(one_data),
-	GIT_OBJECT_BLOB
+	GIT3_OBJECT_BLOB
 };
 
-static git_rawobj two_obj = {
+static git3_rawobj two_obj = {
 	two_data,
 	sizeof(two_data),
-	GIT_OBJECT_BLOB
+	GIT3_OBJECT_BLOB
 };
 
-static git_rawobj commit_obj = {
+static git3_rawobj commit_obj = {
 	commit_data,
 	sizeof(commit_data),
-	GIT_OBJECT_COMMIT
+	GIT3_OBJECT_COMMIT
 };
 
-static git_rawobj some_obj = {
+static git3_rawobj some_obj = {
 	some_data,
 	sizeof(some_data),
-	GIT_OBJECT_BLOB
+	GIT3_OBJECT_BLOB
 };
 
-static git_rawobj junk_obj = {
+static git3_rawobj junk_obj = {
 	NULL,
 	0,
-	GIT_OBJECT_INVALID
+	GIT3_OBJECT_INVALID
 };

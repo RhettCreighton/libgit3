@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_worktree_h__
@@ -14,25 +14,25 @@
 #include "checkout.h"
 
 /**
- * @file git2/worktree.h
+ * @file git3/worktree.h
  * @brief Additional working directories for a repository
- * @defgroup git_commit Additional working directories for a repository
+ * @defgroup git3_commit Additional working directories for a repository
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * List names of linked working trees
  *
- * The returned list should be released with `git_strarray_free`
+ * The returned list should be released with `git3_strarray_free`
  * when no longer needed.
  *
  * @param out pointer to the array of working tree names
  * @param repo the repo to use when listing working trees
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_worktree_list(git_strarray *out, git_repository *repo);
+GIT3_EXTERN(int) git3_worktree_list(git3_strarray *out, git3_repository *repo);
 
 /**
  * Lookup a working tree by its name for a given repository
@@ -42,27 +42,27 @@ GIT_EXTERN(int) git_worktree_list(git_strarray *out, git_repository *repo);
  * @param name Name of the working tree to look up
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_worktree_lookup(git_worktree **out, git_repository *repo, const char *name);
+GIT3_EXTERN(int) git3_worktree_lookup(git3_worktree **out, git3_repository *repo, const char *name);
 
 /**
  * Open a worktree of a given repository
  *
  * If a repository is not the main tree but a worktree, this
  * function will look up the worktree inside the parent
- * repository and create a new `git_worktree` structure.
+ * repository and create a new `git3_worktree` structure.
  *
  * @param out Out-pointer for the newly allocated worktree
  * @param repo Repository to look up worktree for
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_worktree_open_from_repository(git_worktree **out, git_repository *repo);
+GIT3_EXTERN(int) git3_worktree_open_from_repository(git3_worktree **out, git3_repository *repo);
 
 /**
  * Free a previously allocated worktree
  *
  * @param wt worktree handle to close. If NULL nothing occurs.
  */
-GIT_EXTERN(void) git_worktree_free(git_worktree *wt);
+GIT3_EXTERN(void) git3_worktree_free(git3_worktree *wt);
 
 /**
  * Check if worktree is valid
@@ -74,46 +74,46 @@ GIT_EXTERN(void) git_worktree_free(git_worktree *wt);
  * @param wt Worktree to check
  * @return 0 when worktree is valid, error-code otherwise
  */
-GIT_EXTERN(int) git_worktree_validate(const git_worktree *wt);
+GIT3_EXTERN(int) git3_worktree_validate(const git3_worktree *wt);
 
 /**
  * Worktree add options structure
  *
- * Initialize with `GIT_WORKTREE_ADD_OPTIONS_INIT`. Alternatively, you can
- * use `git_worktree_add_options_init`.
+ * Initialize with `GIT3_WORKTREE_ADD_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_worktree_add_options_init`.
  *
  */
-typedef struct git_worktree_add_options {
+typedef struct git3_worktree_add_options {
 	unsigned int version;
 
 	int lock;		/**< lock newly created worktree */
 	int checkout_existing;	/**< allow checkout of existing branch matching worktree name */
-	git_reference *ref;	/**< reference to use for the new worktree HEAD */
+	git3_reference *ref;	/**< reference to use for the new worktree HEAD */
 
 	/**
 	 * Options for the checkout.
 	 */
-	git_checkout_options checkout_options;
-} git_worktree_add_options;
+	git3_checkout_options checkout_options;
+} git3_worktree_add_options;
 
-/** Current version for the `git_worktree_add_options` structure */
-#define GIT_WORKTREE_ADD_OPTIONS_VERSION 1
+/** Current version for the `git3_worktree_add_options` structure */
+#define GIT3_WORKTREE_ADD_OPTIONS_VERSION 1
 
-/** Static constructor for `git_worktree_add_options` */
-#define GIT_WORKTREE_ADD_OPTIONS_INIT { GIT_WORKTREE_ADD_OPTIONS_VERSION, \
-	0, 0, NULL, GIT_CHECKOUT_OPTIONS_INIT }
+/** Static constructor for `git3_worktree_add_options` */
+#define GIT3_WORKTREE_ADD_OPTIONS_INIT { GIT3_WORKTREE_ADD_OPTIONS_VERSION, \
+	0, 0, NULL, GIT3_CHECKOUT_OPTIONS_INIT }
 
 /**
- * Initialize git_worktree_add_options structure
+ * Initialize git3_worktree_add_options structure
  *
- * Initializes a `git_worktree_add_options` with default values. Equivalent to
- * creating an instance with `GIT_WORKTREE_ADD_OPTIONS_INIT`.
+ * Initializes a `git3_worktree_add_options` with default values. Equivalent to
+ * creating an instance with `GIT3_WORKTREE_ADD_OPTIONS_INIT`.
  *
- * @param opts The `git_worktree_add_options` struct to initialize.
- * @param version The struct version; pass `GIT_WORKTREE_ADD_OPTIONS_VERSION`.
+ * @param opts The `git3_worktree_add_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_WORKTREE_ADD_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_worktree_add_options_init(git_worktree_add_options *opts,
+GIT3_EXTERN(int) git3_worktree_add_options_init(git3_worktree_add_options *opts,
 	unsigned int version);
 
 /**
@@ -130,9 +130,9 @@ GIT_EXTERN(int) git_worktree_add_options_init(git_worktree_add_options *opts,
  * @param opts Options to modify default behavior. May be NULL
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_worktree_add(git_worktree **out, git_repository *repo,
+GIT3_EXTERN(int) git3_worktree_add(git3_worktree **out, git3_repository *repo,
 	const char *name, const char *path,
-	const git_worktree_add_options *opts);
+	const git3_worktree_add_options *opts);
 
 /**
  * Lock worktree if not already locked
@@ -144,7 +144,7 @@ GIT_EXTERN(int) git_worktree_add(git_worktree **out, git_repository *repo,
  * @param reason Reason why the working tree is being locked
  * @return 0 on success, non-zero otherwise
  */
-GIT_EXTERN(int) git_worktree_lock(git_worktree *wt, const char *reason);
+GIT3_EXTERN(int) git3_worktree_lock(git3_worktree *wt, const char *reason);
 
 /**
  * Unlock a locked worktree
@@ -153,7 +153,7 @@ GIT_EXTERN(int) git_worktree_lock(git_worktree *wt, const char *reason);
  * @return 0 on success, 1 if worktree was not locked, error-code
  *  otherwise
  */
-GIT_EXTERN(int) git_worktree_unlock(git_worktree *wt);
+GIT3_EXTERN(int) git3_worktree_unlock(git3_worktree *wt);
 
 /**
  * Check if worktree is locked
@@ -167,71 +167,71 @@ GIT_EXTERN(int) git_worktree_unlock(git_worktree *wt);
  *  than zero if it is locked, less than zero if there was an
  *  error
  */
-GIT_EXTERN(int) git_worktree_is_locked(git_buf *reason, const git_worktree *wt);
+GIT3_EXTERN(int) git3_worktree_is_locked(git3_buf *reason, const git3_worktree *wt);
 
 /**
  * Retrieve the name of the worktree
  *
  * @param wt Worktree to get the name for
  * @return The worktree's name. The pointer returned is valid for the
- *  lifetime of the git_worktree
+ *  lifetime of the git3_worktree
  */
-GIT_EXTERN(const char *) git_worktree_name(const git_worktree *wt);
+GIT3_EXTERN(const char *) git3_worktree_name(const git3_worktree *wt);
 
 /**
  * Retrieve the filesystem path for the worktree
  *
  * @param wt Worktree to get the path for
  * @return The worktree's filesystem path. The pointer returned
- *  is valid for the lifetime of the git_worktree.
+ *  is valid for the lifetime of the git3_worktree.
  */
-GIT_EXTERN(const char *) git_worktree_path(const git_worktree *wt);
+GIT3_EXTERN(const char *) git3_worktree_path(const git3_worktree *wt);
 
 /**
- * Flags which can be passed to git_worktree_prune to alter its
+ * Flags which can be passed to git3_worktree_prune to alter its
  * behavior.
  */
 typedef enum {
 	/* Prune working tree even if working tree is valid */
-	GIT_WORKTREE_PRUNE_VALID = 1u << 0,
+	GIT3_WORKTREE_PRUNE_VALID = 1u << 0,
 	/* Prune working tree even if it is locked */
-	GIT_WORKTREE_PRUNE_LOCKED = 1u << 1,
+	GIT3_WORKTREE_PRUNE_LOCKED = 1u << 1,
 	/* Prune checked out working tree */
-	GIT_WORKTREE_PRUNE_WORKING_TREE = 1u << 2
-} git_worktree_prune_t;
+	GIT3_WORKTREE_PRUNE_WORKING_TREE = 1u << 2
+} git3_worktree_prune_t;
 
 /**
  * Worktree prune options structure
  *
- * Initialize with `GIT_WORKTREE_PRUNE_OPTIONS_INIT`. Alternatively, you can
- * use `git_worktree_prune_options_init`.
+ * Initialize with `GIT3_WORKTREE_PRUNE_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_worktree_prune_options_init`.
  *
  */
-typedef struct git_worktree_prune_options {
+typedef struct git3_worktree_prune_options {
 	unsigned int version;
 
-	/** A combination of `git_worktree_prune_t` */
+	/** A combination of `git3_worktree_prune_t` */
 	uint32_t flags;
-} git_worktree_prune_options;
+} git3_worktree_prune_options;
 
-/** Current version for the `git_worktree_prune_options` structure */
-#define GIT_WORKTREE_PRUNE_OPTIONS_VERSION 1
+/** Current version for the `git3_worktree_prune_options` structure */
+#define GIT3_WORKTREE_PRUNE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_worktree_prune_options` */
-#define GIT_WORKTREE_PRUNE_OPTIONS_INIT {GIT_WORKTREE_PRUNE_OPTIONS_VERSION,0}
+/** Static constructor for `git3_worktree_prune_options` */
+#define GIT3_WORKTREE_PRUNE_OPTIONS_INIT {GIT3_WORKTREE_PRUNE_OPTIONS_VERSION,0}
 
 /**
- * Initialize git_worktree_prune_options structure
+ * Initialize git3_worktree_prune_options structure
  *
- * Initializes a `git_worktree_prune_options` with default values. Equivalent to
- * creating an instance with `GIT_WORKTREE_PRUNE_OPTIONS_INIT`.
+ * Initializes a `git3_worktree_prune_options` with default values. Equivalent to
+ * creating an instance with `GIT3_WORKTREE_PRUNE_OPTIONS_INIT`.
  *
- * @param opts The `git_worktree_prune_options` struct to initialize.
- * @param version The struct version; pass `GIT_WORKTREE_PRUNE_OPTIONS_VERSION`.
+ * @param opts The `git3_worktree_prune_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_WORKTREE_PRUNE_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_worktree_prune_options_init(
-	git_worktree_prune_options *opts,
+GIT3_EXTERN(int) git3_worktree_prune_options_init(
+	git3_worktree_prune_options *opts,
 	unsigned int version);
 
 /**
@@ -254,25 +254,25 @@ GIT_EXTERN(int) git_worktree_prune_options_init(
  * @param opts The prunable options.
  * @return 1 if the worktree is prunable, 0 otherwise, or an error code.
  */
-GIT_EXTERN(int) git_worktree_is_prunable(git_worktree *wt,
-	git_worktree_prune_options *opts);
+GIT3_EXTERN(int) git3_worktree_is_prunable(git3_worktree *wt,
+	git3_worktree_prune_options *opts);
 
 /**
  * Prune working tree
  *
  * Prune the working tree, that is remove the git data
  * structures on disk. The repository will only be pruned of
- * `git_worktree_is_prunable` succeeds.
+ * `git3_worktree_is_prunable` succeeds.
  *
  * @param wt Worktree to prune
  * @param opts Specifies which checks to override. See
- *        `git_worktree_is_prunable`. May be NULL
+ *        `git3_worktree_is_prunable`. May be NULL
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_worktree_prune(git_worktree *wt,
-	git_worktree_prune_options *opts);
+GIT3_EXTERN(int) git3_worktree_prune(git3_worktree *wt,
+	git3_worktree_prune_options *opts);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

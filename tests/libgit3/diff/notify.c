@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_helpers.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_diff_notify__initialize(void)
 {
@@ -13,8 +13,8 @@ void test_diff_notify__cleanup(void)
 }
 
 static int assert_called_notifications(
-	const git_diff *diff_so_far,
-	const git_diff_delta *delta_to_add,
+	const git3_diff *diff_so_far,
+	const git3_diff_delta *delta_to_add,
 	const char *matched_pathspec,
 	void *payload)
 {
@@ -22,7 +22,7 @@ static int assert_called_notifications(
 	notify_expected *exp = (notify_expected*)payload;
 	notify_expected *e;
 
-	GIT_UNUSED(diff_so_far);
+	GIT3_UNUSED(diff_so_far);
 
 	for (e = exp; e->path != NULL; e++) {
 		if (strcmp(e->path, delta_to_add->new_file.path))
@@ -44,13 +44,13 @@ static void test_notify(
 	notify_expected *expected_matched_pathspecs,
 	int expected_diffed_files_count)
 {
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	diff_expects exp;
 
 	g_repo = cl_git_sandbox_init("status");
 
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 	opts.notify_cb = assert_called_notifications;
 	opts.pathspec.strings = searched_pathspecs;
 	opts.pathspec.count   = pathspecs_count;
@@ -58,12 +58,12 @@ static void test_notify(
 	opts.payload = expected_matched_pathspecs;
 	memset(&exp, 0, sizeof(exp));
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, g_repo, NULL, &opts));
-	cl_git_pass(git_diff_foreach(diff, diff_file_cb, NULL, NULL, NULL, &exp));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, g_repo, NULL, &opts));
+	cl_git_pass(git3_diff_foreach(diff, diff_file_cb, NULL, NULL, NULL, &exp));
 
 	cl_assert_equal_i(expected_diffed_files_count, exp.files);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 void test_diff_notify__notify_single_pathspec(void)
@@ -155,65 +155,65 @@ void test_diff_notify__notify_catchall(void)
 }
 
 static int abort_diff(
-	const git_diff *diff_so_far,
-	const git_diff_delta *delta_to_add,
+	const git3_diff *diff_so_far,
+	const git3_diff_delta *delta_to_add,
 	const char *matched_pathspec,
 	void *payload)
 {
-	GIT_UNUSED(diff_so_far);
-	GIT_UNUSED(delta_to_add);
-	GIT_UNUSED(matched_pathspec);
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(diff_so_far);
+	GIT3_UNUSED(delta_to_add);
+	GIT3_UNUSED(matched_pathspec);
+	GIT3_UNUSED(payload);
 
 	return -42;
 }
 
 void test_diff_notify__notify_cb_can_abort_diff(void)
 {
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	char *pathspec = NULL;
 
 	g_repo = cl_git_sandbox_init("status");
 
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 	opts.notify_cb = abort_diff;
 	opts.pathspec.strings = &pathspec;
 	opts.pathspec.count   = 1;
 
 	pathspec = "file_deleted";
 	cl_git_fail_with(
-		git_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
+		git3_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
 
 	pathspec = "staged_changes_modified_file";
 	cl_git_fail_with(
-		git_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
+		git3_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
 }
 
 static int filter_all(
-	const git_diff *diff_so_far,
-	const git_diff_delta *delta_to_add,
+	const git3_diff *diff_so_far,
+	const git3_diff_delta *delta_to_add,
 	const char *matched_pathspec,
 	void *payload)
 {
-	GIT_UNUSED(diff_so_far);
-	GIT_UNUSED(delta_to_add);
-	GIT_UNUSED(matched_pathspec);
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(diff_so_far);
+	GIT3_UNUSED(delta_to_add);
+	GIT3_UNUSED(matched_pathspec);
+	GIT3_UNUSED(payload);
 
 	return 42;
 }
 
 void test_diff_notify__notify_cb_can_be_used_as_filtering_function(void)
 {
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 	char *pathspec = NULL;
 	diff_expects exp;
 
 	g_repo = cl_git_sandbox_init("status");
 
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 	opts.notify_cb = filter_all;
 	opts.pathspec.strings = &pathspec;
 	opts.pathspec.count   = 1;
@@ -221,38 +221,38 @@ void test_diff_notify__notify_cb_can_be_used_as_filtering_function(void)
 	pathspec = "*_deleted";
 	memset(&exp, 0, sizeof(exp));
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, g_repo, NULL, &opts));
-	cl_git_pass(git_diff_foreach(diff, diff_file_cb, NULL, NULL, NULL, &exp));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, g_repo, NULL, &opts));
+	cl_git_pass(git3_diff_foreach(diff, diff_file_cb, NULL, NULL, NULL, &exp));
 
 	cl_assert_equal_i(0, exp.files);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 }
 
 static int progress_abort_diff(
-	const git_diff *diff_so_far,
+	const git3_diff *diff_so_far,
 	const char *old_path,
 	const char *new_path,
 	void *payload)
 {
-	GIT_UNUSED(diff_so_far);
-	GIT_UNUSED(old_path);
-	GIT_UNUSED(new_path);
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(diff_so_far);
+	GIT3_UNUSED(old_path);
+	GIT3_UNUSED(new_path);
+	GIT3_UNUSED(payload);
 
 	return -42;
 }
 
 void test_diff_notify__progress_cb_can_abort_diff(void)
 {
-	git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff *diff = NULL;
+	git3_diff_options opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff *diff = NULL;
 
 	g_repo = cl_git_sandbox_init("status");
 
-	opts.flags |= GIT_DIFF_INCLUDE_IGNORED | GIT_DIFF_INCLUDE_UNTRACKED;
+	opts.flags |= GIT3_DIFF_INCLUDE_IGNORED | GIT3_DIFF_INCLUDE_UNTRACKED;
 	opts.progress_cb = progress_abort_diff;
 
 	cl_git_fail_with(
-		git_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
+		git3_diff_index_to_workdir(&diff, g_repo, NULL, &opts), -42);
 }

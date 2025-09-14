@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_strarray_h__
@@ -10,33 +10,33 @@
 #include "common.h"
 
 /**
- * @file git2/strarray.h
+ * @file git3/strarray.h
  * @brief An array of strings for the user to free
- * @defgroup git_strarray An array of strings for the user to free
+ * @defgroup git3_strarray An array of strings for the user to free
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** Array of strings */
-typedef struct git_strarray {
+typedef struct git3_strarray {
 	char **strings;
 	size_t count;
-} git_strarray;
+} git3_strarray;
 
 /**
  * Free the strings contained in a string array.  This method should
- * be called on `git_strarray` objects that were provided by the
+ * be called on `git3_strarray` objects that were provided by the
  * library.  Not doing so, will result in a memory leak.
  *
- * This does not free the `git_strarray` itself, since the library will
+ * This does not free the `git3_strarray` itself, since the library will
  * never allocate that object directly itself.
  *
- * @param array The git_strarray that contains strings to free
+ * @param array The git3_strarray that contains strings to free
  */
-GIT_EXTERN(void) git_strarray_dispose(git_strarray *array);
+GIT3_EXTERN(void) git3_strarray_dispose(git3_strarray *array);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

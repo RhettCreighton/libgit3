@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -15,10 +15,10 @@
  * @param src The UTF-8 path of the directory to enumerate.
  * @return True if the filter string was created successfully; false otherwise
  */
-bool git_win32__findfirstfile_filter(git_win32_path dest, const char *src)
+bool git3_win32__findfirstfile_filter(git3_win32_path dest, const char *src)
 {
 	static const wchar_t suffix[] = L"\\*";
-	int len = git_win32_path_from_utf8(dest, src);
+	int len = git3_win32_path_from_utf8(dest, src);
 
 	/* Ensure the path was converted */
 	if (len < 0)
@@ -35,7 +35,7 @@ bool git_win32__findfirstfile_filter(git_win32_path dest, const char *src)
 	}
 
 	/* Ensure we have enough room to add the suffix */
-	if ((size_t)len >= GIT_WIN_PATH_UTF16 - CONST_STRLEN(suffix))
+	if ((size_t)len >= GIT3_WIN_PATH_UTF16 - CONST_STRLEN(suffix))
 		return false;
 
 	wcscat(dest, suffix);
@@ -48,12 +48,12 @@ bool git_win32__findfirstfile_filter(git_win32_path dest, const char *src)
  * @param path The path which should receive the +H bit.
  * @return 0 on success; -1 on failure
  */
-int git_win32__set_hidden(const char *path, bool hidden)
+int git3_win32__set_hidden(const char *path, bool hidden)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 	DWORD attrs, newattrs;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	attrs = GetFileAttributesW(buf);
@@ -68,7 +68,7 @@ int git_win32__set_hidden(const char *path, bool hidden)
 		newattrs = attrs & ~FILE_ATTRIBUTE_HIDDEN;
 
 	if (attrs != newattrs && !SetFileAttributesW(buf, newattrs)) {
-		git_error_set(GIT_ERROR_OS, "failed to %s hidden bit for '%s'",
+		git3_error_set(GIT3_ERROR_OS, "failed to %s hidden bit for '%s'",
 			hidden ? "set" : "unset", path);
 		return -1;
 	}
@@ -76,12 +76,12 @@ int git_win32__set_hidden(const char *path, bool hidden)
 	return 0;
 }
 
-int git_win32__hidden(bool *out, const char *path)
+int git3_win32__hidden(bool *out, const char *path)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 	DWORD attrs;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	attrs = GetFileAttributesW(buf);
@@ -94,12 +94,12 @@ int git_win32__hidden(bool *out, const char *path)
 	return 0;
 }
 
-int git_win32__file_attribute_to_stat(
+int git3_win32__file_attribute_to_stat(
 	struct stat *st,
 	const WIN32_FILE_ATTRIBUTE_DATA *attrdata,
 	const wchar_t *path)
 {
-	git_win32__stat_init(st,
+	git3_win32__stat_init(st,
 		attrdata->dwFileAttributes,
 		attrdata->nFileSizeHigh,
 		attrdata->nFileSizeLow,
@@ -108,15 +108,15 @@ int git_win32__file_attribute_to_stat(
 		attrdata->ftLastWriteTime);
 
 	if (attrdata->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT && path) {
-		git_win32_path target;
+		git3_win32_path target;
 
-		if (git_win32_path_readlink_w(target, path) >= 0) {
+		if (git3_win32_path_readlink_w(target, path) >= 0) {
 			st->st_mode = (st->st_mode & ~S_IFMT) | S_IFLNK;
 
 			/* st_size gets the UTF-8 length of the target name, in bytes,
 			 * not counting the NULL terminator */
-			if ((st->st_size = git_utf8_from_16(NULL, 0, target)) < 0) {
-				git_error_set(GIT_ERROR_OS, "could not convert reparse point name for '%ls'", path);
+			if ((st->st_size = git3_utf8_from_16(NULL, 0, target)) < 0) {
+				git3_error_set(GIT3_ERROR_OS, "could not convert reparse point name for '%ls'", path);
 				return -1;
 			}
 		}

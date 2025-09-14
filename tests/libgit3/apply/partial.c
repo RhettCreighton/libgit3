@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/repository.h"
 
 #include "apply.h"
@@ -6,7 +6,7 @@
 
 #include "../patch/patch_common.h"
 
-static git_repository *repo = NULL;
+static git3_repository *repo = NULL;
 
 void test_apply_partial__initialize(void)
 {
@@ -19,57 +19,57 @@ void test_apply_partial__cleanup(void)
 }
 
 static int skip_addition(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	return (hunk->new_lines > hunk->old_lines) ? 1 : 0;
 }
 
 static int skip_deletion(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	return (hunk->new_lines < hunk->old_lines) ? 1 : 0;
 }
 
 static int skip_change(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	return (hunk->new_lines == hunk->old_lines) ? 1 : 0;
 }
 
 static int abort_addition(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
-	return (hunk->new_lines > hunk->old_lines) ? GIT_EUSER : 0;
+	return (hunk->new_lines > hunk->old_lines) ? GIT3_EUSER : 0;
 }
 
 static int abort_deletion(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
-	return (hunk->new_lines < hunk->old_lines) ? GIT_EUSER : 0;
+	return (hunk->new_lines < hunk->old_lines) ? GIT3_EUSER : 0;
 }
 
 static int abort_change(
-	const git_diff_hunk *hunk,
+	const git3_diff_hunk *hunk,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
-	return (hunk->new_lines == hunk->old_lines) ? GIT_EUSER : 0;
+	return (hunk->new_lines == hunk->old_lines) ? GIT3_EUSER : 0;
 }
 
 static int apply_buf(
@@ -78,14 +78,14 @@ static int apply_buf(
 	const char *new,
 	const char *newname,
 	const char *expected,
-	const git_diff_options *diff_opts,
-	git_apply_hunk_cb hunk_cb,
+	const git3_diff_options *diff_opts,
+	git3_apply_hunk_cb hunk_cb,
 	void *payload)
 {
-	git_patch *patch;
-	git_str result = GIT_STR_INIT;
-	git_str patchbuf = GIT_STR_INIT;
-	git_apply_options opts = GIT_APPLY_OPTIONS_INIT;
+	git3_patch *patch;
+	git3_str result = GIT3_STR_INIT;
+	git3_str patchbuf = GIT3_STR_INIT;
+	git3_apply_options opts = GIT3_APPLY_OPTIONS_INIT;
 	char *filename;
 	unsigned int mode;
 	int error;
@@ -95,17 +95,17 @@ static int apply_buf(
 	opts.hunk_cb = hunk_cb;
 	opts.payload = payload;
 
-	cl_git_pass(git_patch_from_buffers(&patch, old, oldsize, oldname, new, newsize, newname, diff_opts));
-	if ((error = git_apply__patch(&result, &filename, &mode, old, oldsize, patch, &opts)) == 0) {
+	cl_git_pass(git3_patch_from_buffers(&patch, old, oldsize, oldname, new, newsize, newname, diff_opts));
+	if ((error = git3_apply__patch(&result, &filename, &mode, old, oldsize, patch, &opts)) == 0) {
 		cl_assert_equal_s(expected, result.ptr);
 		cl_assert_equal_s(newname, filename);
 		cl_assert_equal_i(0100644, mode);
 	}
 
-	git__free(filename);
-	git_str_dispose(&result);
-	git_str_dispose(&patchbuf);
-	git_patch_free(patch);
+	git3__free(filename);
+	git3_str_dispose(&result);
+	git3_str_dispose(&patchbuf);
+	git3_patch_free(patch);
 
 	return error;
 }
@@ -120,7 +120,7 @@ void test_apply_partial__prepend_and_change_skip_addition(void)
 
 void test_apply_partial__prepend_and_change_nocontext_skip_addition(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(apply_buf(
@@ -131,7 +131,7 @@ void test_apply_partial__prepend_and_change_nocontext_skip_addition(void)
 
 void test_apply_partial__prepend_and_change_nocontext_abort_addition(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_fail(apply_buf(
@@ -150,7 +150,7 @@ void test_apply_partial__prepend_and_change_skip_change(void)
 
 void test_apply_partial__prepend_and_change_nocontext_skip_change(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(apply_buf(
@@ -161,7 +161,7 @@ void test_apply_partial__prepend_and_change_nocontext_skip_change(void)
 
 void test_apply_partial__prepend_and_change_nocontext_abort_change(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_fail(apply_buf(
@@ -180,7 +180,7 @@ void test_apply_partial__delete_and_change_skip_deletion(void)
 
 void test_apply_partial__delete_and_change_nocontext_skip_deletion(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(apply_buf(
@@ -191,7 +191,7 @@ void test_apply_partial__delete_and_change_nocontext_skip_deletion(void)
 
 void test_apply_partial__delete_and_change_nocontext_abort_deletion(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_fail(apply_buf(
@@ -210,7 +210,7 @@ void test_apply_partial__delete_and_change_skip_change(void)
 
 void test_apply_partial__delete_and_change_nocontext_skip_change(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(apply_buf(
@@ -221,7 +221,7 @@ void test_apply_partial__delete_and_change_nocontext_skip_change(void)
 
 void test_apply_partial__delete_and_change_nocontext_abort_change(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_fail(apply_buf(

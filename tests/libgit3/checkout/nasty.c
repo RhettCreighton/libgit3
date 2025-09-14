@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "checkout_helpers.h"
 
 #include "git3/checkout.h"
@@ -6,15 +6,15 @@
 #include "futils.h"
 
 static const char *repo_name = "nasty";
-static git_repository *repo;
-static git_checkout_options checkout_opts;
+static git3_repository *repo;
+static git3_checkout_options checkout_opts;
 
 void test_checkout_nasty__initialize(void)
 {
 	repo = cl_git_sandbox_init(repo_name);
 
-	GIT_INIT_STRUCTURE(&checkout_opts, GIT_CHECKOUT_OPTIONS_VERSION);
-	checkout_opts.checkout_strategy = GIT_CHECKOUT_FORCE;
+	GIT3_INIT_STRUCTURE(&checkout_opts, GIT3_CHECKOUT_OPTIONS_VERSION);
+	checkout_opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
 }
 
 void test_checkout_nasty__cleanup(void)
@@ -24,45 +24,45 @@ void test_checkout_nasty__cleanup(void)
 
 static void test_checkout_passes(const char *refname, const char *filename)
 {
-	git_oid commit_id;
-	git_commit *commit;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_str path = GIT_STR_INIT;
+	git3_oid commit_id;
+	git3_commit *commit;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_str path = GIT3_STR_INIT;
 
-	cl_git_pass(git_str_joinpath(&path, repo_name, filename));
+	cl_git_pass(git3_str_joinpath(&path, repo_name, filename));
 
-	cl_git_pass(git_reference_name_to_id(&commit_id, repo, refname));
-	cl_git_pass(git_commit_lookup(&commit, repo, &commit_id));
+	cl_git_pass(git3_reference_name_to_id(&commit_id, repo, refname));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &commit_id));
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE |
-		GIT_CHECKOUT_DONT_UPDATE_INDEX;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE |
+		GIT3_CHECKOUT_DONT_UPDATE_INDEX;
 
-	cl_git_pass(git_checkout_tree(repo, (const git_object *)commit, &opts));
-	cl_assert(!git_fs_path_exists(path.ptr));
+	cl_git_pass(git3_checkout_tree(repo, (const git3_object *)commit, &opts));
+	cl_assert(!git3_fs_path_exists(path.ptr));
 
-	git_commit_free(commit);
-	git_str_dispose(&path);
+	git3_commit_free(commit);
+	git3_str_dispose(&path);
 }
 
 static void test_checkout_fails(const char *refname, const char *filename)
 {
-	git_oid commit_id;
-	git_commit *commit;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_str path = GIT_STR_INIT;
+	git3_oid commit_id;
+	git3_commit *commit;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_str path = GIT3_STR_INIT;
 
-	cl_git_pass(git_str_joinpath(&path, repo_name, filename));
+	cl_git_pass(git3_str_joinpath(&path, repo_name, filename));
 
-	cl_git_pass(git_reference_name_to_id(&commit_id, repo, refname));
-	cl_git_pass(git_commit_lookup(&commit, repo, &commit_id));
+	cl_git_pass(git3_reference_name_to_id(&commit_id, repo, refname));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &commit_id));
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
 
-	cl_git_fail(git_checkout_tree(repo, (const git_object *)commit, &opts));
-	cl_assert(!git_fs_path_exists(path.ptr));
+	cl_git_fail(git3_checkout_tree(repo, (const git3_object *)commit, &opts));
+	cl_assert(!git3_fs_path_exists(path.ptr));
 
-	git_commit_free(commit);
-	git_str_dispose(&path);
+	git3_commit_free(commit);
+	git3_str_dispose(&path);
 }
 
 /* A tree that contains ".git" as a tree, with a blob inside
@@ -169,7 +169,7 @@ void test_checkout_nasty__dotdot_path(void)
 /* A tree that contains an entry with a backslash ".git\foobar"  */
 void test_checkout_nasty__dotgit_backslash_path(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dotgit_backslash_path", ".git/foobar");
 #endif
 }
@@ -177,7 +177,7 @@ void test_checkout_nasty__dotgit_backslash_path(void)
 /* A tree that contains an entry with a backslash ".GIT\foobar"  */
 void test_checkout_nasty__dotcapitalgit_backslash_path(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dotcapitalgit_backslash_path", ".GIT/foobar");
 #endif
 }
@@ -185,7 +185,7 @@ void test_checkout_nasty__dotcapitalgit_backslash_path(void)
 /* A tree that contains an entry with a backslash ".\.GIT\foobar"  */
 void test_checkout_nasty__dot_backslash_dotcapitalgit_path(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dot_backslash_dotcapitalgit_path", ".GIT/foobar");
 #endif
 }
@@ -195,7 +195,7 @@ void test_checkout_nasty__dot_backslash_dotcapitalgit_path(void)
  */
 void test_checkout_nasty__dot_git_dot(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dot_git_dot", ".git/foobar");
 #endif
 }
@@ -205,8 +205,8 @@ void test_checkout_nasty__dot_git_dot(void)
  */
 void test_checkout_nasty__git_tilde1(void)
 {
-	test_checkout_fails("refs/heads/git_tilde1", ".git/foobar");
-	test_checkout_fails("refs/heads/git_tilde1", "git~1/foobar");
+	test_checkout_fails("refs/heads/git3_tilde1", ".git/foobar");
+	test_checkout_fails("refs/heads/git3_tilde1", "git~1/foobar");
 }
 
 /* A tree that contains an entry "git~2", when we have forced the short
@@ -214,14 +214,14 @@ void test_checkout_nasty__git_tilde1(void)
  */
 void test_checkout_nasty__git_custom_shortname(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	if (!cl_sandbox_supports_8dot3())
 		clar__skip();
 
 	cl_must_pass(p_rename("nasty/.git", "nasty/_temp"));
 	cl_git_write2file("nasty/git~1", "", 0, O_RDWR|O_CREAT, 0666);
 	cl_must_pass(p_rename("nasty/_temp", "nasty/.git"));
-	test_checkout_fails("refs/heads/git_tilde2", ".git/foobar");
+	test_checkout_fails("refs/heads/git3_tilde2", ".git/foobar");
 #endif
 }
 
@@ -231,24 +231,24 @@ void test_checkout_nasty__git_custom_shortname(void)
  */
 void test_checkout_nasty__only_looks_like_a_git_shortname(void)
 {
-#ifdef GIT_WIN32
-	git_oid commit_id;
-	git_commit *commit;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+#ifdef GIT3_WIN32
+	git3_oid commit_id;
+	git3_commit *commit;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
 
 	cl_must_pass(p_rename("nasty/.git", "nasty/_temp"));
 	cl_git_write2file("nasty/git~1", "", 0, O_RDWR|O_CREAT, 0666);
 	cl_must_pass(p_rename("nasty/_temp", "nasty/.git"));
 
-	cl_git_pass(git_reference_name_to_id(&commit_id, repo, "refs/heads/git_tilde3"));
-	cl_git_pass(git_commit_lookup(&commit, repo, &commit_id));
+	cl_git_pass(git3_reference_name_to_id(&commit_id, repo, "refs/heads/git3_tilde3"));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &commit_id));
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
 
-	cl_git_pass(git_checkout_tree(repo, (const git_object *)commit, &opts));
-	cl_assert(git_fs_path_exists("nasty/git~3/foobar"));
+	cl_git_pass(git3_checkout_tree(repo, (const git3_object *)commit, &opts));
+	cl_assert(git3_fs_path_exists("nasty/git~3/foobar"));
 
-	git_commit_free(commit);
+	git3_commit_free(commit);
 #endif
 }
 
@@ -257,7 +257,7 @@ void test_checkout_nasty__only_looks_like_a_git_shortname(void)
  */
 void test_checkout_nasty__dot_git_colon(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dot_git_colon", ".git/foobar");
 #endif
 }
@@ -267,7 +267,7 @@ void test_checkout_nasty__dot_git_colon(void)
  */
 void test_checkout_nasty__dot_git_colon_stuff(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_checkout_fails("refs/heads/dot_git_colon_stuff", ".git/foobar");
 #endif
 }
@@ -354,7 +354,7 @@ void test_checkout_nasty__honors_core_protectntfs(void)
 	test_checkout_fails("refs/heads/dotgit_backslash_path", ".git/foobar");
 	test_checkout_fails("refs/heads/dotcapitalgit_backslash_path", ".GIT/foobar");
 	test_checkout_fails("refs/heads/dot_git_dot", ".git/foobar");
-	test_checkout_fails("refs/heads/git_tilde1", ".git/foobar");
+	test_checkout_fails("refs/heads/git3_tilde1", ".git/foobar");
 }
 
 void test_checkout_nasty__symlink1(void)

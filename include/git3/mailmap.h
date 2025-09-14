@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_mailmap_h__
@@ -12,9 +12,9 @@
 #include "buffer.h"
 
 /**
- * @file git2/mailmap.h
+ * @file git3/mailmap.h
  * @brief Mailmaps provide alternate email addresses for users
- * @defgroup git_mailmap Git mailmap routines
+ * @defgroup git3_mailmap Git mailmap routines
  * @ingroup Git
  * @{
  *
@@ -23,25 +23,25 @@
  * commits made using different email addresses to the same logical
  * person.
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Allocate a new mailmap object.
  *
  * This object is empty, so you'll have to add a mailmap file before you can do
- * anything with it. The mailmap must be freed with 'git_mailmap_free'.
+ * anything with it. The mailmap must be freed with 'git3_mailmap_free'.
  *
  * @param out pointer to store the new mailmap
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_mailmap_new(git_mailmap **out);
+GIT3_EXTERN(int) git3_mailmap_new(git3_mailmap **out);
 
 /**
  * Free the mailmap and its associated memory.
  *
  * @param mm the mailmap to free
  */
-GIT_EXTERN(void) git_mailmap_free(git_mailmap *mm);
+GIT3_EXTERN(void) git3_mailmap_free(git3_mailmap *mm);
 
 /**
  * Add a single entry to the given mailmap object. If the entry already exists,
@@ -54,8 +54,8 @@ GIT_EXTERN(void) git_mailmap_free(git_mailmap *mm);
  * @param replace_email the email to replace
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_mailmap_add_entry(
-	git_mailmap *mm, const char *real_name, const char *real_email,
+GIT3_EXTERN(int) git3_mailmap_add_entry(
+	git3_mailmap *mm, const char *real_name, const char *real_email,
 	const char *replace_name, const char *replace_email);
 
 /**
@@ -66,8 +66,8 @@ GIT_EXTERN(int) git_mailmap_add_entry(
  * @param len the length of the input buffer
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_mailmap_from_buffer(
-	git_mailmap **out, const char *buf, size_t len);
+GIT3_EXTERN(int) git3_mailmap_from_buffer(
+	git3_mailmap **out, const char *buf, size_t len);
 
 /**
  * Create a new mailmap instance from a repository, loading mailmap files based
@@ -83,8 +83,8 @@ GIT_EXTERN(int) git_mailmap_from_buffer(
  * @param repo repository to load mailmap information from
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_mailmap_from_repository(
-	git_mailmap **out, git_repository *repo);
+GIT3_EXTERN(int) git3_mailmap_from_repository(
+	git3_mailmap **out, git3_repository *repo);
 
 /**
  * Resolve a name and email to the corresponding real name and email.
@@ -98,24 +98,24 @@ GIT_EXTERN(int) git_mailmap_from_repository(
  * @param email the email to look up
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_mailmap_resolve(
+GIT3_EXTERN(int) git3_mailmap_resolve(
 	const char **real_name, const char **real_email,
-	const git_mailmap *mm, const char *name, const char *email);
+	const git3_mailmap *mm, const char *name, const char *email);
 
 /**
  * Resolve a signature to use real names and emails with a mailmap.
  *
- * Call `git_signature_free()` to free the data.
+ * Call `git3_signature_free()` to free the data.
  *
  * @param out new signature
  * @param mm mailmap to resolve with
  * @param sig signature to resolve
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_mailmap_resolve_signature(
-	git_signature **out, const git_mailmap *mm, const git_signature *sig);
+GIT3_EXTERN(int) git3_mailmap_resolve_signature(
+	git3_signature **out, const git3_mailmap *mm, const git3_signature *sig);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

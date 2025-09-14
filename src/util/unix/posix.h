@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_unix_posix_h__
 #define INCLUDE_unix_posix_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include <stdio.h>
 #include <dirent.h>
@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-typedef int GIT_SOCKET;
+typedef int GIT3_SOCKET;
 #define INVALID_SOCKET -1
 
 #define p_lseek(f,n,w) lseek(f, n, w)
@@ -23,16 +23,16 @@ typedef int GIT_SOCKET;
 #define p_lstat(p,b) lstat(p,b)
 #define p_stat(p,b) stat(p, b)
 
-#if defined(GIT_NSEC_MTIMESPEC)
+#if defined(GIT3_NSEC_MTIMESPEC)
 # define st_atime_nsec st_atimespec.tv_nsec
 # define st_mtime_nsec st_mtimespec.tv_nsec
 # define st_ctime_nsec st_ctimespec.tv_nsec
-#elif defined(GIT_NSEC_MTIM)
+#elif defined(GIT3_NSEC_MTIM)
 # define st_atime_nsec st_atim.tv_nsec
 # define st_mtime_nsec st_mtim.tv_nsec
 # define st_ctime_nsec st_ctim.tv_nsec
-#elif !defined(GIT_NSEC_MTIME_NSEC) && defined(GIT_NSEC)
-# error GIT_NSEC defined but unknown struct stat nanosecond type
+#elif !defined(GIT3_NSEC_MTIME_NSEC) && defined(GIT3_NSEC)
+# error GIT3_NSEC defined but unknown struct stat nanosecond type
 #endif
 
 #define p_utimes(f, t) utimes(f, t)
@@ -44,7 +44,7 @@ typedef int GIT_SOCKET;
 #define p_mkdir(p,m) mkdir(p, m)
 extern char *p_realpath(const char *, char *);
 
-GIT_INLINE(int) p_fsync(int fd)
+GIT3_INLINE(int) p_fsync(int fd)
 {
 	p_fsync__cnt++;
 	return fsync(fd);
@@ -82,8 +82,8 @@ GIT_INLINE(int) p_fsync(int fd)
 
 #define p_timeval timeval
 
-#ifdef GIT_FUTIMENS
-GIT_INLINE(int) p_futimes(int f, const struct p_timeval t[2])
+#ifdef GIT3_FUTIMENS
+GIT3_INLINE(int) p_futimes(int f, const struct p_timeval t[2])
 {
 	struct timespec s[2];
 	s[0].tv_sec = t[0].tv_sec;

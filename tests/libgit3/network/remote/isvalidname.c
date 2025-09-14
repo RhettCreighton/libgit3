@@ -1,9 +1,9 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 static int is_valid_name(const char *name)
 {
 	int valid = 0;
-	cl_git_pass(git_remote_name_is_valid(&valid, name));
+	cl_git_pass(git3_remote_name_is_valid(&valid, name));
 	return valid;
 }
 

@@ -3,7 +3,7 @@
 
 add_library(util OBJECT)
 
-configure_file(git2_features.h.in git2_features.h)
+configure_file(git3_features.h.in git3_features.h)
 
 set(UTIL_INCLUDES
 	"${PROJECT_BINARY_DIR}/src/util"
@@ -33,8 +33,8 @@ endif()
 if(USE_SHA1 STREQUAL "builtin")
 	file(GLOB UTIL_SRC_SHA1 hash/collisiondetect.* hash/sha1dc/*)
 	target_compile_definitions(util PRIVATE SHA1DC_NO_STANDARD_INCLUDES=1)
-        target_compile_definitions(util PRIVATE SHA1DC_CUSTOM_INCLUDE_SHA1_C=\"git2_util.h\")
-        target_compile_definitions(util PRIVATE SHA1DC_CUSTOM_INCLUDE_UBC_CHECK_C=\"git2_util.h\")
+        target_compile_definitions(util PRIVATE SHA1DC_CUSTOM_INCLUDE_SHA1_C=\"git3_util.h\")
+        target_compile_definitions(util PRIVATE SHA1DC_CUSTOM_INCLUDE_UBC_CHECK_C=\"git3_util.h\")
 elseif(USE_SHA1 STREQUAL "openssl" OR
        USE_SHA1 STREQUAL "openssl-dynamic" OR
        USE_SHA1 STREQUAL "openssl-fips")
@@ -82,5 +82,5 @@ list(SORT UTIL_SRC_SHA3)
 target_sources(util PRIVATE ${UTIL_SRC} ${UTIL_SRC_OS} ${UTIL_SRC_SHA1} ${UTIL_SRC_SHA256} ${UTIL_SRC_SHA3})
 ide_split_sources(util)
 
-target_include_directories(util PRIVATE ${UTIL_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES} PUBLIC ${libgit3_SOURCE_DIR}/include)
-target_include_directories(util SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})
+target_include_directories(util PRIVATE ${UTIL_INCLUDES} ${LIBGIT3_DEPENDENCY_INCLUDES} PUBLIC ${libgit3_SOURCE_DIR}/include)
+target_include_directories(util SYSTEM PRIVATE ${LIBGIT3_SYSTEM_INCLUDES})

@@ -1,16 +1,16 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "git3/sys/repository.h"
 #include "attr.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_attr_macro__cleanup(void)
 {
@@ -27,28 +27,28 @@ void test_attr_macro__macros(void)
 
 	g_repo = cl_git_sandbox_init("attr");
 
-	cl_git_pass(git_attr_get_many(values, g_repo, 0, "binfile", 7, names));
+	cl_git_pass(git3_attr_get_many(values, g_repo, 0, "binfile", 7, names));
 
-	cl_assert(GIT_ATTR_IS_TRUE(values[0]));
-	cl_assert(GIT_ATTR_IS_TRUE(values[1]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[2]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[3]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[4]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[5]));
-	cl_assert(GIT_ATTR_IS_UNSPECIFIED(values[6]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[0]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[1]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[2]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[3]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[4]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[5]));
+	cl_assert(GIT3_ATTR_IS_UNSPECIFIED(values[6]));
 
-	cl_git_pass(git_attr_get_many(values, g_repo, 0, "macro_test", 5, names2));
+	cl_git_pass(git3_attr_get_many(values, g_repo, 0, "macro_test", 5, names2));
 
-	cl_assert(GIT_ATTR_IS_TRUE(values[0]));
-	cl_assert(GIT_ATTR_IS_TRUE(values[1]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[2]));
-	cl_assert(GIT_ATTR_IS_UNSPECIFIED(values[3]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[0]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[1]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[2]));
+	cl_assert(GIT3_ATTR_IS_UNSPECIFIED(values[3]));
 	cl_assert_equal_s("77", values[4]);
 
-	cl_git_pass(git_attr_get_many(values, g_repo, 0, "macro_test", 3, names3));
+	cl_git_pass(git3_attr_get_many(values, g_repo, 0, "macro_test", 3, names3));
 
-	cl_assert(GIT_ATTR_IS_TRUE(values[0]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[1]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[0]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[1]));
 	cl_assert_equal_s("answer", values[2]);
 }
 
@@ -60,12 +60,12 @@ void test_attr_macro__bad_macros(void)
 
 	g_repo = cl_git_sandbox_init("attr");
 
-	cl_git_pass(git_attr_get_many(values, g_repo, 0, "macro_bad", 6, names));
+	cl_git_pass(git3_attr_get_many(values, g_repo, 0, "macro_bad", 6, names));
 
 	/* these three just confirm that the "mymacro" rule ran */
-	cl_assert(GIT_ATTR_IS_UNSPECIFIED(values[0]));
-	cl_assert(GIT_ATTR_IS_TRUE(values[1]));
-	cl_assert(GIT_ATTR_IS_FALSE(values[2]));
+	cl_assert(GIT3_ATTR_IS_UNSPECIFIED(values[0]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[1]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[2]));
 
 	/* file contains:
 	 *     # let's try some malicious macro defs
@@ -89,9 +89,9 @@ void test_attr_macro__bad_macros(void)
 	 * so summary results should be:
 	 *     -firstmacro secondmacro="hahaha" thirdmacro
 	 */
-	cl_assert(GIT_ATTR_IS_FALSE(values[3]));
+	cl_assert(GIT3_ATTR_IS_FALSE(values[3]));
 	cl_assert_equal_s("hahaha", values[4]);
-	cl_assert(GIT_ATTR_IS_TRUE(values[5]));
+	cl_assert(GIT3_ATTR_IS_TRUE(values[5]));
 }
 
 void test_attr_macro__macros_in_root_wd_apply(void)
@@ -104,7 +104,7 @@ void test_attr_macro__macros_in_root_wd_apply(void)
 	cl_git_rewritefile("empty_standard_repo/.gitattributes", "[attr]customattr key=value\n");
 	cl_git_rewritefile("empty_standard_repo/dir/.gitattributes", "file customattr\n");
 
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "dir/file", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "dir/file", "key"));
 	cl_assert_equal_s(value, "value");
 }
 
@@ -117,13 +117,13 @@ void test_attr_macro__changing_macro_in_root_wd_updates_attributes(void)
 	cl_git_rewritefile("empty_standard_repo/.gitattributes",
 			   "[attr]customattr key=first\n"
 			   "file customattr\n");
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file", "key"));
 	cl_assert_equal_s(value, "first");
 
 	cl_git_rewritefile("empty_standard_repo/.gitattributes",
 			   "[attr]customattr key=second\n"
 			   "file customattr\n");
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file", "key"));
 	cl_assert_equal_s(value, "second");
 }
 
@@ -139,7 +139,7 @@ void test_attr_macro__macros_in_subdir_do_not_apply(void)
 			   "file customattr\n");
 
 	/* This should _not_ pass, as macros in subdirectories shall be ignored */
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "dir/file", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "dir/file", "key"));
 	cl_assert_equal_p(value, NULL);
 }
 
@@ -148,10 +148,10 @@ void test_attr_macro__adding_macro_succeeds(void)
 	const char *value;
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
-	cl_git_pass(git_attr_add_macro(g_repo, "macro", "key=value"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro", "key=value"));
 	cl_git_rewritefile("empty_standard_repo/.gitattributes", "file.txt macro\n");
 
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file.txt", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file.txt", "key"));
 	cl_assert_equal_s(value, "value");
 }
 
@@ -160,14 +160,14 @@ void test_attr_macro__adding_boolean_macros_succeeds(void)
 	const char *value;
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
-	cl_git_pass(git_attr_add_macro(g_repo, "macro-pos", "positive"));
-	cl_git_pass(git_attr_add_macro(g_repo, "macro-neg", "-negative"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro-pos", "positive"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro-neg", "-negative"));
 	cl_git_rewritefile("empty_standard_repo/.gitattributes", "file.txt macro-pos macro-neg\n");
 
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file.txt", "positive"));
-	cl_assert(GIT_ATTR_IS_TRUE(value));
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file.txt", "negative"));
-	cl_assert(GIT_ATTR_IS_FALSE(value));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file.txt", "positive"));
+	cl_assert(GIT3_ATTR_IS_TRUE(value));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file.txt", "negative"));
+	cl_assert(GIT3_ATTR_IS_FALSE(value));
 }
 
 void test_attr_macro__redefining_macro_succeeds(void)
@@ -175,11 +175,11 @@ void test_attr_macro__redefining_macro_succeeds(void)
 	const char *value;
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
-	cl_git_pass(git_attr_add_macro(g_repo, "macro", "key=value1"));
-	cl_git_pass(git_attr_add_macro(g_repo, "macro", "key=value2"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro", "key=value1"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro", "key=value2"));
 	cl_git_rewritefile("empty_standard_repo/.gitattributes", "file.txt macro");
 
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file.txt", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file.txt", "key"));
 	cl_assert_equal_s(value, "value2");
 }
 
@@ -188,10 +188,10 @@ void test_attr_macro__recursive_macro_resolves(void)
 	const char *value;
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
-	cl_git_pass(git_attr_add_macro(g_repo, "expandme", "key=value"));
-	cl_git_pass(git_attr_add_macro(g_repo, "macro", "expandme"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "expandme", "key=value"));
+	cl_git_pass(git3_attr_add_macro(g_repo, "macro", "expandme"));
 	cl_git_rewritefile("empty_standard_repo/.gitattributes", "file.txt macro");
 
-	cl_git_pass(git_attr_get(&value, g_repo, 0, "file.txt", "key"));
+	cl_git_pass(git3_attr_get(&value, g_repo, 0, "file.txt", "key"));
 	cl_assert_equal_s(value, "value");
 }

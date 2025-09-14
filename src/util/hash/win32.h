@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -13,17 +13,17 @@
 #include <wincrypt.h>
 
 typedef enum {
-	GIT_HASH_WIN32_INVALID = 0,
-	GIT_HASH_WIN32_CRYPTOAPI,
-	GIT_HASH_WIN32_CNG
-} git_hash_win32_provider_t;
+	GIT3_HASH_WIN32_INVALID = 0,
+	GIT3_HASH_WIN32_CRYPTOAPI,
+	GIT3_HASH_WIN32_CNG
+} git3_hash_win32_provider_t;
 
-struct git_hash_win32_cryptoapi_ctx {
+struct git3_hash_win32_cryptoapi_ctx {
 	bool valid;
 	HCRYPTHASH hash_handle;
 };
 
-struct git_hash_win32_cng_ctx {
+struct git3_hash_win32_cng_ctx {
 	bool updated;
 	HANDLE /* BCRYPT_HASH_HANDLE */ hash_handle;
 	PBYTE hash_object;
@@ -33,27 +33,27 @@ typedef struct {
 	ALG_ID algorithm;
 
 	union {
-		struct git_hash_win32_cryptoapi_ctx cryptoapi;
-		struct git_hash_win32_cng_ctx cng;
+		struct git3_hash_win32_cryptoapi_ctx cryptoapi;
+		struct git3_hash_win32_cng_ctx cng;
 	} ctx;
-} git_hash_win32_ctx;
+} git3_hash_win32_ctx;
 
 /*
  * Gets/sets the current hash provider (cng or cryptoapi).  This is only
  * for testing purposes.
  */
-git_hash_win32_provider_t git_hash_win32_provider(void);
-int git_hash_win32_set_provider(git_hash_win32_provider_t provider);
+git3_hash_win32_provider_t git3_hash_win32_provider(void);
+int git3_hash_win32_set_provider(git3_hash_win32_provider_t provider);
 
-#ifdef GIT_SHA1_WIN32
-struct git_hash_sha1_ctx {
-	git_hash_win32_ctx win32;
+#ifdef GIT3_SHA1_WIN32
+struct git3_hash_sha1_ctx {
+	git3_hash_win32_ctx win32;
 };
 #endif
 
-#ifdef GIT_SHA256_WIN32
-struct git_hash_sha256_ctx {
-	git_hash_win32_ctx win32;
+#ifdef GIT3_SHA256_WIN32
+struct git3_hash_sha256_ctx {
+	git3_hash_win32_ctx win32;
 };
 #endif
 

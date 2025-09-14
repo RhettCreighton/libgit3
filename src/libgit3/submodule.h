@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_submodule_h__
@@ -52,18 +52,18 @@
  * submodule described in .gitmodules.  The fields are as follows:
  *
  * - `rc` tracks the refcount of how many hash table entries in the
- *   git_submodule_cache there are for this submodule.  It only comes into
+ *   git3_submodule_cache there are for this submodule.  It only comes into
  *   play if the name and path of the submodule differ.
  *
  * - `name` is the name of the submodule from .gitmodules.
  * - `path` is the path to the submodule from the repo root.  It is almost
  *    always the same as `name`.
  * - `url` is the url for the submodule.
- * - `update` is a git_submodule_update_t value - see gitmodules(5) update.
+ * - `update` is a git3_submodule_update_t value - see gitmodules(5) update.
  * - `update_default` is the update value from the config
- * - `ignore` is a git_submodule_ignore_t value - see gitmodules(5) ignore.
+ * - `ignore` is a git3_submodule_ignore_t value - see gitmodules(5) ignore.
  * - `ignore_default` is the ignore value from the config
- * - `fetch_recurse` is a git_submodule_recurse_t value - see gitmodules(5)
+ * - `fetch_recurse` is a git3_submodule_recurse_t value - see gitmodules(5)
  *    fetchRecurseSubmodules.
  * - `fetch_recurse_default` is the recurse value from the config
  *
@@ -79,74 +79,74 @@
  * submodule has been deleted, but the delete has not been committed yet,
  * then the `index_oid` will be set, but the `url` will be NULL.
  */
-struct git_submodule {
-	git_refcount rc;
+struct git3_submodule {
+	git3_refcount rc;
 
 	/* information from config */
 	char *name;
 	char *path; /* important: may just point to "name" string */
 	char *url;
 	char *branch;
-	git_submodule_update_t update;
-	git_submodule_update_t update_default;
-	git_submodule_ignore_t ignore;
-	git_submodule_ignore_t ignore_default;
-	git_submodule_recurse_t fetch_recurse;
-	git_submodule_recurse_t fetch_recurse_default;
+	git3_submodule_update_t update;
+	git3_submodule_update_t update_default;
+	git3_submodule_ignore_t ignore;
+	git3_submodule_ignore_t ignore_default;
+	git3_submodule_recurse_t fetch_recurse;
+	git3_submodule_recurse_t fetch_recurse_default;
 
 	/* internal information */
-	git_repository *repo;
+	git3_repository *repo;
 	uint32_t flags;
-	git_oid head_oid;
-	git_oid index_oid;
-	git_oid wd_oid;
+	git3_oid head_oid;
+	git3_oid index_oid;
+	git3_oid wd_oid;
 };
 
-/* Additional flags on top of public GIT_SUBMODULE_STATUS values */
+/* Additional flags on top of public GIT3_SUBMODULE_STATUS values */
 enum {
-	GIT_SUBMODULE_STATUS__WD_SCANNED          = (1u << 20),
-	GIT_SUBMODULE_STATUS__HEAD_OID_VALID      = (1u << 21),
-	GIT_SUBMODULE_STATUS__INDEX_OID_VALID     = (1u << 22),
-	GIT_SUBMODULE_STATUS__WD_OID_VALID        = (1u << 23),
-	GIT_SUBMODULE_STATUS__HEAD_NOT_SUBMODULE  = (1u << 24),
-	GIT_SUBMODULE_STATUS__INDEX_NOT_SUBMODULE = (1u << 25),
-	GIT_SUBMODULE_STATUS__WD_NOT_SUBMODULE    = (1u << 26),
-	GIT_SUBMODULE_STATUS__INDEX_MULTIPLE_ENTRIES = (1u << 27)
+	GIT3_SUBMODULE_STATUS__WD_SCANNED          = (1u << 20),
+	GIT3_SUBMODULE_STATUS__HEAD_OID_VALID      = (1u << 21),
+	GIT3_SUBMODULE_STATUS__INDEX_OID_VALID     = (1u << 22),
+	GIT3_SUBMODULE_STATUS__WD_OID_VALID        = (1u << 23),
+	GIT3_SUBMODULE_STATUS__HEAD_NOT_SUBMODULE  = (1u << 24),
+	GIT3_SUBMODULE_STATUS__INDEX_NOT_SUBMODULE = (1u << 25),
+	GIT3_SUBMODULE_STATUS__WD_NOT_SUBMODULE    = (1u << 26),
+	GIT3_SUBMODULE_STATUS__INDEX_MULTIPLE_ENTRIES = (1u << 27)
 };
 
-#define GIT_SUBMODULE_STATUS__CLEAR_INTERNAL(S) \
+#define GIT3_SUBMODULE_STATUS__CLEAR_INTERNAL(S) \
 	((S) & ~(0xFFFFFFFFu << 20))
 
-GIT_HASHMAP_STR_STRUCT(git_submodule_cache, git_submodule *);
+GIT3_HASHMAP_STR_STRUCT(git3_submodule_cache, git3_submodule *);
 
 /* Initialize an external submodule cache for the provided repo. */
-extern int git_submodule_cache_init(git_submodule_cache **out, git_repository *repo);
+extern int git3_submodule_cache_init(git3_submodule_cache **out, git3_repository *repo);
 
 /* Release the resources of the submodule cache. */
-extern int git_submodule_cache_free(git_submodule_cache *cache);
+extern int git3_submodule_cache_free(git3_submodule_cache *cache);
 
 /* Submodule lookup with an explicit cache */
-extern int git_submodule__lookup_with_cache(
-	git_submodule **out, git_repository *repo, const char *path, git_submodule_cache *cache);
+extern int git3_submodule__lookup_with_cache(
+	git3_submodule **out, git3_repository *repo, const char *path, git3_submodule_cache *cache);
 
 /* Internal status fn returns status and optionally the various OIDs */
-extern int git_submodule__status(
+extern int git3_submodule__status(
 	unsigned int *out_status,
-	git_oid *out_head_id,
-	git_oid *out_index_id,
-	git_oid *out_wd_id,
-	git_submodule *sm,
-	git_submodule_ignore_t ign);
+	git3_oid *out_head_id,
+	git3_oid *out_index_id,
+	git3_oid *out_wd_id,
+	git3_submodule *sm,
+	git3_submodule_ignore_t ign);
 
 /* Open submodule repository as bare repo for quick HEAD check, etc. */
-extern int git_submodule_open_bare(
-	git_repository **repo,
-	git_submodule *submodule);
+extern int git3_submodule_open_bare(
+	git3_repository **repo,
+	git3_submodule *submodule);
 
-extern int git_submodule_parse_ignore(
-	git_submodule_ignore_t *out, const char *value);
-extern int git_submodule_parse_update(
-	git_submodule_update_t *out, const char *value);
+extern int git3_submodule_parse_ignore(
+	git3_submodule_ignore_t *out, const char *value);
+extern int git3_submodule_parse_update(
+	git3_submodule_update_t *out, const char *value);
 
 /**
  * Check whether a submodule's name is valid.
@@ -156,8 +156,8 @@ extern int git_submodule_parse_update(
  *
  * @param repo the repository which contains the submodule
  * @param name the name to check
- * @param flags the `GIT_PATH` flags to use for the check (0 to use filesystem defaults)
+ * @param flags the `GIT3_PATH` flags to use for the check (0 to use filesystem defaults)
  */
-extern int git_submodule_name_is_valid(git_repository *repo, const char *name, int flags);
+extern int git3_submodule_name_is_valid(git3_repository *repo, const char *name, int flags);
 
 #endif

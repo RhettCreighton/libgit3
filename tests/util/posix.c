@@ -9,13 +9,13 @@
 # endif
 #endif
 
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "posix.h"
 
 void test_posix__initialize(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	/* on win32, the WSA context needs to be initialized
 	 * before any socket calls can be performed */
 	WSADATA wsd;
@@ -27,9 +27,9 @@ void test_posix__initialize(void)
 
 static bool supports_ipv6(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	/* IPv6 is supported on Vista and newer */
-	return git_has_win32_version(6, 0, 0);
+	return git3_has_win32_version(6, 0, 0);
 #else
 	return 1;
 #endif
@@ -147,11 +147,11 @@ void test_posix__utimes(void)
 
 void test_posix__unlink_removes_symlink(void)
 {
-	if (!git_fs_path_supports_symlinks(clar_sandbox_path()))
+	if (!git3_fs_path_supports_symlinks(clar_sandbox_path()))
 		clar__skip();
 
 	cl_git_mkfile("file", "Dummy file.");
-	cl_git_pass(git_futils_mkdir("dir", 0777, 0));
+	cl_git_pass(git3_futils_mkdir("dir", 0777, 0));
 
 	cl_must_pass(p_symlink("file", "file-symlink"));
 	cl_must_pass(p_symlink("dir", "dir-symlink"));
@@ -159,8 +159,8 @@ void test_posix__unlink_removes_symlink(void)
 	cl_must_pass(p_unlink("file-symlink"));
 	cl_must_pass(p_unlink("dir-symlink"));
 
-	cl_assert(git_fs_path_exists("file"));
-	cl_assert(git_fs_path_exists("dir"));
+	cl_assert(git3_fs_path_exists("file"));
+	cl_assert(git3_fs_path_exists("dir"));
 
 	cl_must_pass(p_unlink("file"));
 	cl_must_pass(p_rmdir("dir"));
@@ -168,18 +168,18 @@ void test_posix__unlink_removes_symlink(void)
 
 void test_posix__symlink_resolves_to_correct_type(void)
 {
-	git_str contents = GIT_STR_INIT;
+	git3_str contents = GIT3_STR_INIT;
 
-	if (!git_fs_path_supports_symlinks(clar_sandbox_path()))
+	if (!git3_fs_path_supports_symlinks(clar_sandbox_path()))
 		clar__skip();
 
-	cl_must_pass(git_futils_mkdir("dir", 0777, 0));
-	cl_must_pass(git_futils_mkdir("file", 0777, 0));
+	cl_must_pass(git3_futils_mkdir("dir", 0777, 0));
+	cl_must_pass(git3_futils_mkdir("file", 0777, 0));
 	cl_git_mkfile("dir/file", "symlink target");
 
 	cl_git_pass(p_symlink("file", "dir/link"));
 
-	cl_git_pass(git_futils_readbuffer(&contents, "dir/file"));
+	cl_git_pass(git3_futils_readbuffer(&contents, "dir/file"));
 	cl_assert_equal_s(contents.ptr, "symlink target");
 
 	cl_must_pass(p_unlink("dir/link"));
@@ -187,34 +187,34 @@ void test_posix__symlink_resolves_to_correct_type(void)
 	cl_must_pass(p_rmdir("dir"));
 	cl_must_pass(p_rmdir("file"));
 
-	git_str_dispose(&contents);
+	git3_str_dispose(&contents);
 }
 
 void test_posix__relative_symlink(void)
 {
-	git_str contents = GIT_STR_INIT;
+	git3_str contents = GIT3_STR_INIT;
 
-	if (!git_fs_path_supports_symlinks(clar_sandbox_path()))
+	if (!git3_fs_path_supports_symlinks(clar_sandbox_path()))
 		clar__skip();
 
-	cl_must_pass(git_futils_mkdir("dir", 0777, 0));
+	cl_must_pass(git3_futils_mkdir("dir", 0777, 0));
 	cl_git_mkfile("file", "contents");
 	cl_git_pass(p_symlink("../file", "dir/link"));
-	cl_git_pass(git_futils_readbuffer(&contents, "dir/link"));
+	cl_git_pass(git3_futils_readbuffer(&contents, "dir/link"));
 	cl_assert_equal_s(contents.ptr, "contents");
 
 	cl_must_pass(p_unlink("file"));
 	cl_must_pass(p_unlink("dir/link"));
 	cl_must_pass(p_rmdir("dir"));
 
-	git_str_dispose(&contents);
+	git3_str_dispose(&contents);
 }
 
 void test_posix__symlink_to_file_across_dirs(void)
 {
-	git_str contents = GIT_STR_INIT;
+	git3_str contents = GIT3_STR_INIT;
 
-	if (!git_fs_path_supports_symlinks(clar_sandbox_path()))
+	if (!git3_fs_path_supports_symlinks(clar_sandbox_path()))
 		clar__skip();
 
 	/*
@@ -223,16 +223,16 @@ void test_posix__symlink_to_file_across_dirs(void)
 	 * forgot to convert directory separators to
 	 * Windows-style ones.
 	 */
-	cl_must_pass(git_futils_mkdir("dir", 0777, 0));
+	cl_must_pass(git3_futils_mkdir("dir", 0777, 0));
 	cl_git_mkfile("dir/target", "symlink target");
 	cl_git_pass(p_symlink("dir/target", "link"));
 
-	cl_git_pass(git_futils_readbuffer(&contents, "dir/target"));
+	cl_git_pass(git3_futils_readbuffer(&contents, "dir/target"));
 	cl_assert_equal_s(contents.ptr, "symlink target");
 
 	cl_must_pass(p_unlink("dir/target"));
 	cl_must_pass(p_unlink("link"));
 	cl_must_pass(p_rmdir("dir"));
 
-	git_str_dispose(&contents);
+	git3_str_dispose(&contents);
 }

@@ -12,17 +12,17 @@ foreach(fuzz_target_src ${SRC_FUZZERS})
 	string(REPLACE "_fuzzer" "" fuzz_name ${fuzz_target_name})
 
 	set(${fuzz_target_name}_SOURCES
-		${fuzz_target_src} "fuzzer_utils.c" ${LIBGIT2_OBJECTS})
+		${fuzz_target_src} "fuzzer_utils.c" ${LIBGIT3_OBJECTS})
 
 	if(USE_STANDALONE_FUZZERS)
 		list(APPEND ${fuzz_target_name}_SOURCES "standalone_driver.c")
 	endif()
 
 	add_executable(${fuzz_target_name} ${${fuzz_target_name}_SOURCES})
-	target_include_directories(${fuzz_target_name} PRIVATE ${LIBGIT2_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES})
-	target_include_directories(${fuzz_target_name} SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})
+	target_include_directories(${fuzz_target_name} PRIVATE ${LIBGIT3_INCLUDES} ${LIBGIT3_DEPENDENCY_INCLUDES})
+	target_include_directories(${fuzz_target_name} SYSTEM PRIVATE ${LIBGIT3_SYSTEM_INCLUDES})
 
-	target_link_libraries(${fuzz_target_name} ${LIBGIT2_SYSTEM_LIBS})
+	target_link_libraries(${fuzz_target_name} ${LIBGIT3_SYSTEM_LIBS})
 	if(NOT USE_STANDALONE_FUZZERS)
 		target_link_options(${fuzz_target_name} PRIVATE "-fsanitize=fuzzer")
 	endif()

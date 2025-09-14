@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_ignore_h__
@@ -11,7 +11,7 @@
 #include "types.h"
 
 /**
- * @file git2/ignore.h
+ * @file git3/ignore.h
  * @brief Ignore particular untracked files
  * @ingroup Git
  * @{
@@ -19,7 +19,7 @@
  * When examining the repository status, git can optionally ignore
  * specified untracked files.
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Add ignore rules for a repository.
@@ -33,7 +33,7 @@ GIT_BEGIN_DECL
  *
  * Example usage:
  *
- *     error = git_ignore_add_rule(myrepo, "*.c\ndir/\nFile with space\n");
+ *     error = git3_ignore_add_rule(myrepo, "*.c\ndir/\nFile with space\n");
  *
  * This would add three rules to the ignores.
  *
@@ -43,8 +43,8 @@ GIT_BEGIN_DECL
  *              each rule should be terminated with a newline.
  * @return 0 on success
  */
-GIT_EXTERN(int) git_ignore_add_rule(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_ignore_add_rule(
+	git3_repository *repo,
 	const char *rules);
 
 /**
@@ -58,8 +58,8 @@ GIT_EXTERN(int) git_ignore_add_rule(
  * @param repo The repository to remove ignore rules from.
  * @return 0 on success
  */
-GIT_EXTERN(int) git_ignore_clear_internal_rules(
-	git_repository *repo);
+GIT3_EXTERN(int) git3_ignore_clear_internal_rules(
+	git3_repository *repo);
 
 /**
  * Test if the ignore rules apply to a given path.
@@ -77,12 +77,12 @@ GIT_EXTERN(int) git_ignore_clear_internal_rules(
  * @return 0 if ignore rules could be processed for the file (regardless
  *         of whether it exists or not), or an error < 0 if they could not.
  */
-GIT_EXTERN(int) git_ignore_path_is_ignored(
+GIT3_EXTERN(int) git3_ignore_path_is_ignored(
 	int *ignored,
-	git_repository *repo,
+	git3_repository *repo,
 	const char *path);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_apply_h__
@@ -13,13 +13,13 @@
 #include "git3/apply.h"
 #include "str.h"
 
-extern int git_apply__patch(
-	git_str *out,
+extern int git3_apply__patch(
+	git3_str *out,
 	char **filename,
 	unsigned int *mode,
 	const char *source,
 	size_t source_len,
-	git_patch *patch,
-	const git_apply_options *opts);
+	git3_patch *patch,
+	const git3_apply_options *opts);
 
 #endif

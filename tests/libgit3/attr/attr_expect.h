@@ -15,7 +15,7 @@ struct attr_expected {
 	const char *expected_str;
 };
 
-GIT_INLINE(void) attr_check_expected(
+GIT3_INLINE(void) attr_check_expected(
 	enum attr_expect_t expected,
 	const char *expected_str,
 	const char *name,
@@ -23,15 +23,15 @@ GIT_INLINE(void) attr_check_expected(
 {
 	switch (expected) {
 	case EXPECT_TRUE:
-		cl_assert_(GIT_ATTR_IS_TRUE(value), name);
+		cl_assert_(GIT3_ATTR_IS_TRUE(value), name);
 		break;
 
 	case EXPECT_FALSE:
-		cl_assert_(GIT_ATTR_IS_FALSE(value), name);
+		cl_assert_(GIT3_ATTR_IS_FALSE(value), name);
 		break;
 
 	case EXPECT_UNDEFINED:
-		cl_assert_(GIT_ATTR_IS_UNSPECIFIED(value), name);
+		cl_assert_(GIT3_ATTR_IS_UNSPECIFIED(value), name);
 		break;
 
 	case EXPECT_STRING:

@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "streams/schannel.h"
 
-#ifdef GIT_HTTPS_SCHANNEL
+#ifdef GIT3_HTTPS_SCHANNEL
 
 #define SECURITY_WIN32
 
@@ -40,8 +40,8 @@ typedef enum {
 } schannel_state;
 
 typedef struct {
-	git_stream parent;
-	git_stream *io;
+	git3_stream parent;
+	git3_stream *io;
 	int owned;
 	bool connected;
 	wchar_t *host_w;
@@ -54,10 +54,10 @@ typedef struct {
 
 	CERT_CONTEXT *certificate;
 	const CERT_CHAIN_CONTEXT *cert_chain;
-	git_cert_x509 x509;
+	git3_cert_x509 x509;
 
-	git_str plaintext_in;
-	git_str ciphertext_in;
+	git3_str plaintext_in;
+	git3_str ciphertext_in;
 } schannel_stream;
 
 static int connect_context(schannel_stream *st)
@@ -70,7 +70,7 @@ static int connect_context(schannel_stream *st)
 	ssize_t read_len;
 	int error = 0;
 
-	if (st->owned && (error = git_stream_connect(st->io)) < 0)
+	if (st->owned && (error = git3_stream_connect(st->io)) < 0)
 		return error;
 
 	cred.dwVersion = SCHANNEL_CRED_VERSION;
@@ -85,7 +85,7 @@ static int connect_context(schannel_stream *st)
 	if (AcquireCredentialsHandleW(NULL, SCHANNEL_NAME_W,
 			SECPKG_CRED_OUTBOUND, NULL, &cred, NULL,
 			NULL, &st->cred, NULL) != SEC_E_OK) {
-		git_error_set(GIT_ERROR_OS, "could not acquire credentials handle");
+		git3_error_set(GIT3_ERROR_OS, "could not acquire credentials handle");
 		return -1;
 	}
 
@@ -120,7 +120,7 @@ static int connect_context(schannel_stream *st)
 			st->state = STATE_CONTEXT;
 
 			if (output_buf[0].cbBuffer > 0) {
-				error = git_stream__write_full(st->io,
+				error = git3_stream__write_full(st->io,
 					output_buf[0].pvBuffer,
 					output_buf[0].cbBuffer, 0);
 
@@ -129,45 +129,45 @@ static int connect_context(schannel_stream *st)
 
 			/* handle any leftover, unprocessed data */
 			if (input_buf[1].BufferType == SECBUFFER_EXTRA) {
-				GIT_ASSERT(st->ciphertext_in.size > input_buf[1].cbBuffer);
+				GIT3_ASSERT(st->ciphertext_in.size > input_buf[1].cbBuffer);
 
-				git_str_consume_bytes(&st->ciphertext_in,
+				git3_str_consume_bytes(&st->ciphertext_in,
 					st->ciphertext_in.size - input_buf[1].cbBuffer);
 			} else {
-				git_str_clear(&st->ciphertext_in);
+				git3_str_clear(&st->ciphertext_in);
 			}
 
 			if (error < 0 || status == SEC_E_OK)
 				break;
 			} else if (status == SEC_E_INCOMPLETE_MESSAGE) {
 				/* we need additional data from the client; */
-				if (git_str_grow_by(&st->ciphertext_in, READ_BLOCKSIZE) < 0) {
+				if (git3_str_grow_by(&st->ciphertext_in, READ_BLOCKSIZE) < 0) {
 					error = -1;
 				break;
 			}
 
-			if ((read_len = git_stream_read(st->io,
+			if ((read_len = git3_stream_read(st->io,
 					st->ciphertext_in.ptr + st->ciphertext_in.size,
 					(st->ciphertext_in.asize - st->ciphertext_in.size))) < 0) {
 				error = -1;
 				break;
 			}
 
-			GIT_ASSERT((size_t)read_len <=
+			GIT3_ASSERT((size_t)read_len <=
 				st->ciphertext_in.asize - st->ciphertext_in.size);
 			st->ciphertext_in.size += read_len;
 		} else {
-			git_error_set(GIT_ERROR_OS,
+			git3_error_set(GIT3_ERROR_OS,
 				"could not initialize security context");
 			error = -1;
 			break;
 		}
 
-		GIT_ASSERT(st->ciphertext_in.size < ULONG_MAX);
+		GIT3_ASSERT(st->ciphertext_in.size < ULONG_MAX);
 	}
 
 	if (retries == MAX_RETRIES) {
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"could not initialize security context: too many retries");
 		error = -1;
 	}
@@ -176,7 +176,7 @@ static int connect_context(schannel_stream *st)
 		if (QueryContextAttributesW(&st->context,
 				SECPKG_ATTR_STREAM_SIZES,
 				&st->stream_sizes) != SEC_E_OK) {
-			git_error_set(GIT_ERROR_SSL,
+			git3_error_set(GIT3_ERROR_SSL,
 				"could not query stream sizes");
 			error = -1;
 		}
@@ -189,11 +189,11 @@ static int set_certificate_lookup_error(DWORD status)
 {
 	switch (status) {
 	case CERT_TRUST_IS_NOT_TIME_VALID:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate is expired or not yet valid");
 		break;
 	case CERT_TRUST_IS_REVOKED:
-		git_error_set(GIT_ERROR_SSL, "certificate is revoked");
+		git3_error_set(GIT3_ERROR_SSL, "certificate is revoked");
 		break;
 	case CERT_TRUST_IS_NOT_SIGNATURE_VALID:
 	case CERT_TRUST_IS_NOT_VALID_FOR_USAGE:
@@ -207,95 +207,95 @@ static int set_certificate_lookup_error(DWORD status)
 	case CERT_TRUST_HAS_EXCLUDED_NAME_CONSTRAINT:
 	case CERT_TRUST_NO_ISSUANCE_CHAIN_POLICY:
 	case CERT_TRUST_HAS_NOT_SUPPORTED_CRITICAL_EXT:
-		git_error_set(GIT_ERROR_SSL, "certificate is not valid");
+		git3_error_set(GIT3_ERROR_SSL, "certificate is not valid");
 		break;
 	case CERT_TRUST_IS_UNTRUSTED_ROOT:
 	case CERT_TRUST_IS_CYCLIC:
 	case CERT_TRUST_IS_EXPLICIT_DISTRUST:
-		git_error_set(GIT_ERROR_SSL, "certificate is not trusted");
+		git3_error_set(GIT3_ERROR_SSL, "certificate is not trusted");
 		break;
 	case CERT_TRUST_REVOCATION_STATUS_UNKNOWN:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate revocation status could not be verified");
 		break;
 	case CERT_TRUST_IS_OFFLINE_REVOCATION:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate revocation is offline or stale");
 		break;
 	case CERT_TRUST_HAS_WEAK_SIGNATURE:
-		git_error_set(GIT_ERROR_SSL, "certificate has a weak signature");
+		git3_error_set(GIT3_ERROR_SSL, "certificate has a weak signature");
 		break;
 	default:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"unknown certificate lookup failure: %d", status);
 		return -1;
 	}
 
-	return GIT_ECERTIFICATE;
+	return GIT3_ECERTIFICATE;
 }
 
 static int set_certificate_validation_error(DWORD status)
 {
 	switch (status) {
 	case TRUST_E_CERT_SIGNATURE:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate cannot be verified");
 		break;
 	case CRYPT_E_REVOKED:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate or signature has been revoked");
 		break;
 	case CERT_E_UNTRUSTEDROOT:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate root is not trusted");
 		break;
 	case CERT_E_UNTRUSTEDTESTROOT:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate root is a test certificate");
 		break;
 	case CERT_E_CHAINING:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate chain is invalid");
 		break;
 	case CERT_E_WRONG_USAGE:
 	case CERT_E_PURPOSE:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"the certificate is not valid for this usage");
 		break;
 	case CERT_E_EXPIRED:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate is expired or not yet valid");
 		break;
 	case CERT_E_INVALID_NAME:
 	case CERT_E_CN_NO_MATCH:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate is not valid for this hostname");
 		break;
 	case CERT_E_INVALID_POLICY:
 	case TRUST_E_BASIC_CONSTRAINTS:
 	case CERT_E_CRITICAL:
 	case CERT_E_VALIDITYPERIODNESTING:
-		git_error_set(GIT_ERROR_SSL, "certificate is not valid");
+		git3_error_set(GIT3_ERROR_SSL, "certificate is not valid");
 		break;
 	case CRYPT_E_NO_REVOCATION_CHECK:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate revocation status could not be verified");
 		break;
 	case CRYPT_E_REVOCATION_OFFLINE:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"certificate revocation is offline or stale");
 		break;
 	case CERT_E_ROLE:
-		git_error_set(GIT_ERROR_SSL, "certificate authority is not valid");
+		git3_error_set(GIT3_ERROR_SSL, "certificate authority is not valid");
 		break;
 	default:
-		git_error_set(GIT_ERROR_SSL,
+		git3_error_set(GIT3_ERROR_SSL,
 			"unknown certificate policy checking failure: %d",
 			status);
 		return -1;
 	}
 
-	return GIT_ECERTIFICATE;
+	return GIT3_ECERTIFICATE;
 }
 
 static int check_certificate(schannel_stream* st)
@@ -312,7 +312,7 @@ static int check_certificate(schannel_stream* st)
 	if (QueryContextAttributesW(&st->context,
 			SECPKG_ATTR_REMOTE_CERT_CONTEXT,
 			&st->certificate) != SEC_E_OK) {
-		git_error_set(GIT_ERROR_OS,
+		git3_error_set(GIT3_ERROR_OS,
 			"could not query remote certificate context");
 		return -1;
 	}
@@ -322,7 +322,7 @@ static int check_certificate(schannel_stream* st)
 			st->certificate->hCertStore, &cert_chain_parameters,
 			CERT_CHAIN_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT,
 			NULL, &st->cert_chain)) {
-		git_error_set(GIT_ERROR_OS, "could not query remote certificate chain");
+		git3_error_set(GIT3_ERROR_OS, "could not query remote certificate chain");
 		CertFreeCertificateContext(st->certificate);
 		return -1;
 	}
@@ -331,7 +331,7 @@ static int check_certificate(schannel_stream* st)
 
 	/* Set up the x509 certificate data for future callbacks */
 
-	st->x509.parent.cert_type = GIT_CERT_X509;
+	st->x509.parent.cert_type = GIT3_CERT_X509;
 	st->x509.data = st->certificate->pbCertEncoded;
 	st->x509.len = st->certificate->cbCertEncoded;
 
@@ -347,7 +347,7 @@ static int check_certificate(schannel_stream* st)
 	if (!CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_SSL,
 			st->cert_chain, &cert_policy_parameters,
 			&cert_policy_status)) {
-		git_error_set(GIT_ERROR_OS, "could not verify certificate chain policy");
+		git3_error_set(GIT3_ERROR_OS, "could not verify certificate chain policy");
 		return -1;
 	}
 
@@ -357,12 +357,12 @@ static int check_certificate(schannel_stream* st)
 	return 0;
 }
 
-static int schannel_connect(git_stream *stream)
+static int schannel_connect(git3_stream *stream)
 {
 	schannel_stream *st = (schannel_stream *)stream;
 	int error;
 
-	GIT_ASSERT(st->state == STATE_NONE);
+	GIT3_ASSERT(st->state == STATE_NONE);
 
 	if ((error = connect_context(st)) < 0 ||
 	    (error = check_certificate(st)) < 0)
@@ -372,7 +372,7 @@ static int schannel_connect(git_stream *stream)
 	return 0;
 }
 
-static int schannel_certificate(git_cert **out, git_stream *stream)
+static int schannel_certificate(git3_cert **out, git3_stream *stream)
 {
 	schannel_stream *st = (schannel_stream *)stream;
 
@@ -381,15 +381,15 @@ static int schannel_certificate(git_cert **out, git_stream *stream)
 }
 
 static int schannel_set_proxy(
-	git_stream *stream,
-	const git_proxy_options *proxy_options)
+	git3_stream *stream,
+	const git3_proxy_options *proxy_options)
 {
 	schannel_stream *st = (schannel_stream *)stream;
-	return git_stream_set_proxy(st->io, proxy_options);
+	return git3_stream_set_proxy(st->io, proxy_options);
 }
 
 static ssize_t schannel_write(
-	git_stream *stream,
+	git3_stream *stream,
 	const char *data,
 	size_t data_len,
 	int flags)
@@ -397,15 +397,15 @@ static ssize_t schannel_write(
 	schannel_stream *st = (schannel_stream *)stream;
 	SecBuffer encrypt_buf[3];
 	SecBufferDesc encrypt_buf_desc = { SECBUFFER_VERSION, 3, encrypt_buf };
-	git_str ciphertext_out = GIT_STR_INIT;
+	git3_str ciphertext_out = GIT3_STR_INIT;
 	ssize_t total_len = 0;
 
-	GIT_UNUSED(flags);
+	GIT3_UNUSED(flags);
 
 	if (data_len > SSIZE_MAX)
 		data_len = SSIZE_MAX;
 
-	git_str_init(&ciphertext_out,
+	git3_str_init(&ciphertext_out,
 		st->stream_sizes.cbHeader +
 		st->stream_sizes.cbMaximumMessage +
 		st->stream_sizes.cbTrailer);
@@ -432,7 +432,7 @@ static ssize_t schannel_write(
 		memcpy(ciphertext_out.ptr + st->stream_sizes.cbHeader, data, message_len);
 
 		if (EncryptMessage(&st->context, 0, &encrypt_buf_desc, 0) != SEC_E_OK) {
-			git_error_set(GIT_ERROR_OS, "could not encrypt tls message");
+			git3_error_set(GIT3_ERROR_OS, "could not encrypt tls message");
 			total_len = -1;
 			goto done;
 		}
@@ -442,7 +442,7 @@ static ssize_t schannel_write(
 		                 encrypt_buf[2].cbBuffer;
 
 		while (ciphertext_written < ciphertext_len) {
-			ssize_t chunk_len = git_stream_write(st->io,
+			ssize_t chunk_len = git3_stream_write(st->io,
 				ciphertext_out.ptr + ciphertext_written,
 				ciphertext_len - ciphertext_written, 0);
 
@@ -462,11 +462,11 @@ static ssize_t schannel_write(
 	}
 
 done:
-	git_str_dispose(&ciphertext_out);
+	git3_str_dispose(&ciphertext_out);
 	return total_len;
 }
 
-static ssize_t schannel_read(git_stream *stream, void *_data, size_t data_len)
+static ssize_t schannel_read(git3_stream *stream, void *_data, size_t data_len)
 {
 	schannel_stream *st = (schannel_stream *)stream;
 	char *data = (char *)_data;
@@ -490,7 +490,7 @@ static ssize_t schannel_read(git_stream *stream, void *_data, size_t data_len)
 			size_t copy_len = min(st->plaintext_in.size, data_len);
 
 			memcpy(data, st->plaintext_in.ptr, copy_len);
-			git_str_consume_bytes(&st->plaintext_in, copy_len);
+			git3_str_consume_bytes(&st->plaintext_in, copy_len);
 
 			data += copy_len;
 			data_len -= copy_len;
@@ -520,26 +520,26 @@ static ssize_t schannel_read(git_stream *stream, void *_data, size_t data_len)
 			status = DecryptMessage(&st->context, &decrypt_buf_desc, 0, NULL);
 
 			if (status == SEC_E_OK) {
-				GIT_ASSERT(decrypt_buf[0].BufferType == SECBUFFER_STREAM_HEADER);
-				GIT_ASSERT(decrypt_buf[1].BufferType == SECBUFFER_DATA);
-				GIT_ASSERT(decrypt_buf[2].BufferType == SECBUFFER_STREAM_TRAILER);
+				GIT3_ASSERT(decrypt_buf[0].BufferType == SECBUFFER_STREAM_HEADER);
+				GIT3_ASSERT(decrypt_buf[1].BufferType == SECBUFFER_DATA);
+				GIT3_ASSERT(decrypt_buf[2].BufferType == SECBUFFER_STREAM_TRAILER);
 
-				if (git_str_put(&st->plaintext_in, decrypt_buf[1].pvBuffer, decrypt_buf[1].cbBuffer) < 0) {
+				if (git3_str_put(&st->plaintext_in, decrypt_buf[1].pvBuffer, decrypt_buf[1].cbBuffer) < 0) {
 					total_len = -1;
 					goto done;
 				}
 
 				if (decrypt_buf[3].BufferType == SECBUFFER_EXTRA) {
-					git_str_consume_bytes(&st->ciphertext_in, (st->ciphertext_in.size - decrypt_buf[3].cbBuffer));
+					git3_str_consume_bytes(&st->ciphertext_in, (st->ciphertext_in.size - decrypt_buf[3].cbBuffer));
 				} else {
-					git_str_clear(&st->ciphertext_in);
+					git3_str_clear(&st->ciphertext_in);
 				}
 
 				continue;
 			} else if (status == SEC_E_CONTEXT_EXPIRED) {
 				break;
 			} else if (status != SEC_E_INCOMPLETE_MESSAGE) {
-				git_error_set(GIT_ERROR_SSL, "could not decrypt tls message");
+				git3_error_set(GIT3_ERROR_SSL, "could not decrypt tls message");
 				total_len = -1;
 				goto done;
 			}
@@ -548,12 +548,12 @@ static ssize_t schannel_read(git_stream *stream, void *_data, size_t data_len)
 		if (total_len != 0)
 			break;
 
-		if (git_str_grow_by(&st->ciphertext_in, READ_BLOCKSIZE) < 0) {
+		if (git3_str_grow_by(&st->ciphertext_in, READ_BLOCKSIZE) < 0) {
 			total_len = -1;
 			goto done;
 		}
 
-		if ((chunk_len = git_stream_read(st->io, st->ciphertext_in.ptr + st->ciphertext_in.size, st->ciphertext_in.asize - st->ciphertext_in.size)) < 0) {
+		if ((chunk_len = git3_stream_read(st->io, st->ciphertext_in.ptr + st->ciphertext_in.size, st->ciphertext_in.asize - st->ciphertext_in.size)) < 0) {
 			total_len = -1;
 			goto done;
 		}
@@ -565,7 +565,7 @@ done:
 	return total_len;
 }
 
-static int schannel_close(git_stream *stream)
+static int schannel_close(git3_stream *stream)
 {
 	schannel_stream *st = (schannel_stream *)stream;
 	int error = 0;
@@ -581,7 +581,7 @@ static int schannel_close(git_stream *stream)
 		shutdown_buf.pvBuffer = &shutdown_message;
 
 		if (ApplyControlToken(&st->context, &shutdown_buf_desc) != SEC_E_OK) {
-			git_error_set(GIT_ERROR_SSL, "could not shutdown stream");
+			git3_error_set(GIT3_ERROR_SSL, "could not shutdown stream");
 			error = -1;
 		}
 
@@ -601,7 +601,7 @@ static int schannel_close(git_stream *stream)
 				&shutdown_buf_desc, &shutdown_flags,
 				NULL) == SEC_E_OK) {
 			if (shutdown_buf.cbBuffer > 0) {
-				if (git_stream__write_full(st->io,
+				if (git3_stream__write_full(st->io,
 						shutdown_buf.pvBuffer,
 						shutdown_buf.cbBuffer, 0) < 0)
 					error = -1;
@@ -613,13 +613,13 @@ static int schannel_close(git_stream *stream)
 
 	st->connected = false;
 
-	if (st->owned && git_stream_close(st->io) < 0)
+	if (st->owned && git3_stream_close(st->io) < 0)
 		error = -1;
 
 	return error;
 }
 
-static void schannel_free(git_stream *stream)
+static void schannel_free(git3_stream *stream)
 {
 	schannel_stream *st = (schannel_stream *)stream;
 
@@ -636,39 +636,39 @@ static void schannel_free(git_stream *stream)
 
 	st->state = STATE_NONE;
 
-	git_str_dispose(&st->ciphertext_in);
-	git_str_dispose(&st->plaintext_in);
+	git3_str_dispose(&st->ciphertext_in);
+	git3_str_dispose(&st->plaintext_in);
 
-	git__free(st->host_w);
+	git3__free(st->host_w);
 
 	if (st->owned)
-		git_stream_free(st->io);
+		git3_stream_free(st->io);
 
-	git__free(st);
+	git3__free(st);
 }
 
 static int schannel_stream_wrap(
-	git_stream **out,
-	git_stream *in,
+	git3_stream **out,
+	git3_stream *in,
 	const char *host,
 	int owned)
 {
 	schannel_stream *st;
 
-	st = git__calloc(1, sizeof(schannel_stream));
-	GIT_ERROR_CHECK_ALLOC(st);
+	st = git3__calloc(1, sizeof(schannel_stream));
+	GIT3_ERROR_CHECK_ALLOC(st);
 
 	st->io = in;
 	st->owned = owned;
 
-	if (git_utf8_to_16_alloc(&st->host_w, host) < 0) {
-		git__free(st);
+	if (git3_utf8_to_16_alloc(&st->host_w, host) < 0) {
+		git3__free(st);
 		return -1;
 	}
 
-	st->parent.version = GIT_STREAM_VERSION;
+	st->parent.version = GIT3_STREAM_VERSION;
 	st->parent.encrypted = 1;
-	st->parent.proxy_support = git_stream_supports_proxy(st->io);
+	st->parent.proxy_support = git3_stream_supports_proxy(st->io);
 	st->parent.connect = schannel_connect;
 	st->parent.certificate = schannel_certificate;
 	st->parent.set_proxy = schannel_set_proxy;
@@ -677,36 +677,36 @@ static int schannel_stream_wrap(
 	st->parent.close = schannel_close;
 	st->parent.free = schannel_free;
 
-	*out = (git_stream *)st;
+	*out = (git3_stream *)st;
 	return 0;
 }
 
-extern int git_schannel_stream_new(
-	git_stream **out,
+extern int git3_schannel_stream_new(
+	git3_stream **out,
 	const char *host,
 	const char *port)
 {
-	git_stream *stream;
+	git3_stream *stream;
 	int error;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(host);
-	GIT_ASSERT_ARG(port);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(host);
+	GIT3_ASSERT_ARG(port);
 
-	if ((error = git_socket_stream_new(&stream, host, port)) < 0)
+	if ((error = git3_socket_stream_new(&stream, host, port)) < 0)
 		return error;
 
 	if ((error = schannel_stream_wrap(out, stream, host, 1)) < 0) {
-		git_stream_close(stream);
-		git_stream_free(stream);
+		git3_stream_close(stream);
+		git3_stream_free(stream);
 	}
 
 	return error;
 }
 
-extern int git_schannel_stream_wrap(
-	git_stream **out,
-	git_stream *in,
+extern int git3_schannel_stream_wrap(
+	git3_stream **out,
+	git3_stream *in,
 	const char *host)
 {
 	return schannel_stream_wrap(out, in, host, 0);

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,7 +12,7 @@
 #include "utf8.h"
 
 typedef struct {
-	git_repository *repo;
+	git3_repository *repo;
 	uint16_t file_mode;
 	unsigned int flags;
 } repository_path_validate_data;
@@ -21,7 +21,7 @@ static int32_t next_hfs_char(const char **in, size_t *len)
 {
 	while (*len) {
 		uint32_t codepoint;
-		int cp_len = git_utf8_iterate(&codepoint, *in, *len);
+		int cp_len = git3_utf8_iterate(&codepoint, *in, *len);
 		if (cp_len < 0)
 			return -1;
 
@@ -53,7 +53,7 @@ static int32_t next_hfs_char(const char **in, size_t *len)
 		 * the ASCII range, which is perfectly fine, because the
 		 * git folder name can only be composed of ascii characters
 		 */
-		return git__tolower((int)codepoint);
+		return git3__tolower((int)codepoint);
 	}
 	return 0; /* NULL byte -- end of string */
 }
@@ -87,20 +87,20 @@ static bool validate_dotgit_hfs(const char *path, size_t len)
 	return validate_dotgit_hfs_generic(path, len, "git", CONST_STRLEN("git"));
 }
 
-GIT_INLINE(bool) validate_dotgit_ntfs(
-	git_repository *repo,
+GIT3_INLINE(bool) validate_dotgit_ntfs(
+	git3_repository *repo,
 	const char *path,
 	size_t len)
 {
-	git_str *reserved = git_repository__reserved_names_win32;
-	size_t reserved_len = git_repository__reserved_names_win32_len;
+	git3_str *reserved = git3_repository__reserved_names_win32;
+	size_t reserved_len = git3_repository__reserved_names_win32_len;
 	size_t start = 0, i;
 
 	if (repo)
-		git_repository__reserved_names(&reserved, &reserved_len, repo, true);
+		git3_repository__reserved_names(&reserved, &reserved_len, repo, true);
 
 	for (i = 0; i < reserved_len; i++) {
-		git_str *r = &reserved[i];
+		git3_str *r = &reserved[i];
 
 		if (len >= r->size &&
 			strncasecmp(path, r->ptr, r->size) == 0) {
@@ -138,7 +138,7 @@ GIT_INLINE(bool) validate_dotgit_ntfs(
  * filename (end of string) or a colon (which would indicate a
  * Windows alternate data stream.)
  */
-GIT_INLINE(bool) ntfs_end_of_filename(const char *path)
+GIT3_INLINE(bool) ntfs_end_of_filename(const char *path)
 {
 	const char *c = path;
 
@@ -152,7 +152,7 @@ GIT_INLINE(bool) ntfs_end_of_filename(const char *path)
 	return true;
 }
 
-GIT_INLINE(bool) validate_dotgit_ntfs_generic(
+GIT3_INLINE(bool) validate_dotgit_ntfs_generic(
 	const char *name,
 	size_t len,
 	const char *dotgit_name,
@@ -186,7 +186,7 @@ GIT_INLINE(bool) validate_dotgit_ntfs_generic(
 			return true;
 		} else if ((unsigned char)name[i] > 127) {
 			return true;
-		} else if (git__tolower(name[i]) != shortname_pfix[i]) {
+		} else if (git3__tolower(name[i]) != shortname_pfix[i]) {
 			return true;
 		}
 	}
@@ -198,11 +198,11 @@ GIT_INLINE(bool) validate_dotgit_ntfs_generic(
  * Return the length of the common prefix between str and prefix, comparing them
  * case-insensitively (must be ASCII to match).
  */
-GIT_INLINE(size_t) common_prefix_icase(const char *str, size_t len, const char *prefix)
+GIT3_INLINE(size_t) common_prefix_icase(const char *str, size_t len, const char *prefix)
 {
 	size_t count = 0;
 
-	while (len > 0 && git__tolower(*str) == git__tolower(*prefix)) {
+	while (len > 0 && git3__tolower(*str) == git3__tolower(*prefix)) {
 		count++;
 		str++;
 		prefix++;
@@ -219,30 +219,30 @@ static bool validate_repo_component(
 {
 	repository_path_validate_data *data = (repository_path_validate_data *)payload;
 
-	if (data->flags & GIT_PATH_REJECT_DOT_GIT_HFS) {
+	if (data->flags & GIT3_PATH_REJECT_DOT_GIT3_HFS) {
 		if (!validate_dotgit_hfs(component, len))
 			return false;
 
 		if (S_ISLNK(data->file_mode) &&
-		    git_path_is_gitfile(component, len, GIT_PATH_GITFILE_GITMODULES, GIT_PATH_FS_HFS))
+		    git3_path_is_gitfile(component, len, GIT3_PATH_GITFILE_GITMODULES, GIT3_PATH_FS_HFS))
 			return false;
 	}
 
-	if (data->flags & GIT_PATH_REJECT_DOT_GIT_NTFS) {
+	if (data->flags & GIT3_PATH_REJECT_DOT_GIT3_NTFS) {
 		if (!validate_dotgit_ntfs(data->repo, component, len))
 			return false;
 
 		if (S_ISLNK(data->file_mode) &&
-		    git_path_is_gitfile(component, len, GIT_PATH_GITFILE_GITMODULES, GIT_PATH_FS_NTFS))
+		    git3_path_is_gitfile(component, len, GIT3_PATH_GITFILE_GITMODULES, GIT3_PATH_FS_NTFS))
 			return false;
 	}
 
 	/* don't bother rerunning the `.git` test if we ran the HFS or NTFS
 	 * specific tests, they would have already rejected `.git`.
 	 */
-	if ((data->flags & GIT_PATH_REJECT_DOT_GIT_HFS) == 0 &&
-	    (data->flags & GIT_PATH_REJECT_DOT_GIT_NTFS) == 0 &&
-	    (data->flags & GIT_PATH_REJECT_DOT_GIT_LITERAL)) {
+	if ((data->flags & GIT3_PATH_REJECT_DOT_GIT3_HFS) == 0 &&
+	    (data->flags & GIT3_PATH_REJECT_DOT_GIT3_NTFS) == 0 &&
+	    (data->flags & GIT3_PATH_REJECT_DOT_GIT3_LITERAL)) {
 		if (len >= 4 &&
 		    component[0] == '.' &&
 		    (component[1] == 'g' || component[1] == 'G') &&
@@ -260,75 +260,75 @@ static bool validate_repo_component(
 	return true;
 }
 
-GIT_INLINE(unsigned int) dotgit_flags(
-	git_repository *repo,
+GIT3_INLINE(unsigned int) dotgit_flags(
+	git3_repository *repo,
 	unsigned int flags)
 {
 	int protectHFS = 0, protectNTFS = 1;
 	int error = 0;
 
-	flags |= GIT_PATH_REJECT_DOT_GIT_LITERAL;
+	flags |= GIT3_PATH_REJECT_DOT_GIT3_LITERAL;
 
 #ifdef __APPLE__
 	protectHFS = 1;
 #endif
 
 	if (repo && !protectHFS)
-		error = git_repository__configmap_lookup(&protectHFS, repo, GIT_CONFIGMAP_PROTECTHFS);
+		error = git3_repository__configmap_lookup(&protectHFS, repo, GIT3_CONFIGMAP_PROTECTHFS);
 	if (!error && protectHFS)
-		flags |= GIT_PATH_REJECT_DOT_GIT_HFS;
+		flags |= GIT3_PATH_REJECT_DOT_GIT3_HFS;
 
 	if (repo)
-		error = git_repository__configmap_lookup(&protectNTFS, repo, GIT_CONFIGMAP_PROTECTNTFS);
+		error = git3_repository__configmap_lookup(&protectNTFS, repo, GIT3_CONFIGMAP_PROTECTNTFS);
 	if (!error && protectNTFS)
-		flags |= GIT_PATH_REJECT_DOT_GIT_NTFS;
+		flags |= GIT3_PATH_REJECT_DOT_GIT3_NTFS;
 
 	return flags;
 }
 
-GIT_INLINE(unsigned int) length_flags(
-	git_repository *repo,
+GIT3_INLINE(unsigned int) length_flags(
+	git3_repository *repo,
 	unsigned int flags)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	int allow = 0;
 
 	if (repo &&
-	    git_repository__configmap_lookup(&allow, repo, GIT_CONFIGMAP_LONGPATHS) < 0)
+	    git3_repository__configmap_lookup(&allow, repo, GIT3_CONFIGMAP_LONGPATHS) < 0)
 		allow = 0;
 
 	if (allow)
-		flags &= ~GIT_FS_PATH_REJECT_LONG_PATHS;
+		flags &= ~GIT3_FS_PATH_REJECT_LONG_PATHS;
 
 #else
-	GIT_UNUSED(repo);
-	flags &= ~GIT_FS_PATH_REJECT_LONG_PATHS;
+	GIT3_UNUSED(repo);
+	flags &= ~GIT3_FS_PATH_REJECT_LONG_PATHS;
 #endif
 
 	return flags;
 }
 
-bool git_path_str_is_valid(
-	git_repository *repo,
-	const git_str *path,
+bool git3_path_str_is_valid(
+	git3_repository *repo,
+	const git3_str *path,
 	uint16_t file_mode,
 	unsigned int flags)
 {
 	repository_path_validate_data data = {0};
 
 	/* Upgrade the ".git" checks based on platform */
-	if ((flags & GIT_PATH_REJECT_DOT_GIT))
+	if ((flags & GIT3_PATH_REJECT_DOT_GIT))
 		flags = dotgit_flags(repo, flags);
 
 	/* Update the length checks based on platform */
-	if ((flags & GIT_FS_PATH_REJECT_LONG_PATHS))
+	if ((flags & GIT3_FS_PATH_REJECT_LONG_PATHS))
 		flags = length_flags(repo, flags);
 
 	data.repo = repo;
 	data.file_mode = file_mode;
 	data.flags = flags;
 
-	return git_fs_path_str_is_valid_ext(path, flags, NULL, validate_repo_component, NULL, &data);
+	return git3_fs_path_str_is_valid_ext(path, flags, NULL, validate_repo_component, NULL, &data);
 }
 
 static const struct {
@@ -341,17 +341,17 @@ static const struct {
 	{ "gitattributes", "gi7d29", CONST_STRLEN("gitattributes") }
 };
 
-extern int git_path_is_gitfile(
+extern int git3_path_is_gitfile(
 	const char *path,
 	size_t pathlen,
-	git_path_gitfile gitfile,
-	git_path_fs fs)
+	git3_path_gitfile gitfile,
+	git3_path_fs fs)
 {
 	const char *file, *hash;
 	size_t filelen;
 
-	if (!(gitfile >= GIT_PATH_GITFILE_GITIGNORE && gitfile < ARRAY_SIZE(gitfiles))) {
-		git_error_set(GIT_ERROR_OS, "invalid gitfile for path validation");
+	if (!(gitfile >= GIT3_PATH_GITFILE_GITIGNORE && gitfile < ARRAY_SIZE(gitfiles))) {
+		git3_error_set(GIT3_ERROR_OS, "invalid gitfile for path validation");
 		return -1;
 	}
 
@@ -360,15 +360,15 @@ extern int git_path_is_gitfile(
 	hash = gitfiles[gitfile].hash;
 
 	switch (fs) {
-	case GIT_PATH_FS_GENERIC:
+	case GIT3_PATH_FS_GENERIC:
 		return !validate_dotgit_ntfs_generic(path, pathlen, file, filelen, hash) ||
 		       !validate_dotgit_hfs_generic(path, pathlen, file, filelen);
-	case GIT_PATH_FS_NTFS:
+	case GIT3_PATH_FS_NTFS:
 		return !validate_dotgit_ntfs_generic(path, pathlen, file, filelen, hash);
-	case GIT_PATH_FS_HFS:
+	case GIT3_PATH_FS_HFS:
 		return !validate_dotgit_hfs_generic(path, pathlen, file, filelen);
 	default:
-		git_error_set(GIT_ERROR_OS, "invalid filesystem for path validation");
+		git3_error_set(GIT3_ERROR_OS, "invalid filesystem for path validation");
 		return -1;
 	}
 }

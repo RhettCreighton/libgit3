@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "repository.h"
 #include "worktree.h"
 #include "worktree_helpers.h"
@@ -30,8 +30,8 @@ void test_worktree_submodule__cleanup(void)
 
 void test_worktree_submodule__submodule_worktree_parent(void)
 {
-	cl_assert(git_repository_path(parent.worktree) != NULL);
-	cl_assert(git_repository_workdir(parent.worktree) != NULL);
+	cl_assert(git3_repository_path(parent.worktree) != NULL);
+	cl_assert(git3_repository_workdir(parent.worktree) != NULL);
 
 	cl_assert(!parent.repo->is_worktree);
 	cl_assert(parent.worktree->is_worktree);
@@ -46,47 +46,47 @@ void test_worktree_submodule__submodule_worktree_child(void)
 
 void test_worktree_submodule__open_discovered_submodule_worktree(void)
 {
-	git_buf path = GIT_BUF_INIT;
-	git_repository *repo;
+	git3_buf path = GIT3_BUF_INIT;
+	git3_repository *repo;
 
-	cl_git_pass(git_repository_discover(&path,
-		git_repository_workdir(child.worktree), false, NULL));
-	cl_git_pass(git_repository_open(&repo, path.ptr));
-	cl_assert_equal_s(git_repository_workdir(child.worktree),
-		git_repository_workdir(repo));
+	cl_git_pass(git3_repository_discover(&path,
+		git3_repository_workdir(child.worktree), false, NULL));
+	cl_git_pass(git3_repository_open(&repo, path.ptr));
+	cl_assert_equal_s(git3_repository_workdir(child.worktree),
+		git3_repository_workdir(repo));
 
-	git_buf_dispose(&path);
-	git_repository_free(repo);
+	git3_buf_dispose(&path);
+	git3_repository_free(repo);
 }
 
 void test_worktree_submodule__resolve_relative_url(void)
 {
-	git_str wt_path = GIT_STR_INIT;
-	git_buf sm_relative_path = GIT_BUF_INIT, wt_relative_path = GIT_BUF_INIT;
-	git_repository *repo;
-	git_worktree *wt;
+	git3_str wt_path = GIT3_STR_INIT;
+	git3_buf sm_relative_path = GIT3_BUF_INIT, wt_relative_path = GIT3_BUF_INIT;
+	git3_repository *repo;
+	git3_worktree *wt;
 
-	cl_git_pass(git_futils_mkdir("subdir", 0755, GIT_MKDIR_PATH));
-	cl_git_pass(git_fs_path_prettify_dir(&wt_path, "subdir", NULL));
-	cl_git_pass(git_str_joinpath(&wt_path, wt_path.ptr, "wt"));
+	cl_git_pass(git3_futils_mkdir("subdir", 0755, GIT3_MKDIR_PATH));
+	cl_git_pass(git3_fs_path_prettify_dir(&wt_path, "subdir", NULL));
+	cl_git_pass(git3_str_joinpath(&wt_path, wt_path.ptr, "wt"));
 
 	/* Open child repository, which is a submodule */
-	cl_git_pass(git_repository_open(&child.repo, WORKTREE_CHILD));
+	cl_git_pass(git3_repository_open(&child.repo, WORKTREE_CHILD));
 
 	/* Create worktree of submodule repository */
-	cl_git_pass(git_worktree_add(&wt, child.repo, "subdir", wt_path.ptr, NULL));
-	cl_git_pass(git_repository_open_from_worktree(&repo, wt));
+	cl_git_pass(git3_worktree_add(&wt, child.repo, "subdir", wt_path.ptr, NULL));
+	cl_git_pass(git3_repository_open_from_worktree(&repo, wt));
 
-	cl_git_pass(git_submodule_resolve_url(&sm_relative_path, repo,
+	cl_git_pass(git3_submodule_resolve_url(&sm_relative_path, repo,
 		    "../" WORKTREE_CHILD));
-	cl_git_pass(git_submodule_resolve_url(&wt_relative_path, child.repo,
+	cl_git_pass(git3_submodule_resolve_url(&wt_relative_path, child.repo,
 		    "../" WORKTREE_CHILD));
 
 	cl_assert_equal_s(sm_relative_path.ptr, wt_relative_path.ptr);
 
-	git_worktree_free(wt);
-	git_repository_free(repo);
-	git_str_dispose(&wt_path);
-	git_buf_dispose(&sm_relative_path);
-	git_buf_dispose(&wt_relative_path);
+	git3_worktree_free(wt);
+	git3_repository_free(repo);
+	git3_str_dispose(&wt_path);
+	git3_buf_dispose(&sm_relative_path);
+	git3_buf_dispose(&wt_relative_path);
 }

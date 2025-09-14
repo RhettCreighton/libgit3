@@ -1,53 +1,53 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include <stdio.h>
 
-#include "git2_util.h"
+#include "git3_util.h"
 #include "vector.h"
 #include "strlist.h"
 
-int git_strlist_copy(char ***out, const char **in, size_t len)
+int git3_strlist_copy(char ***out, const char **in, size_t len)
 {
 	char **dup;
 	size_t i;
 
-	dup = git__calloc(len, sizeof(char *));
-	GIT_ERROR_CHECK_ALLOC(dup);
+	dup = git3__calloc(len, sizeof(char *));
+	GIT3_ERROR_CHECK_ALLOC(dup);
 
 	for (i = 0; i < len; i++) {
-		dup[i] = git__strdup(in[i]);
-		GIT_ERROR_CHECK_ALLOC(dup[i]);
+		dup[i] = git3__strdup(in[i]);
+		GIT3_ERROR_CHECK_ALLOC(dup[i]);
 	}
 
 	*out = dup;
 	return 0;
 }
 
-int git_strlist_copy_with_null(char ***out, const char **in, size_t len)
+int git3_strlist_copy_with_null(char ***out, const char **in, size_t len)
 {
 	char **dup;
 	size_t new_len, i;
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&new_len, len, 1);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&new_len, len, 1);
 
-	dup = git__calloc(new_len, sizeof(char *));
-	GIT_ERROR_CHECK_ALLOC(dup);
+	dup = git3__calloc(new_len, sizeof(char *));
+	GIT3_ERROR_CHECK_ALLOC(dup);
 
 	for (i = 0; i < len; i++) {
-		dup[i] = git__strdup(in[i]);
-		GIT_ERROR_CHECK_ALLOC(dup[i]);
+		dup[i] = git3__strdup(in[i]);
+		GIT3_ERROR_CHECK_ALLOC(dup[i]);
 	}
 
 	*out = dup;
 	return 0;
 }
 
-bool git_strlist_contains_prefix(
+bool git3_strlist_contains_prefix(
 	const char **strings,
 	size_t len,
 	const char *str,
@@ -63,7 +63,7 @@ bool git_strlist_contains_prefix(
 	return false;
 }
 
-bool git_strlist_contains_key(
+bool git3_strlist_contains_key(
 	const char **strings,
 	size_t len,
 	const char *key,
@@ -77,11 +77,11 @@ bool git_strlist_contains_key(
 	}
 
 	return *c ?
-	       git_strlist_contains_prefix(strings, len, key, (c - key)) :
+	       git3_strlist_contains_prefix(strings, len, key, (c - key)) :
 	       false;
 }
 
-void git_strlist_free(char **strings, size_t len)
+void git3_strlist_free(char **strings, size_t len)
 {
 	size_t i;
 
@@ -89,12 +89,12 @@ void git_strlist_free(char **strings, size_t len)
 		return;
 
 	for (i = 0; i < len; i++)
-		git__free(strings[i]);
+		git3__free(strings[i]);
 
-	git__free(strings);
+	git3__free(strings);
 }
 
-void git_strlist_free_with_null(char **strings)
+void git3_strlist_free_with_null(char **strings)
 {
 	char **s;
 
@@ -102,7 +102,7 @@ void git_strlist_free_with_null(char **strings)
 		return;
 
 	for (s = strings; *s; s++)
-		git__free(*s);
+		git3__free(*s);
 
-	git__free(strings);
+	git3__free(strings);
 }

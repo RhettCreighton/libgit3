@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_filter_h__
@@ -10,13 +10,13 @@
 #include "git3/filter.h"
 
 /**
- * @file git2/sys/filter.h
+ * @file git3/sys/filter.h
  * @brief Custom filter backends and plugins
- * @defgroup git_backend Custom filter backends and plugins
+ * @defgroup git3_backend Custom filter backends and plugins
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Look up a filter by name
@@ -24,37 +24,37 @@ GIT_BEGIN_DECL
  * @param name The name of the filter
  * @return Pointer to the filter object or NULL if not found
  */
-GIT_EXTERN(git_filter *) git_filter_lookup(const char *name);
+GIT3_EXTERN(git3_filter *) git3_filter_lookup(const char *name);
 
 /** The "crlf" filter */
-#define GIT_FILTER_CRLF  "crlf"
+#define GIT3_FILTER_CRLF  "crlf"
 
 /** The "ident" filter */
-#define GIT_FILTER_IDENT "ident"
+#define GIT3_FILTER_IDENT "ident"
 
 /**
  * This is priority that the internal CRLF filter will be registered with
  */
-#define GIT_FILTER_CRLF_PRIORITY 0
+#define GIT3_FILTER_CRLF_PRIORITY 0
 
 /**
  * This is priority that the internal ident filter will be registered with
  */
-#define GIT_FILTER_IDENT_PRIORITY 100
+#define GIT3_FILTER_IDENT_PRIORITY 100
 
 /**
  * This is priority to use with a custom filter to imitate a core Git
  * filter driver, so that it will be run last on checkout and first on
  * checkin.  You do not have to use this, but it helps compatibility.
  */
-#define GIT_FILTER_DRIVER_PRIORITY 200
+#define GIT3_FILTER_DRIVER_PRIORITY 200
 
 /**
  * Create a new empty filter list
  *
- * Normally you won't use this because `git_filter_list_load` will create
+ * Normally you won't use this because `git3_filter_list_load` will create
  * the filter list for you, but you can use this in combination with the
- * `git_filter_lookup` and `git_filter_list_push` functions to assemble
+ * `git3_filter_lookup` and `git3_filter_list_push` functions to assemble
  * your own chains of filters.
  *
  * @param out the filter list
@@ -63,10 +63,10 @@ GIT_EXTERN(git_filter *) git_filter_lookup(const char *name);
  * @param options the options
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_filter_list_new(
-	git_filter_list **out,
-	git_repository *repo,
-	git_filter_mode_t mode,
+GIT3_EXTERN(int) git3_filter_list_new(
+	git3_filter_list **out,
+	git3_repository *repo,
+	git3_filter_mode_t mode,
 	uint32_t options);
 
 /**
@@ -87,8 +87,8 @@ GIT_EXTERN(int) git_filter_list_new(
  * @param payload the payload for the filter
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_filter_list_push(
-	git_filter_list *fl, git_filter *filter, void *payload);
+GIT3_EXTERN(int) git3_filter_list_push(
+	git3_filter_list *fl, git3_filter *filter, void *payload);
 
 /**
  * Look up how many filters are in the list
@@ -101,12 +101,12 @@ GIT_EXTERN(int) git_filter_list_push(
  * @param fl A filter list
  * @return The number of filters in the list
  */
-GIT_EXTERN(size_t) git_filter_list_length(const git_filter_list *fl);
+GIT3_EXTERN(size_t) git3_filter_list_length(const git3_filter_list *fl);
 
 /**
  * A filter source represents a file/blob to be processed
  */
-typedef struct git_filter_source git_filter_source;
+typedef struct git3_filter_source git3_filter_source;
 
 /**
  * Get the repository that the source data is coming from.
@@ -114,7 +114,7 @@ typedef struct git_filter_source git_filter_source;
  * @param src the filter source
  * @return the repository for the filter information
  */
-GIT_EXTERN(git_repository *) git_filter_source_repo(const git_filter_source *src);
+GIT3_EXTERN(git3_repository *) git3_filter_source_repo(const git3_filter_source *src);
 
 /**
  * Get the path that the source data is coming from.
@@ -122,7 +122,7 @@ GIT_EXTERN(git_repository *) git_filter_source_repo(const git_filter_source *src
  * @param src the filter source
  * @return the path that is being filtered
  */
-GIT_EXTERN(const char *) git_filter_source_path(const git_filter_source *src);
+GIT3_EXTERN(const char *) git3_filter_source_path(const git3_filter_source *src);
 
 /**
  * Get the file mode of the source file
@@ -131,33 +131,33 @@ GIT_EXTERN(const char *) git_filter_source_path(const git_filter_source *src);
  * @param src the filter source
  * @return the file mode for the file being filtered
  */
-GIT_EXTERN(uint16_t) git_filter_source_filemode(const git_filter_source *src);
+GIT3_EXTERN(uint16_t) git3_filter_source_filemode(const git3_filter_source *src);
 
 /**
  * Get the OID of the source
- * If the OID is unknown (often the case with GIT_FILTER_CLEAN) then
+ * If the OID is unknown (often the case with GIT3_FILTER_CLEAN) then
  * this will return NULL.
  *
  * @param src the filter source
  * @return the object id of the file being filtered
  */
-GIT_EXTERN(const git_oid *) git_filter_source_id(const git_filter_source *src);
+GIT3_EXTERN(const git3_oid *) git3_filter_source_id(const git3_filter_source *src);
 
 /**
- * Get the git_filter_mode_t to be used
+ * Get the git3_filter_mode_t to be used
  *
  * @param src the filter source
  * @return the mode (direction) of the filter
  */
-GIT_EXTERN(git_filter_mode_t) git_filter_source_mode(const git_filter_source *src);
+GIT3_EXTERN(git3_filter_mode_t) git3_filter_source_mode(const git3_filter_source *src);
 
 /**
- * Get the combination git_filter_flag_t options to be applied
+ * Get the combination git3_filter_flag_t options to be applied
  *
  * @param src the filter source
  * @return the flags of the filter
  */
-GIT_EXTERN(uint32_t) git_filter_source_flags(const git_filter_source *src);
+GIT3_EXTERN(uint32_t) git3_filter_source_flags(const git3_filter_source *src);
 
 /**
  * Initialize callback on filter
@@ -167,27 +167,27 @@ GIT_EXTERN(uint32_t) git_filter_source_flags(const git_filter_source *src);
  *
  * If non-NULL, the filter's `initialize` callback will be invoked right
  * before the first use of the filter, so you can defer expensive
- * initialization operations (in case libgit2 is being used in a way that
+ * initialization operations (in case libgit3 is being used in a way that
  * doesn't need the filter).
  *
  * @param self the filter to initialize
  * @return 0 on success, negative number on failure
  */
-typedef int GIT_CALLBACK(git_filter_init_fn)(git_filter *self);
+typedef int GIT3_CALLBACK(git3_filter_init_fn)(git3_filter *self);
 
 /**
  * Shutdown callback on filter
  *
  * Specified as `filter.shutdown`, this is an optional callback invoked
- * when the filter is unregistered or when libgit2 is shutting down.  It
+ * when the filter is unregistered or when libgit3 is shutting down.  It
  * will be called once at most and should release resources as needed.
  * This may be called even if the `initialize` callback was not made.
  *
- * Typically this function will free the `git_filter` object itself.
+ * Typically this function will free the `git3_filter` object itself.
  *
  * @param self the filter to shutdown
  */
-typedef void GIT_CALLBACK(git_filter_shutdown_fn)(git_filter *self);
+typedef void GIT3_CALLBACK(git3_filter_shutdown_fn)(git3_filter *self);
 
 /**
  * Callback to decide if a given source needs this filter
@@ -196,11 +196,11 @@ typedef void GIT_CALLBACK(git_filter_shutdown_fn)(git_filter *self);
  * if filtering is needed for a given source.
  *
  * It should return 0 if the filter should be applied (i.e. success),
- * GIT_PASSTHROUGH if the filter should not be applied, or an error code
+ * GIT3_PASSTHROUGH if the filter should not be applied, or an error code
  * to fail out of the filter processing pipeline and return to the caller.
  *
  * The `attr_values` will be set to the values of any attributes given in
- * the filter definition.  See `git_filter` below for more detail.
+ * the filter definition.  See `git3_filter` below for more detail.
  *
  * The `payload` will be a pointer to a reference payload for the filter.
  * This will start as NULL, but `check` can assign to this pointer for
@@ -215,19 +215,19 @@ typedef void GIT_CALLBACK(git_filter_shutdown_fn)(git_filter *self);
  * @param attr_values the attribute values
  * @return 0 on success or a negative value on error
  */
-typedef int GIT_CALLBACK(git_filter_check_fn)(
-	git_filter              *self,
+typedef int GIT3_CALLBACK(git3_filter_check_fn)(
+	git3_filter              *self,
 	void                   **payload, /* NULL on entry, may be set */
-	const git_filter_source *src,
+	const git3_filter_source *src,
 	const char             **attr_values);
 
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 /**
  * Callback to actually perform the data filtering
  *
  * Specified as `filter.apply`, this is the callback that actually filters
  * data.  If it successfully writes the output, it should return 0.  Like
- * `check`, it can return GIT_PASSTHROUGH to indicate that the filter
+ * `check`, it can return GIT3_PASSTHROUGH to indicate that the filter
  * doesn't want to run.  Other error codes will stop filter processing and
  * return to the caller.
  *
@@ -240,14 +240,14 @@ typedef int GIT_CALLBACK(git_filter_check_fn)(
  * @param from the output buffer
  * @param src the filter source
  * @return 0 on success or a negative value on error
- * @deprecated use git_filter_stream_fn
+ * @deprecated use git3_filter_stream_fn
  */
-typedef int GIT_CALLBACK(git_filter_apply_fn)(
-	git_filter              *self,
+typedef int GIT3_CALLBACK(git3_filter_apply_fn)(
+	git3_filter              *self,
 	void                   **payload, /* may be read and/or set */
-	git_buf                 *to,
-	const git_buf           *from,
-	const git_filter_source *src);
+	git3_buf                 *to,
+	const git3_buf           *from,
+	const git3_filter_source *src);
 #endif
 
 /**
@@ -255,8 +255,8 @@ typedef int GIT_CALLBACK(git_filter_apply_fn)(
  *
  * Specified as `filter.stream`, this is a callback that filters data
  * in a streaming manner.  This function will provide a
- * `git_writestream` that will the original data will be written to;
- * with that data, the `git_writestream` will then perform the filter
+ * `git3_writestream` that will the original data will be written to;
+ * with that data, the `git3_writestream` will then perform the filter
  * translation and stream the filtered data out to the `next` location.
  *
  * @param out the write stream
@@ -266,12 +266,12 @@ typedef int GIT_CALLBACK(git_filter_apply_fn)(
  * @param next the output stream
  * @return 0 on success or a negative value on error
  */
-typedef int GIT_CALLBACK(git_filter_stream_fn)(
-	git_writestream        **out,
-	git_filter              *self,
+typedef int GIT3_CALLBACK(git3_filter_stream_fn)(
+	git3_writestream        **out,
+	git3_filter              *self,
 	void                   **payload,
-	const git_filter_source *src,
-	git_writestream         *next);
+	const git3_filter_source *src,
+	git3_writestream         *next);
 
 /**
  * Callback to clean up after filtering has been applied
@@ -285,19 +285,19 @@ typedef int GIT_CALLBACK(git_filter_stream_fn)(
  * @param self the filter
  * @param payload a data for future filter functions
  */
-typedef void GIT_CALLBACK(git_filter_cleanup_fn)(
-	git_filter              *self,
+typedef void GIT3_CALLBACK(git3_filter_cleanup_fn)(
+	git3_filter              *self,
 	void                    *payload);
 
 /**
  * Filter structure used to register custom filters.
  *
  * To associate extra data with a filter, allocate extra data and put the
- * `git_filter` struct at the start of your data buffer, then cast the
+ * `git3_filter` struct at the start of your data buffer, then cast the
  * `self` pointer to your larger structure when your callback is invoked.
  */
-struct git_filter {
-	/** The `version` field should be set to `GIT_FILTER_VERSION`. */
+struct git3_filter {
+	/** The `version` field should be set to `GIT3_FILTER_VERSION`. */
 	unsigned int           version;
 
  	/**
@@ -313,58 +313,58 @@ struct git_filter {
 	const char            *attributes;
 
 	/** Called when the filter is first used for any file. */
-	git_filter_init_fn     initialize;
+	git3_filter_init_fn     initialize;
 
 	/** Called when the filter is removed or unregistered from the system. */
-	git_filter_shutdown_fn shutdown;
+	git3_filter_shutdown_fn shutdown;
 
 	/**
 	 * Called to determine whether the filter should be invoked for a
-	 * given file.  If this function returns `GIT_PASSTHROUGH` then the
+	 * given file.  If this function returns `GIT3_PASSTHROUGH` then the
 	 * `stream` or `apply` functions will not be invoked and the
 	 * contents will be passed through unmodified.
 	 */
-	git_filter_check_fn    check;
+	git3_filter_check_fn    check;
 
-#ifdef GIT_DEPRECATE_HARD
+#ifdef GIT3_DEPRECATE_HARD
 	void *reserved;
 #else
 	/**
 	 * Provided for backward compatibility; this will apply the
-	 * filter to the given contents in a `git_buf`.  Callers should
+	 * filter to the given contents in a `git3_buf`.  Callers should
 	 * provide a `stream` function instead.
 	 */
-	git_filter_apply_fn    apply;
+	git3_filter_apply_fn    apply;
 #endif
 
 	/**
 	 * Called to apply the filter, this function will provide a
-	 * `git_writestream` that will the original data will be
-	 * written to; with that data, the `git_writestream` will then
+	 * `git3_writestream` that will the original data will be
+	 * written to; with that data, the `git3_writestream` will then
 	 * perform the filter translation and stream the filtered data
 	 * out to the `next` location.
 	 */
-	git_filter_stream_fn   stream;
+	git3_filter_stream_fn   stream;
 
 	/** Called when the system is done filtering for a file. */
-	git_filter_cleanup_fn  cleanup;
+	git3_filter_cleanup_fn  cleanup;
 };
 
-/** Current version for the `git_filter_options` structure */
-#define GIT_FILTER_VERSION 1
+/** Current version for the `git3_filter_options` structure */
+#define GIT3_FILTER_VERSION 1
 
-/** Static constructor for `git_filter_options` */
-#define GIT_FILTER_INIT {GIT_FILTER_VERSION}
+/** Static constructor for `git3_filter_options` */
+#define GIT3_FILTER_INIT {GIT3_FILTER_VERSION}
 
 /**
- * Initializes a `git_filter` with default values. Equivalent to
- * creating an instance with GIT_FILTER_INIT.
+ * Initializes a `git3_filter` with default values. Equivalent to
+ * creating an instance with GIT3_FILTER_INIT.
  *
- * @param filter the `git_filter` struct to initialize.
- * @param version Version the struct; pass `GIT_FILTER_VERSION`
+ * @param filter the `git3_filter` struct to initialize.
+ * @param version Version the struct; pass `GIT3_FILTER_VERSION`
  * @return 0 on success; -1 on failure.
  */
-GIT_EXTERN(int) git_filter_init(git_filter *filter, unsigned int version);
+GIT3_EXTERN(int) git3_filter_init(git3_filter *filter, unsigned int version);
 
 /**
  * Register a filter under a given name with a given priority.
@@ -376,29 +376,29 @@ GIT_EXTERN(int) git_filter_init(git_filter *filter, unsigned int version);
  * callbacks will be issued in order of `priority` on smudge (to
  * workdir), and in reverse order of `priority` on clean (to odb).
  *
- * Two filters are preregistered with libgit2:
- * - GIT_FILTER_CRLF with priority 0
- * - GIT_FILTER_IDENT with priority 100
+ * Two filters are preregistered with libgit3:
+ * - GIT3_FILTER_CRLF with priority 0
+ * - GIT3_FILTER_IDENT with priority 100
  *
  * Currently the filter registry is not thread safe, so any registering or
  * deregistering of filters must be done outside of any possible usage of
  * the filters (i.e. during application setup or shutdown).
  *
  * @param name A name by which the filter can be referenced.  Attempting
- * 			to register with an in-use name will return GIT_EEXISTS.
+ * 			to register with an in-use name will return GIT3_EEXISTS.
  * @param filter The filter definition.  This pointer will be stored as is
- * 			by libgit2 so it must be a durable allocation (either static
+ * 			by libgit3 so it must be a durable allocation (either static
  * 			or on the heap).
  * @param priority The priority for filter application
  * @return 0 on successful registry, error code <0 on failure
  */
-GIT_EXTERN(int) git_filter_register(
-	const char *name, git_filter *filter, int priority);
+GIT3_EXTERN(int) git3_filter_register(
+	const char *name, git3_filter *filter, int priority);
 
 /**
  * Remove the filter with the given name
  *
- * Attempting to remove the builtin libgit2 filters is not permitted and
+ * Attempting to remove the builtin libgit3 filters is not permitted and
  * will return an error.
  *
  * Currently the filter registry is not thread safe, so any registering or
@@ -408,9 +408,9 @@ GIT_EXTERN(int) git_filter_register(
  * @param name The name under which the filter was registered
  * @return 0 on success, error code <0 on failure
  */
-GIT_EXTERN(int) git_filter_unregister(const char *name);
+GIT3_EXTERN(int) git3_filter_unregister(const char *name);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

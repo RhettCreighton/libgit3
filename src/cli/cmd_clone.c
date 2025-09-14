@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -64,9 +64,9 @@ static char *compute_local_path(const char *orig_path)
 
 	if ((slash = strrchr(orig_path, '/')) == NULL &&
 	    (slash = strrchr(orig_path, '\\')) == NULL)
-		local_path = git__strdup(orig_path);
+		local_path = git3__strdup(orig_path);
 	else
-		local_path = git__strdup(slash + 1);
+		local_path = git3__strdup(slash + 1);
 
 	return local_path;
 }
@@ -79,7 +79,7 @@ static int compute_depth(const char *depth)
 	if (!depth)
 		return 0;
 
-	if (git__strntol64(&i, depth, strlen(depth), &endptr, 10) < 0 || i < 0 || i > INT_MAX || *endptr) {
+	if (git3__strntol64(&i, depth, strlen(depth), &endptr, 10) < 0 || i < 0 || i > INT_MAX || *endptr) {
 		fprintf(stderr, "fatal: depth '%s' is not valid.\n", depth);
 		exit(128);
 	}
@@ -89,10 +89,10 @@ static int compute_depth(const char *depth)
 
 static bool validate_local_path(const char *path)
 {
-	if (!git_fs_path_exists(path))
+	if (!git3_fs_path_exists(path))
 		return false;
 
-	if (!git_fs_path_isdir(path) || !git_fs_path_is_empty_dir(path)) {
+	if (!git3_fs_path_isdir(path) || !git3_fs_path_is_empty_dir(path)) {
 		fprintf(stderr, "fatal: destination path '%s' already exists and is not an empty directory.\n",
 			path);
 		exit(128);
@@ -103,17 +103,17 @@ static bool validate_local_path(const char *path)
 
 static void cleanup(void)
 {
-	int rmdir_flags = GIT_RMDIR_REMOVE_FILES;
+	int rmdir_flags = GIT3_RMDIR_REMOVE_FILES;
 
 	cli_progress_abort(&progress);
 
 	if (local_path_exists)
-		rmdir_flags |= GIT_RMDIR_SKIP_ROOT;
+		rmdir_flags |= GIT3_RMDIR_SKIP_ROOT;
 
-	if (!git_fs_path_isdir(local_path))
+	if (!git3_fs_path_isdir(local_path))
 		return;
 
-	git_futils_rmdir_r(local_path, NULL, rmdir_flags);
+	git3_futils_rmdir_r(local_path, NULL, rmdir_flags);
 }
 
 static void interrupt_cleanup(void)
@@ -124,8 +124,8 @@ static void interrupt_cleanup(void)
 
 int cmd_clone(int argc, char **argv)
 {
-	git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
-	git_repository *repo = NULL;
+	git3_clone_options clone_opts = GIT3_CLONE_OPTIONS_INIT;
+	git3_repository *repo = NULL;
 	cli_opt invalid_opt;
 	char *computed_path = NULL;
 	int ret = 0;
@@ -148,7 +148,7 @@ int cmd_clone(int argc, char **argv)
 	clone_opts.fetch_opts.depth = compute_depth(depth);
 
 	if (!checkout)
-		clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_NONE;
+		clone_opts.checkout_opts.checkout_strategy = GIT3_CHECKOUT_NONE;
 
 	if (!local_path)
 		local_path = computed_path = compute_local_path(remote_path);
@@ -158,7 +158,7 @@ int cmd_clone(int argc, char **argv)
 	cli_sighandler_set_interrupt(interrupt_cleanup);
 
 	if (!local_path_exists &&
-	    git_futils_mkdir(local_path, 0777, 0) < 0) {
+	    git3_futils_mkdir(local_path, 0777, 0) < 0) {
 		ret = cli_error_git();
 		goto done;
 	}
@@ -174,7 +174,7 @@ int cmd_clone(int argc, char **argv)
 		printf("Cloning into '%s'...\n", local_path);
 	}
 
-	if (git_clone(&repo, remote_path, local_path, &clone_opts) < 0) {
+	if (git3_clone(&repo, remote_path, local_path, &clone_opts) < 0) {
 		cleanup();
 		ret = cli_error_git();
 		goto done;
@@ -184,7 +184,7 @@ int cmd_clone(int argc, char **argv)
 
 done:
 	cli_progress_dispose(&progress);
-	git__free(computed_path);
-	git_repository_free(repo);
+	git3__free(computed_path);
+	git3_repository_free(repo);
 	return ret;
 }

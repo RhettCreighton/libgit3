@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "status_helpers.h"
 
 int cb_status__normal(
@@ -24,8 +24,8 @@ int cb_status__count(const char *p, unsigned int s, void *payload)
 {
 	volatile int *count = (int *)payload;
 
-	GIT_UNUSED(p);
-	GIT_UNUSED(s);
+	GIT3_UNUSED(p);
+	GIT3_UNUSED(s);
 
 	(*count)++;
 
@@ -51,38 +51,38 @@ int cb_status__print(
 	char istatus = ' ', wstatus = ' ';
 	int icount = 0, wcount = 0;
 
-	if (status_flags & GIT_STATUS_INDEX_NEW) {
+	if (status_flags & GIT3_STATUS_INDEX_NEW) {
 		istatus = 'A'; icount++;
 	}
-	if (status_flags & GIT_STATUS_INDEX_MODIFIED) {
+	if (status_flags & GIT3_STATUS_INDEX_MODIFIED) {
 		istatus = 'M'; icount++;
 	}
-	if (status_flags & GIT_STATUS_INDEX_DELETED) {
+	if (status_flags & GIT3_STATUS_INDEX_DELETED) {
 		istatus = 'D'; icount++;
 	}
-	if (status_flags & GIT_STATUS_INDEX_RENAMED) {
+	if (status_flags & GIT3_STATUS_INDEX_RENAMED) {
 		istatus = 'R'; icount++;
 	}
-	if (status_flags & GIT_STATUS_INDEX_TYPECHANGE) {
+	if (status_flags & GIT3_STATUS_INDEX_TYPECHANGE) {
 		istatus = 'T'; icount++;
 	}
 
-	if (status_flags & GIT_STATUS_WT_NEW) {
+	if (status_flags & GIT3_STATUS_WT_NEW) {
 		wstatus = 'A'; wcount++;
 	}
-	if (status_flags & GIT_STATUS_WT_MODIFIED) {
+	if (status_flags & GIT3_STATUS_WT_MODIFIED) {
 		wstatus = 'M'; wcount++;
 	}
-	if (status_flags & GIT_STATUS_WT_DELETED) {
+	if (status_flags & GIT3_STATUS_WT_DELETED) {
 		wstatus = 'D'; wcount++;
 	}
-	if (status_flags & GIT_STATUS_WT_TYPECHANGE) {
+	if (status_flags & GIT3_STATUS_WT_TYPECHANGE) {
 		wstatus = 'T'; wcount++;
 	}
-	if (status_flags & GIT_STATUS_IGNORED) {
+	if (status_flags & GIT3_STATUS_IGNORED) {
 		wstatus = 'I'; wcount++;
 	}
-	if (status_flags & GIT_STATUS_WT_UNREADABLE) {
+	if (status_flags & GIT3_STATUS_WT_UNREADABLE) {
 		wstatus = 'X'; wcount++;
 	}
 

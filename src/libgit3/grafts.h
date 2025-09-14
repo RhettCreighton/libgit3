@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_graft_h__
@@ -12,24 +12,24 @@
 
 /** graft commit */
 typedef struct {
-	git_oid oid;
-	git_array_oid_t parents;
-} git_commit_graft;
+	git3_oid oid;
+	git3_array_oid_t parents;
+} git3_commit_graft;
 
-typedef struct git_grafts git_grafts;
+typedef struct git3_grafts git3_grafts;
 
-int git_grafts_new(git_grafts **out, git_oid_t oid_type);
-int git_grafts_open(git_grafts **out, const char *path, git_oid_t oid_type);
-int git_grafts_open_or_refresh(git_grafts **out, const char *path, git_oid_t oid_type);
-void git_grafts_free(git_grafts *grafts);
-void git_grafts_clear(git_grafts *grafts);
+int git3_grafts_new(git3_grafts **out, git3_oid_t oid_type);
+int git3_grafts_open(git3_grafts **out, const char *path, git3_oid_t oid_type);
+int git3_grafts_open_or_refresh(git3_grafts **out, const char *path, git3_oid_t oid_type);
+void git3_grafts_free(git3_grafts *grafts);
+void git3_grafts_clear(git3_grafts *grafts);
 
-int git_grafts_refresh(git_grafts *grafts);
-int git_grafts_parse(git_grafts *grafts, const char *buf, size_t len);
-int git_grafts_add(git_grafts *grafts, const git_oid *oid, git_array_oid_t parents);
-int git_grafts_remove(git_grafts *grafts, const git_oid *oid);
-int git_grafts_get(git_commit_graft **out, git_grafts *grafts, const git_oid *oid);
-int git_grafts_oids(git_oid **out, size_t *out_len, git_grafts *grafts);
-size_t git_grafts_size(git_grafts *grafts);
+int git3_grafts_refresh(git3_grafts *grafts);
+int git3_grafts_parse(git3_grafts *grafts, const char *buf, size_t len);
+int git3_grafts_add(git3_grafts *grafts, const git3_oid *oid, git3_array_oid_t parents);
+int git3_grafts_remove(git3_grafts *grafts, const git3_oid *oid);
+int git3_grafts_get(git3_commit_graft **out, git3_grafts *grafts, const git3_oid *oid);
+int git3_grafts_oids(git3_oid **out, size_t *out_len, git3_grafts *grafts);
+size_t git3_grafts_size(git3_grafts *grafts);
 
 #endif

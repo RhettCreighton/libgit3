@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "worktree_helpers.h"
 
 void cleanup_fixture_worktree(worktree_fixture *fixture)
@@ -7,11 +7,11 @@ void cleanup_fixture_worktree(worktree_fixture *fixture)
 		return;
 
 	if (fixture->repo) {
-		git_repository_free(fixture->repo);
+		git3_repository_free(fixture->repo);
 		fixture->repo = NULL;
 	}
 	if (fixture->worktree) {
-		git_repository_free(fixture->worktree);
+		git3_repository_free(fixture->worktree);
 		fixture->worktree = NULL;
 	}
 

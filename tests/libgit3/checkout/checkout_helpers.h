@@ -1,9 +1,9 @@
 #include "git3/object.h"
 #include "git3/repository.h"
-#include "git2_features.h"
+#include "git3_features.h"
 
-extern void assert_on_branch(git_repository *repo, const char *branch);
-extern void reset_index_to_treeish(git_object *treeish);
+extern void assert_on_branch(git3_repository *repo, const char *branch);
+extern void reset_index_to_treeish(git3_object *treeish);
 
 #define check_file_contents(PATH,EXP) \
 	cl_assert_equal_file(EXP,0,PATH)
@@ -21,11 +21,11 @@ typedef struct {
 } checkout_counts;
 
 extern int checkout_count_callback(
-	git_checkout_notify_t why,
+	git3_checkout_notify_t why,
 	const char *path,
-	const git_diff_file *baseline,
-	const git_diff_file *target,
-	const git_diff_file *workdir,
+	const git3_diff_file *baseline,
+	const git3_diff_file *target,
+	const git3_diff_file *workdir,
 	void *payload);
 
-extern void tick_index(git_index *index);
+extern void tick_index(git3_index *index);

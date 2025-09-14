@@ -1,109 +1,109 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/odb_backend.h"
 #include "odb.h"
 
 typedef struct {
-	git_odb_backend base;
+	git3_odb_backend base;
 	size_t position;
 } fake_backend;
 
-static void odb_backend_free(git_odb_backend *odb)
+static void odb_backend_free(git3_odb_backend *odb)
 {
-	git__free(odb);
+	git3__free(odb);
 }
 
-static git_odb_backend *new_backend(size_t position)
+static git3_odb_backend *new_backend(size_t position)
 {
 	fake_backend *b;
 
-	b = git__calloc(1, sizeof(fake_backend));
+	b = git3__calloc(1, sizeof(fake_backend));
 	if (b == NULL)
 		return NULL;
 
 	b->base.free = odb_backend_free;
-	b->base.version = GIT_ODB_BACKEND_VERSION;
+	b->base.version = GIT3_ODB_BACKEND_VERSION;
 	b->position = position;
-	return (git_odb_backend *)b;
+	return (git3_odb_backend *)b;
 }
 
-static void check_backend_sorting(git_odb *odb)
+static void check_backend_sorting(git3_odb *odb)
 {
-	size_t i, max_i = git_odb_num_backends(odb);
+	size_t i, max_i = git3_odb_num_backends(odb);
 	fake_backend *internal;
 
 	for (i = 0; i < max_i; ++i) {
-		cl_git_pass(git_odb_get_backend((git_odb_backend **)&internal, odb, i));
+		cl_git_pass(git3_odb_get_backend((git3_odb_backend **)&internal, odb, i));
 		cl_assert(internal != NULL);
 		cl_assert_equal_sz(i, internal->position);
 	}
 }
 
-static git_odb *_odb;
+static git3_odb *_odb;
 
 void test_odb_sorting__initialize(void)
 {
-	cl_git_pass(git_odb_new(&_odb));
+	cl_git_pass(git3_odb_new(&_odb));
 }
 
 void test_odb_sorting__cleanup(void)
 {
-	git_odb_free(_odb);
+	git3_odb_free(_odb);
 	_odb = NULL;
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_ODB_LOOSE_PRIORITY,
-	                             GIT_ODB_DEFAULT_LOOSE_PRIORITY));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_ODB_PACKED_PRIORITY,
-	                             GIT_ODB_DEFAULT_PACKED_PRIORITY));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_ODB_LOOSE_PRIORITY,
+	                             GIT3_ODB_DEFAULT_LOOSE_PRIORITY));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_ODB_PACKED_PRIORITY,
+	                             GIT3_ODB_DEFAULT_PACKED_PRIORITY));
 }
 
 void test_odb_sorting__basic_backends_sorting(void)
 {
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(0), 5));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(2), 3));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(1), 4));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(3), 1));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(0), 5));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(2), 3));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(1), 4));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(3), 1));
 
 	check_backend_sorting(_odb);
 }
 
 void test_odb_sorting__alternate_backends_sorting(void)
 {
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(1), 5));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(5), 3));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(3), 4));
-	cl_git_pass(git_odb_add_backend(_odb, new_backend(7), 1));
-	cl_git_pass(git_odb_add_alternate(_odb, new_backend(0), 5));
-	cl_git_pass(git_odb_add_alternate(_odb, new_backend(4), 3));
-	cl_git_pass(git_odb_add_alternate(_odb, new_backend(2), 4));
-	cl_git_pass(git_odb_add_alternate(_odb, new_backend(6), 1));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(1), 5));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(5), 3));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(3), 4));
+	cl_git_pass(git3_odb_add_backend(_odb, new_backend(7), 1));
+	cl_git_pass(git3_odb_add_alternate(_odb, new_backend(0), 5));
+	cl_git_pass(git3_odb_add_alternate(_odb, new_backend(4), 3));
+	cl_git_pass(git3_odb_add_alternate(_odb, new_backend(2), 4));
+	cl_git_pass(git3_odb_add_alternate(_odb, new_backend(6), 1));
 
 	check_backend_sorting(_odb);
 }
 
 void test_odb_sorting__override_default_backend_priority(void)
 {
-	git_odb *new_odb;
-	git_odb_backend *loose, *packed, *backend;
+	git3_odb *new_odb;
+	git3_odb_backend *loose, *packed, *backend;
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_ODB_LOOSE_PRIORITY, 5));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_ODB_PACKED_PRIORITY, 3));
-	git_odb_backend_pack(&packed, "./testrepo.git/objects"
-#ifdef GIT_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_ODB_LOOSE_PRIORITY, 5));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_ODB_PACKED_PRIORITY, 3));
+	git3_odb_backend_pack(&packed, "./testrepo.git/objects"
+#ifdef GIT3_EXPERIMENTAL_SHA256
 		, NULL
 #endif
 	);
-	git_odb__backend_loose(&loose, "./testrepo.git/objects", NULL);
+	git3_odb__backend_loose(&loose, "./testrepo.git/objects", NULL);
 
-	cl_git_pass(git_odb_open(&new_odb, cl_fixture("testrepo.git/objects")));
-	cl_assert_equal_sz(2, git_odb_num_backends(new_odb));
+	cl_git_pass(git3_odb_open(&new_odb, cl_fixture("testrepo.git/objects")));
+	cl_assert_equal_sz(2, git3_odb_num_backends(new_odb));
 
-	cl_git_pass(git_odb_get_backend(&backend, new_odb, 0));
+	cl_git_pass(git3_odb_get_backend(&backend, new_odb, 0));
 	cl_assert_equal_p(loose->read, backend->read);
 
-	cl_git_pass(git_odb_get_backend(&backend, new_odb, 1));
+	cl_git_pass(git3_odb_get_backend(&backend, new_odb, 1));
 	cl_assert_equal_p(packed->read, backend->read);
 
-	git_odb_free(new_odb);
+	git3_odb_free(new_odb);
 	loose->free(loose);
 	packed->free(packed);
 }

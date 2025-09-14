@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "blame.h"
 
-void hunk_message(size_t idx, const git_blame_hunk *hunk, const char *fmt, ...) GIT_FORMAT_PRINTF(3, 4);
+void hunk_message(size_t idx, const git3_blame_hunk *hunk, const char *fmt, ...) GIT3_FORMAT_PRINTF(3, 4);
 
 void check_blame_hunk_index(
-		git_repository *repo,
-		git_blame *blame,
+		git3_repository *repo,
+		git3_blame *blame,
 		int idx,
 		size_t start_line,
 		size_t len,

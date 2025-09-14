@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "net.h"
 
 struct url_pattern {
@@ -9,7 +9,7 @@ struct url_pattern {
 
 void test_url_pattern__single(void)
 {
-	git_net_url url;
+	git3_net_url url;
 	size_t i;
 
 	struct url_pattern url_patterns[] = {
@@ -47,15 +47,15 @@ void test_url_pattern__single(void)
 	};
 
 	for (i = 0; i < ARRAY_SIZE(url_patterns); i++) {
-		cl_git_pass(git_net_url_parse(&url, url_patterns[i].url));
-		cl_assert_(git_net_url_matches_pattern(&url, url_patterns[i].pattern) == url_patterns[i].matches, url_patterns[i].pattern);
-		git_net_url_dispose(&url);
+		cl_git_pass(git3_net_url_parse(&url, url_patterns[i].url));
+		cl_assert_(git3_net_url_matches_pattern(&url, url_patterns[i].pattern) == url_patterns[i].matches, url_patterns[i].pattern);
+		git3_net_url_dispose(&url);
 	}
 }
 
 void test_url_pattern__list(void)
 {
-	git_net_url url;
+	git3_net_url url;
 	size_t i;
 
 	struct url_pattern url_patterns[] = {
@@ -96,8 +96,8 @@ void test_url_pattern__list(void)
 	};
 
 	for (i = 0; i < ARRAY_SIZE(url_patterns); i++) {
-		cl_git_pass(git_net_url_parse(&url, url_patterns[i].url));
-		cl_assert_(git_net_url_matches_pattern_list(&url, url_patterns[i].pattern) == url_patterns[i].matches, url_patterns[i].pattern);
-		git_net_url_dispose(&url);
+		cl_git_pass(git3_net_url_parse(&url, url_patterns[i].url));
+		cl_assert_(git3_net_url_matches_pattern_list(&url, url_patterns[i].pattern) == url_patterns[i].matches, url_patterns[i].pattern);
+		git3_net_url_dispose(&url);
 	}
 }

@@ -1,9 +1,9 @@
 /*
- * libgit2 raw packfile fuzz target.
+ * libgit3 raw packfile fuzz target.
  *
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -26,20 +26,20 @@ struct fuzzer_buffer {
 };
 
 struct fuzzer_stream {
-	git_smart_subtransport_stream base;
+	git3_smart_subtransport_stream base;
 	const unsigned char *readp;
 	const unsigned char *endp;
 };
 
 struct fuzzer_subtransport {
-	git_smart_subtransport base;
-	git_transport *owner;
+	git3_smart_subtransport base;
+	git3_transport *owner;
 	struct fuzzer_buffer data;
 };
 
-static git_repository *repo;
+static git3_repository *repo;
 
-static int fuzzer_stream_read(git_smart_subtransport_stream *stream,
+static int fuzzer_stream_read(git3_smart_subtransport_stream *stream,
 	char *buffer,
 	size_t buf_size,
 	size_t *bytes_read)
@@ -54,7 +54,7 @@ static int fuzzer_stream_read(git_smart_subtransport_stream *stream,
 	return 0;
 }
 
-static int fuzzer_stream_write(git_smart_subtransport_stream *stream,
+static int fuzzer_stream_write(git3_smart_subtransport_stream *stream,
 	  const char *buffer, size_t len)
 {
 	UNUSED(stream);
@@ -63,7 +63,7 @@ static int fuzzer_stream_write(git_smart_subtransport_stream *stream,
 	return 0;
 }
 
-static void fuzzer_stream_free(git_smart_subtransport_stream *stream)
+static void fuzzer_stream_free(git3_smart_subtransport_stream *stream)
 {
 	free(stream);
 }
@@ -88,10 +88,10 @@ static int fuzzer_stream_new(
 }
 
 static int fuzzer_subtransport_action(
-	git_smart_subtransport_stream **out,
-	git_smart_subtransport *transport,
+	git3_smart_subtransport_stream **out,
+	git3_smart_subtransport *transport,
 	const char *url,
-	git_smart_service_t action)
+	git3_smart_service_t action)
 {
 	struct fuzzer_subtransport *ft = (struct fuzzer_subtransport *) transport;
 
@@ -101,20 +101,20 @@ static int fuzzer_subtransport_action(
 	return fuzzer_stream_new((struct fuzzer_stream **) out, &ft->data);
 }
 
-static int fuzzer_subtransport_close(git_smart_subtransport *transport)
+static int fuzzer_subtransport_close(git3_smart_subtransport *transport)
 {
 	UNUSED(transport);
 	return 0;
 }
 
-static void fuzzer_subtransport_free(git_smart_subtransport *transport)
+static void fuzzer_subtransport_free(git3_smart_subtransport *transport)
 {
 	free(transport);
 }
 
 static int fuzzer_subtransport_new(
 	struct fuzzer_subtransport **out,
-	git_transport *owner,
+	git3_transport *owner,
 	const struct fuzzer_buffer *data)
 {
 	struct fuzzer_subtransport *sub = malloc(sizeof(*sub));
@@ -134,8 +134,8 @@ static int fuzzer_subtransport_new(
 }
 
 static int fuzzer_subtransport_cb(
-	git_smart_subtransport **out,
-	git_transport *owner,
+	git3_smart_subtransport **out,
+	git3_transport *owner,
 	void *payload)
 {
 	struct fuzzer_buffer *buf = (struct fuzzer_buffer *) payload;
@@ -148,14 +148,14 @@ static int fuzzer_subtransport_cb(
 	return 0;
 }
 
-static int fuzzer_transport_cb(git_transport **out, git_remote *owner, void *param)
+static int fuzzer_transport_cb(git3_transport **out, git3_remote *owner, void *param)
 {
-	git_smart_subtransport_definition def = {
+	git3_smart_subtransport_definition def = {
 		fuzzer_subtransport_cb,
 		1,
 		param
 	};
-	return git_transport_smart(out, owner, &def);
+	return git3_transport_smart(out, owner, &def);
 }
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
@@ -163,10 +163,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	if (git_libgit3_init() < 0)
+	if (git3_libgit3_init() < 0)
 		abort();
 
-	if (git_libgit3_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
+	if (git3_libgit3_opts(GIT3_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0)
 		abort();
 
 	repo = fuzzer_repo_init();
@@ -176,23 +176,23 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 int LLVMFuzzerTestOneInput(const unsigned char *data, size_t size)
 {
 	struct fuzzer_buffer buffer = { data, size };
-	git_remote_callbacks callbacks = GIT_REMOTE_CALLBACKS_INIT;
-	git_remote *remote;
+	git3_remote_callbacks callbacks = GIT3_REMOTE_CALLBACKS_INIT;
+	git3_remote *remote;
 
-	if (git_remote_create_anonymous(&remote, repo, "fuzzer://remote-url") < 0)
-		fuzzer_git_abort("git_remote_create");
+	if (git3_remote_create_anonymous(&remote, repo, "fuzzer://remote-url") < 0)
+		fuzzer_git_abort("git3_remote_create");
 
 	callbacks.transport = fuzzer_transport_cb;
 	callbacks.payload = &buffer;
 
-	if (git_remote_connect(remote, GIT_DIRECTION_FETCH,
+	if (git3_remote_connect(remote, GIT3_DIRECTION_FETCH,
 	    &callbacks, NULL, NULL) < 0)
 		goto out;
 
-	git_remote_download(remote, NULL, NULL);
+	git3_remote_download(remote, NULL, NULL);
 
     out:
-	git_remote_free(remote);
+	git3_remote_free(remote);
 
 	return 0;
 }

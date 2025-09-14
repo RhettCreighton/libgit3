@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "tree.h"
 #include "object.h"
 
@@ -21,37 +21,37 @@ typedef struct {
 static void assert_tree_parses(const char *data, size_t datalen,
 	expected_entry *expected_entries, size_t expected_nentries)
 {
-	git_tree *tree;
+	git3_tree *tree;
 	size_t n;
 
 	if (!datalen)
 		datalen = strlen(data);
-	cl_git_pass(git_object__from_raw((git_object **) &tree, data, datalen, GIT_OBJECT_TREE, GIT_OID_SHA1));
+	cl_git_pass(git3_object__from_raw((git3_object **) &tree, data, datalen, GIT3_OBJECT_TREE, GIT3_OID_SHA1));
 
-	cl_assert_equal_i(git_tree_entrycount(tree), expected_nentries);
+	cl_assert_equal_i(git3_tree_entrycount(tree), expected_nentries);
 
 	for (n = 0; n < expected_nentries; n++) {
 		expected_entry *expected = expected_entries + n;
-		const git_tree_entry *entry;
-		git_oid oid;
+		const git3_tree_entry *entry;
+		git3_oid oid;
 
-		cl_git_pass(git_oid_from_string(&oid, expected->oid, GIT_OID_SHA1));
+		cl_git_pass(git3_oid_from_string(&oid, expected->oid, GIT3_OID_SHA1));
 
-		cl_assert(entry = git_tree_entry_byname(tree, expected->filename));
+		cl_assert(entry = git3_tree_entry_byname(tree, expected->filename));
 		cl_assert_equal_s(expected->filename, entry->filename);
 		cl_assert_equal_i(expected->attr, entry->attr);
 		cl_assert_equal_oid(&oid, &entry->oid);
 	}
 
-	git_object_free(&tree->object);
+	git3_object_free(&tree->object);
 }
 
 static void assert_tree_fails(const char *data, size_t datalen)
 {
-	git_object *object;
+	git3_object *object;
 	if (!datalen)
 		datalen = strlen(data);
-	cl_git_fail(git_object__from_raw(&object, data, datalen, GIT_OBJECT_TREE, GIT_OID_SHA1));
+	cl_git_fail(git3_object__from_raw(&object, data, datalen, GIT3_OBJECT_TREE, GIT3_OID_SHA1));
 }
 
 void test_object_tree_parse__single_blob_parses(void)
@@ -118,7 +118,7 @@ void test_object_tree_parse__mode_doesnt_cause_oob_read(void)
 	 * later fail to parse the OID with a different error
 	 * message
 	 */
-	cl_assert_equal_s(git_error_last()->message, "failed to parse tree: missing space after filemode");
+	cl_assert_equal_s(git3_error_last()->message, "failed to parse tree: missing space after filemode");
 }
 
 void test_object_tree_parse__unreasonably_large_mode_fails(void)

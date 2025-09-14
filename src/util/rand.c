@@ -6,24 +6,24 @@ worldwide. This software is distributed without any warranty.
 
 See <http://creativecommons.org/publicdomain/zero/1.0/>. */
 
-#include "git2_util.h"
+#include "git3_util.h"
 #include "rand.h"
 #include "runtime.h"
 
-#if defined(GIT_WIN32)
+#if defined(GIT3_WIN32)
 # include <wincrypt.h>
 #endif
 
 static uint64_t state[4];
-static git_mutex state_lock;
+static git3_mutex state_lock;
 
 typedef union {
 	double f;
 	uint64_t d;
 } bits;
 
-#if defined(GIT_WIN32)
-GIT_INLINE(int) getseed(uint64_t *seed)
+#if defined(GIT3_WIN32)
+GIT3_INLINE(int) getseed(uint64_t *seed)
 {
 	HCRYPTPROV provider;
 	SYSTEMTIME systemtime;
@@ -40,7 +40,7 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 
 	GetSystemTime(&systemtime);
 	if (!SystemTimeToFileTime(&systemtime, &filetime)) {
-		git_error_set(GIT_ERROR_OS, "could not get time for random seed");
+		git3_error_set(GIT3_ERROR_OS, "could not get time for random seed");
 		return -1;
 	}
 
@@ -62,7 +62,7 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 	*seed ^= ((uint64_t)GetCurrentProcessId() << 32);
 	*seed ^= ((uint64_t)GetCurrentThreadId() << 48);
 
-	*seed ^= git_time_monotonic();
+	*seed ^= git3_time_monotonic();
 
 	/* Mix in the addresses of some functions and variables */
 	*seed ^= (((uint64_t)((uintptr_t)seed) << 32));
@@ -73,18 +73,18 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 
 #else
 
-GIT_INLINE(int) getseed(uint64_t *seed)
+GIT3_INLINE(int) getseed(uint64_t *seed)
 {
 	struct timeval tv;
 	int fd;
 
-# if defined(GIT_RAND_GETLOADAVG)
+# if defined(GIT3_RAND_GETLOADAVG)
 	double loadavg[3];
 	bits convert;
 # endif
 
-# if defined(GIT_RAND_GETENTROPY)
-	GIT_UNUSED((fd = 0));
+# if defined(GIT3_RAND_GETENTROPY)
+	GIT3_UNUSED((fd = 0));
 
 	if (getentropy(seed, sizeof(uint64_t)) == 0)
 		return 0;
@@ -104,7 +104,7 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 
 	/* Fall-through: generate a seed from the time and system state */
 	if (gettimeofday(&tv, NULL) < 0) {
-		git_error_set(GIT_ERROR_OS, "could get time for random seed");
+		git3_error_set(GIT3_ERROR_OS, "could get time for random seed");
 		return -1;
 	}
 
@@ -119,7 +119,7 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 	*seed ^= ((uint64_t)getuid() << 8);
 	*seed ^= ((uint64_t)getgid());
 
-# if defined(GIT_RAND_GETLOADAVG)
+# if defined(GIT3_RAND_GETLOADAVG)
 	getloadavg(loadavg, 3);
 
 	convert.f = loadavg[0]; *seed ^= (convert.d >> 36);
@@ -127,7 +127,7 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 	convert.f = loadavg[2]; *seed ^= (convert.d >> 16);
 # endif
 
-	*seed ^= git_time_monotonic();
+	*seed ^= git3_time_monotonic();
 
 	/* Mix in the addresses of some variables */
 	*seed ^= ((uint64_t)((size_t)((void *)seed)) << 32);
@@ -137,25 +137,25 @@ GIT_INLINE(int) getseed(uint64_t *seed)
 }
 #endif
 
-static void git_rand_global_shutdown(void)
+static void git3_rand_global_shutdown(void)
 {
-	git_mutex_free(&state_lock);
+	git3_mutex_free(&state_lock);
 }
 
-int git_rand_global_init(void)
+int git3_rand_global_init(void)
 {
 	uint64_t seed = 0;
 
-	if (git_mutex_init(&state_lock) < 0 || getseed(&seed) < 0)
+	if (git3_mutex_init(&state_lock) < 0 || getseed(&seed) < 0)
 		return -1;
 
 	if (!seed) {
-		git_error_set(GIT_ERROR_INTERNAL, "failed to generate random seed");
+		git3_error_set(GIT3_ERROR_INTERNAL, "failed to generate random seed");
 		return -1;
 	}
 
-	git_rand_seed(seed);
-	git_runtime_shutdown_register(git_rand_global_shutdown);
+	git3_rand_seed(seed);
+	git3_runtime_shutdown_register(git3_rand_global_shutdown);
 
 	return 0;
 }
@@ -165,7 +165,7 @@ int git_rand_global_init(void)
  * to generate 256 bits of seed from the given 64, per the author's
  * recommendation.
  */
-GIT_INLINE(uint64_t) splitmix64(uint64_t *in)
+GIT3_INLINE(uint64_t) splitmix64(uint64_t *in)
 {
 	uint64_t z;
 
@@ -177,18 +177,18 @@ GIT_INLINE(uint64_t) splitmix64(uint64_t *in)
 	return z ^ (z >> 31);
 }
 
-void git_rand_seed(uint64_t seed)
+void git3_rand_seed(uint64_t seed)
 {
 	uint64_t mixer;
 
 	mixer = seed;
 
-	git_mutex_lock(&state_lock);
+	git3_mutex_lock(&state_lock);
 	state[0] = splitmix64(&mixer);
 	state[1] = splitmix64(&mixer);
 	state[2] = splitmix64(&mixer);
 	state[3] = splitmix64(&mixer);
-	git_mutex_unlock(&state_lock);
+	git3_mutex_unlock(&state_lock);
 }
 
 /* This is xoshiro256** 1.0, one of our all-purpose, rock-solid
@@ -202,14 +202,14 @@ void git_rand_seed(uint64_t seed)
    a 64-bit seed, we suggest to seed a splitmix64 generator and use its
    output to fill s. */
 
-GIT_INLINE(uint64_t) rotl(const uint64_t x, int k) {
+GIT3_INLINE(uint64_t) rotl(const uint64_t x, int k) {
 	return (x << k) | (x >> (64 - k));
 }
 
-uint64_t git_rand_next(void) {
+uint64_t git3_rand_next(void) {
 	uint64_t t, result;
 
-	git_mutex_lock(&state_lock);
+	git3_mutex_lock(&state_lock);
 
 	result = rotl(state[1] * 5, 7) * 9;
 
@@ -224,7 +224,7 @@ uint64_t git_rand_next(void) {
 
 	state[3] = rotl(state[3], 45);
 
-	git_mutex_unlock(&state_lock);
+	git3_mutex_unlock(&state_lock);
 
 	return result;
 }

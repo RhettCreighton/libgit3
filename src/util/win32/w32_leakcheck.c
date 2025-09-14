@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "w32_leakcheck.h"
 
-#if defined(GIT_DEBUG_LEAKCHECK_WIN32)
+#if defined(GIT3_DEBUG_LEAKCHECK_WIN32)
 
 #include "Windows.h"
 #include "Dbghelp.h"
@@ -19,12 +19,12 @@
 
 static bool   g_win32_stack_initialized = false;
 static HANDLE g_win32_stack_process = INVALID_HANDLE_VALUE;
-static git_win32_leakcheck_stack_aux_cb_alloc  g_aux_cb_alloc  = NULL;
-static git_win32_leakcheck_stack_aux_cb_lookup g_aux_cb_lookup = NULL;
+static git3_win32_leakcheck_stack_aux_cb_alloc  g_aux_cb_alloc  = NULL;
+static git3_win32_leakcheck_stack_aux_cb_lookup g_aux_cb_lookup = NULL;
 
-int git_win32_leakcheck_stack_set_aux_cb(
-	git_win32_leakcheck_stack_aux_cb_alloc cb_alloc,
-	git_win32_leakcheck_stack_aux_cb_lookup cb_lookup)
+int git3_win32_leakcheck_stack_set_aux_cb(
+	git3_win32_leakcheck_stack_aux_cb_alloc cb_alloc,
+	git3_win32_leakcheck_stack_aux_cb_lookup cb_lookup)
 {
 	g_aux_cb_alloc = cb_alloc;
 	g_aux_cb_lookup = cb_lookup;
@@ -37,7 +37,7 @@ int git_win32_leakcheck_stack_set_aux_cb(
  * thread at startup (under a lock if there are other threads
  * active).
  */
-void git_win32_leakcheck_stack_init(void)
+void git3_win32_leakcheck_stack_init(void)
 {
 	if (!g_win32_stack_initialized) {
 		g_win32_stack_process = GetCurrentProcess();
@@ -52,7 +52,7 @@ void git_win32_leakcheck_stack_init(void)
  * primary thead at shutdown (under a lock if there are other
  * threads active).
  */
-void git_win32_leakcheck_stack_cleanup(void)
+void git3_win32_leakcheck_stack_cleanup(void)
 {
 	if (g_win32_stack_initialized) {
 		SymCleanup(g_win32_stack_process);
@@ -61,16 +61,16 @@ void git_win32_leakcheck_stack_cleanup(void)
 	}
 }
 
-int git_win32_leakcheck_stack_capture(git_win32_leakcheck_stack_raw_data *pdata, int skip)
+int git3_win32_leakcheck_stack_capture(git3_win32_leakcheck_stack_raw_data *pdata, int skip)
 {
 	if (!g_win32_stack_initialized) {
-		git_error_set(GIT_ERROR_INVALID, "git_win32_stack not initialized.");
-		return GIT_ERROR;
+		git3_error_set(GIT3_ERROR_INVALID, "git3_win32_stack not initialized.");
+		return GIT3_ERROR;
 	}
 
 	memset(pdata, 0, sizeof(*pdata));
 	pdata->nr_frames = RtlCaptureStackBackTrace(
-		skip+1, GIT_WIN32_LEAKCHECK_STACK_MAX_FRAMES, pdata->frames, NULL);
+		skip+1, GIT3_WIN32_LEAKCHECK_STACK_MAX_FRAMES, pdata->frames, NULL);
 
 	/* If an "aux" data provider was registered, ask it to capture
 	 * whatever data it needs and give us an "aux_id" to it so that
@@ -82,16 +82,16 @@ int git_win32_leakcheck_stack_capture(git_win32_leakcheck_stack_raw_data *pdata,
 	return 0;
 }
 
-int git_win32_leakcheck_stack_compare(
-	git_win32_leakcheck_stack_raw_data *d1,
-	git_win32_leakcheck_stack_raw_data *d2)
+int git3_win32_leakcheck_stack_compare(
+	git3_win32_leakcheck_stack_raw_data *d1,
+	git3_win32_leakcheck_stack_raw_data *d2)
 {
 	return memcmp(d1, d2, sizeof(*d1));
 }
 
-int git_win32_leakcheck_stack_format(
+int git3_win32_leakcheck_stack_format(
 	char *pbuf, size_t buf_len,
-	const git_win32_leakcheck_stack_raw_data *pdata,
+	const git3_win32_leakcheck_stack_raw_data *pdata,
 	const char *prefix, const char *suffix)
 {
 #define MY_MAX_FILENAME 255
@@ -111,8 +111,8 @@ int git_win32_leakcheck_stack_format(
 	size_t detail_len;
 
 	if (!g_win32_stack_initialized) {
-		git_error_set(GIT_ERROR_INVALID, "git_win32_stack not initialized.");
-		return GIT_ERROR;
+		git3_error_set(GIT3_ERROR_INVALID, "git3_win32_stack not initialized.");
+		return GIT3_ERROR;
 	}
 
 	if (!prefix)
@@ -181,20 +181,20 @@ int git_win32_leakcheck_stack_format(
 			(g_aux_cb_lookup)(pdata->aux_id, &pbuf[buf_used], (buf_len - buf_used - 1));
 	}
 
-	return GIT_OK;
+	return GIT3_OK;
 }
 
-int git_win32_leakcheck_stack(
+int git3_win32_leakcheck_stack(
 	char * pbuf, size_t buf_len,
 	int skip,
 	const char *prefix, const char *suffix)
 {
-	git_win32_leakcheck_stack_raw_data data;
+	git3_win32_leakcheck_stack_raw_data data;
 	int error;
 
-	if ((error = git_win32_leakcheck_stack_capture(&data, skip)) < 0)
+	if ((error = git3_win32_leakcheck_stack_capture(&data, skip)) < 0)
 		return error;
-	if ((error = git_win32_leakcheck_stack_format(pbuf, buf_len, &data, prefix, suffix)) < 0)
+	if ((error = git3_win32_leakcheck_stack_format(pbuf, buf_len, &data, prefix, suffix)) < 0)
 		return error;
 	return 0;
 }
@@ -212,19 +212,19 @@ int git_win32_leakcheck_stack(
  */
 typedef struct {
 	char uid[STACKTRACE_UID_LEN + 1];
-} git_win32_leakcheck_stacktrace_uid;
+} git3_win32_leakcheck_stacktrace_uid;
 
 /**
  * All mallocs with the same stacktrace will be de-duped
  * and aggregated into this row.
  */
 typedef struct {
-	git_win32_leakcheck_stacktrace_uid uid; /* must be first */
-	git_win32_leakcheck_stack_raw_data raw_data;
+	git3_win32_leakcheck_stacktrace_uid uid; /* must be first */
+	git3_win32_leakcheck_stack_raw_data raw_data;
 	unsigned int count_allocs; /* times this alloc signature seen since init */
 	unsigned int count_allocs_at_last_checkpoint; /* times since last mark */
 	unsigned int transient_count_leaks; /* sum of leaks */
-} git_win32_leakcheck_stacktrace_row;
+} git3_win32_leakcheck_stacktrace_row;
 
 static CRITICAL_SECTION g_crtdbg_stacktrace_cs;
 
@@ -249,8 +249,8 @@ static CRITICAL_SECTION g_crtdbg_stacktrace_cs;
  */
 
 #define MY_ROW_LIMIT (2 * 1024 * 1024)
-static git_win32_leakcheck_stacktrace_row  g_cs_rows[MY_ROW_LIMIT];
-static git_win32_leakcheck_stacktrace_row *g_cs_index[MY_ROW_LIMIT];
+static git3_win32_leakcheck_stacktrace_row  g_cs_rows[MY_ROW_LIMIT];
+static git3_win32_leakcheck_stacktrace_row *g_cs_index[MY_ROW_LIMIT];
 
 static unsigned int g_cs_end = MY_ROW_LIMIT;
 static unsigned int g_cs_ins = 0; /* insertion point == unique allocs seen */
@@ -267,21 +267,21 @@ static bool g_transient_leaks_since_mark = false; /* payload for hook */
  */
 static int row_cmp(const void *v1, const void *v2)
 {
-	git_win32_leakcheck_stack_raw_data *d1 = (git_win32_leakcheck_stack_raw_data*)v1;
-	git_win32_leakcheck_stacktrace_row *r2 = (git_win32_leakcheck_stacktrace_row *)v2;
+	git3_win32_leakcheck_stack_raw_data *d1 = (git3_win32_leakcheck_stack_raw_data*)v1;
+	git3_win32_leakcheck_stacktrace_row *r2 = (git3_win32_leakcheck_stacktrace_row *)v2;
 
-	return (git_win32_leakcheck_stack_compare(d1, &r2->raw_data));
+	return (git3_win32_leakcheck_stack_compare(d1, &r2->raw_data));
 }
 
 /**
  * Unique insert the new data into the row and index tables.
  * We have to sort by the stackframe data itself, not the uid.
  */
-static git_win32_leakcheck_stacktrace_row * insert_unique(
-	const git_win32_leakcheck_stack_raw_data *pdata)
+static git3_win32_leakcheck_stacktrace_row * insert_unique(
+	const git3_win32_leakcheck_stack_raw_data *pdata)
 {
 	size_t pos;
-	if (git__bsearch(g_cs_index, g_cs_ins, pdata, row_cmp, &pos) < 0) {
+	if (git3__bsearch(g_cs_index, g_cs_ins, pdata, row_cmp, &pos) < 0) {
 		/* Append new unique item to row table. */
 		memcpy(&g_cs_rows[g_cs_ins].raw_data, pdata, sizeof(*pdata));
 		sprintf(g_cs_rows[g_cs_ins].uid.uid, "##%08lx", g_cs_ins);
@@ -397,7 +397,7 @@ static void dump_summary(const char *label)
 					g_cs_rows[k].count_allocs);
 			my_output(buf);
 
-			if (git_win32_leakcheck_stack_format(
+			if (git3_win32_leakcheck_stack_format(
 					buf, sizeof(buf), &g_cs_rows[k].raw_data,
 					NULL, NULL) >= 0) {
 				my_output(buf);
@@ -412,9 +412,9 @@ static void dump_summary(const char *label)
 
 /**
  * Initialize our memory leak tracking and de-dup data structures.
- * This should ONLY be called by git_libgit3_init().
+ * This should ONLY be called by git3_libgit3_init().
  */
-void git_win32_leakcheck_stacktrace_init(void)
+void git3_win32_leakcheck_stacktrace_init(void)
 {
 	InitializeCriticalSection(&g_crtdbg_stacktrace_cs);
 
@@ -433,8 +433,8 @@ void git_win32_leakcheck_stacktrace_init(void)
 	LeaveCriticalSection(&g_crtdbg_stacktrace_cs);
 }
 
-int git_win32_leakcheck_stacktrace_dump(
-	git_win32_leakcheck_stacktrace_options opt,
+int git3_win32_leakcheck_stacktrace_dump(
+	git3_win32_leakcheck_stacktrace_options opt,
 	const char *label)
 {
 	_CRT_REPORT_HOOK old;
@@ -443,18 +443,18 @@ int git_win32_leakcheck_stacktrace_dump(
 
 #define IS_BIT_SET(o,b) (((o) & (b)) != 0)
 
-	bool b_set_mark         = IS_BIT_SET(opt, GIT_WIN32_LEAKCHECK_STACKTRACE_SET_MARK);
-	bool b_leaks_since_mark = IS_BIT_SET(opt, GIT_WIN32_LEAKCHECK_STACKTRACE_LEAKS_SINCE_MARK);
-	bool b_leaks_total      = IS_BIT_SET(opt, GIT_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL);
-	bool b_quiet            = IS_BIT_SET(opt, GIT_WIN32_LEAKCHECK_STACKTRACE_QUIET);
+	bool b_set_mark         = IS_BIT_SET(opt, GIT3_WIN32_LEAKCHECK_STACKTRACE_SET_MARK);
+	bool b_leaks_since_mark = IS_BIT_SET(opt, GIT3_WIN32_LEAKCHECK_STACKTRACE_LEAKS_SINCE_MARK);
+	bool b_leaks_total      = IS_BIT_SET(opt, GIT3_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL);
+	bool b_quiet            = IS_BIT_SET(opt, GIT3_WIN32_LEAKCHECK_STACKTRACE_QUIET);
 
 	if (b_leaks_since_mark && b_leaks_total) {
-		git_error_set(GIT_ERROR_INVALID, "cannot combine LEAKS_SINCE_MARK and LEAKS_TOTAL.");
-		return GIT_ERROR;
+		git3_error_set(GIT3_ERROR_INVALID, "cannot combine LEAKS_SINCE_MARK and LEAKS_TOTAL.");
+		return GIT3_ERROR;
 	}
 	if (!b_set_mark && !b_leaks_since_mark && !b_leaks_total) {
-		git_error_set(GIT_ERROR_INVALID, "nothing to do.");
-		return GIT_ERROR;
+		git3_error_set(GIT3_ERROR_INVALID, "nothing to do.");
+		return GIT3_ERROR;
 	}
 
 	EnterCriticalSection(&g_crtdbg_stacktrace_cs);
@@ -498,20 +498,20 @@ int git_win32_leakcheck_stacktrace_dump(
 
 /**
  * Shutdown our memory leak tracking and dump summary data.
- * This should ONLY be called by git_libgit3_shutdown().
+ * This should ONLY be called by git3_libgit3_shutdown().
  *
  * We explicitly call _CrtDumpMemoryLeaks() during here so
  * that we can compute summary data for the leaks. We print
  * the stacktrace of each unique leak.
  *
  * This cleanup does not happen if the app calls exit()
- * without calling the libgit2 shutdown code.
+ * without calling the libgit3 shutdown code.
  *
  * This info we print here is independent of any automatic
  * reporting during exit() caused by _CRTDBG_LEAK_CHECK_DF.
  * Set it in your app if you also want traditional reporting.
  */
-void git_win32_leakcheck_stacktrace_cleanup(void)
+void git3_win32_leakcheck_stacktrace_cleanup(void)
 {
 	/* At shutdown/cleanup, dump cumulative leak info
 	 * with everything since startup.  This might generate
@@ -520,20 +520,20 @@ void git_win32_leakcheck_stacktrace_cleanup(void)
 	 * positives for resources previously reported during
 	 * checkpoints.
 	 */
-	git_win32_leakcheck_stacktrace_dump(
-		GIT_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL,
+	git3_win32_leakcheck_stacktrace_dump(
+		GIT3_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL,
 		"CLEANUP");
 
 	DeleteCriticalSection(&g_crtdbg_stacktrace_cs);
 }
 
-const char *git_win32_leakcheck_stacktrace(int skip, const char *file)
+const char *git3_win32_leakcheck_stacktrace(int skip, const char *file)
 {
-	git_win32_leakcheck_stack_raw_data new_data;
-	git_win32_leakcheck_stacktrace_row *row;
+	git3_win32_leakcheck_stack_raw_data new_data;
+	git3_win32_leakcheck_stacktrace_row *row;
 	const char * result = file;
 
-	if (git_win32_leakcheck_stack_capture(&new_data, skip+1) < 0)
+	if (git3_win32_leakcheck_stack_capture(&new_data, skip+1) < 0)
 		return result;
 
 	EnterCriticalSection(&g_crtdbg_stacktrace_cs);
@@ -552,28 +552,28 @@ const char *git_win32_leakcheck_stacktrace(int skip, const char *file)
 	return result;
 }
 
-static void git_win32_leakcheck_global_shutdown(void)
+static void git3_win32_leakcheck_global_shutdown(void)
 {
-	git_win32_leakcheck_stacktrace_cleanup();
-	git_win32_leakcheck_stack_cleanup();
+	git3_win32_leakcheck_stacktrace_cleanup();
+	git3_win32_leakcheck_stack_cleanup();
 }
 
-bool git_win32_leakcheck_has_leaks(void)
+bool git3_win32_leakcheck_has_leaks(void)
 {
 	return (g_transient_count_total_leaks > 0);
 }
 
-int git_win32_leakcheck_global_init(void)
+int git3_win32_leakcheck_global_init(void)
 {
-	git_win32_leakcheck_stacktrace_init();
-	git_win32_leakcheck_stack_init();
+	git3_win32_leakcheck_stacktrace_init();
+	git3_win32_leakcheck_stack_init();
 
-	return git_runtime_shutdown_register(git_win32_leakcheck_global_shutdown);
+	return git3_runtime_shutdown_register(git3_win32_leakcheck_global_shutdown);
 }
 
 #else
 
-int git_win32_leakcheck_global_init(void)
+int git3_win32_leakcheck_global_init(void)
 {
 	return 0;
 }

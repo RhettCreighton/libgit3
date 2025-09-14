@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include <git3/sys/commit_graph.h>
 #include <git3/sys/config.h>
 #include <git3/sys/filter.h>
@@ -12,10 +12,10 @@
  *     1. That the initializers for the latest version produces the same
  *        in-memory representation.
  *     2. That the function-based initializer supports all versions from 1...n,
- *        where n is the latest version (often represented by GIT_*_VERSION).
+ *        where n is the latest version (often represented by GIT3_*_VERSION).
  *
  * Parameters:
- *     structname: The name of the structure to test, e.g. git_blame_options.
+ *     structname: The name of the structure to test, e.g. git3_blame_options.
  *     structver: The latest version of the specified structure.
  *     macroinit: The macro that initializes the latest version of the structure.
  *     funcinitname: The function that initializes the structure. Must have the
@@ -61,7 +61,7 @@ void test_core_structinit__compare(void)
 {
 	/* These tests assume that they can memcmp() two structures that were
 	 * initialized with the same static initializer.  Eg,
-	 * git_blame_options = GIT_BLAME_OPTIONS_INIT;
+	 * git3_blame_options = GIT3_BLAME_OPTIONS_INIT;
 	 *
 	 * This assumption fails when there is padding between structure members,
 	 * which is not guaranteed to be initialized to anything sane at all.
@@ -75,132 +75,132 @@ void test_core_structinit__compare(void)
 
 	/* apply */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_apply_options, GIT_APPLY_OPTIONS_VERSION, \
-		GIT_APPLY_OPTIONS_INIT, git_apply_options_init);
+		git3_apply_options, GIT3_APPLY_OPTIONS_VERSION, \
+		GIT3_APPLY_OPTIONS_INIT, git3_apply_options_init);
 
 	/* blame */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_blame_options, GIT_BLAME_OPTIONS_VERSION, \
-		GIT_BLAME_OPTIONS_INIT, git_blame_options_init);
+		git3_blame_options, GIT3_BLAME_OPTIONS_VERSION, \
+		GIT3_BLAME_OPTIONS_INIT, git3_blame_options_init);
 
 	/* blob_filter_options */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_blob_filter_options, GIT_BLOB_FILTER_OPTIONS_VERSION, \
-		GIT_BLOB_FILTER_OPTIONS_INIT, git_blob_filter_options_init);
+		git3_blob_filter_options, GIT3_BLOB_FILTER_OPTIONS_VERSION, \
+		GIT3_BLOB_FILTER_OPTIONS_INIT, git3_blob_filter_options_init);
 
 	/* checkout */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_checkout_options, GIT_CHECKOUT_OPTIONS_VERSION, \
-		GIT_CHECKOUT_OPTIONS_INIT, git_checkout_options_init);
+		git3_checkout_options, GIT3_CHECKOUT_OPTIONS_VERSION, \
+		GIT3_CHECKOUT_OPTIONS_INIT, git3_checkout_options_init);
 
 	/* clone */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_clone_options, GIT_CLONE_OPTIONS_VERSION, \
-		GIT_CLONE_OPTIONS_INIT, git_clone_options_init);
+		git3_clone_options, GIT3_CLONE_OPTIONS_VERSION, \
+		GIT3_CLONE_OPTIONS_INIT, git3_clone_options_init);
 
 	/* commit_graph_writer */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_commit_graph_writer_options, \
-		GIT_COMMIT_GRAPH_WRITER_OPTIONS_VERSION, \
-		GIT_COMMIT_GRAPH_WRITER_OPTIONS_INIT, \
-		git_commit_graph_writer_options_init);
+		git3_commit_graph_writer_options, \
+		GIT3_COMMIT_GRAPH_WRITER_OPTIONS_VERSION, \
+		GIT3_COMMIT_GRAPH_WRITER_OPTIONS_INIT, \
+		git3_commit_graph_writer_options_init);
 
 	/* diff */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_diff_options, GIT_DIFF_OPTIONS_VERSION, \
-		GIT_DIFF_OPTIONS_INIT, git_diff_options_init);
+		git3_diff_options, GIT3_DIFF_OPTIONS_VERSION, \
+		GIT3_DIFF_OPTIONS_INIT, git3_diff_options_init);
 
 	/* diff_find */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_diff_find_options, GIT_DIFF_FIND_OPTIONS_VERSION, \
-		GIT_DIFF_FIND_OPTIONS_INIT, git_diff_find_options_init);
+		git3_diff_find_options, GIT3_DIFF_FIND_OPTIONS_VERSION, \
+		GIT3_DIFF_FIND_OPTIONS_INIT, git3_diff_find_options_init);
 
 	/* filter */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_filter, GIT_FILTER_VERSION, \
-		GIT_FILTER_INIT, git_filter_init);
+		git3_filter, GIT3_FILTER_VERSION, \
+		GIT3_FILTER_INIT, git3_filter_init);
 
 	/* merge_file_input */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_merge_file_input, GIT_MERGE_FILE_INPUT_VERSION, \
-		GIT_MERGE_FILE_INPUT_INIT, git_merge_file_input_init);
+		git3_merge_file_input, GIT3_MERGE_FILE_INPUT_VERSION, \
+		GIT3_MERGE_FILE_INPUT_INIT, git3_merge_file_input_init);
 
 	/* merge_file */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_merge_file_options, GIT_MERGE_FILE_OPTIONS_VERSION, \
-		GIT_MERGE_FILE_OPTIONS_INIT, git_merge_file_options_init);
+		git3_merge_file_options, GIT3_MERGE_FILE_OPTIONS_VERSION, \
+		GIT3_MERGE_FILE_OPTIONS_INIT, git3_merge_file_options_init);
 
 	/* merge_tree */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_merge_options, GIT_MERGE_OPTIONS_VERSION, \
-		GIT_MERGE_OPTIONS_INIT, git_merge_options_init);
+		git3_merge_options, GIT3_MERGE_OPTIONS_VERSION, \
+		GIT3_MERGE_OPTIONS_INIT, git3_merge_options_init);
 
 	/* push */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_push_options, GIT_PUSH_OPTIONS_VERSION, \
-		GIT_PUSH_OPTIONS_INIT, git_push_options_init);
+		git3_push_options, GIT3_PUSH_OPTIONS_VERSION, \
+		GIT3_PUSH_OPTIONS_INIT, git3_push_options_init);
 
 	/* remote */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_remote_callbacks, GIT_REMOTE_CALLBACKS_VERSION, \
-		GIT_REMOTE_CALLBACKS_INIT, git_remote_init_callbacks);
+		git3_remote_callbacks, GIT3_REMOTE_CALLBACKS_VERSION, \
+		GIT3_REMOTE_CALLBACKS_INIT, git3_remote_init_callbacks);
 
 	/* repository_init */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_repository_init_options, GIT_REPOSITORY_INIT_OPTIONS_VERSION, \
-		GIT_REPOSITORY_INIT_OPTIONS_INIT, git_repository_init_options_init);
+		git3_repository_init_options, GIT3_REPOSITORY_INIT_OPTIONS_VERSION, \
+		GIT3_REPOSITORY_INIT_OPTIONS_INIT, git3_repository_init_options_init);
 
 	/* revert */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_revert_options, GIT_REVERT_OPTIONS_VERSION, \
-		GIT_REVERT_OPTIONS_INIT, git_revert_options_init);
+		git3_revert_options, GIT3_REVERT_OPTIONS_VERSION, \
+		GIT3_REVERT_OPTIONS_INIT, git3_revert_options_init);
 
 	/* stash apply */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_stash_apply_options, GIT_STASH_APPLY_OPTIONS_VERSION, \
-		GIT_STASH_APPLY_OPTIONS_INIT, git_stash_apply_options_init);
+		git3_stash_apply_options, GIT3_STASH_APPLY_OPTIONS_VERSION, \
+		GIT3_STASH_APPLY_OPTIONS_INIT, git3_stash_apply_options_init);
 
 	/* stash save */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_stash_save_options, GIT_STASH_SAVE_OPTIONS_VERSION, \
-		GIT_STASH_SAVE_OPTIONS_INIT, git_stash_save_options_init);
+		git3_stash_save_options, GIT3_STASH_SAVE_OPTIONS_VERSION, \
+		GIT3_STASH_SAVE_OPTIONS_INIT, git3_stash_save_options_init);
 
 	/* status */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_status_options, GIT_STATUS_OPTIONS_VERSION, \
-		GIT_STATUS_OPTIONS_INIT, git_status_options_init);
+		git3_status_options, GIT3_STATUS_OPTIONS_VERSION, \
+		GIT3_STATUS_OPTIONS_INIT, git3_status_options_init);
 
 	/* transport */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_transport, GIT_TRANSPORT_VERSION, \
-		GIT_TRANSPORT_INIT, git_transport_init);
+		git3_transport, GIT3_TRANSPORT_VERSION, \
+		GIT3_TRANSPORT_INIT, git3_transport_init);
 
 	/* config_backend */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_config_backend, GIT_CONFIG_BACKEND_VERSION, \
-		GIT_CONFIG_BACKEND_INIT, git_config_init_backend);
+		git3_config_backend, GIT3_CONFIG_BACKEND_VERSION, \
+		GIT3_CONFIG_BACKEND_INIT, git3_config_init_backend);
 
 	/* odb_backend */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_odb_backend, GIT_ODB_BACKEND_VERSION, \
-		GIT_ODB_BACKEND_INIT, git_odb_init_backend);
+		git3_odb_backend, GIT3_ODB_BACKEND_VERSION, \
+		GIT3_ODB_BACKEND_INIT, git3_odb_init_backend);
 
 	/* refdb_backend */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_refdb_backend, GIT_REFDB_BACKEND_VERSION, \
-		GIT_REFDB_BACKEND_INIT, git_refdb_init_backend);
+		git3_refdb_backend, GIT3_REFDB_BACKEND_VERSION, \
+		GIT3_REFDB_BACKEND_INIT, git3_refdb_init_backend);
 
 	/* submodule update */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_submodule_update_options, GIT_SUBMODULE_UPDATE_OPTIONS_VERSION, \
-		GIT_SUBMODULE_UPDATE_OPTIONS_INIT, git_submodule_update_options_init);
+		git3_submodule_update_options, GIT3_SUBMODULE_UPDATE_OPTIONS_VERSION, \
+		GIT3_SUBMODULE_UPDATE_OPTIONS_INIT, git3_submodule_update_options_init);
 
 	/* submodule update */
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_proxy_options, GIT_PROXY_OPTIONS_VERSION, \
-		GIT_PROXY_OPTIONS_INIT, git_proxy_options_init);
+		git3_proxy_options, GIT3_PROXY_OPTIONS_VERSION, \
+		GIT3_PROXY_OPTIONS_INIT, git3_proxy_options_init);
 
 	CHECK_MACRO_FUNC_INIT_EQUAL( \
-		git_diff_patchid_options, GIT_DIFF_PATCHID_OPTIONS_VERSION, \
-		GIT_DIFF_PATCHID_OPTIONS_INIT, git_diff_patchid_options_init);
+		git3_diff_patchid_options, GIT3_DIFF_PATCHID_OPTIONS_VERSION, \
+		GIT3_DIFF_PATCHID_OPTIONS_INIT, git3_diff_patchid_options_init);
 }

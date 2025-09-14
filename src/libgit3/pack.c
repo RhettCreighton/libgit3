@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -16,41 +16,41 @@
 #include "hashmap_oid.h"
 
 /* Option to bypass checking existence of '.keep' files */
-bool git_disable_pack_keep_file_checks = false;
+bool git3_disable_pack_keep_file_checks = false;
 
-static int packfile_open_locked(struct git_pack_file *p);
-static off64_t nth_packed_object_offset_locked(struct git_pack_file *p, uint32_t n);
+static int packfile_open_locked(struct git3_pack_file *p);
+static off64_t nth_packed_object_offset_locked(struct git3_pack_file *p, uint32_t n);
 static int packfile_unpack_compressed(
-		git_rawobj *obj,
-		struct git_pack_file *p,
-		git_mwindow **w_curs,
+		git3_rawobj *obj,
+		struct git3_pack_file *p,
+		git3_mwindow **w_curs,
 		off64_t *curpos,
 		size_t size,
-		git_object_t type);
+		git3_object_t type);
 
 /* Can find the offset of an object given
  * a prefix of an identifier.
- * Throws GIT_EAMBIGUOUSOIDPREFIX if short oid
+ * Throws GIT3_EAMBIGUOUSOIDPREFIX if short oid
  * is ambiguous within the pack.
  * This method assumes that len is between
- * GIT_OID_MINPREFIXLEN and the oid type's hexsize.
+ * GIT3_OID_MINPREFIXLEN and the oid type's hexsize.
  */
 static int pack_entry_find_offset(
 		off64_t *offset_out,
-		git_oid *found_oid,
-		struct git_pack_file *p,
-		const git_oid *short_oid,
+		git3_oid *found_oid,
+		struct git3_pack_file *p,
+		const git3_oid *short_oid,
 		size_t len);
 
 #define off64_hash(key) (uint32_t)((key)>>33^(key)^(key)<<11)
 #define off64_equal(a, b) ((a) == (b))
 
-GIT_HASHMAP_FUNCTIONS(git_pack_offsetmap, GIT_HASHMAP_INLINE, off64_t, git_pack_cache_entry *, off64_hash, off64_equal);
-GIT_HASHMAP_OID_FUNCTIONS(git_pack_oidmap, , struct git_pack_entry *);
+GIT3_HASHMAP_FUNCTIONS(git3_pack_offsetmap, GIT3_HASHMAP_INLINE, off64_t, git3_pack_cache_entry *, off64_hash, off64_equal);
+GIT3_HASHMAP_OID_FUNCTIONS(git3_pack_oidmap, , struct git3_pack_entry *);
 
 static int packfile_error(const char *message)
 {
-	git_error_set(GIT_ERROR_ODB, "invalid pack file - %s", message);
+	git3_error_set(GIT3_ERROR_ODB, "invalid pack file - %s", message);
 	return -1;
 }
 
@@ -58,118 +58,118 @@ static int packfile_error(const char *message)
  * Delta base cache
  ********************/
 
-static git_pack_cache_entry *new_cache_object(git_rawobj *source)
+static git3_pack_cache_entry *new_cache_object(git3_rawobj *source)
 {
-	git_pack_cache_entry *e = git__calloc(1, sizeof(git_pack_cache_entry));
+	git3_pack_cache_entry *e = git3__calloc(1, sizeof(git3_pack_cache_entry));
 	if (!e)
 		return NULL;
 
-	git_atomic32_inc(&e->refcount);
-	memcpy(&e->raw, source, sizeof(git_rawobj));
+	git3_atomic32_inc(&e->refcount);
+	memcpy(&e->raw, source, sizeof(git3_rawobj));
 
 	return e;
 }
 
 static void free_cache_object(void *o)
 {
-	git_pack_cache_entry *e = (git_pack_cache_entry *)o;
+	git3_pack_cache_entry *e = (git3_pack_cache_entry *)o;
 
 	if (e != NULL) {
-		git__free(e->raw.data);
-		git__free(e);
+		git3__free(e->raw.data);
+		git3__free(e);
 	}
 }
 
-static void cache_free(git_pack_cache *cache)
+static void cache_free(git3_pack_cache *cache)
 {
-	git_hashmap_iter_t iter = GIT_HASHMAP_ITER_INIT;
-	git_pack_cache_entry *entry;
+	git3_hashmap_iter_t iter = GIT3_HASHMAP_ITER_INIT;
+	git3_pack_cache_entry *entry;
 
-	while (git_pack_offsetmap_iterate(&iter, NULL, &entry, &cache->entries) == 0)
+	while (git3_pack_offsetmap_iterate(&iter, NULL, &entry, &cache->entries) == 0)
 		free_cache_object(entry);
 
-	git_pack_offsetmap_dispose(&cache->entries);
+	git3_pack_offsetmap_dispose(&cache->entries);
 }
 
-static int cache_init(git_pack_cache *cache)
+static int cache_init(git3_pack_cache *cache)
 {
-	cache->memory_limit = GIT_PACK_CACHE_MEMORY_LIMIT;
+	cache->memory_limit = GIT3_PACK_CACHE_MEMORY_LIMIT;
 
-	if (git_mutex_init(&cache->lock)) {
-		git_error_set(GIT_ERROR_OS, "failed to initialize pack cache mutex");
+	if (git3_mutex_init(&cache->lock)) {
+		git3_error_set(GIT3_ERROR_OS, "failed to initialize pack cache mutex");
 		return -1;
 	}
 
 	return 0;
 }
 
-static git_pack_cache_entry *cache_get(git_pack_cache *cache, off64_t offset)
+static git3_pack_cache_entry *cache_get(git3_pack_cache *cache, off64_t offset)
 {
-	git_pack_cache_entry *entry = NULL;
+	git3_pack_cache_entry *entry = NULL;
 
-	if (git_mutex_lock(&cache->lock) < 0)
+	if (git3_mutex_lock(&cache->lock) < 0)
 		return NULL;
 
-	if (git_pack_offsetmap_get(&entry, &cache->entries, offset) == 0) {
-		git_atomic32_inc(&entry->refcount);
+	if (git3_pack_offsetmap_get(&entry, &cache->entries, offset) == 0) {
+		git3_atomic32_inc(&entry->refcount);
 		entry->last_usage = cache->use_ctr++;
 	}
 
-	git_mutex_unlock(&cache->lock);
+	git3_mutex_unlock(&cache->lock);
 
 	return entry;
 }
 
 /* Run with the cache lock held */
-static void free_lowest_entry(git_pack_cache *cache)
+static void free_lowest_entry(git3_pack_cache *cache)
 {
-	git_hashmap_iter_t iter = GIT_HASHMAP_ITER_INIT;
-	git_pack_cache_entry *entry;
+	git3_hashmap_iter_t iter = GIT3_HASHMAP_ITER_INIT;
+	git3_pack_cache_entry *entry;
 	off64_t offset;
 
-	while (git_pack_offsetmap_iterate(&iter, &offset, &entry, &cache->entries) == 0) {
-		if (entry && git_atomic32_get(&entry->refcount) == 0) {
+	while (git3_pack_offsetmap_iterate(&iter, &offset, &entry, &cache->entries) == 0) {
+		if (entry && git3_atomic32_get(&entry->refcount) == 0) {
 			cache->memory_used -= entry->raw.len;
-			git_pack_offsetmap_remove(&cache->entries, offset);
+			git3_pack_offsetmap_remove(&cache->entries, offset);
 			free_cache_object(entry);
 		}
 	}
 }
 
 static int cache_add(
-		git_pack_cache_entry **cached_out,
-		git_pack_cache *cache,
-		git_rawobj *base,
+		git3_pack_cache_entry **cached_out,
+		git3_pack_cache *cache,
+		git3_rawobj *base,
 		off64_t offset)
 {
-	git_pack_cache_entry *entry;
+	git3_pack_cache_entry *entry;
 	int exists;
 
-	if (base->len > GIT_PACK_CACHE_SIZE_LIMIT)
+	if (base->len > GIT3_PACK_CACHE_SIZE_LIMIT)
 		return -1;
 
 	entry = new_cache_object(base);
 	if (entry) {
-		if (git_mutex_lock(&cache->lock) < 0) {
-			git_error_set(GIT_ERROR_OS, "failed to lock cache");
-			git__free(entry);
+		if (git3_mutex_lock(&cache->lock) < 0) {
+			git3_error_set(GIT3_ERROR_OS, "failed to lock cache");
+			git3__free(entry);
 			return -1;
 		}
 		/* Add it to the cache if nobody else has */
-		exists = git_pack_offsetmap_contains(&cache->entries, offset);
+		exists = git3_pack_offsetmap_contains(&cache->entries, offset);
 		if (!exists) {
 			while (cache->memory_used + base->len > cache->memory_limit)
 				free_lowest_entry(cache);
 
-			git_pack_offsetmap_put(&cache->entries, offset, entry);
+			git3_pack_offsetmap_put(&cache->entries, offset, entry);
 			cache->memory_used += entry->raw.len;
 
 			*cached_out = entry;
 		}
-		git_mutex_unlock(&cache->lock);
+		git3_mutex_unlock(&cache->lock);
 		/* Somebody beat us to adding it into the cache */
 		if (exists) {
-			git__free(entry);
+			git3__free(entry);
 			return -1;
 		}
 	}
@@ -183,22 +183,22 @@ static int cache_add(
  *
  ***********************************************************/
 
-static void pack_index_free(struct git_pack_file *p)
+static void pack_index_free(struct git3_pack_file *p)
 {
 	if (p->ids) {
-		git__free(p->ids);
+		git3__free(p->ids);
 		p->ids = NULL;
 	}
 	if (p->index_map.data) {
-		git_futils_mmap_free(&p->index_map);
+		git3_futils_mmap_free(&p->index_map);
 		p->index_map.data = NULL;
 	}
 }
 
 /* Run with the packfile lock held */
-static int pack_index_check_locked(const char *path, struct git_pack_file *p)
+static int pack_index_check_locked(const char *path, struct git3_pack_file *p)
 {
-	struct git_pack_idx_header *hdr;
+	struct git3_pack_idx_header *hdr;
 	uint32_t version, nr = 0, i, *index;
 	void *idx_map;
 	size_t idx_size;
@@ -206,25 +206,25 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 	int error;
 
 	/* TODO: properly open the file without access time using O_NOATIME */
-	git_file fd = git_futils_open_ro(path);
+	git3_file fd = git3_futils_open_ro(path);
 	if (fd < 0)
 		return fd;
 
 	if (p_fstat(fd, &st) < 0) {
 		p_close(fd);
-		git_error_set(GIT_ERROR_OS, "unable to stat pack index '%s'", path);
+		git3_error_set(GIT3_ERROR_OS, "unable to stat pack index '%s'", path);
 		return -1;
 	}
 
 	if (!S_ISREG(st.st_mode) ||
-		!git__is_sizet(st.st_size) ||
+		!git3__is_sizet(st.st_size) ||
 		(idx_size = (size_t)st.st_size) < (size_t)((4 * 256) + (p->oid_size * 2))) {
 		p_close(fd);
-		git_error_set(GIT_ERROR_ODB, "invalid pack index '%s'", path);
+		git3_error_set(GIT3_ERROR_ODB, "invalid pack index '%s'", path);
 		return -1;
 	}
 
-	error = git_futils_mmap_ro(&p->index_map, fd, 0, idx_size);
+	error = git3_futils_mmap_ro(&p->index_map, fd, 0, idx_size);
 
 	p_close(fd);
 
@@ -237,7 +237,7 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 		version = ntohl(hdr->idx_version);
 
 		if (version < 2 || version > 2) {
-			git_futils_mmap_free(&p->index_map);
+			git3_futils_mmap_free(&p->index_map);
 			return packfile_error("unsupported index version");
 		}
 
@@ -253,7 +253,7 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 	for (i = 0; i < 256; i++) {
 		uint32_t n = ntohl(index[i]);
 		if (n < nr) {
-			git_futils_mmap_free(&p->index_map);
+			git3_futils_mmap_free(&p->index_map);
 			return packfile_error("index is non-monotonic");
 		}
 		nr = n;
@@ -268,7 +268,7 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 		 * - 20/32-byte SHA file checksum
 		 */
 		if (idx_size != (4 * 256 + ((uint64_t) nr * (p->oid_size + 4)) + (p->oid_size * 2))) {
-			git_futils_mmap_free(&p->index_map);
+			git3_futils_mmap_free(&p->index_map);
 			return packfile_error("index is corrupted");
 		}
 	} else if (version == 2) {
@@ -292,7 +292,7 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 			max_size += (nr - 1)*8;
 
 		if (idx_size < min_size || idx_size > max_size) {
-			git_futils_mmap_free(&p->index_map);
+			git3_futils_mmap_free(&p->index_map);
 			return packfile_error("wrong index size");
 		}
 	}
@@ -303,25 +303,25 @@ static int pack_index_check_locked(const char *path, struct git_pack_file *p)
 }
 
 /* Run with the packfile lock held */
-static int pack_index_open_locked(struct git_pack_file *p)
+static int pack_index_open_locked(struct git3_pack_file *p)
 {
 	int error = 0;
 	size_t name_len;
-	git_str idx_name = GIT_STR_INIT;
+	git3_str idx_name = GIT3_STR_INIT;
 
 	if (p->index_version > -1)
 		goto cleanup;
 
-	/* checked by git_pack_file alloc */
+	/* checked by git3_pack_file alloc */
 	name_len = strlen(p->pack_name);
-	GIT_ASSERT(name_len > strlen(".pack"));
+	GIT3_ASSERT(name_len > strlen(".pack"));
 
-	if ((error = git_str_init(&idx_name, name_len)) < 0)
+	if ((error = git3_str_init(&idx_name, name_len)) < 0)
 		goto cleanup;
 
-	git_str_put(&idx_name, p->pack_name, name_len - strlen(".pack"));
-	git_str_puts(&idx_name, ".idx");
-	if (git_str_oom(&idx_name)) {
+	git3_str_put(&idx_name, p->pack_name, name_len - strlen(".pack"));
+	git3_str_puts(&idx_name, ".idx");
+	if (git3_str_oom(&idx_name)) {
 		error = -1;
 		goto cleanup;
 	}
@@ -330,26 +330,26 @@ static int pack_index_open_locked(struct git_pack_file *p)
 		error = pack_index_check_locked(idx_name.ptr, p);
 
 cleanup:
-	git_str_dispose(&idx_name);
+	git3_str_dispose(&idx_name);
 
 	return error;
 }
 
 static unsigned char *pack_window_open(
-		struct git_pack_file *p,
-		git_mwindow **w_cursor,
+		struct git3_pack_file *p,
+		git3_mwindow **w_cursor,
 		off64_t offset,
 		unsigned int *left)
 {
 	unsigned char *pack_data = NULL;
 
-	if (git_mutex_lock(&p->lock) < 0) {
-		git_error_set(GIT_ERROR_THREAD, "unable to lock packfile");
+	if (git3_mutex_lock(&p->lock) < 0) {
+		git3_error_set(GIT3_ERROR_THREAD, "unable to lock packfile");
 		return NULL;
 	}
-	if (git_mutex_lock(&p->mwf.lock) < 0) {
-		git_mutex_unlock(&p->lock);
-		git_error_set(GIT_ERROR_THREAD, "unable to lock packfile");
+	if (git3_mutex_lock(&p->mwf.lock) < 0) {
+		git3_mutex_unlock(&p->lock);
+		git3_error_set(GIT3_ERROR_THREAD, "unable to lock packfile");
 		return NULL;
 	}
 
@@ -369,11 +369,11 @@ static unsigned char *pack_window_open(
 	if (offset < 0)
 		goto cleanup;
 
-	pack_data = git_mwindow_open(&p->mwf, w_cursor, offset, p->oid_size, left);
+	pack_data = git3_mwindow_open(&p->mwf, w_cursor, offset, p->oid_size, left);
 
 cleanup:
-	git_mutex_unlock(&p->mwf.lock);
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->mwf.lock);
+	git3_mutex_unlock(&p->lock);
 	return pack_data;
  }
 
@@ -385,12 +385,12 @@ cleanup:
  *  - each byte afterwards: low seven bits are size continuation,
  *    with the high bit being "size continues"
  */
-int git_packfile__object_header(size_t *out, unsigned char *hdr, size_t size, git_object_t type)
+int git3_packfile__object_header(size_t *out, unsigned char *hdr, size_t size, git3_object_t type)
 {
 	unsigned char *hdr_base;
 	unsigned char c;
 
-	GIT_ASSERT_ARG(type >= GIT_OBJECT_COMMIT && type <= GIT_PACKFILE_REF_DELTA);
+	GIT3_ASSERT_ARG(type >= GIT3_OBJECT_COMMIT && type <= GIT3_PACKFILE_REF_DELTA);
 
 	/* TODO: add support for chunked objects; see git.git 6c0d19b1 */
 
@@ -413,7 +413,7 @@ int git_packfile__object_header(size_t *out, unsigned char *hdr, size_t size, gi
 static int packfile_unpack_header1(
 		unsigned long *usedp,
 		size_t *sizep,
-		git_object_t *type,
+		git3_object_t *type,
 		const unsigned char *buf,
 		unsigned long len)
 {
@@ -427,13 +427,13 @@ static int packfile_unpack_header1(
 	shift = 4;
 	while (c & 0x80) {
 		if (len <= used) {
-			git_error_set(GIT_ERROR_ODB, "buffer too small");
-			return GIT_EBUFS;
+			git3_error_set(GIT3_ERROR_ODB, "buffer too small");
+			return GIT3_EBUFS;
 		}
 
 		if (bitsizeof(long) <= shift) {
 			*usedp = 0;
-			git_error_set(GIT_ERROR_ODB, "packfile corrupted");
+			git3_error_set(GIT3_ERROR_ODB, "packfile corrupted");
 			return -1;
 		}
 
@@ -447,11 +447,11 @@ static int packfile_unpack_header1(
 	return 0;
 }
 
-int git_packfile_unpack_header(
+int git3_packfile_unpack_header(
 		size_t *size_p,
-		git_object_t *type_p,
-		struct git_pack_file *p,
-		git_mwindow **w_curs,
+		git3_object_t *type_p,
+		struct git3_pack_file *p,
+		git3_mwindow **w_curs,
 		off64_t *curpos)
 {
 	unsigned char *base;
@@ -459,16 +459,16 @@ int git_packfile_unpack_header(
 	unsigned long used;
 	int error;
 
-	if ((error = git_mutex_lock(&p->lock)) < 0)
+	if ((error = git3_mutex_lock(&p->lock)) < 0)
 		return error;
-	if ((error = git_mutex_lock(&p->mwf.lock)) < 0) {
-		git_mutex_unlock(&p->lock);
+	if ((error = git3_mutex_lock(&p->mwf.lock)) < 0) {
+		git3_mutex_unlock(&p->lock);
 		return error;
 	}
 
 	if (p->mwf.fd == -1 && (error = packfile_open_locked(p)) < 0) {
-		git_mutex_unlock(&p->lock);
-		git_mutex_unlock(&p->mwf.lock);
+		git3_mutex_unlock(&p->lock);
+		git3_mutex_unlock(&p->mwf.lock);
 		return error;
 	}
 
@@ -478,15 +478,15 @@ int git_packfile_unpack_header(
 	 * encoding the maximum deflated object size is 2^137, which is
 	 * just insane, so we know won't exceed what we have been given.
 	 */
-	base = git_mwindow_open(&p->mwf, w_curs, *curpos, p->oid_size, &left);
-	git_mutex_unlock(&p->lock);
-	git_mutex_unlock(&p->mwf.lock);
+	base = git3_mwindow_open(&p->mwf, w_curs, *curpos, p->oid_size, &left);
+	git3_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->mwf.lock);
 	if (base == NULL)
-		return GIT_EBUFS;
+		return GIT3_EBUFS;
 
 	error = packfile_unpack_header1(&used, size_p, type_p, base, left);
-	git_mwindow_close(w_curs);
-	if (error == GIT_EBUFS)
+	git3_mwindow_close(w_curs);
+	if (error == GIT3_EBUFS)
 		return error;
 	else if (error < 0)
 		return packfile_error("header length is zero");
@@ -495,57 +495,57 @@ int git_packfile_unpack_header(
 	return 0;
 }
 
-int git_packfile_resolve_header(
+int git3_packfile_resolve_header(
 		size_t *size_p,
-		git_object_t *type_p,
-		struct git_pack_file *p,
+		git3_object_t *type_p,
+		struct git3_pack_file *p,
 		off64_t offset)
 {
-	git_mwindow *w_curs = NULL;
+	git3_mwindow *w_curs = NULL;
 	off64_t curpos = offset;
 	size_t size;
-	git_object_t type;
+	git3_object_t type;
 	off64_t base_offset;
 	int error;
 
-	error = git_mutex_lock(&p->lock);
+	error = git3_mutex_lock(&p->lock);
 	if (error < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
 		return error;
 	}
-	error = git_mutex_lock(&p->mwf.lock);
+	error = git3_mutex_lock(&p->mwf.lock);
 	if (error < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
-		git_mutex_unlock(&p->lock);
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
+		git3_mutex_unlock(&p->lock);
 		return error;
 	}
 
 	if (p->mwf.fd == -1 && (error = packfile_open_locked(p)) < 0) {
-		git_mutex_unlock(&p->mwf.lock);
-		git_mutex_unlock(&p->lock);
+		git3_mutex_unlock(&p->mwf.lock);
+		git3_mutex_unlock(&p->lock);
 		return error;
 	}
-	git_mutex_unlock(&p->mwf.lock);
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->mwf.lock);
+	git3_mutex_unlock(&p->lock);
 
-	error = git_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
+	error = git3_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
 	if (error < 0)
 		return error;
 
-	if (type == GIT_PACKFILE_OFS_DELTA || type == GIT_PACKFILE_REF_DELTA) {
+	if (type == GIT3_PACKFILE_OFS_DELTA || type == GIT3_PACKFILE_REF_DELTA) {
 		size_t base_size;
-		git_packfile_stream stream;
+		git3_packfile_stream stream;
 
 		error = get_delta_base(&base_offset, p, &w_curs, &curpos, type, offset);
-		git_mwindow_close(&w_curs);
+		git3_mwindow_close(&w_curs);
 
 		if (error < 0)
 			return error;
 
-		if ((error = git_packfile_stream_open(&stream, p, curpos)) < 0)
+		if ((error = git3_packfile_stream_open(&stream, p, curpos)) < 0)
 			return error;
-		error = git_delta_read_header_fromstream(&base_size, size_p, &stream);
-		git_packfile_stream_dispose(&stream);
+		error = git3_delta_read_header_fromstream(&base_size, size_p, &stream);
+		git3_packfile_stream_dispose(&stream);
 		if (error < 0)
 			return error;
 	} else {
@@ -553,16 +553,16 @@ int git_packfile_resolve_header(
 		base_offset = 0;
 	}
 
-	while (type == GIT_PACKFILE_OFS_DELTA || type == GIT_PACKFILE_REF_DELTA) {
+	while (type == GIT3_PACKFILE_OFS_DELTA || type == GIT3_PACKFILE_REF_DELTA) {
 		curpos = base_offset;
-		error = git_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
+		error = git3_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
 		if (error < 0)
 			return error;
-		if (type != GIT_PACKFILE_OFS_DELTA && type != GIT_PACKFILE_REF_DELTA)
+		if (type != GIT3_PACKFILE_OFS_DELTA && type != GIT3_PACKFILE_REF_DELTA)
 			break;
 
 		error = get_delta_base(&base_offset, p, &w_curs, &curpos, type, base_offset);
-		git_mwindow_close(&w_curs);
+		git3_mwindow_close(&w_curs);
 
 		if (error < 0)
 			return error;
@@ -580,22 +580,22 @@ int git_packfile_resolve_header(
  * order to apply deltas on. If an object is found in the pack's base
  * cache, we stop calculating there.
  */
-static int pack_dependency_chain(git_dependency_chain *chain_out,
-				 git_pack_cache_entry **cached_out, off64_t *cached_off,
+static int pack_dependency_chain(git3_dependency_chain *chain_out,
+				 git3_pack_cache_entry **cached_out, off64_t *cached_off,
 				 struct pack_chain_elem *small_stack, size_t *stack_sz,
-				 struct git_pack_file *p, off64_t obj_offset)
+				 struct git3_pack_file *p, off64_t obj_offset)
 {
-	git_dependency_chain chain = GIT_ARRAY_INIT;
-	git_mwindow *w_curs = NULL;
+	git3_dependency_chain chain = GIT3_ARRAY_INIT;
+	git3_mwindow *w_curs = NULL;
 	off64_t curpos = obj_offset, base_offset;
 	int error = 0, use_heap = 0;
 	size_t size, elem_pos;
-	git_object_t type;
+	git3_object_t type;
 
 	elem_pos = 0;
 	while (true) {
 		struct pack_chain_elem *elem;
-		git_pack_cache_entry *cached = NULL;
+		git3_pack_cache_entry *cached = NULL;
 
 		/* if we have a base cached, we can stop here instead */
 		if ((cached = cache_get(&p->bases, obj_offset)) != NULL) {
@@ -606,8 +606,8 @@ static int pack_dependency_chain(git_dependency_chain *chain_out,
 
 		/* if we run out of space on the small stack, use the array */
 		if (elem_pos == SMALL_STACK_SIZE) {
-			git_array_init_to_size(chain, elem_pos);
-			GIT_ERROR_CHECK_ARRAY(chain);
+			git3_array_init_to_size(chain, elem_pos);
+			GIT3_ERROR_CHECK_ARRAY(chain);
 			memcpy(chain.ptr, small_stack, elem_pos * sizeof(struct pack_chain_elem));
 			chain.size = elem_pos;
 			use_heap = 1;
@@ -617,7 +617,7 @@ static int pack_dependency_chain(git_dependency_chain *chain_out,
 		if (!use_heap) {
 			elem = &small_stack[elem_pos];
 		} else {
-			elem = git_array_alloc(chain);
+			elem = git3_array_alloc(chain);
 			if (!elem) {
 				error = -1;
 				goto on_error;
@@ -626,7 +626,7 @@ static int pack_dependency_chain(git_dependency_chain *chain_out,
 
 		elem->base_key = obj_offset;
 
-		error = git_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
+		error = git3_packfile_unpack_header(&size, &type, p, &w_curs, &curpos);
 		if (error < 0)
 			goto on_error;
 
@@ -635,11 +635,11 @@ static int pack_dependency_chain(git_dependency_chain *chain_out,
 		elem->type = type;
 		elem->base_key = obj_offset;
 
-		if (type != GIT_PACKFILE_OFS_DELTA && type != GIT_PACKFILE_REF_DELTA)
+		if (type != GIT3_PACKFILE_OFS_DELTA && type != GIT3_PACKFILE_REF_DELTA)
 			break;
 
 		error = get_delta_base(&base_offset, p, &w_curs, &curpos, type, obj_offset);
-		git_mwindow_close(&w_curs);
+		git3_mwindow_close(&w_curs);
 
 		if (error < 0)
 			goto on_error;
@@ -658,41 +658,41 @@ static int pack_dependency_chain(git_dependency_chain *chain_out,
 	return error;
 
 on_error:
-	git_array_clear(chain);
+	git3_array_clear(chain);
 	return error;
 }
 
-int git_packfile_unpack(
-	git_rawobj *obj,
-	struct git_pack_file *p,
+int git3_packfile_unpack(
+	git3_rawobj *obj,
+	struct git3_pack_file *p,
 	off64_t *obj_offset)
 {
-	git_mwindow *w_curs = NULL;
+	git3_mwindow *w_curs = NULL;
 	off64_t curpos = *obj_offset;
 	int error, free_base = 0;
-	git_dependency_chain chain = GIT_ARRAY_INIT;
+	git3_dependency_chain chain = GIT3_ARRAY_INIT;
 	struct pack_chain_elem *elem = NULL, *stack;
-	git_pack_cache_entry *cached = NULL;
+	git3_pack_cache_entry *cached = NULL;
 	struct pack_chain_elem small_stack[SMALL_STACK_SIZE];
 	size_t stack_size = 0, elem_pos, alloclen;
 	int base_type;
 
-	error = git_mutex_lock(&p->lock);
+	error = git3_mutex_lock(&p->lock);
 	if (error < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
 		return error;
 	}
-	error = git_mutex_lock(&p->mwf.lock);
+	error = git3_mutex_lock(&p->mwf.lock);
 	if (error < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
-		git_mutex_unlock(&p->lock);
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
+		git3_mutex_unlock(&p->lock);
 		return error;
 	}
 
 	if (p->mwf.fd == -1)
 		error = packfile_open_locked(p);
-	git_mutex_unlock(&p->mwf.lock);
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->mwf.lock);
+	git3_mutex_unlock(&p->lock);
 	if (error < 0)
 		return error;
 
@@ -706,14 +706,14 @@ int git_packfile_unpack(
 
 	obj->data = NULL;
 	obj->len = 0;
-	obj->type = GIT_OBJECT_INVALID;
+	obj->type = GIT3_OBJECT_INVALID;
 
 	/* let's point to the right stack */
 	stack = chain.ptr ? chain.ptr : small_stack;
 
 	elem_pos = stack_size;
 	if (cached) {
-		memcpy(obj, &cached->raw, sizeof(git_rawobj));
+		memcpy(obj, &cached->raw, sizeof(git3_rawobj));
 		base_type = obj->type;
 		elem_pos--;	/* stack_size includes the base, which isn't actually there */
 	} else {
@@ -722,21 +722,21 @@ int git_packfile_unpack(
 	}
 
 	switch (base_type) {
-	case GIT_OBJECT_COMMIT:
-	case GIT_OBJECT_TREE:
-	case GIT_OBJECT_BLOB:
-	case GIT_OBJECT_TAG:
+	case GIT3_OBJECT_COMMIT:
+	case GIT3_OBJECT_TREE:
+	case GIT3_OBJECT_BLOB:
+	case GIT3_OBJECT_TAG:
 		if (!cached) {
 			curpos = elem->offset;
 			error = packfile_unpack_compressed(obj, p, &w_curs, &curpos, elem->size, elem->type);
-			git_mwindow_close(&w_curs);
+			git3_mwindow_close(&w_curs);
 			base_type = elem->type;
 		}
 		if (error < 0)
 			goto cleanup;
 		break;
-	case GIT_PACKFILE_OFS_DELTA:
-	case GIT_PACKFILE_REF_DELTA:
+	case GIT3_PACKFILE_OFS_DELTA:
+	case GIT3_PACKFILE_REF_DELTA:
 		error = packfile_error("dependency chain ends in a delta");
 		goto cleanup;
 	default:
@@ -753,18 +753,18 @@ int git_packfile_unpack(
 	if (cached && stack_size == 1) {
 		void *data = obj->data;
 
-		GIT_ERROR_CHECK_ALLOC_ADD(&alloclen, obj->len, 1);
-		obj->data = git__malloc(alloclen);
-		GIT_ERROR_CHECK_ALLOC(obj->data);
+		GIT3_ERROR_CHECK_ALLOC_ADD(&alloclen, obj->len, 1);
+		obj->data = git3__malloc(alloclen);
+		GIT3_ERROR_CHECK_ALLOC(obj->data);
 
 		memcpy(obj->data, data, obj->len + 1);
-		git_atomic32_dec(&cached->refcount);
+		git3_atomic32_dec(&cached->refcount);
 		goto cleanup;
 	}
 
 	/* we now apply each consecutive delta until we run out */
 	while (elem_pos > 0 && !error) {
-		git_rawobj base, delta;
+		git3_rawobj base, delta;
 
 		/*
 		 * We can now try to add the base to the cache, as
@@ -776,7 +776,7 @@ int git_packfile_unpack(
 		elem = &stack[elem_pos - 1];
 		curpos = elem->offset;
 		error = packfile_unpack_compressed(&delta, p, &w_curs, &curpos, elem->size, elem->type);
-		git_mwindow_close(&w_curs);
+		git3_mwindow_close(&w_curs);
 
 		if (error < 0) {
 			/* We have transferred ownership of the data to the cache. */
@@ -788,9 +788,9 @@ int git_packfile_unpack(
 		base = *obj;
 		obj->data = NULL;
 		obj->len = 0;
-		obj->type = GIT_OBJECT_INVALID;
+		obj->type = GIT3_OBJECT_INVALID;
 
-		error = git_delta_apply(&obj->data, &obj->len, base.data, base.len, delta.data, delta.len);
+		error = git3_delta_apply(&obj->data, &obj->len, base.data, base.len, delta.data, delta.len);
 		obj->type = base_type;
 
 		/*
@@ -799,14 +799,14 @@ int git_packfile_unpack(
 		 * iteration. free_base lets us know that we got the
 		 * base object directly from the packfile, so we can free it.
 		 */
-		git__free(delta.data);
+		git3__free(delta.data);
 		if (free_base) {
 			free_base = 0;
-			git__free(base.data);
+			git3__free(base.data);
 		}
 
 		if (cached) {
-			git_atomic32_dec(&cached->refcount);
+			git3_atomic32_dec(&cached->refcount);
 			cached = NULL;
 		}
 
@@ -818,33 +818,33 @@ int git_packfile_unpack(
 
 cleanup:
 	if (error < 0) {
-		git__free(obj->data);
+		git3__free(obj->data);
 		if (cached)
-			git_atomic32_dec(&cached->refcount);
+			git3_atomic32_dec(&cached->refcount);
 	}
 
 	if (elem)
 		*obj_offset = curpos;
 
-	git_array_clear(chain);
+	git3_array_clear(chain);
 	return error;
 }
 
-int git_packfile_stream_open(git_packfile_stream *obj, struct git_pack_file *p, off64_t curpos)
+int git3_packfile_stream_open(git3_packfile_stream *obj, struct git3_pack_file *p, off64_t curpos)
 {
-	memset(obj, 0, sizeof(git_packfile_stream));
+	memset(obj, 0, sizeof(git3_packfile_stream));
 	obj->curpos = curpos;
 	obj->p = p;
 
-	if (git_zstream_init(&obj->zstream, GIT_ZSTREAM_INFLATE) < 0) {
-		git_error_set(GIT_ERROR_ZLIB, "failed to init packfile stream");
+	if (git3_zstream_init(&obj->zstream, GIT3_ZSTREAM_INFLATE) < 0) {
+		git3_error_set(GIT3_ERROR_ZLIB, "failed to init packfile stream");
 		return -1;
 	}
 
 	return 0;
 }
 
-ssize_t git_packfile_stream_read(git_packfile_stream *obj, void *buffer, size_t len)
+ssize_t git3_packfile_stream_read(git3_packfile_stream *obj, void *buffer, size_t len)
 {
 	unsigned int window_len;
 	unsigned char *in;
@@ -854,54 +854,54 @@ ssize_t git_packfile_stream_read(git_packfile_stream *obj, void *buffer, size_t 
 		return 0;
 
 	if ((in = pack_window_open(obj->p, &obj->mw, obj->curpos, &window_len)) == NULL)
-		return GIT_EBUFS;
+		return GIT3_EBUFS;
 
-	if ((error = git_zstream_set_input(&obj->zstream, in, window_len)) < 0 ||
-	    (error = git_zstream_get_output_chunk(buffer, &len, &obj->zstream)) < 0) {
-		git_mwindow_close(&obj->mw);
-		git_error_set(GIT_ERROR_ZLIB, "error reading from the zlib stream");
+	if ((error = git3_zstream_set_input(&obj->zstream, in, window_len)) < 0 ||
+	    (error = git3_zstream_get_output_chunk(buffer, &len, &obj->zstream)) < 0) {
+		git3_mwindow_close(&obj->mw);
+		git3_error_set(GIT3_ERROR_ZLIB, "error reading from the zlib stream");
 		return -1;
 	}
 
-	git_mwindow_close(&obj->mw);
+	git3_mwindow_close(&obj->mw);
 
 	obj->curpos += window_len - obj->zstream.in_len;
 
-	if (git_zstream_eos(&obj->zstream))
+	if (git3_zstream_eos(&obj->zstream))
 		obj->done = 1;
 
 	/* If we didn't write anything out but we're not done, we need more data */
-	if (!len && !git_zstream_eos(&obj->zstream))
-		return GIT_EBUFS;
+	if (!len && !git3_zstream_eos(&obj->zstream))
+		return GIT3_EBUFS;
 
 	return len;
 
 }
 
-void git_packfile_stream_dispose(git_packfile_stream *obj)
+void git3_packfile_stream_dispose(git3_packfile_stream *obj)
 {
-	git_zstream_free(&obj->zstream);
+	git3_zstream_free(&obj->zstream);
 }
 
 static int packfile_unpack_compressed(
-	git_rawobj *obj,
-	struct git_pack_file *p,
-	git_mwindow **mwindow,
+	git3_rawobj *obj,
+	struct git3_pack_file *p,
+	git3_mwindow **mwindow,
 	off64_t *position,
 	size_t size,
-	git_object_t type)
+	git3_object_t type)
 {
-	git_zstream zstream = GIT_ZSTREAM_INIT;
+	git3_zstream zstream = GIT3_ZSTREAM_INIT;
 	size_t buffer_len, total = 0;
 	char *data = NULL;
 	int error;
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&buffer_len, size, 1);
-	data = git__calloc(1, buffer_len);
-	GIT_ERROR_CHECK_ALLOC(data);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&buffer_len, size, 1);
+	data = git3__calloc(1, buffer_len);
+	GIT3_ERROR_CHECK_ALLOC(data);
 
-	if ((error = git_zstream_init(&zstream, GIT_ZSTREAM_INFLATE)) < 0) {
-		git_error_set(GIT_ERROR_ZLIB, "failed to init zlib stream on unpack");
+	if ((error = git3_zstream_init(&zstream, GIT3_ZSTREAM_INFLATE)) < 0) {
+		git3_error_set(GIT3_ERROR_ZLIB, "failed to init zlib stream on unpack");
 		goto out;
 	}
 
@@ -915,28 +915,28 @@ static int packfile_unpack_compressed(
 			goto out;
 		}
 
-		if ((error = git_zstream_set_input(&zstream, in, window_len)) < 0 ||
-		    (error = git_zstream_get_output_chunk(data + total, &bytes, &zstream)) < 0) {
-			git_mwindow_close(mwindow);
+		if ((error = git3_zstream_set_input(&zstream, in, window_len)) < 0 ||
+		    (error = git3_zstream_get_output_chunk(data + total, &bytes, &zstream)) < 0) {
+			git3_mwindow_close(mwindow);
 			goto out;
 		}
 
-		git_mwindow_close(mwindow);
+		git3_mwindow_close(mwindow);
 
 		consumed = window_len - (unsigned int)zstream.in_len;
 
 		if (!bytes && !consumed) {
-			git_error_set(GIT_ERROR_ZLIB, "error inflating zlib stream");
+			git3_error_set(GIT3_ERROR_ZLIB, "error inflating zlib stream");
 			error = -1;
 			goto out;
 		}
 
 		*position += consumed;
 		total += bytes;
-	} while (!git_zstream_eos(&zstream));
+	} while (!git3_zstream_eos(&zstream));
 
-	if (total != size || !git_zstream_eos(&zstream)) {
-		git_error_set(GIT_ERROR_ZLIB, "error inflating zlib stream");
+	if (total != size || !git3_zstream_eos(&zstream)) {
+		git3_error_set(GIT3_ERROR_ZLIB, "error inflating zlib stream");
 		error = -1;
 		goto out;
 	}
@@ -946,9 +946,9 @@ static int packfile_unpack_compressed(
 	obj->data = data;
 
 out:
-	git_zstream_free(&zstream);
+	git3_zstream_free(&zstream);
 	if (error)
-		git__free(data);
+		git3__free(data);
 
 	return error;
 }
@@ -959,23 +959,23 @@ out:
  */
 int get_delta_base(
 		off64_t *delta_base_out,
-		struct git_pack_file *p,
-		git_mwindow **w_curs,
+		struct git3_pack_file *p,
+		git3_mwindow **w_curs,
 		off64_t *curpos,
-		git_object_t type,
+		git3_object_t type,
 		off64_t delta_obj_offset)
 {
 	unsigned int left = 0;
 	unsigned char *base_info;
 	off64_t base_offset;
-	git_oid unused;
+	git3_oid unused;
 
-	GIT_ASSERT_ARG(delta_base_out);
+	GIT3_ASSERT_ARG(delta_base_out);
 
 	base_info = pack_window_open(p, w_curs, *curpos, &left);
 	/* Assumption: the only reason this would fail is because the file is too small */
 	if (base_info == NULL)
-		return GIT_EBUFS;
+		return GIT3_EBUFS;
 	/* pack_window_open() assured us we have
 	 * [base_info, base_info + oid_size) as a range that we can look
 	 * at without walking off the end of the mapped window. Its
@@ -983,13 +983,13 @@ int get_delta_base(
 	 * than the hash size is stupid, as then a REF_DELTA would be
 	 * smaller to store.
 	 */
-	if (type == GIT_PACKFILE_OFS_DELTA) {
+	if (type == GIT3_PACKFILE_OFS_DELTA) {
 		unsigned used = 0;
 		unsigned char c = base_info[used++];
 		size_t unsigned_base_offset = c & 127;
 		while (c & 128) {
 			if (left <= used)
-				return GIT_EBUFS;
+				return GIT3_EBUFS;
 			unsigned_base_offset += 1;
 			if (!unsigned_base_offset || MSB(unsigned_base_offset, 7))
 				return packfile_error("overflow");
@@ -1000,15 +1000,15 @@ int get_delta_base(
 			return packfile_error("out of bounds");
 		base_offset = delta_obj_offset - unsigned_base_offset;
 		*curpos += used;
-	} else if (type == GIT_PACKFILE_REF_DELTA) {
-		git_oid base_oid;
-		git_oid_from_raw(&base_oid, base_info, p->oid_type);
+	} else if (type == GIT3_PACKFILE_REF_DELTA) {
+		git3_oid base_oid;
+		git3_oid_from_raw(&base_oid, base_info, p->oid_type);
 
 		/* If we have the cooperative cache, search in it first */
 		if (p->has_cache) {
-			struct git_pack_entry *entry;
+			struct git3_pack_entry *entry;
 
-			if (git_pack_oidmap_get(&entry, &p->idx_cache, &base_oid) == 0) {
+			if (git3_pack_oidmap_get(&entry, &p->idx_cache, &base_oid) == 0) {
 				if (entry->offset == 0)
 					return packfile_error("delta offset is zero");
 
@@ -1020,7 +1020,7 @@ int get_delta_base(
 				 * entry; we just haven't seen it yet.  We'll make
 				 * progress again in the next loop.
 				 */
-				return GIT_PASSTHROUGH;
+				return GIT3_PASSTHROUGH;
 			}
 		}
 
@@ -1044,7 +1044,7 @@ int get_delta_base(
  *
  ***********************************************************/
 
-void git_packfile_free(struct git_pack_file *p, bool unlink_packfile)
+void git3_packfile_free(struct git3_pack_file *p, bool unlink_packfile)
 {
 	bool locked = true;
 
@@ -1053,52 +1053,52 @@ void git_packfile_free(struct git_pack_file *p, bool unlink_packfile)
 
 	cache_free(&p->bases);
 
-	if (git_mutex_lock(&p->lock) < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile");
+	if (git3_mutex_lock(&p->lock) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile");
 		locked = false;
 	}
 	if (p->mwf.fd >= 0) {
-		git_mwindow_free_all(&p->mwf);
+		git3_mwindow_free_all(&p->mwf);
 		p_close(p->mwf.fd);
 		p->mwf.fd = -1;
 	}
 	if (locked)
-		git_mutex_unlock(&p->lock);
+		git3_mutex_unlock(&p->lock);
 
 	if (unlink_packfile)
 		p_unlink(p->pack_name);
 
 	pack_index_free(p);
 
-	git__free(p->bad_object_ids);
+	git3__free(p->bad_object_ids);
 
-	git_mutex_free(&p->bases.lock);
-	git_mutex_free(&p->mwf.lock);
-	git_mutex_free(&p->lock);
-	git__free(p);
+	git3_mutex_free(&p->bases.lock);
+	git3_mutex_free(&p->mwf.lock);
+	git3_mutex_free(&p->lock);
+	git3__free(p);
 }
 
 /* Run with the packfile and mwf locks held */
-static int packfile_open_locked(struct git_pack_file *p)
+static int packfile_open_locked(struct git3_pack_file *p)
 {
 	struct stat st;
-	struct git_pack_header hdr;
-	unsigned char checksum[GIT_OID_MAX_SIZE];
+	struct git3_pack_header hdr;
+	unsigned char checksum[GIT3_OID_MAX_SIZE];
 	unsigned char *idx_checksum;
 
 	if (pack_index_open_locked(p) < 0)
-		return git_odb__error_notfound("failed to open packfile", NULL, 0);
+		return git3_odb__error_notfound("failed to open packfile", NULL, 0);
 
 	if (p->mwf.fd >= 0)
 		return 0;
 
 	/* TODO: open with noatime */
-	p->mwf.fd = git_futils_open_ro(p->pack_name);
+	p->mwf.fd = git3_futils_open_ro(p->pack_name);
 	if (p->mwf.fd < 0)
 		goto cleanup;
 
 	if (p_fstat(p->mwf.fd, &st) < 0) {
-		git_error_set(GIT_ERROR_OS, "could not stat packfile");
+		git3_error_set(GIT3_ERROR_OS, "could not stat packfile");
 		goto cleanup;
 	}
 
@@ -1137,16 +1137,16 @@ static int packfile_open_locked(struct git_pack_file *p)
 	idx_checksum = ((unsigned char *)p->index_map.data) +
 	               p->index_map.len - (p->oid_size * 2);
 
-	if (git_oid_raw_cmp(checksum, idx_checksum, p->oid_size) != 0)
+	if (git3_oid_raw_cmp(checksum, idx_checksum, p->oid_size) != 0)
 		goto cleanup;
 
-	if (git_mwindow_file_register(&p->mwf) < 0)
+	if (git3_mwindow_file_register(&p->mwf) < 0)
 		goto cleanup;
 
 	return 0;
 
 cleanup:
-	git_error_set(GIT_ERROR_OS, "invalid packfile '%s'", p->pack_name);
+	git3_error_set(GIT3_ERROR_OS, "invalid packfile '%s'", p->pack_name);
 
 	if (p->mwf.fd >= 0)
 		p_close(p->mwf.fd);
@@ -1155,42 +1155,42 @@ cleanup:
 	return -1;
 }
 
-int git_packfile__name(char **out, const char *path)
+int git3_packfile__name(char **out, const char *path)
 {
 	size_t path_len;
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 
 	path_len = strlen(path);
 
 	if (path_len < strlen(".idx"))
-		return git_odb__error_notfound("invalid packfile path", NULL, 0);
+		return git3_odb__error_notfound("invalid packfile path", NULL, 0);
 
-	if (git_str_printf(&buf, "%.*s.pack", (int)(path_len - strlen(".idx")), path) < 0)
+	if (git3_str_printf(&buf, "%.*s.pack", (int)(path_len - strlen(".idx")), path) < 0)
 		return -1;
 
-	*out = git_str_detach(&buf);
+	*out = git3_str_detach(&buf);
 	return 0;
 }
 
-int git_packfile_alloc(
-	struct git_pack_file **pack_out,
+int git3_packfile_alloc(
+	struct git3_pack_file **pack_out,
 	const char *path,
-	git_oid_t oid_type)
+	git3_oid_t oid_type)
 {
 	struct stat st;
-	struct git_pack_file *p;
+	struct git3_pack_file *p;
 	size_t path_len = path ? strlen(path) : 0, alloc_len;
 
 	*pack_out = NULL;
 
 	if (path_len < strlen(".idx"))
-		return git_odb__error_notfound("invalid packfile path", NULL, 0);
+		return git3_odb__error_notfound("invalid packfile path", NULL, 0);
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&alloc_len, sizeof(*p), path_len);
-	GIT_ERROR_CHECK_ALLOC_ADD(&alloc_len, alloc_len, 2);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&alloc_len, sizeof(*p), path_len);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&alloc_len, alloc_len, 2);
 
-	p = git__calloc(1, alloc_len);
-	GIT_ERROR_CHECK_ALLOC(p);
+	p = git3__calloc(1, alloc_len);
+	GIT3_ERROR_CHECK_ALLOC(p);
 
 	memcpy(p->pack_name, path, path_len + 1);
 
@@ -1198,12 +1198,12 @@ int git_packfile_alloc(
 	 * Make sure a corresponding .pack file exists and that
 	 * the index looks sane.
 	 */
-	if (git__suffixcmp(path, ".idx") == 0) {
+	if (git3__suffixcmp(path, ".idx") == 0) {
 		size_t root_len = path_len - strlen(".idx");
 
-		if (!git_disable_pack_keep_file_checks) {
+		if (!git3_disable_pack_keep_file_checks) {
 			memcpy(p->pack_name + root_len, ".keep", sizeof(".keep"));
-			if (git_fs_path_exists(p->pack_name) == true)
+			if (git3_fs_path_exists(p->pack_name) == true)
 				p->pack_keep = 1;
 		}
 
@@ -1211,8 +1211,8 @@ int git_packfile_alloc(
 	}
 
 	if (p_stat(p->pack_name, &st) < 0 || !S_ISREG(st.st_mode)) {
-		git__free(p);
-		return git_odb__error_notfound("packfile not found", NULL, 0);
+		git3__free(p);
+		return git3_odb__error_notfound("packfile not found", NULL, 0);
 	}
 
 	/* ok, it looks sane as far as we can check without
@@ -1221,29 +1221,29 @@ int git_packfile_alloc(
 	p->mwf.fd = -1;
 	p->mwf.size = st.st_size;
 	p->pack_local = 1;
-	p->mtime = (git_time_t)st.st_mtime;
+	p->mtime = (git3_time_t)st.st_mtime;
 	p->index_version = -1;
-	p->oid_type = oid_type ? oid_type : GIT_OID_DEFAULT;
-	p->oid_size = (unsigned int)git_oid_size(p->oid_type);
-	p->oid_hexsize = (unsigned int)git_oid_hexsize(p->oid_type);
+	p->oid_type = oid_type ? oid_type : GIT3_OID_DEFAULT;
+	p->oid_size = (unsigned int)git3_oid_size(p->oid_type);
+	p->oid_hexsize = (unsigned int)git3_oid_hexsize(p->oid_type);
 
-	if (git_mutex_init(&p->lock) < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to initialize packfile mutex");
-		git__free(p);
+	if (git3_mutex_init(&p->lock) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "failed to initialize packfile mutex");
+		git3__free(p);
 		return -1;
 	}
 
-	if (git_mutex_init(&p->mwf.lock) < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to initialize packfile window mutex");
-		git_mutex_free(&p->lock);
-		git__free(p);
+	if (git3_mutex_init(&p->mwf.lock) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "failed to initialize packfile window mutex");
+		git3_mutex_free(&p->lock);
+		git3__free(p);
 		return -1;
 	}
 
 	if (cache_init(&p->bases) < 0) {
-		git_mutex_free(&p->mwf.lock);
-		git_mutex_free(&p->lock);
-		git__free(p);
+		git3_mutex_free(&p->mwf.lock);
+		git3_mutex_free(&p->lock);
+		git3__free(p);
 		return -1;
 	}
 
@@ -1258,7 +1258,7 @@ int git_packfile_alloc(
  *
  ***********************************************************/
 
-static off64_t nth_packed_object_offset_locked(struct git_pack_file *p, uint32_t n)
+static off64_t nth_packed_object_offset_locked(struct git3_pack_file *p, uint32_t n)
 {
 	const unsigned char *index, *end;
 	uint32_t off32;
@@ -1283,32 +1283,32 @@ static off64_t nth_packed_object_offset_locked(struct git_pack_file *p, uint32_t
 	       ntohl(*((uint32_t *)(index + 4)));
 }
 
-static int git__memcmp4(const void *a, const void *b) {
+static int git3__memcmp4(const void *a, const void *b) {
 	return memcmp(a, b, 4);
 }
 
-int git_pack_foreach_entry(
-	struct git_pack_file *p,
-	git_odb_foreach_cb cb,
+int git3_pack_foreach_entry(
+	struct git3_pack_file *p,
+	git3_odb_foreach_cb cb,
 	void *data)
 {
 	const unsigned char *index, *current;
 	uint32_t i;
 	int error = 0;
-	git_array_oid_t oids = GIT_ARRAY_INIT;
-	git_oid *oid;
+	git3_array_oid_t oids = GIT3_ARRAY_INIT;
+	git3_oid *oid;
 
-	if (git_mutex_lock(&p->lock) < 0)
-		return packfile_error("failed to get lock for git_pack_foreach_entry");
+	if (git3_mutex_lock(&p->lock) < 0)
+		return packfile_error("failed to get lock for git3_pack_foreach_entry");
 
 	if ((error = pack_index_open_locked(p)) < 0) {
-		git_mutex_unlock(&p->lock);
+		git3_mutex_unlock(&p->lock);
 		return error;
 	}
 
 	if (!p->index_map.data) {
-		git_error_set(GIT_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
-		git_mutex_unlock(&p->lock);
+		git3_error_set(GIT3_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
+		git3_mutex_unlock(&p->lock);
 		return -1;
 	}
 
@@ -1320,15 +1320,15 @@ int git_pack_foreach_entry(
 	index += 4 * 256;
 
 	if (p->ids == NULL) {
-		git_vector offsets, oids;
+		git3_vector offsets, oids;
 
-		if ((error = git_vector_init(&oids, p->num_objects, NULL))) {
-			git_mutex_unlock(&p->lock);
+		if ((error = git3_vector_init(&oids, p->num_objects, NULL))) {
+			git3_mutex_unlock(&p->lock);
 			return error;
 		}
 
-		if ((error = git_vector_init(&offsets, p->num_objects, git__memcmp4))) {
-			git_mutex_unlock(&p->lock);
+		if ((error = git3_vector_init(&offsets, p->num_objects, git3__memcmp4))) {
+			git3_mutex_unlock(&p->lock);
 			return error;
 		}
 
@@ -1337,21 +1337,21 @@ int git_pack_foreach_entry(
 				(p->oid_size + 4) * p->num_objects;
 
 			for (i = 0; i < p->num_objects; i++)
-				git_vector_insert(&offsets, (void*)&off[4 * i]);
+				git3_vector_insert(&offsets, (void*)&off[4 * i]);
 
-			git_vector_sort(&offsets);
-			git_vector_foreach(&offsets, i, current)
-				git_vector_insert(&oids, (void*)&index[5 * (current - off)]);
+			git3_vector_sort(&offsets);
+			git3_vector_foreach(&offsets, i, current)
+				git3_vector_insert(&oids, (void*)&index[5 * (current - off)]);
 		} else {
 			for (i = 0; i < p->num_objects; i++)
-				git_vector_insert(&offsets, (void*)&index[(p->oid_size + 4) * i]);
-			git_vector_sort(&offsets);
-			git_vector_foreach(&offsets, i, current)
-				git_vector_insert(&oids, (void*)&current[4]);
+				git3_vector_insert(&offsets, (void*)&index[(p->oid_size + 4) * i]);
+			git3_vector_sort(&offsets);
+			git3_vector_foreach(&offsets, i, current)
+				git3_vector_insert(&oids, (void*)&current[4]);
 		}
 
-		git_vector_dispose(&offsets);
-		p->ids = (unsigned char **)git_vector_detach(NULL, NULL, &oids);
+		git3_vector_dispose(&offsets);
+		p->ids = (unsigned char **)git3_vector_detach(NULL, NULL, &oids);
 	}
 
 	/*
@@ -1359,48 +1359,48 @@ int git_pack_foreach_entry(
 	 * relinquish the lock to avoid races.  We can also take
 	 * this opportunity to put them into normal form.
 	 */
-	git_array_init_to_size(oids, p->num_objects);
+	git3_array_init_to_size(oids, p->num_objects);
 	if (!oids.ptr) {
-		git_mutex_unlock(&p->lock);
-		git_array_clear(oids);
-		GIT_ERROR_CHECK_ARRAY(oids);
+		git3_mutex_unlock(&p->lock);
+		git3_array_clear(oids);
+		GIT3_ERROR_CHECK_ARRAY(oids);
 	}
 	for (i = 0; i < p->num_objects; i++) {
-		oid = git_array_alloc(oids);
+		oid = git3_array_alloc(oids);
 		if (!oid) {
-			git_mutex_unlock(&p->lock);
-			git_array_clear(oids);
-			GIT_ERROR_CHECK_ALLOC(oid);
+			git3_mutex_unlock(&p->lock);
+			git3_array_clear(oids);
+			GIT3_ERROR_CHECK_ALLOC(oid);
 		}
-		git_oid_from_raw(oid, p->ids[i], p->oid_type);
+		git3_oid_from_raw(oid, p->ids[i], p->oid_type);
 	}
 
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->lock);
 
-	git_array_foreach(oids, i, oid) {
+	git3_array_foreach(oids, i, oid) {
 		if ((error = cb(oid, data)) != 0) {
-			git_error_set_after_callback(error);
+			git3_error_set_after_callback(error);
 			break;
 		}
 	}
 
-	git_array_clear(oids);
+	git3_array_clear(oids);
 	return error;
 }
 
-int git_pack_foreach_entry_offset(
-	struct git_pack_file *p,
-	git_pack_foreach_entry_offset_cb cb,
+int git3_pack_foreach_entry_offset(
+	struct git3_pack_file *p,
+	git3_pack_foreach_entry_offset_cb cb,
 	void *data)
 {
 	const unsigned char *index;
 	off64_t current_offset;
-	git_oid current_oid;
+	git3_oid current_oid;
 	uint32_t i;
 	int error = 0;
 
-	if (git_mutex_lock(&p->lock) < 0)
-		return packfile_error("failed to get lock for git_pack_foreach_entry_offset");
+	if (git3_mutex_lock(&p->lock) < 0)
+		return packfile_error("failed to get lock for git3_pack_foreach_entry_offset");
 
 	index = p->index_map.data;
 	if (index == NULL) {
@@ -1408,7 +1408,7 @@ int git_pack_foreach_entry_offset(
 			goto cleanup;
 
 		if (!p->index_map.data) {
-			git_error_set(GIT_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
+			git3_error_set(GIT3_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
 			goto cleanup;
 		}
 
@@ -1441,42 +1441,42 @@ int git_pack_foreach_entry_offset(
 						ntohl(*((uint32_t *)(large_offset_ptr + 4)));
 			}
 
-			git_oid_from_raw(&current_oid, (index + p->oid_size * i), p->oid_type);
+			git3_oid_from_raw(&current_oid, (index + p->oid_size * i), p->oid_type);
 			if ((error = cb(&current_oid, current_offset, data)) != 0) {
-				error = git_error_set_after_callback(error);
+				error = git3_error_set_after_callback(error);
 				goto cleanup;
 			}
 		}
 	} else {
 		for (i = 0; i < p->num_objects; i++) {
 			current_offset = ntohl(*(const uint32_t *)(index + (p->oid_size + 4) * i));
-			git_oid_from_raw(&current_oid, (index + (p->oid_size + 4) * i + 4), p->oid_type);
+			git3_oid_from_raw(&current_oid, (index + (p->oid_size + 4) * i + 4), p->oid_type);
 			if ((error = cb(&current_oid, current_offset, data)) != 0) {
-				error = git_error_set_after_callback(error);
+				error = git3_error_set_after_callback(error);
 				goto cleanup;
 			}
 		}
 	}
 
 cleanup:
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->lock);
 	return error;
 }
 
-int git_pack__lookup_id(
+int git3_pack__lookup_id(
 	const void *oid_lookup_table,
 	size_t stride,
 	unsigned lo,
 	unsigned hi,
 	const unsigned char *oid_prefix,
-	const git_oid_t oid_type)
+	const git3_oid_t oid_type)
 {
 	const unsigned char *base = oid_lookup_table;
-	size_t oid_size = git_oid_size(oid_type);
+	size_t oid_size = git3_oid_size(oid_type);
 
 	while (lo < hi) {
 		unsigned mi = (lo + hi) / 2;
-		int cmp = git_oid_raw_cmp(base + mi * stride, oid_prefix, oid_size);
+		int cmp = git3_oid_raw_cmp(base + mi * stride, oid_prefix, oid_size);
 
 		if (!cmp)
 			return mi;
@@ -1492,9 +1492,9 @@ int git_pack__lookup_id(
 
 static int pack_entry_find_offset(
 	off64_t *offset_out,
-	git_oid *found_oid,
-	struct git_pack_file *p,
-	const git_oid *short_oid,
+	git3_oid *found_oid,
+	struct git3_pack_file *p,
+	const git3_oid *short_oid,
 	size_t len)
 {
 	const uint32_t *level1_ofs;
@@ -1508,14 +1508,14 @@ static int pack_entry_find_offset(
 
 	*offset_out = 0;
 
-	if (git_mutex_lock(&p->lock) < 0)
+	if (git3_mutex_lock(&p->lock) < 0)
 		return packfile_error("failed to get lock for pack_entry_find_offset");
 
 	if ((error = pack_index_open_locked(p)) < 0)
 		goto cleanup;
 
 	if (!p->index_map.data) {
-		git_error_set(GIT_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
+		git3_error_set(GIT3_ERROR_INTERNAL, "internal error: p->index_map.data == NULL");
 		goto cleanup;
 	}
 
@@ -1529,7 +1529,7 @@ static int pack_entry_find_offset(
 	}
 
 	if ((size_t)short_oid->id[0] + ofs_delta >= p->index_map.len) {
-		git_error_set(GIT_ERROR_INTERNAL, "internal error: p->short_oid->[0] out of bounds");
+		git3_error_set(GIT3_ERROR_INTERNAL, "internal error: p->short_oid->[0] out of bounds");
 		goto cleanup;
 	}
 
@@ -1549,7 +1549,7 @@ static int pack_entry_find_offset(
 		short_oid->id[0], short_oid->id[1], short_oid->id[2], lo, hi, p->num_objects);
 #endif
 
-	pos = git_pack__lookup_id(index, stride, lo, hi,
+	pos = git3_pack__lookup_id(index, stride, lo, hi,
 		short_oid->id, p->oid_type);
 
 	if (pos >= 0) {
@@ -1563,7 +1563,7 @@ static int pack_entry_find_offset(
 		if (pos < (int)p->num_objects) {
 			current = index + pos * stride;
 
-			if (!git_oid_raw_ncmp(short_oid->id, current, len))
+			if (!git3_oid_raw_ncmp(short_oid->id, current, len))
 				found = 1;
 		}
 	}
@@ -1574,59 +1574,59 @@ static int pack_entry_find_offset(
 		/* Check for ambiguousity */
 		const unsigned char *next = current + stride;
 
-		if (!git_oid_raw_ncmp(short_oid->id, next, len)) {
+		if (!git3_oid_raw_ncmp(short_oid->id, next, len)) {
 			found = 2;
 		}
 	}
 
 	if (!found) {
-		error = git_odb__error_notfound("failed to find offset for pack entry", short_oid, len);
+		error = git3_odb__error_notfound("failed to find offset for pack entry", short_oid, len);
 		goto cleanup;
 	}
 	if (found > 1) {
-		error = git_odb__error_ambiguous("found multiple offsets for pack entry");
+		error = git3_odb__error_ambiguous("found multiple offsets for pack entry");
 		goto cleanup;
 	}
 
 	if ((offset = nth_packed_object_offset_locked(p, pos)) < 0) {
-		git_error_set(GIT_ERROR_ODB, "packfile index is corrupt");
+		git3_error_set(GIT3_ERROR_ODB, "packfile index is corrupt");
 		error = -1;
 		goto cleanup;
 	}
 
 	*offset_out = offset;
-	git_oid_from_raw(found_oid, current, p->oid_type);
+	git3_oid_from_raw(found_oid, current, p->oid_type);
 
 #ifdef INDEX_DEBUG_LOOKUP
 	{
 		char hex_sha1[p->oid_hexsize + 1];
-		git_oid_fmt(hex_sha1, found_oid);
+		git3_oid_fmt(hex_sha1, found_oid);
 		hex_sha1[p->oid_hexsize] = '\0';
 		printf("found lo=%d %s\n", lo, hex_sha1);
 	}
 #endif
 
 cleanup:
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->lock);
 	return error;
 }
 
-int git_pack_entry_find(
-		struct git_pack_entry *e,
-		struct git_pack_file *p,
-		const git_oid *short_oid,
+int git3_pack_entry_find(
+		struct git3_pack_entry *e,
+		struct git3_pack_file *p,
+		const git3_oid *short_oid,
 		size_t len)
 {
 	off64_t offset;
-	git_oid found_oid;
+	git3_oid found_oid;
 	int error;
 
-	GIT_ASSERT_ARG(p);
+	GIT3_ASSERT_ARG(p);
 
 	if (len == p->oid_hexsize && p->num_bad_objects) {
 		unsigned i;
 		for (i = 0; i < p->num_bad_objects; i++)
-			if (git_oid__cmp(short_oid, &p->bad_object_ids[i]) == 0)
+			if (git3_oid__cmp(short_oid, &p->bad_object_ids[i]) == 0)
 				return packfile_error("bad object found in packfile");
 	}
 
@@ -1634,15 +1634,15 @@ int git_pack_entry_find(
 	if (error < 0)
 		return error;
 
-	error = git_mutex_lock(&p->lock);
+	error = git3_mutex_lock(&p->lock);
 	if (error < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
 		return error;
 	}
-	error = git_mutex_lock(&p->mwf.lock);
+	error = git3_mutex_lock(&p->mwf.lock);
 	if (error < 0) {
-		git_mutex_unlock(&p->lock);
-		git_error_set(GIT_ERROR_OS, "failed to lock packfile reader");
+		git3_mutex_unlock(&p->lock);
+		git3_error_set(GIT3_ERROR_OS, "failed to lock packfile reader");
 		return error;
 	}
 
@@ -1651,14 +1651,14 @@ int git_pack_entry_find(
 	 * still exists on disk */
 	if (p->mwf.fd == -1)
 		error = packfile_open_locked(p);
-	git_mutex_unlock(&p->mwf.lock);
-	git_mutex_unlock(&p->lock);
+	git3_mutex_unlock(&p->mwf.lock);
+	git3_mutex_unlock(&p->lock);
 	if (error < 0)
 		return error;
 
 	e->offset = offset;
 	e->p = p;
 
-	git_oid_cpy(&e->id, &found_oid);
+	git3_oid_cpy(&e->id, &found_oid);
 	return 0;
 }

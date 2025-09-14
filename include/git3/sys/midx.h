@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_midx_h__
@@ -11,50 +11,50 @@
 #include "git3/types.h"
 
 /**
- * @file git2/sys/midx.h
+ * @file git3/sys/midx.h
  * @brief Incremental multi-pack indexes
- * @defgroup git_midx Incremental multi-pack indexes
+ * @defgroup git3_midx Incremental multi-pack indexes
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
- * Options structure for `git_midx_writer_options`.
+ * Options structure for `git3_midx_writer_options`.
  *
- * Initialize with `GIT_MIDX_WRITER_OPTIONS_INIT`. Alternatively,
- * you can use `git_midx_writer_options_init`.
+ * Initialize with `GIT3_MIDX_WRITER_OPTIONS_INIT`. Alternatively,
+ * you can use `git3_midx_writer_options_init`.
  */
 typedef struct {
 	unsigned int version;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	/** The object ID type that this commit graph contains. */
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 #endif
-} git_midx_writer_options;
+} git3_midx_writer_options;
 
-/** Current version for the `git_midx_writer_options` structure */
-#define GIT_MIDX_WRITER_OPTIONS_VERSION 1
+/** Current version for the `git3_midx_writer_options` structure */
+#define GIT3_MIDX_WRITER_OPTIONS_VERSION 1
 
-/** Static constructor for `git_midx_writer_options` */
-#define GIT_MIDX_WRITER_OPTIONS_INIT { \
-		GIT_MIDX_WRITER_OPTIONS_VERSION \
+/** Static constructor for `git3_midx_writer_options` */
+#define GIT3_MIDX_WRITER_OPTIONS_INIT { \
+		GIT3_MIDX_WRITER_OPTIONS_VERSION \
 	}
 
 /**
- * Initialize git_midx_writer_options structure
+ * Initialize git3_midx_writer_options structure
  *
- * Initializes a `git_midx_writer_options` with default values.
+ * Initializes a `git3_midx_writer_options` with default values.
  * Equivalent to creating an instance with
- * `GIT_MIDX_WRITER_OPTIONS_INIT`.
+ * `GIT3_MIDX_WRITER_OPTIONS_INIT`.
  *
- * @param opts The `git_midx_writer_options` struct to initialize.
- * @param version The struct version; pass `GIT_MIDX_WRITER_OPTIONS_VERSION`.
+ * @param opts The `git3_midx_writer_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_MIDX_WRITER_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_midx_writer_options_init(
-	git_midx_writer_options *opts,
+GIT3_EXTERN(int) git3_midx_writer_options_init(
+	git3_midx_writer_options *opts,
 	unsigned int version);
 
 /**
@@ -65,11 +65,11 @@ GIT_EXTERN(int) git_midx_writer_options_init(
  * `multi-pack-index` file will be written in this directory, too.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_midx_writer_new(
-		git_midx_writer **out,
+GIT3_EXTERN(int) git3_midx_writer_new(
+		git3_midx_writer **out,
 		const char *pack_dir
-#ifdef GIT_EXPERIMENTAL_SHA256
-		, git_midx_writer_options *options
+#ifdef GIT3_EXPERIMENTAL_SHA256
+		, git3_midx_writer_options *options
 #endif
 		);
 
@@ -78,7 +78,7 @@ GIT_EXTERN(int) git_midx_writer_new(
  *
  * @param w the writer to free. If NULL no action is taken.
  */
-GIT_EXTERN(void) git_midx_writer_free(git_midx_writer *w);
+GIT3_EXTERN(void) git3_midx_writer_free(git3_midx_writer *w);
 
 /**
  * Add an `.idx` file to the writer.
@@ -87,8 +87,8 @@ GIT_EXTERN(void) git_midx_writer_free(git_midx_writer *w);
  * @param idx_path the path of an `.idx` file.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_midx_writer_add(
-		git_midx_writer *w,
+GIT3_EXTERN(int) git3_midx_writer_add(
+		git3_midx_writer *w,
 		const char *idx_path);
 
 /**
@@ -97,8 +97,8 @@ GIT_EXTERN(int) git_midx_writer_add(
  * @param w the writer
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_midx_writer_commit(
-		git_midx_writer *w);
+GIT3_EXTERN(int) git3_midx_writer_commit(
+		git3_midx_writer *w);
 
 /**
  * Dump the contents of the `multi-pack-index` to an in-memory buffer.
@@ -107,11 +107,11 @@ GIT_EXTERN(int) git_midx_writer_commit(
  * @param w the writer
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_midx_writer_dump(
-		git_buf *midx,
-		git_midx_writer *w);
+GIT3_EXTERN(int) git3_midx_writer_dump(
+		git3_buf *midx,
+		git3_midx_writer *w);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

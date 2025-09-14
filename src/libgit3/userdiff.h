@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_userdiff_h__
@@ -12,7 +12,7 @@
 /*
  * This file isolates the built in diff driver function name patterns.
  * Most of these patterns are taken from Git (with permission from the
- * original authors for relicensing to libgit2).
+ * original authors for relicensing to libgit3).
  */
 
 typedef struct {
@@ -20,7 +20,7 @@ typedef struct {
 	const char *fns;
 	const char *words;
 	int flags;
-} git_diff_driver_definition;
+} git3_diff_driver_definition;
 
 #define WORD_DEFAULT "|[^[:space:]]|[\xc0-\xff][\x80-\xbf]+"
 
@@ -31,7 +31,7 @@ typedef struct {
 #define PATTERNS(NAME, FN_PATS, WORD_PAT) \
 	{ NAME, FN_PATS, WORD_PAT WORD_DEFAULT, 0 }
 #define IPATTERN(NAME, FN_PATS, WORD_PAT) \
-	{ NAME, FN_PATS, WORD_PAT WORD_DEFAULT, GIT_REGEXP_ICASE }
+	{ NAME, FN_PATS, WORD_PAT WORD_DEFAULT, GIT3_REGEXP_ICASE }
 
 /*
  * The table of diff driver patterns
@@ -44,7 +44,7 @@ typedef struct {
  * Word boundary patterns are just a simple pattern that will be OR'ed with
  * the default value above (i.e. whitespace or non-ASCII characters).
  */
-static git_diff_driver_definition builtin_defs[] = {
+static git3_diff_driver_definition builtin_defs[] = {
 
 IPATTERN("ada",
 	 "!^(.*[ \t])?(is[ \t]+new|renames|is[ \t]+separate)([ \t].*)?$\n"

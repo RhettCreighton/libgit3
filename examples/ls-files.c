@@ -1,7 +1,7 @@
 /*
- * libgit2 "ls-files" example - shows how to view all files currently in the index
+ * libgit3 "ls-files" example - shows how to view all files currently in the index
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,7 +15,7 @@
 #include "common.h"
 
 /**
- * This example demonstrates the libgit2 index APIs to roughly
+ * This example demonstrates the libgit3 index APIs to roughly
  * simulate the output of `git ls-files`.
  * `git ls-files` has many options and this currently does not show them.
  *
@@ -78,17 +78,17 @@ static int parse_options(struct ls_options *opts, int argc, char *argv[])
 	return 0;
 }
 
-static int print_paths(struct ls_options *opts, git_index *index)
+static int print_paths(struct ls_options *opts, git3_index *index)
 {
 	size_t i;
-	const git_index_entry *entry;
+	const git3_index_entry *entry;
 
 	/* if there are no files explicitly listed by the user print all entries in the index */
 	if (opts->file_count == 0) {
-		size_t entry_count = git_index_entrycount(index);
+		size_t entry_count = git3_index_entrycount(index);
 
 		for (i = 0; i < entry_count; i++) {
-			entry = git_index_get_byindex(index, i);
+			entry = git3_index_get_byindex(index, i);
 			puts(entry->path);
 		}
 		return 0;
@@ -98,7 +98,7 @@ static int print_paths(struct ls_options *opts, git_index *index)
 	for (i = 0; i < opts->file_count; ++i) {
 		const char *path = opts->files[i];
 
-		if ((entry = git_index_get_bypath(index, path, GIT_INDEX_STAGE_NORMAL)) != NULL) {
+		if ((entry = git3_index_get_bypath(index, path, GIT3_INDEX_STAGE_NORMAL)) != NULL) {
 			puts(path);
 		} else if (opts->error_unmatch) {
 			fprintf(stderr, "error: pathspec '%s' did not match any file(s) known to git.\n", path);
@@ -110,22 +110,22 @@ static int print_paths(struct ls_options *opts, git_index *index)
 	return 0;
 }
 
-int lg2_ls_files(git_repository *repo, int argc, char *argv[])
+int lg2_ls_files(git3_repository *repo, int argc, char *argv[])
 {
-	git_index *index = NULL;
+	git3_index *index = NULL;
 	struct ls_options opts;
 	int error;
 
 	if ((error = parse_options(&opts, argc, argv)) < 0)
 		return error;
 
-	if ((error = git_repository_index(&index, repo)) < 0)
+	if ((error = git3_repository_index(&index, repo)) < 0)
 		goto cleanup;
 
 	error = print_paths(&opts, index);
 
 cleanup:
-	git_index_free(index);
+	git3_index_free(index);
 
 	return error;
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_email_h__
@@ -11,32 +11,32 @@
 #include "diff.h"
 
 /**
- * @file git2/email.h
+ * @file git3/email.h
  * @brief Produce email-ready patches
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Formatting options for diff e-mail generation
  */
 typedef enum {
 	/** Normal patch, the default */
-	GIT_EMAIL_CREATE_DEFAULT = 0,
+	GIT3_EMAIL_CREATE_DEFAULT = 0,
 
 	/** Do not include patch numbers in the subject prefix. */
-	GIT_EMAIL_CREATE_OMIT_NUMBERS = (1u << 0),
+	GIT3_EMAIL_CREATE_OMIT_NUMBERS = (1u << 0),
 
 	/**
 	 * Include numbers in the subject prefix even when the
 	 * patch is for a single commit (1/1).
 	 */
-	GIT_EMAIL_CREATE_ALWAYS_NUMBER = (1u << 1),
+	GIT3_EMAIL_CREATE_ALWAYS_NUMBER = (1u << 1),
 
 	/** Do not perform rename or similarity detection. */
-	GIT_EMAIL_CREATE_NO_RENAMES = (1u << 2)
-} git_email_create_flags_t;
+	GIT3_EMAIL_CREATE_NO_RENAMES = (1u << 2)
+} git3_email_create_flags_t;
 
 /**
  * Options for controlling the formatting of the generated e-mail.
@@ -44,14 +44,14 @@ typedef enum {
 typedef struct {
 	unsigned int version;
 
-	/** see `git_email_create_flags_t` above */
+	/** see `git3_email_create_flags_t` above */
 	uint32_t flags;
 
 	/** Options to use when creating diffs */
-	git_diff_options diff_opts;
+	git3_diff_options diff_opts;
 
 	/** Options for finding similarities within diffs */
-	git_diff_find_options diff_find_opts;
+	git3_diff_find_options diff_find_opts;
 
 	/**
 	 * The subject prefix, by default "PATCH".  If set to an empty
@@ -69,22 +69,22 @@ typedef struct {
 
 	/** The "re-roll" number.  By default, there is no re-roll. */
 	size_t reroll_number;
-} git_email_create_options;
+} git3_email_create_options;
 
-/** Current version for the `git_email_create_options` structure */
-#define GIT_EMAIL_CREATE_OPTIONS_VERSION 1
+/** Current version for the `git3_email_create_options` structure */
+#define GIT3_EMAIL_CREATE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_email_create_options`
+/** Static constructor for `git3_email_create_options`
  *
  * By default, our options include rename detection and binary
  * diffs to match `git format-patch`.
  */
-#define GIT_EMAIL_CREATE_OPTIONS_INIT \
+#define GIT3_EMAIL_CREATE_OPTIONS_INIT \
 { \
-	GIT_EMAIL_CREATE_OPTIONS_VERSION, \
-	GIT_EMAIL_CREATE_DEFAULT, \
-	{ GIT_DIFF_OPTIONS_VERSION, GIT_DIFF_SHOW_BINARY, GIT_SUBMODULE_IGNORE_UNSPECIFIED, {NULL,0}, NULL, NULL, NULL, 3 }, \
-	GIT_DIFF_FIND_OPTIONS_INIT \
+	GIT3_EMAIL_CREATE_OPTIONS_VERSION, \
+	GIT3_EMAIL_CREATE_DEFAULT, \
+	{ GIT3_DIFF_OPTIONS_VERSION, GIT3_DIFF_SHOW_BINARY, GIT3_SUBMODULE_IGNORE_UNSPECIFIED, {NULL,0}, NULL, NULL, NULL, 3 }, \
+	GIT3_DIFF_FIND_OPTIONS_INIT \
 }
 
 /**
@@ -96,12 +96,12 @@ typedef struct {
  * @param opts email creation options
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_email_create_from_commit(
-	git_buf *out,
-	git_commit *commit,
-	const git_email_create_options *opts);
+GIT3_EXTERN(int) git3_email_create_from_commit(
+	git3_buf *out,
+	git3_commit *commit,
+	const git3_email_create_options *opts);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

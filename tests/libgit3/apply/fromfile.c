@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/repository.h"
 
 #include "apply.h"
@@ -8,7 +8,7 @@
 
 #include "../patch/patch_common.h"
 
-static git_repository *repo = NULL;
+static git3_repository *repo = NULL;
 
 void test_apply_fromfile__initialize(void)
 {
@@ -29,16 +29,16 @@ static int apply_patchfile(
 	const char *filename_expected,
 	unsigned int mode_expected)
 {
-	git_patch *patch;
-	git_str result = GIT_STR_INIT;
-	git_str patchbuf = GIT_STR_INIT;
+	git3_patch *patch;
+	git3_str result = GIT3_STR_INIT;
+	git3_str patchbuf = GIT3_STR_INIT;
 	char *filename;
 	unsigned int mode;
 	int error;
 
-	cl_git_pass(git_patch_from_buffer(&patch, patchfile, strlen(patchfile), NULL));
+	cl_git_pass(git3_patch_from_buffer(&patch, patchfile, strlen(patchfile), NULL));
 
-	error = git_apply__patch(&result, &filename, &mode, old, old_len, patch, NULL);
+	error = git3_apply__patch(&result, &filename, &mode, old, old_len, patch, NULL);
 
 	if (error == 0) {
 		cl_assert_equal_i(new_len, result.size);
@@ -49,10 +49,10 @@ static int apply_patchfile(
 		cl_assert_equal_i(mode_expected, mode);
 	}
 
-	git__free(filename);
-	git_str_dispose(&result);
-	git_str_dispose(&patchbuf);
-	git_patch_free(patch);
+	git3__free(filename);
+	git3_str_dispose(&result);
+	git3_str_dispose(&patchbuf);
+	git3_patch_free(patch);
 
 	return error;
 }
@@ -63,26 +63,26 @@ static int validate_and_apply_patchfile(
 	const char *new,
 	size_t new_len,
 	const char *patchfile,
-	const git_diff_options *diff_opts,
+	const git3_diff_options *diff_opts,
 	const char *filename_expected,
 	unsigned int mode_expected)
 {
-	git_patch *patch_fromdiff;
-	git_buf validated = GIT_BUF_INIT;
+	git3_patch *patch_fromdiff;
+	git3_buf validated = GIT3_BUF_INIT;
 	int error;
 
-	cl_git_pass(git_patch_from_buffers(&patch_fromdiff,
+	cl_git_pass(git3_patch_from_buffers(&patch_fromdiff,
 		old, old_len, "file.txt",
 		new, new_len, "file.txt",
 		diff_opts));
-	cl_git_pass(git_patch_to_buf(&validated, patch_fromdiff));
+	cl_git_pass(git3_patch_to_buf(&validated, patch_fromdiff));
 
 	cl_assert_equal_s(patchfile, validated.ptr);
 
 	error = apply_patchfile(old, old_len, new, new_len, patchfile, filename_expected, mode_expected);
 
-	git_buf_dispose(&validated);
-	git_patch_free(patch_fromdiff);
+	git3_buf_dispose(&validated);
+	git3_patch_free(patch_fromdiff);
 
 	return error;
 }
@@ -98,7 +98,7 @@ void test_apply_fromfile__change_middle(void)
 
 void test_apply_fromfile__change_middle_nocontext(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(validate_and_apply_patchfile(
@@ -138,7 +138,7 @@ void test_apply_fromfile__change_middle_shrink(void)
 
 void test_apply_fromfile__change_middle_shrink_nocontext(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(validate_and_apply_patchfile(
@@ -159,7 +159,7 @@ void test_apply_fromfile__change_middle_grow(void)
 
 void test_apply_fromfile__change_middle_grow_nocontext(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(validate_and_apply_patchfile(
@@ -179,7 +179,7 @@ void test_apply_fromfile__prepend(void)
 
 void test_apply_fromfile__prepend_nocontext(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(validate_and_apply_patchfile(
@@ -199,7 +199,7 @@ void test_apply_fromfile__append(void)
 
 void test_apply_fromfile__append_nocontext(void)
 {
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
 	diff_opts.context_lines = 0;
 
 	cl_git_pass(validate_and_apply_patchfile(
@@ -309,30 +309,30 @@ void test_apply_fromfile__noisy_nocontext(void)
 
 void test_apply_fromfile__fail_truncated_1(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch, PATCH_TRUNCATED_1,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch, PATCH_TRUNCATED_1,
 		strlen(PATCH_TRUNCATED_1), NULL));
 }
 
 void test_apply_fromfile__fail_truncated_2(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch, PATCH_TRUNCATED_2,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch, PATCH_TRUNCATED_2,
 		strlen(PATCH_TRUNCATED_2), NULL));
 }
 
 void test_apply_fromfile__fail_truncated_3(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch, PATCH_TRUNCATED_3,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch, PATCH_TRUNCATED_3,
 		strlen(PATCH_TRUNCATED_3), NULL));
 }
 
 void test_apply_fromfile__fail_corrupt_githeader(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch, PATCH_CORRUPT_GIT_HEADER,
-		strlen(PATCH_CORRUPT_GIT_HEADER), NULL));
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch, PATCH_CORRUPT_GIT3_HEADER,
+		strlen(PATCH_CORRUPT_GIT3_HEADER), NULL));
 }
 
 void test_apply_fromfile__empty_context(void)
@@ -354,40 +354,40 @@ void test_apply_fromfile__append_no_nl(void)
 
 void test_apply_fromfile__fail_missing_new_file(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch,
 		PATCH_CORRUPT_MISSING_NEW_FILE,
 		strlen(PATCH_CORRUPT_MISSING_NEW_FILE), NULL));
 }
 
 void test_apply_fromfile__fail_missing_old_file(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch,
 		PATCH_CORRUPT_MISSING_OLD_FILE,
 		strlen(PATCH_CORRUPT_MISSING_OLD_FILE), NULL));
 }
 
 void test_apply_fromfile__fail_no_changes(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch,
 		PATCH_CORRUPT_NO_CHANGES,
 		strlen(PATCH_CORRUPT_NO_CHANGES), NULL));
 }
 
 void test_apply_fromfile__fail_missing_hunk_header(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch,
 		PATCH_CORRUPT_MISSING_HUNK_HEADER,
 		strlen(PATCH_CORRUPT_MISSING_HUNK_HEADER), NULL));
 }
 
 void test_apply_fromfile__fail_not_a_patch(void)
 {
-	git_patch *patch;
-	cl_git_fail(git_patch_from_buffer(&patch, PATCH_NOT_A_PATCH,
+	git3_patch *patch;
+	cl_git_fail(git3_patch_from_buffer(&patch, PATCH_NOT_A_PATCH,
 		strlen(PATCH_NOT_A_PATCH), NULL));
 }
 
@@ -442,8 +442,8 @@ void test_apply_fromfile__binary_change_must_be_reversible(void)
 
 void test_apply_fromfile__empty_file_not_allowed(void)
 {
-	git_patch *patch;
+	git3_patch *patch;
 
-	cl_git_fail(git_patch_from_buffer(&patch, "", 0, NULL));
-	cl_git_fail(git_patch_from_buffer(&patch, NULL, 0, NULL));
+	cl_git_fail(git3_patch_from_buffer(&patch, "", 0, NULL));
+	cl_git_fail(git3_patch_from_buffer(&patch, NULL, 0, NULL));
 }

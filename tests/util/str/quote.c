@@ -1,16 +1,16 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 static void expect_quote_pass(const char *expected, const char *str)
 {
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 
-	cl_git_pass(git_str_puts(&buf, str));
-	cl_git_pass(git_str_quote(&buf));
+	cl_git_pass(git3_str_puts(&buf, str));
+	cl_git_pass(git3_str_quote(&buf));
 
-	cl_assert_equal_s(expected, git_str_cstr(&buf));
-	cl_assert_equal_i(strlen(expected), git_str_len(&buf));
+	cl_assert_equal_s(expected, git3_str_cstr(&buf));
+	cl_assert_equal_i(strlen(expected), git3_str_len(&buf));
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 }
 
 void test_str_quote__quote_succeeds(void)
@@ -29,25 +29,25 @@ void test_str_quote__quote_succeeds(void)
 
 static void expect_unquote_pass(const char *expected, const char *quoted)
 {
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 
-	cl_git_pass(git_str_puts(&buf, quoted));
-	cl_git_pass(git_str_unquote(&buf));
+	cl_git_pass(git3_str_puts(&buf, quoted));
+	cl_git_pass(git3_str_unquote(&buf));
 
-	cl_assert_equal_s(expected, git_str_cstr(&buf));
-	cl_assert_equal_i(strlen(expected), git_str_len(&buf));
+	cl_assert_equal_s(expected, git3_str_cstr(&buf));
+	cl_assert_equal_i(strlen(expected), git3_str_len(&buf));
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 }
 
 static void expect_unquote_fail(const char *quoted)
 {
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 
-	cl_git_pass(git_str_puts(&buf, quoted));
-	cl_git_fail(git_str_unquote(&buf));
+	cl_git_pass(git3_str_puts(&buf, quoted));
+	cl_git_fail(git3_str_unquote(&buf));
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 }
 
 void test_str_quote__unquote_succeeds(void)

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_trace_h__
@@ -11,13 +11,13 @@
 #include "types.h"
 
 /**
- * @file git2/trace.h
- * @brief Tracing functionality to introspect libgit2 in your application
- * @defgroup git_trace Tracing functionality to introspect libgit2 in your application
+ * @file git3/trace.h
+ * @brief Tracing functionality to introspect libgit3 in your application
+ * @defgroup git3_trace Tracing functionality to introspect libgit3 in your application
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Available tracing levels.  When tracing is set to a particular level,
@@ -25,26 +25,26 @@ GIT_BEGIN_DECL
  */
 typedef enum {
 	/** No tracing will be performed. */
-	GIT_TRACE_NONE = 0,
+	GIT3_TRACE_NONE = 0,
 
 	/** Severe errors that may impact the program's execution */
-	GIT_TRACE_FATAL = 1,
+	GIT3_TRACE_FATAL = 1,
 
 	/** Errors that do not impact the program's execution */
-	GIT_TRACE_ERROR = 2,
+	GIT3_TRACE_ERROR = 2,
 
 	/** Warnings that suggest abnormal data */
-	GIT_TRACE_WARN = 3,
+	GIT3_TRACE_WARN = 3,
 
 	/** Informational messages about program execution */
-	GIT_TRACE_INFO = 4,
+	GIT3_TRACE_INFO = 4,
 
 	/** Detailed data that allows for debugging */
-	GIT_TRACE_DEBUG = 5,
+	GIT3_TRACE_DEBUG = 5,
 
 	/** Exceptionally detailed debugging data */
-	GIT_TRACE_TRACE = 6
-} git_trace_level_t;
+	GIT3_TRACE_TRACE = 6
+} git3_trace_level_t;
 
 /**
  * An instance for a tracing function
@@ -52,8 +52,8 @@ typedef enum {
  * @param level the trace level
  * @param msg the trace message
  */
-typedef void GIT_CALLBACK(git_trace_cb)(
-	git_trace_level_t level,
+typedef void GIT3_CALLBACK(git3_trace_cb)(
+	git3_trace_level_t level,
 	const char *msg);
 
 /**
@@ -65,9 +65,9 @@ typedef void GIT_CALLBACK(git_trace_cb)(
  * @param cb Function to call with trace data
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_trace_set(git_trace_level_t level, git_trace_cb cb);
+GIT3_EXTERN(int) git3_trace_set(git3_trace_level_t level, git3_trace_cb cb);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

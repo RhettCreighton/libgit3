@@ -56,7 +56,7 @@ set(LIBGIT3_SYSTEM_INCLUDES ${LIBGIT3_SYSTEM_INCLUDES} PARENT_SCOPE)
 set(LIBGIT3_SYSTEM_LIBS ${LIBGIT3_SYSTEM_LIBS} PARENT_SCOPE)
 
 #
-# Compile and link libgit2
+# Compile and link libgit3
 #
 
 add_library(libgit3package ${SRC_RC} ${LIBGIT3_OBJECTS})

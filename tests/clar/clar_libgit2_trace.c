@@ -1,43 +1,43 @@
-#include "clar_libgit2_trace.h"
-#include "clar_libgit2.h"
-#include "clar_libgit2_timer.h"
+#include "clar_libgit3_trace.h"
+#include "clar_libgit3.h"
+#include "clar_libgit3_timer.h"
 #include "trace.h"
 
 struct method {
 	const char *name;
-	void (*git_trace_cb)(git_trace_level_t level, const char *msg);
+	void (*git3_trace_cb)(git3_trace_level_t level, const char *msg);
 	void (*close)(void);
 };
 
-static const char *message_prefix(git_trace_level_t level)
+static const char *message_prefix(git3_trace_level_t level)
 {
 	switch (level) {
-	case GIT_TRACE_NONE:
+	case GIT3_TRACE_NONE:
 		return "[NONE]:  ";
-	case GIT_TRACE_FATAL:
+	case GIT3_TRACE_FATAL:
 		return "[FATAL]: ";
-	case GIT_TRACE_ERROR:
+	case GIT3_TRACE_ERROR:
 		return "[ERROR]: ";
-	case GIT_TRACE_WARN:
+	case GIT3_TRACE_WARN:
 		return "[WARN]:  ";
-	case GIT_TRACE_INFO:
+	case GIT3_TRACE_INFO:
 		return "[INFO]:  ";
-	case GIT_TRACE_DEBUG:
+	case GIT3_TRACE_DEBUG:
 		return "[DEBUG]: ";
-	case GIT_TRACE_TRACE:
+	case GIT3_TRACE_TRACE:
 		return "[TRACE]: ";
 	default:
 		return "[?????]: ";
 	}
 }
 
-static void _git_trace_cb__printf(git_trace_level_t level, const char *msg)
+static void _git_trace_cb__printf(git3_trace_level_t level, const char *msg)
 {
 	printf("%s%s\n", message_prefix(level), msg);
 }
 
-#if defined(GIT_WIN32)
-static void _git_trace_cb__debug(git_trace_level_t level, const char *msg)
+#if defined(GIT3_WIN32)
+static void _git_trace_cb__debug(git3_trace_level_t level, const char *msg)
 {
 	OutputDebugString(message_prefix(level));
 	OutputDebugString(msg);
@@ -67,7 +67,7 @@ static struct method s_methods[] = {
 
 
 static int s_trace_loaded = 0;
-static int s_trace_level = GIT_TRACE_NONE;
+static int s_trace_level = GIT3_TRACE_NONE;
 static struct method *s_trace_method = NULL;
 static int s_trace_tests = 0;
 
@@ -95,7 +95,7 @@ static int set_method(const char *name)
  *
  * If CLAR_TRACE_LEVEL is not set, we disable tracing.
  *
- * TODO If set, we assume GIT_TRACE_TRACE level, which
+ * TODO If set, we assume GIT3_TRACE_TRACE level, which
  * logs everything. Later, we may want to parse the
  * value of the environment variable and set a specific
  * level.
@@ -121,13 +121,13 @@ static void _load_trace_params(void)
 
 	sz_level = cl_getenv("CLAR_TRACE_LEVEL");
 	if (!sz_level || !*sz_level) {
-		s_trace_level = GIT_TRACE_NONE;
+		s_trace_level = GIT3_TRACE_NONE;
 		s_trace_method = NULL;
 		return;
 	}
 
 	/* TODO Parse sz_level and set s_trace_level. */
-	s_trace_level = GIT_TRACE_TRACE;
+	s_trace_level = GIT3_TRACE_TRACE;
 
 	sz_method = cl_getenv("CLAR_TRACE_METHOD");
 	if (set_method(sz_method) < 0)
@@ -156,23 +156,23 @@ static void _cl_trace_cb__event_handler(
 	const char *test_name,
 	void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	if (!s_trace_tests)
 		return;
 
 	switch (ev) {
 	case CL_TRACE__SUITE_BEGIN:
-		git_trace(GIT_TRACE_TRACE, "\n\n%s\n%s: Begin Suite", HR, suite_name);
-#if 0 && defined(GIT_DEBUG_LEAKCHECK_WIN32)
-		git_win32__crtdbg_stacktrace__dump(
-			GIT_WIN32__CRTDBG_STACKTRACE__SET_MARK,
+		git3_trace(GIT3_TRACE_TRACE, "\n\n%s\n%s: Begin Suite", HR, suite_name);
+#if 0 && defined(GIT3_DEBUG_LEAKCHECK_WIN32)
+		git3_win32__crtdbg_stacktrace__dump(
+			GIT3_WIN32__CRTDBG_STACKTRACE__SET_MARK,
 			suite_name);
 #endif
 		break;
 
 	case CL_TRACE__SUITE_END:
-#if 0 && defined(GIT_DEBUG_LEAKCHECK_WIN32)
+#if 0 && defined(GIT3_DEBUG_LEAKCHECK_WIN32)
 		/* As an example of checkpointing, dump leaks within this suite.
 		 * This may generate false positives for things like the global
 		 * TLS error state and maybe the odb cache since they aren't
@@ -182,40 +182,40 @@ static void _cl_trace_cb__event_handler(
 		 * This may under-report if the test itself uses a checkpoint.
 		 * See tests/trace/windows/stacktrace.c
 		 */
-		git_win32__crtdbg_stacktrace__dump(
-			GIT_WIN32__CRTDBG_STACKTRACE__LEAKS_SINCE_MARK,
+		git3_win32__crtdbg_stacktrace__dump(
+			GIT3_WIN32__CRTDBG_STACKTRACE__LEAKS_SINCE_MARK,
 			suite_name);
 #endif
-		git_trace(GIT_TRACE_TRACE, "\n\n%s: End Suite\n%s", suite_name, HR);
+		git3_trace(GIT3_TRACE_TRACE, "\n\n%s: End Suite\n%s", suite_name, HR);
 		break;
 
 	case CL_TRACE__TEST__BEGIN:
-		git_trace(GIT_TRACE_TRACE, "\n%s::%s: Begin Test", suite_name, test_name);
+		git3_trace(GIT3_TRACE_TRACE, "\n%s::%s: Begin Test", suite_name, test_name);
 		cl_perf_timer__init(&s_timer_test);
 		cl_perf_timer__start(&s_timer_test);
 		break;
 
 	case CL_TRACE__TEST__END:
 		cl_perf_timer__stop(&s_timer_test);
-		git_trace(GIT_TRACE_TRACE, "%s::%s: End Test (%" PRIuZ " %" PRIuZ ")", suite_name, test_name,
+		git3_trace(GIT3_TRACE_TRACE, "%s::%s: End Test (%" PRIuZ " %" PRIuZ ")", suite_name, test_name,
 				  cl_perf_timer__last(&s_timer_run),
 				  cl_perf_timer__last(&s_timer_test));
 		break;
 
 	case CL_TRACE__TEST__RUN_BEGIN:
-		git_trace(GIT_TRACE_TRACE, "%s::%s: Begin Run", suite_name, test_name);
+		git3_trace(GIT3_TRACE_TRACE, "%s::%s: Begin Run", suite_name, test_name);
 		cl_perf_timer__init(&s_timer_run);
 		cl_perf_timer__start(&s_timer_run);
 		break;
 
 	case CL_TRACE__TEST__RUN_END:
 		cl_perf_timer__stop(&s_timer_run);
-		git_trace(GIT_TRACE_TRACE, "%s::%s: End Run", suite_name, test_name);
+		git3_trace(GIT3_TRACE_TRACE, "%s::%s: End Run", suite_name, test_name);
 		break;
 
 	case CL_TRACE__TEST__LONGJMP:
 		cl_perf_timer__stop(&s_timer_run);
-		git_trace(GIT_TRACE_TRACE, "%s::%s: Aborted", suite_name, test_name);
+		git3_trace(GIT3_TRACE_TRACE, "%s::%s: Aborted", suite_name, test_name);
 		break;
 
 	default:
@@ -224,26 +224,26 @@ static void _cl_trace_cb__event_handler(
 }
 
 /**
- * Setup/Enable git_trace() based upon settings user's environment.
+ * Setup/Enable git3_trace() based upon settings user's environment.
  */
 void cl_global_trace_register(void)
 {
 	if (!s_trace_loaded)
 		_load_trace_params();
 
-	if (s_trace_level == GIT_TRACE_NONE)
+	if (s_trace_level == GIT3_TRACE_NONE)
 		return;
 	if (s_trace_method == NULL)
 		return;
-	if (s_trace_method->git_trace_cb == NULL)
+	if (s_trace_method->git3_trace_cb == NULL)
 		return;
 
-	git_trace_set(s_trace_level, s_trace_method->git_trace_cb);
+	git3_trace_set(s_trace_level, s_trace_method->git3_trace_cb);
 	cl_trace_register(_cl_trace_cb__event_handler, NULL);
 }
 
 /**
- * If we turned on git_trace() earlier, turn it off.
+ * If we turned on git3_trace() earlier, turn it off.
  *
  * This is intended to let us close/flush any buffered
  * IO if necessary.
@@ -252,7 +252,7 @@ void cl_global_trace_register(void)
 void cl_global_trace_disable(void)
 {
 	cl_trace_register(NULL, NULL);
-	git_trace_set(GIT_TRACE_NONE, NULL);
+	git3_trace_set(GIT3_TRACE_NONE, NULL);
 	if (s_trace_method && s_trace_method->close)
 		s_trace_method->close();
 

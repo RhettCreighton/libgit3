@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_remote_h__
@@ -18,13 +18,13 @@
 #include "proxy.h"
 
 /**
- * @file git2/remote.h
+ * @file git3/remote.h
  * @brief Remotes are where local repositories fetch from and push to
- * @defgroup git_remote Remotes are where local repositories fetch from and push to
+ * @defgroup git3_remote Remotes are where local repositories fetch from and push to
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Add a remote with the default fetch refspec to the repository's configuration.
@@ -33,11 +33,11 @@ GIT_BEGIN_DECL
  * @param repo the repository in which to create the remote
  * @param name the remote's name
  * @param url the remote's url
- * @return 0, GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+ * @return 0, GIT3_EINVALIDSPEC, GIT3_EEXISTS or an error code
  */
-GIT_EXTERN(int) git_remote_create(
-		git_remote **out,
-		git_repository *repo,
+GIT3_EXTERN(int) git3_remote_create(
+		git3_remote **out,
+		git3_repository *repo,
 		const char *name,
 		const char *url);
 
@@ -51,57 +51,57 @@ typedef enum {
 	 * Do not follow any off-site redirects at any stage of
 	 * the fetch or push.
 	 */
-	GIT_REMOTE_REDIRECT_NONE = (1 << 0),
+	GIT3_REMOTE_REDIRECT_NONE = (1 << 0),
 
 	/**
 	 * Allow off-site redirects only upon the initial request.
 	 * This is the default.
 	 */
-	GIT_REMOTE_REDIRECT_INITIAL = (1 << 1),
+	GIT3_REMOTE_REDIRECT_INITIAL = (1 << 1),
 
 	/**
 	 * Allow redirects at any stage in the fetch or push.
 	 */
-	GIT_REMOTE_REDIRECT_ALL = (1 << 2)
-} git_remote_redirect_t;
+	GIT3_REMOTE_REDIRECT_ALL = (1 << 2)
+} git3_remote_redirect_t;
 
 /**
  * Remote creation options flags
  */
 typedef enum {
 	/** Ignore the repository apply.insteadOf configuration */
-	GIT_REMOTE_CREATE_SKIP_INSTEADOF = (1 << 0),
+	GIT3_REMOTE_CREATE_SKIP_INSTEADOF = (1 << 0),
 
 	/** Don't build a fetchspec from the name if none is set */
-	GIT_REMOTE_CREATE_SKIP_DEFAULT_FETCHSPEC = (1 << 1)
-} git_remote_create_flags;
+	GIT3_REMOTE_CREATE_SKIP_DEFAULT_FETCHSPEC = (1 << 1)
+} git3_remote_create_flags;
 
 /**
  * How to handle reference updates.
  */
 typedef enum {
 	/* Write the fetch results to FETCH_HEAD. */
-	GIT_REMOTE_UPDATE_FETCHHEAD = (1 << 0),
+	GIT3_REMOTE_UPDATE_FETCHHEAD = (1 << 0),
 
 	/* Report unchanged tips in the update_refs callback. */
-	GIT_REMOTE_UPDATE_REPORT_UNCHANGED = (1 << 1)
-} git_remote_update_flags;
+	GIT3_REMOTE_UPDATE_REPORT_UNCHANGED = (1 << 1)
+} git3_remote_update_flags;
 
 /**
  * Remote creation options structure
  *
- * Initialize with `GIT_REMOTE_CREATE_OPTIONS_INIT`. Alternatively, you can
- * use `git_remote_create_options_init`.
+ * Initialize with `GIT3_REMOTE_CREATE_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_remote_create_options_init`.
  *
  */
-typedef struct git_remote_create_options {
+typedef struct git3_remote_create_options {
 	unsigned int version;
 
 	/**
 	 * The repository that should own the remote.
 	 * Setting this to NULL results in a detached remote.
 	 */
-	git_repository *repository;
+	git3_repository *repository;
 
 	/**
 	 * The remote's name.
@@ -112,28 +112,28 @@ typedef struct git_remote_create_options {
 	/** The fetchspec the remote should use. */
 	const char *fetchspec;
 
-	/** Additional flags for the remote. See git_remote_create_flags. */
+	/** Additional flags for the remote. See git3_remote_create_flags. */
 	unsigned int flags;
-} git_remote_create_options;
+} git3_remote_create_options;
 
-/** Current version for the `git_remote_create_options` structure */
-#define GIT_REMOTE_CREATE_OPTIONS_VERSION 1
+/** Current version for the `git3_remote_create_options` structure */
+#define GIT3_REMOTE_CREATE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_remote_create_options` */
-#define GIT_REMOTE_CREATE_OPTIONS_INIT {GIT_REMOTE_CREATE_OPTIONS_VERSION}
+/** Static constructor for `git3_remote_create_options` */
+#define GIT3_REMOTE_CREATE_OPTIONS_INIT {GIT3_REMOTE_CREATE_OPTIONS_VERSION}
 
 /**
- * Initialize git_remote_create_options structure
+ * Initialize git3_remote_create_options structure
  *
- * Initializes a `git_remote_create_options` with default values. Equivalent to
- * creating an instance with `GIT_REMOTE_CREATE_OPTIONS_INIT`.
+ * Initializes a `git3_remote_create_options` with default values. Equivalent to
+ * creating an instance with `GIT3_REMOTE_CREATE_OPTIONS_INIT`.
  *
- * @param opts The `git_remote_create_options` struct to initialize.
- * @param version The struct version; pass `GIT_REMOTE_CREATE_OPTIONS_VERSION`.
+ * @param opts The `git3_remote_create_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_REMOTE_CREATE_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_remote_create_options_init(
-		git_remote_create_options *opts,
+GIT3_EXTERN(int) git3_remote_create_options_init(
+		git3_remote_create_options *opts,
 		unsigned int version);
 
 /**
@@ -146,12 +146,12 @@ GIT_EXTERN(int) git_remote_create_options_init(
  * @param out the resulting remote
  * @param url the remote's url
  * @param opts the remote creation options
- * @return 0, GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+ * @return 0, GIT3_EINVALIDSPEC, GIT3_EEXISTS or an error code
  */
-GIT_EXTERN(int) git_remote_create_with_opts(
-		git_remote **out,
+GIT3_EXTERN(int) git3_remote_create_with_opts(
+		git3_remote **out,
 		const char *url,
-		const git_remote_create_options *opts);
+		const git3_remote_create_options *opts);
 
 /**
  * Add a remote with the provided fetch refspec (or default if NULL) to the repository's
@@ -162,11 +162,11 @@ GIT_EXTERN(int) git_remote_create_with_opts(
  * @param name the remote's name
  * @param url the remote's url
  * @param fetch the remote fetch value
- * @return 0, GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+ * @return 0, GIT3_EINVALIDSPEC, GIT3_EEXISTS or an error code
  */
-GIT_EXTERN(int) git_remote_create_with_fetchspec(
-		git_remote **out,
-		git_repository *repo,
+GIT3_EXTERN(int) git3_remote_create_with_fetchspec(
+		git3_remote **out,
+		git3_repository *repo,
 		const char *name,
 		const char *url,
 		const char *fetch);
@@ -182,9 +182,9 @@ GIT_EXTERN(int) git_remote_create_with_fetchspec(
  * @param url the remote repository's URL
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_create_anonymous(
-		git_remote **out,
-		git_repository *repo,
+GIT3_EXTERN(int) git3_remote_create_anonymous(
+		git3_remote **out,
+		git3_repository *repo,
 		const char *url);
 
 /**
@@ -193,7 +193,7 @@ GIT_EXTERN(int) git_remote_create_anonymous(
  * Create a remote with the given url in-memory. You can use this when
  * you have a URL instead of a remote's name.
  *
- * Contrasted with git_remote_create_anonymous, a detached remote
+ * Contrasted with git3_remote_create_anonymous, a detached remote
  * will not consider any repo configuration values (such as insteadof url
  * substitutions).
  *
@@ -201,34 +201,34 @@ GIT_EXTERN(int) git_remote_create_anonymous(
  * @param url the remote repository's URL
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_create_detached(
-		git_remote **out,
+GIT3_EXTERN(int) git3_remote_create_detached(
+		git3_remote **out,
 		const char *url);
 
 /**
  * Get the information for a particular remote
  *
  * The name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * @param out pointer to the new remote object
  * @param repo the associated repository
  * @param name the remote's name
- * @return 0, GIT_ENOTFOUND, GIT_EINVALIDSPEC or an error code
+ * @return 0, GIT3_ENOTFOUND, GIT3_EINVALIDSPEC or an error code
  */
-GIT_EXTERN(int) git_remote_lookup(git_remote **out, git_repository *repo, const char *name);
+GIT3_EXTERN(int) git3_remote_lookup(git3_remote **out, git3_repository *repo, const char *name);
 
 /**
  * Create a copy of an existing remote.  All internal strings are also
  * duplicated. Callbacks are not duplicated.
  *
- * Call `git_remote_free` to free the data.
+ * Call `git3_remote_free` to free the data.
  *
  * @param dest pointer where to store the copy
  * @param source object to copy
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_dup(git_remote **dest, git_remote *source);
+GIT3_EXTERN(int) git3_remote_dup(git3_remote **dest, git3_remote *source);
 
 /**
  * Get the remote's repository
@@ -236,7 +236,7 @@ GIT_EXTERN(int) git_remote_dup(git_remote **dest, git_remote *source);
  * @param remote the remote
  * @return a pointer to the repository
  */
-GIT_EXTERN(git_repository *) git_remote_owner(const git_remote *remote);
+GIT3_EXTERN(git3_repository *) git3_remote_owner(const git3_remote *remote);
 
 /**
  * Get the remote's name
@@ -244,31 +244,31 @@ GIT_EXTERN(git_repository *) git_remote_owner(const git_remote *remote);
  * @param remote the remote
  * @return a pointer to the name or NULL for in-memory remotes
  */
-GIT_EXTERN(const char *) git_remote_name(const git_remote *remote);
+GIT3_EXTERN(const char *) git3_remote_name(const git3_remote *remote);
 
 /**
  * Get the remote's url
  *
  * If url.*.insteadOf has been configured for this URL, it will return
  * the modified URL. This function does not consider if a push url has
- * been configured for this remote (use `git_remote_pushurl` if needed).
+ * been configured for this remote (use `git3_remote_pushurl` if needed).
  *
  * @param remote the remote
  * @return a pointer to the url
  */
-GIT_EXTERN(const char *) git_remote_url(const git_remote *remote);
+GIT3_EXTERN(const char *) git3_remote_url(const git3_remote *remote);
 
 /**
  * Get the remote's url for pushing.
  *
  * If url.*.pushInsteadOf has been configured for this URL, it
- * will return the modified URL.  If `git_remote_set_instance_pushurl`
+ * will return the modified URL.  If `git3_remote_set_instance_pushurl`
  * has been called for this remote, then that URL will be returned.
  *
  * @param remote the remote
  * @return a pointer to the url or NULL if no special url for pushing is set
  */
-GIT_EXTERN(const char *) git_remote_pushurl(const git_remote *remote);
+GIT3_EXTERN(const char *) git3_remote_pushurl(const git3_remote *remote);
 
 /**
  * Set the remote's url in the configuration
@@ -281,7 +281,7 @@ GIT_EXTERN(const char *) git_remote_pushurl(const git_remote *remote);
  * @param url the url to set
  * @return 0 or an error value
  */
-GIT_EXTERN(int) git_remote_set_url(git_repository *repo, const char *remote, const char *url);
+GIT3_EXTERN(int) git3_remote_set_url(git3_repository *repo, const char *remote, const char *url);
 
 /**
  * Set the remote's url for pushing in the configuration.
@@ -295,7 +295,7 @@ GIT_EXTERN(int) git_remote_set_url(git_repository *repo, const char *remote, con
  * @param url the url to set
  * @return 0, or an error code
  */
-GIT_EXTERN(int) git_remote_set_pushurl(git_repository *repo, const char *remote, const char *url);
+GIT3_EXTERN(int) git3_remote_set_pushurl(git3_repository *repo, const char *remote, const char *url);
 
 /**
  * Set the url for this particular url instance.  The URL in the
@@ -305,7 +305,7 @@ GIT_EXTERN(int) git_remote_set_pushurl(git_repository *repo, const char *remote,
  * @param url the url to set
  * @return 0 or an error value
  */
-GIT_EXTERN(int) git_remote_set_instance_url(git_remote *remote, const char *url);
+GIT3_EXTERN(int) git3_remote_set_instance_url(git3_remote *remote, const char *url);
 
 /**
  * Set the push url for this particular url instance.  The URL in the
@@ -315,7 +315,7 @@ GIT_EXTERN(int) git_remote_set_instance_url(git_remote *remote, const char *url)
  * @param url the url to set
  * @return 0 or an error value
  */
-GIT_EXTERN(int) git_remote_set_instance_pushurl(git_remote *remote, const char *url);
+GIT3_EXTERN(int) git3_remote_set_instance_pushurl(git3_remote *remote, const char *url);
 
 /**
  * Add a fetch refspec to the remote's configuration
@@ -326,21 +326,21 @@ GIT_EXTERN(int) git_remote_set_instance_pushurl(git_remote *remote, const char *
  * @param repo the repository in which to change the configuration
  * @param remote the name of the remote to change
  * @param refspec the new fetch refspec
- * @return 0, GIT_EINVALIDSPEC if refspec is invalid or an error value
+ * @return 0, GIT3_EINVALIDSPEC if refspec is invalid or an error value
  */
-GIT_EXTERN(int) git_remote_add_fetch(git_repository *repo, const char *remote, const char *refspec);
+GIT3_EXTERN(int) git3_remote_add_fetch(git3_repository *repo, const char *remote, const char *refspec);
 
 /**
  * Get the remote's list of fetch refspecs
  *
  * The memory is owned by the user and should be freed with
- * `git_strarray_free`.
+ * `git3_strarray_free`.
  *
  * @param array pointer to the array in which to store the strings
  * @param remote the remote to query
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_remote_get_fetch_refspecs(git_strarray *array, const git_remote *remote);
+GIT3_EXTERN(int) git3_remote_get_fetch_refspecs(git3_strarray *array, const git3_remote *remote);
 
 /**
  * Add a push refspec to the remote's configuration
@@ -351,21 +351,21 @@ GIT_EXTERN(int) git_remote_get_fetch_refspecs(git_strarray *array, const git_rem
  * @param repo the repository in which to change the configuration
  * @param remote the name of the remote to change
  * @param refspec the new push refspec
- * @return 0, GIT_EINVALIDSPEC if refspec is invalid or an error value
+ * @return 0, GIT3_EINVALIDSPEC if refspec is invalid or an error value
  */
-GIT_EXTERN(int) git_remote_add_push(git_repository *repo, const char *remote, const char *refspec);
+GIT3_EXTERN(int) git3_remote_add_push(git3_repository *repo, const char *remote, const char *refspec);
 
 /**
  * Get the remote's list of push refspecs
  *
  * The memory is owned by the user and should be freed with
- * `git_strarray_free`.
+ * `git3_strarray_free`.
  *
  * @param array pointer to the array in which to store the strings
  * @param remote the remote to query
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_remote_get_push_refspecs(git_strarray *array, const git_remote *remote);
+GIT3_EXTERN(int) git3_remote_get_push_refspecs(git3_strarray *array, const git3_remote *remote);
 
 /**
  * Get the number of refspecs for a remote
@@ -373,7 +373,7 @@ GIT_EXTERN(int) git_remote_get_push_refspecs(git_strarray *array, const git_remo
  * @param remote the remote
  * @return the amount of refspecs configured in this remote
  */
-GIT_EXTERN(size_t) git_remote_refspec_count(const git_remote *remote);
+GIT3_EXTERN(size_t) git3_remote_refspec_count(const git3_remote *remote);
 
 /**
  * Get a refspec from the remote
@@ -382,7 +382,7 @@ GIT_EXTERN(size_t) git_remote_refspec_count(const git_remote *remote);
  * @param n the refspec to get
  * @return the nth refspec
  */
-GIT_EXTERN(const git_refspec *)git_remote_get_refspec(const git_remote *remote, size_t n);
+GIT3_EXTERN(const git3_refspec *)git3_remote_get_refspec(const git3_remote *remote, size_t n);
 
 /**
  * Get the remote repository's reference advertisement list
@@ -404,7 +404,7 @@ GIT_EXTERN(const git_refspec *)git_remote_get_refspec(const git_remote *remote, 
  * @param remote the remote
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_remote_ls(const git_remote_head ***out,  size_t *size, git_remote *remote);
+GIT3_EXTERN(int) git3_remote_ls(const git3_remote_head ***out,  size_t *size, git3_remote *remote);
 
 /**
  * Check whether the remote is connected
@@ -415,7 +415,7 @@ GIT_EXTERN(int) git_remote_ls(const git_remote_head ***out,  size_t *size, git_r
  * @param remote the remote
  * @return 1 if it's connected, 0 otherwise.
  */
-GIT_EXTERN(int) git_remote_connected(const git_remote *remote);
+GIT3_EXTERN(int) git3_remote_connected(const git3_remote *remote);
 
 /**
  * Cancel the operation
@@ -426,7 +426,7 @@ GIT_EXTERN(int) git_remote_connected(const git_remote *remote);
  * @param remote the remote
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_remote_stop(git_remote *remote);
+GIT3_EXTERN(int) git3_remote_stop(git3_remote *remote);
 
 /**
  * Disconnect from the remote
@@ -436,17 +436,17 @@ GIT_EXTERN(int) git_remote_stop(git_remote *remote);
  * @param remote the remote to disconnect from
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_remote_disconnect(git_remote *remote);
+GIT3_EXTERN(int) git3_remote_disconnect(git3_remote *remote);
 
 /**
  * Free the memory associated with a remote
  *
  * This also disconnects from the remote, if the connection
- * has not been closed yet (using git_remote_disconnect).
+ * has not been closed yet (using git3_remote_disconnect).
  *
  * @param remote the remote to free
  */
-GIT_EXTERN(void) git_remote_free(git_remote *remote);
+GIT3_EXTERN(void) git3_remote_free(git3_remote *remote);
 
 /**
  * Get a list of the configured remotes for a repo
@@ -457,17 +457,17 @@ GIT_EXTERN(void) git_remote_free(git_remote *remote);
  * @param repo the repository to query
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_list(git_strarray *out, git_repository *repo);
+GIT3_EXTERN(int) git3_remote_list(git3_strarray *out, git3_repository *repo);
 
 /**
  * Argument to the completion callback which tells it which operation
  * finished.
  */
-typedef enum git_remote_completion_t {
-	GIT_REMOTE_COMPLETION_DOWNLOAD,
-	GIT_REMOTE_COMPLETION_INDEXING,
-	GIT_REMOTE_COMPLETION_ERROR
-} git_remote_completion_t;
+typedef enum git3_remote_completion_t {
+	GIT3_REMOTE_COMPLETION_DOWNLOAD,
+	GIT3_REMOTE_COMPLETION_INDEXING,
+	GIT3_REMOTE_COMPLETION_ERROR
+} git3_remote_completion_t;
 
 /**
  * Push network progress notification callback.
@@ -478,7 +478,7 @@ typedef enum git_remote_completion_t {
  * @param payload The user-specified payload callback
  * @return 0 or an error code to stop the transfer
  */
-typedef int GIT_CALLBACK(git_push_transfer_progress_cb)(
+typedef int GIT3_CALLBACK(git3_push_transfer_progress_cb)(
 	unsigned int current,
 	unsigned int total,
 	size_t bytes,
@@ -499,12 +499,12 @@ typedef struct {
 	/**
 	 * The current target of the reference
 	 */
-	git_oid src;
+	git3_oid src;
 	/**
 	 * The new target for the reference
 	 */
-	git_oid dst;
-} git_push_update;
+	git3_oid dst;
+} git3_push_update;
 
 /**
  * Callback used to inform of upcoming updates.
@@ -515,8 +515,8 @@ typedef struct {
  * @param payload Payload provided by the caller
  * @return 0 or an error code to stop the push
  */
-typedef int GIT_CALLBACK(git_push_negotiation)(
-	const git_push_update **updates,
+typedef int GIT3_CALLBACK(git3_push_negotiation)(
+	const git3_push_update **updates,
 	size_t len,
 	void *payload);
 
@@ -532,36 +532,36 @@ typedef int GIT_CALLBACK(git_push_negotiation)(
  * @param data data provided by the caller
  * @return 0 on success, otherwise an error
  */
-typedef int GIT_CALLBACK(git_push_update_reference_cb)(const char *refname, const char *status, void *data);
+typedef int GIT3_CALLBACK(git3_push_update_reference_cb)(const char *refname, const char *status, void *data);
 
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 /**
  * Callback to resolve URLs before connecting to remote
  *
- * If you return GIT_PASSTHROUGH, you don't need to write anything to
+ * If you return GIT3_PASSTHROUGH, you don't need to write anything to
  * url_resolved.
  *
  * @param url_resolved The buffer to write the resolved URL to
  * @param url The URL to resolve
- * @param direction GIT_DIRECTION_FETCH or GIT_DIRECTION_PUSH
+ * @param direction GIT3_DIRECTION_FETCH or GIT3_DIRECTION_PUSH
  * @param payload Payload provided by the caller
- * @return 0 on success, GIT_PASSTHROUGH or an error
- * @deprecated Use `git_remote_set_instance_url`
+ * @return 0 on success, GIT3_PASSTHROUGH or an error
+ * @deprecated Use `git3_remote_set_instance_url`
  */
-typedef int GIT_CALLBACK(git_url_resolve_cb)(git_buf *url_resolved, const char *url, int direction, void *payload);
+typedef int GIT3_CALLBACK(git3_url_resolve_cb)(git3_buf *url_resolved, const char *url, int direction, void *payload);
 #endif
 
 /**
  * Callback invoked immediately before we attempt to connect to the
  * given url.  Callers may change the URL before the connection by
- * calling `git_remote_set_instance_url` in the callback.
+ * calling `git3_remote_set_instance_url` in the callback.
  *
  * @param remote The remote to be connected
- * @param direction GIT_DIRECTION_FETCH or GIT_DIRECTION_PUSH
+ * @param direction GIT3_DIRECTION_FETCH or GIT3_DIRECTION_PUSH
  * @param payload Payload provided by the caller
  * @return 0 on success, or an error
  */
-typedef int GIT_CALLBACK(git_remote_ready_cb)(git_remote *remote, int direction, void *payload);
+typedef int GIT3_CALLBACK(git3_remote_ready_cb)(git3_remote *remote, int direction, void *payload);
 
 /**
  * The callback settings structure
@@ -569,7 +569,7 @@ typedef int GIT_CALLBACK(git_remote_ready_cb)(git_remote *remote, int direction,
  * Set the callbacks to be called by the remote when informing the user
  * about the progress of the network operations.
  */
-struct git_remote_callbacks {
+struct git3_remote_callbacks {
 	unsigned int version; /**< The version */
 
 	/**
@@ -577,23 +577,23 @@ struct git_remote_callbacks {
 	 * progress side-band will be passed to this function (this is
 	 * the 'counting objects' output).
 	 */
-	git_transport_message_cb sideband_progress;
+	git3_transport_message_cb sideband_progress;
 
 	/**
 	 * Completion is called when different parts of the download
 	 * process are done (currently unused).
 	 */
-	int GIT_CALLBACK(completion)(git_remote_completion_t type,
+	int GIT3_CALLBACK(completion)(git3_remote_completion_t type,
 		void *data);
 
 	/**
 	 * This will be called if the remote host requires
 	 * authentication in order to connect to it.
 	 *
-	 * Returning GIT_PASSTHROUGH will make libgit2 behave as
+	 * Returning GIT3_PASSTHROUGH will make libgit3 behave as
 	 * though this field isn't set.
 	 */
-	git_credential_acquire_cb credentials;
+	git3_credential_acquire_cb credentials;
 
 	/**
 	 * If cert verification fails, this will be called to let the
@@ -601,16 +601,16 @@ struct git_remote_callbacks {
 	 * connection to proceed. Returns 0 to allow the connection
 	 * or a negative value to indicate an error.
 	 */
-	git_transport_certificate_check_cb certificate_check;
+	git3_transport_certificate_check_cb certificate_check;
 
 	/**
 	 * During the download of new data, this will be regularly
 	 * called with the current count of progress done by the
 	 * indexer.
 	 */
-	git_indexer_progress_cb transfer_progress;
+	git3_indexer_progress_cb transfer_progress;
 
-#ifdef GIT_DEPRECATE_HARD
+#ifdef GIT3_DEPRECATE_HARD
 	void *reserved_update_tips;
 #else
 	/**
@@ -623,8 +623,8 @@ struct git_remote_callbacks {
 	 * @deprecated the `update_refs` callback in this structure
 	 * should be preferred
 	 */
-	int GIT_CALLBACK(update_tips)(const char *refname,
-		const git_oid *a, const git_oid *b, void *data);
+	int GIT3_CALLBACK(update_tips)(const char *refname,
+		const git3_oid *a, const git3_oid *b, void *data);
 #endif
 
 	/**
@@ -632,7 +632,7 @@ struct git_remote_callbacks {
 	 * building. Be aware that this is called inline with pack
 	 * building operations, so performance may be affected.
 	 */
-	git_packbuilder_progress pack_progress;
+	git3_packbuilder_progress pack_progress;
 
 	/**
 	 * Function to call with progress information during the
@@ -640,29 +640,29 @@ struct git_remote_callbacks {
 	 * inline with pack building operations, so performance may be
 	 * affected.
 	 */
-	git_push_transfer_progress_cb push_transfer_progress;
+	git3_push_transfer_progress_cb push_transfer_progress;
 
 	/**
-	 * See documentation of git_push_update_reference_cb
+	 * See documentation of git3_push_update_reference_cb
 	 */
-	git_push_update_reference_cb push_update_reference;
+	git3_push_update_reference_cb push_update_reference;
 
 	/**
 	 * Called once between the negotiation step and the upload. It
 	 * provides information about what updates will be performed.
 	 */
-	git_push_negotiation push_negotiation;
+	git3_push_negotiation push_negotiation;
 
 	/**
 	 * Create the transport to use for this operation. Leave NULL
 	 * to auto-detect.
 	 */
-	git_transport_cb transport;
+	git3_transport_cb transport;
 
 	/**
 	 * Callback when the remote is ready to connect.
 	 */
-	git_remote_ready_cb remote_ready;
+	git3_remote_ready_cb remote_ready;
 
 	/**
 	 * This will be passed to each of the callbacks in this struct
@@ -670,7 +670,7 @@ struct git_remote_callbacks {
 	 */
 	void *payload;
 
-#ifdef GIT_DEPRECATE_HARD
+#ifdef GIT3_DEPRECATE_HARD
 	void *reserved;
 #else
 	/**
@@ -678,9 +678,9 @@ struct git_remote_callbacks {
 	 * The returned URL will be used to connect to the remote instead.
 	 *
 	 * This callback is deprecated; users should use
-	 * git_remote_ready_cb and configure the instance URL instead.
+	 * git3_remote_ready_cb and configure the instance URL instead.
 	 */
-	git_url_resolve_cb resolve_url;
+	git3_url_resolve_cb resolve_url;
 #endif
 
 	/**
@@ -689,30 +689,30 @@ struct git_remote_callbacks {
 	 * preferred over the `update_tips` callback in this
 	 * structure.
 	 */
-	int GIT_CALLBACK(update_refs)(
+	int GIT3_CALLBACK(update_refs)(
 		const char *refname,
-		const git_oid *a,
-		const git_oid *b,
-		git_refspec *spec,
+		const git3_oid *a,
+		const git3_oid *b,
+		git3_refspec *spec,
 		void *data);
 };
 
-/** Current version for the `git_remote_callbacks_options` structure */
-#define GIT_REMOTE_CALLBACKS_VERSION 1
+/** Current version for the `git3_remote_callbacks_options` structure */
+#define GIT3_REMOTE_CALLBACKS_VERSION 1
 
-/** Static constructor for `git_remote_callbacks_options` */
-#define GIT_REMOTE_CALLBACKS_INIT {GIT_REMOTE_CALLBACKS_VERSION}
+/** Static constructor for `git3_remote_callbacks_options` */
+#define GIT3_REMOTE_CALLBACKS_INIT {GIT3_REMOTE_CALLBACKS_VERSION}
 
 /**
- * Initializes a `git_remote_callbacks` with default values. Equivalent to
- * creating an instance with GIT_REMOTE_CALLBACKS_INIT.
+ * Initializes a `git3_remote_callbacks` with default values. Equivalent to
+ * creating an instance with GIT3_REMOTE_CALLBACKS_INIT.
  *
- * @param opts the `git_remote_callbacks` struct to initialize
- * @param version Version of struct; pass `GIT_REMOTE_CALLBACKS_VERSION`
+ * @param opts the `git3_remote_callbacks` struct to initialize
+ * @param version Version of struct; pass `GIT3_REMOTE_CALLBACKS_VERSION`
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_remote_init_callbacks(
-	git_remote_callbacks *opts,
+GIT3_EXTERN(int) git3_remote_init_callbacks(
+	git3_remote_callbacks *opts,
 	unsigned int version);
 
 /** Acceptable prune settings when fetching */
@@ -720,16 +720,16 @@ typedef enum {
 	/**
 	 * Use the setting from the configuration
 	 */
-	GIT_FETCH_PRUNE_UNSPECIFIED,
+	GIT3_FETCH_PRUNE_UNSPECIFIED,
 	/**
 	 * Force pruning on
 	 */
-	GIT_FETCH_PRUNE,
+	GIT3_FETCH_PRUNE,
 	/**
 	 * Force pruning off
 	 */
-	GIT_FETCH_NO_PRUNE
-} git_fetch_prune_t;
+	GIT3_FETCH_NO_PRUNE
+} git3_fetch_prune_t;
 
 /**
  * Automatic tag following option
@@ -740,38 +740,38 @@ typedef enum {
 	/**
 	 * Use the setting from the configuration.
 	 */
-	GIT_REMOTE_DOWNLOAD_TAGS_UNSPECIFIED = 0,
+	GIT3_REMOTE_DOWNLOAD_TAGS_UNSPECIFIED = 0,
 	/**
 	 * Ask the server for tags pointing to objects we're already
 	 * downloading.
 	 */
-	GIT_REMOTE_DOWNLOAD_TAGS_AUTO,
+	GIT3_REMOTE_DOWNLOAD_TAGS_AUTO,
 	/**
 	 * Don't ask for any tags beyond the refspecs.
 	 */
-	GIT_REMOTE_DOWNLOAD_TAGS_NONE,
+	GIT3_REMOTE_DOWNLOAD_TAGS_NONE,
 	/**
 	 * Ask for the all the tags.
 	 */
-	GIT_REMOTE_DOWNLOAD_TAGS_ALL
-} git_remote_autotag_option_t;
+	GIT3_REMOTE_DOWNLOAD_TAGS_ALL
+} git3_remote_autotag_option_t;
 
 /** Constants for fetch depth (shallowness of fetch). */
 typedef enum {
 	/** The fetch is "full" (not shallow). This is the default. */
-	GIT_FETCH_DEPTH_FULL = 0,
+	GIT3_FETCH_DEPTH_FULL = 0,
 
 	/** The fetch should "unshallow" and fetch missing data. */
-	GIT_FETCH_DEPTH_UNSHALLOW = 2147483647
-} git_fetch_depth_t;
+	GIT3_FETCH_DEPTH_UNSHALLOW = 2147483647
+} git3_fetch_depth_t;
 
 /**
  * Fetch options structure.
  *
- * Zero out for defaults.  Initialize with `GIT_FETCH_OPTIONS_INIT` macro to
+ * Zero out for defaults.  Initialize with `GIT3_FETCH_OPTIONS_INIT` macro to
  * correctly set the `version` field.  E.g.
  *
- *		git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
+ *		git3_fetch_options opts = GIT3_FETCH_OPTIONS_INIT;
  */
 typedef struct {
 	int version;
@@ -779,15 +779,15 @@ typedef struct {
 	/**
 	 * Callbacks to use for this fetch operation
 	 */
-	git_remote_callbacks callbacks;
+	git3_remote_callbacks callbacks;
 
 	/**
 	 * Whether to perform a prune after the fetch
 	 */
-	git_fetch_prune_t prune;
+	git3_fetch_prune_t prune;
 
 	/**
-	 * How to handle reference updates; see `git_remote_update_flags`.
+	 * How to handle reference updates; see `git3_remote_update_flags`.
 	 */
 	unsigned int update_fetchhead;
 
@@ -798,19 +798,19 @@ typedef struct {
 	 *
 	 * The default is to auto-follow tags.
 	 */
-	git_remote_autotag_option_t download_tags;
+	git3_remote_autotag_option_t download_tags;
 
 	/**
 	 * Proxy options to use, by default no proxy is used.
 	 */
-	git_proxy_options proxy_opts;
+	git3_proxy_options proxy_opts;
 
 	/**
-	 * Depth of the fetch to perform, or `GIT_FETCH_DEPTH_FULL`
-	 * (or `0`) for full history, or `GIT_FETCH_DEPTH_UNSHALLOW`
+	 * Depth of the fetch to perform, or `GIT3_FETCH_DEPTH_FULL`
+	 * (or `0`) for full history, or `GIT3_FETCH_DEPTH_UNSHALLOW`
 	 * to "unshallow" a shallow repository.
 	 *
-	 * The default is full (`GIT_FETCH_DEPTH_FULL` or `0`).
+	 * The default is full (`GIT3_FETCH_DEPTH_FULL` or `0`).
 	 */
 	int depth;
 
@@ -819,43 +819,43 @@ typedef struct {
 	 * specified, the `http.followRedirects` configuration setting
 	 * will be consulted.
 	 */
-	git_remote_redirect_t follow_redirects;
+	git3_remote_redirect_t follow_redirects;
 
 	/**
 	 * Extra headers for this fetch operation
 	 */
-	git_strarray custom_headers;
-} git_fetch_options;
+	git3_strarray custom_headers;
+} git3_fetch_options;
 
-/** Current version for the `git_fetch_options` structure */
-#define GIT_FETCH_OPTIONS_VERSION 1
+/** Current version for the `git3_fetch_options` structure */
+#define GIT3_FETCH_OPTIONS_VERSION 1
 
-/** Static constructor for `git_fetch_options` */
-#define GIT_FETCH_OPTIONS_INIT { \
-	GIT_FETCH_OPTIONS_VERSION, \
-	GIT_REMOTE_CALLBACKS_INIT, \
-	GIT_FETCH_PRUNE_UNSPECIFIED, \
-	GIT_REMOTE_UPDATE_FETCHHEAD, \
-	GIT_REMOTE_DOWNLOAD_TAGS_UNSPECIFIED, \
-	GIT_PROXY_OPTIONS_INIT }
+/** Static constructor for `git3_fetch_options` */
+#define GIT3_FETCH_OPTIONS_INIT { \
+	GIT3_FETCH_OPTIONS_VERSION, \
+	GIT3_REMOTE_CALLBACKS_INIT, \
+	GIT3_FETCH_PRUNE_UNSPECIFIED, \
+	GIT3_REMOTE_UPDATE_FETCHHEAD, \
+	GIT3_REMOTE_DOWNLOAD_TAGS_UNSPECIFIED, \
+	GIT3_PROXY_OPTIONS_INIT }
 
 /**
- * Initialize git_fetch_options structure
+ * Initialize git3_fetch_options structure
  *
- * Initializes a `git_fetch_options` with default values. Equivalent to
- * creating an instance with `GIT_FETCH_OPTIONS_INIT`.
+ * Initializes a `git3_fetch_options` with default values. Equivalent to
+ * creating an instance with `GIT3_FETCH_OPTIONS_INIT`.
  *
- * @param opts The `git_fetch_options` struct to initialize.
- * @param version The struct version; pass `GIT_FETCH_OPTIONS_VERSION`.
+ * @param opts The `git3_fetch_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_FETCH_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_fetch_options_init(
-	git_fetch_options *opts,
+GIT3_EXTERN(int) git3_fetch_options_init(
+	git3_fetch_options *opts,
 	unsigned int version);
 
 
 /**
- * Controls the behavior of a git_push object.
+ * Controls the behavior of a git3_push object.
  */
 typedef struct {
 	unsigned int version;
@@ -873,100 +873,100 @@ typedef struct {
 	/**
 	 * Callbacks to use for this push operation
 	 */
-	git_remote_callbacks callbacks;
+	git3_remote_callbacks callbacks;
 
 	/**
 	* Proxy options to use, by default no proxy is used.
 	*/
-	git_proxy_options proxy_opts;
+	git3_proxy_options proxy_opts;
 
 	/**
 	 * Whether to allow off-site redirects.  If this is not
 	 * specified, the `http.followRedirects` configuration setting
 	 * will be consulted.
 	 */
-	git_remote_redirect_t follow_redirects;
+	git3_remote_redirect_t follow_redirects;
 
 	/**
 	 * Extra headers for this push operation
 	 */
-	git_strarray custom_headers;
+	git3_strarray custom_headers;
 
 	/**
 	 * "Push options" to deliver to the remote.
 	 */
-	git_strarray remote_push_options;
-} git_push_options;
+	git3_strarray remote_push_options;
+} git3_push_options;
 
-/** Current version for the `git_push_options` structure */
-#define GIT_PUSH_OPTIONS_VERSION 1
+/** Current version for the `git3_push_options` structure */
+#define GIT3_PUSH_OPTIONS_VERSION 1
 
-/** Static constructor for `git_push_options` */
-#define GIT_PUSH_OPTIONS_INIT { GIT_PUSH_OPTIONS_VERSION, 1, GIT_REMOTE_CALLBACKS_INIT, GIT_PROXY_OPTIONS_INIT }
+/** Static constructor for `git3_push_options` */
+#define GIT3_PUSH_OPTIONS_INIT { GIT3_PUSH_OPTIONS_VERSION, 1, GIT3_REMOTE_CALLBACKS_INIT, GIT3_PROXY_OPTIONS_INIT }
 
 /**
- * Initialize git_push_options structure
+ * Initialize git3_push_options structure
  *
- * Initializes a `git_push_options` with default values. Equivalent to
- * creating an instance with `GIT_PUSH_OPTIONS_INIT`.
+ * Initializes a `git3_push_options` with default values. Equivalent to
+ * creating an instance with `GIT3_PUSH_OPTIONS_INIT`.
  *
- * @param opts The `git_push_options` struct to initialize.
- * @param version The struct version; pass `GIT_PUSH_OPTIONS_VERSION`.
+ * @param opts The `git3_push_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_PUSH_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_push_options_init(
-	git_push_options *opts,
+GIT3_EXTERN(int) git3_push_options_init(
+	git3_push_options *opts,
 	unsigned int version);
 
 /**
  * Remote creation options structure
  *
- * Initialize with `GIT_REMOTE_CREATE_OPTIONS_INIT`. Alternatively, you can
- * use `git_remote_create_options_init`.
+ * Initialize with `GIT3_REMOTE_CREATE_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_remote_create_options_init`.
  *
  */
 typedef struct {
 	unsigned int version;
 
 	/** Callbacks to use for this connection */
-	git_remote_callbacks callbacks;
+	git3_remote_callbacks callbacks;
 
 	/** HTTP Proxy settings */
-	git_proxy_options proxy_opts;
+	git3_proxy_options proxy_opts;
 
 	/**
 	 * Whether to allow off-site redirects.  If this is not
 	 * specified, the `http.followRedirects` configuration setting
 	 * will be consulted.
 	 */
-	git_remote_redirect_t follow_redirects;
+	git3_remote_redirect_t follow_redirects;
 
 	/** Extra HTTP headers to use in this connection */
-	git_strarray custom_headers;
-} git_remote_connect_options;
+	git3_strarray custom_headers;
+} git3_remote_connect_options;
 
-/** Current version for the `git_remote_connect_options` structure */
-#define GIT_REMOTE_CONNECT_OPTIONS_VERSION 1
+/** Current version for the `git3_remote_connect_options` structure */
+#define GIT3_REMOTE_CONNECT_OPTIONS_VERSION 1
 
-/** Static constructor for `git_remote_connect_options` */
-#define GIT_REMOTE_CONNECT_OPTIONS_INIT { \
-	GIT_REMOTE_CONNECT_OPTIONS_VERSION, \
-	GIT_REMOTE_CALLBACKS_INIT, \
-	GIT_PROXY_OPTIONS_INIT }
+/** Static constructor for `git3_remote_connect_options` */
+#define GIT3_REMOTE_CONNECT_OPTIONS_INIT { \
+	GIT3_REMOTE_CONNECT_OPTIONS_VERSION, \
+	GIT3_REMOTE_CALLBACKS_INIT, \
+	GIT3_PROXY_OPTIONS_INIT }
 
 /**
- * Initialize git_remote_connect_options structure.
+ * Initialize git3_remote_connect_options structure.
  *
- * Initializes a `git_remote_connect_options` with default values.
+ * Initializes a `git3_remote_connect_options` with default values.
  * Equivalent to creating an instance with
- * `GIT_REMOTE_CONNECT_OPTIONS_INIT`.
+ * `GIT3_REMOTE_CONNECT_OPTIONS_INIT`.
  *
- * @param opts The `git_remote_connect_options` struct to initialize.
- * @param version The struct version; pass `GIT_REMOTE_CONNECT_OPTIONS_VERSION`.
+ * @param opts The `git3_remote_connect_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_REMOTE_CONNECT_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_remote_connect_options_init(
-		git_remote_connect_options *opts,
+GIT3_EXTERN(int) git3_remote_connect_options_init(
+		git3_remote_connect_options *opts,
 		unsigned int version);
 
 /**
@@ -977,19 +977,19 @@ GIT_EXTERN(int) git_remote_connect_options_init(
  * specific binary which can only do the one or the other.
  *
  * @param remote the remote to connect to
- * @param direction GIT_DIRECTION_FETCH if you want to fetch or
- * GIT_DIRECTION_PUSH if you want to push
+ * @param direction GIT3_DIRECTION_FETCH if you want to fetch or
+ * GIT3_DIRECTION_PUSH if you want to push
  * @param callbacks the callbacks to use for this connection
  * @param proxy_opts proxy settings
  * @param custom_headers extra HTTP headers to use in this connection
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_connect(
-	git_remote *remote,
-	git_direction direction,
-	const git_remote_callbacks *callbacks,
-	const git_proxy_options *proxy_opts,
-	const git_strarray *custom_headers);
+GIT3_EXTERN(int) git3_remote_connect(
+	git3_remote *remote,
+	git3_direction direction,
+	const git3_remote_callbacks *callbacks,
+	const git3_proxy_options *proxy_opts,
+	const git3_strarray *custom_headers);
 
 /**
  * Open a connection to a remote with extended options.
@@ -1000,19 +1000,19 @@ GIT_EXTERN(int) git_remote_connect(
  *
  * The given options structure will form the defaults for connection
  * options and callback setup.  Callers may override these defaults
- * by specifying `git_fetch_options` or `git_push_options` in
+ * by specifying `git3_fetch_options` or `git3_push_options` in
  * subsequent calls.
  *
  * @param remote the remote to connect to
- * @param direction GIT_DIRECTION_FETCH if you want to fetch or
- * GIT_DIRECTION_PUSH if you want to push
+ * @param direction GIT3_DIRECTION_FETCH if you want to fetch or
+ * GIT3_DIRECTION_PUSH if you want to push
  * @param opts the remote connection options
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_connect_ext(
-	git_remote *remote,
-	git_direction direction,
-	const git_remote_connect_options *opts);
+GIT3_EXTERN(int) git3_remote_connect_ext(
+	git3_remote *remote,
+	git3_direction direction,
+	const git3_remote_connect_options *opts);
 
 /**
  * Download and index the packfile.
@@ -1034,10 +1034,10 @@ GIT_EXTERN(int) git_remote_connect_ext(
  * @param opts the options to use for this fetch or NULL
  * @return 0 or an error code
  */
- GIT_EXTERN(int) git_remote_download(
-	git_remote *remote,
-	const git_strarray *refspecs,
-	const git_fetch_options *opts);
+ GIT3_EXTERN(int) git3_remote_download(
+	git3_remote *remote,
+	const git3_strarray *refspecs,
+	const git3_fetch_options *opts);
 
 /**
  * Create a packfile and send it to the server
@@ -1056,33 +1056,33 @@ GIT_EXTERN(int) git_remote_connect_ext(
  * @param opts the options to use for this push
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_upload(
-	git_remote *remote,
-	const git_strarray *refspecs,
-	const git_push_options *opts);
+GIT3_EXTERN(int) git3_remote_upload(
+	git3_remote *remote,
+	const git3_strarray *refspecs,
+	const git3_push_options *opts);
 
 /**
  * Update the tips to the new state.
  *
  * If callbacks are not specified then the callbacks specified to
- * `git_remote_connect` will be used (if it was called).
+ * `git3_remote_connect` will be used (if it was called).
  *
  * @param remote the remote to update
  * @param callbacks  pointer to the callback structure to use or NULL
- * @param update_flags the git_remote_update_flags for these tips.
+ * @param update_flags the git3_remote_update_flags for these tips.
  * @param download_tags what the behaviour for downloading tags is for this fetch. This is
- * ignored for push. This must be the same value passed to `git_remote_download()`.
+ * ignored for push. This must be the same value passed to `git3_remote_download()`.
  * @param reflog_message The message to insert into the reflogs. If
  * NULL and fetching, the default is "fetch <name>", where <name> is
  * the name of the remote (or its url, for in-memory remotes). This
  * parameter is ignored when pushing.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_update_tips(
-		git_remote *remote,
-		const git_remote_callbacks *callbacks,
+GIT3_EXTERN(int) git3_remote_update_tips(
+		git3_remote *remote,
+		const git3_remote_callbacks *callbacks,
 		unsigned int update_flags,
-		git_remote_autotag_option_t download_tags,
+		git3_remote_autotag_option_t download_tags,
 		const char *reflog_message);
 
 /**
@@ -1103,25 +1103,25 @@ GIT_EXTERN(int) git_remote_update_tips(
  *								 default is "fetch"
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_fetch(
-		git_remote *remote,
-		const git_strarray *refspecs,
-		const git_fetch_options *opts,
+GIT3_EXTERN(int) git3_remote_fetch(
+		git3_remote *remote,
+		const git3_strarray *refspecs,
+		const git3_fetch_options *opts,
 		const char *reflog_message);
 
 /**
  * Prune tracking refs that are no longer present on remote.
  *
  * If callbacks are not specified then the callbacks specified to
- * `git_remote_connect` will be used (if it was called).
+ * `git3_remote_connect` will be used (if it was called).
  *
  * @param remote the remote to prune
  * @param callbacks callbacks to use for this prune
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_remote_prune(
-	git_remote *remote,
-	const git_remote_callbacks *callbacks);
+GIT3_EXTERN(int) git3_remote_prune(
+	git3_remote *remote,
+	const git3_remote_callbacks *callbacks);
 
 /**
  * Perform a push.
@@ -1136,18 +1136,18 @@ GIT_EXTERN(int) git_remote_prune(
  * @param opts options to use for this push
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_remote_push(
-	git_remote *remote,
-	const git_strarray *refspecs,
-	const git_push_options *opts);
+GIT3_EXTERN(int) git3_remote_push(
+	git3_remote *remote,
+	const git3_strarray *refspecs,
+	const git3_push_options *opts);
 
 /**
  * Get the statistics structure that is filled in by the fetch operation.
  *
  * @param remote the remote to get statistics for
- * @return the git_indexer_progress for the remote
+ * @return the git3_indexer_progress for the remote
  */
-GIT_EXTERN(const git_indexer_progress *) git_remote_stats(git_remote *remote);
+GIT3_EXTERN(const git3_indexer_progress *) git3_remote_stats(git3_remote *remote);
 
 /**
  * Retrieve the tag auto-follow setting
@@ -1155,7 +1155,7 @@ GIT_EXTERN(const git_indexer_progress *) git_remote_stats(git_remote *remote);
  * @param remote the remote to query
  * @return the auto-follow setting
  */
-GIT_EXTERN(git_remote_autotag_option_t) git_remote_autotag(const git_remote *remote);
+GIT3_EXTERN(git3_remote_autotag_option_t) git3_remote_autotag(const git3_remote *remote);
 
 /**
  * Set the remote's tag following setting.
@@ -1168,7 +1168,7 @@ GIT_EXTERN(git_remote_autotag_option_t) git_remote_autotag(const git_remote *rem
  * @param value the new value to take.
  * @return 0, or an error code.
  */
-GIT_EXTERN(int) git_remote_set_autotag(git_repository *repo, const char *remote, git_remote_autotag_option_t value);
+GIT3_EXTERN(int) git3_remote_set_autotag(git3_repository *repo, const char *remote, git3_remote_autotag_option_t value);
 
 /**
  * Retrieve the ref-prune setting
@@ -1176,7 +1176,7 @@ GIT_EXTERN(int) git_remote_set_autotag(git_repository *repo, const char *remote,
  * @param remote the remote to query
  * @return the ref-prune setting
  */
-GIT_EXTERN(int) git_remote_prune_refs(const git_remote *remote);
+GIT3_EXTERN(int) git3_remote_prune_refs(const git3_remote *remote);
 
 /**
  * Give the remote a new name
@@ -1185,7 +1185,7 @@ GIT_EXTERN(int) git_remote_prune_refs(const git_remote *remote);
  * for the remote are updated.
  *
  * The new name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * No loaded instances of a the remote with the old name will change
  * their name or their list of refspecs.
@@ -1196,11 +1196,11 @@ GIT_EXTERN(int) git_remote_prune_refs(const git_remote *remote);
  * @param repo the repository in which to rename
  * @param name the current name of the remote
  * @param new_name the new name the remote should bear
- * @return 0, GIT_EINVALIDSPEC, GIT_EEXISTS or an error code
+ * @return 0, GIT3_EINVALIDSPEC, GIT3_EEXISTS or an error code
  */
-GIT_EXTERN(int) git_remote_rename(
-	git_strarray *problems,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_remote_rename(
+	git3_strarray *problems,
+	git3_repository *repo,
 	const char *name,
 	const char *new_name);
 
@@ -1211,7 +1211,7 @@ GIT_EXTERN(int) git_remote_rename(
  * @param remote_name name to be checked.
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_remote_name_is_valid(int *valid, const char *remote_name);
+GIT3_EXTERN(int) git3_remote_name_is_valid(int *valid, const char *remote_name);
 
 /**
 * Delete an existing persisted remote.
@@ -1223,7 +1223,7 @@ GIT_EXTERN(int) git_remote_name_is_valid(int *valid, const char *remote_name);
 * @param name the name of the remote to delete
 * @return 0 on success, or an error code.
 */
-GIT_EXTERN(int) git_remote_delete(git_repository *repo, const char *name);
+GIT3_EXTERN(int) git3_remote_delete(git3_repository *repo, const char *name);
 
 /**
  * Retrieve the name of the remote's default branch
@@ -1238,12 +1238,12 @@ GIT_EXTERN(int) git_remote_delete(git_repository *repo, const char *name);
  *
  * @param out the buffer in which to store the reference name
  * @param remote the remote
- * @return 0, GIT_ENOTFOUND if the remote does not have any references
+ * @return 0, GIT3_ENOTFOUND if the remote does not have any references
  * or none of them point to HEAD's commit, or an error message.
  */
-GIT_EXTERN(int) git_remote_default_branch(git_buf *out, git_remote *remote);
+GIT3_EXTERN(int) git3_remote_default_branch(git3_buf *out, git3_remote *remote);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

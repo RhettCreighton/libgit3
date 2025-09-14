@@ -1,5 +1,5 @@
-#ifndef __CLAR_LIBGIT2_ALLOC__
-#define __CLAR_LIBGIT2_ALLOC__
+#ifndef __CLAR_LIBGIT3_ALLOC__
+#define __CLAR_LIBGIT3_ALLOC__
 
 #include "clar.h"
 #include "common.h"

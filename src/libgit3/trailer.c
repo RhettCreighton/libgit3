@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #include "array.h"
@@ -15,7 +15,7 @@
 #define COMMENT_LINE_CHAR '#'
 #define TRAILER_SEPARATORS ":"
 
-static const char *const git_generated_prefixes[] = {
+static const char *const git3_generated_prefixes[] = {
 	"Signed-off-by: ",
 	"(cherry picked from commit ",
 	NULL
@@ -24,7 +24,7 @@ static const char *const git_generated_prefixes[] = {
 static int is_blank_line(const char *str)
 {
 	const char *s = str;
-	while (*s && *s != '\n' && git__isspace(*s))
+	while (*s && *s != '\n' && git3__isspace(*s))
 		s++;
 	return !*s || *s == '\n';
 }
@@ -93,7 +93,7 @@ static bool find_separator(size_t *out, const char *line, const char *separators
 			return true;
 		}
 
-		if (!whitespace_found && (git__isalnum(*c) || *c == '-'))
+		if (!whitespace_found && (git3__isalnum(*c) || *c == '-'))
 			continue;
 		if (c != line && (*c == ' ' || *c == '\t')) {
 			whitespace_found = 1;
@@ -133,7 +133,7 @@ static size_t ignore_non_trailer(const char *buf, size_t len)
 			if (!boc)
 				boc = bol;
 			/* otherwise, it is just continuing */
-		} else if (git__prefixcmp(buf + bol, "Conflicts:\n") == 0) {
+		} else if (git3__prefixcmp(buf + bol, "Conflicts:\n") == 0) {
 			in_old_conflicts_block = 1;
 			if (!boc)
 				boc = bol;
@@ -158,7 +158,7 @@ static size_t find_patch_start(const char *str)
 	const char *s;
 
 	for (s = str; *s; s = next_line(s)) {
-		if (git__prefixcmp(s, "---") == 0 && git__isspace(s[3]))
+		if (git3__prefixcmp(s, "---") == 0 && git3__isspace(s[3]))
 			return s - str;
 	}
 
@@ -223,8 +223,8 @@ static size_t find_trailer_start(const char *buf, size_t len)
 		}
 		only_spaces = 0;
 
-		for (p = git_generated_prefixes; *p; p++) {
-			if (git__prefixcmp(bol, *p) == 0) {
+		for (p = git3_generated_prefixes; *p; p++) {
+			if (git3__prefixcmp(bol, *p) == 0) {
 				trailer_lines++;
 				possible_continuation_lines = 0;
 				recognized_prefix = 1;
@@ -233,12 +233,12 @@ static size_t find_trailer_start(const char *buf, size_t len)
 		}
 
 		find_separator(&separator_pos, bol, TRAILER_SEPARATORS);
-		if (separator_pos >= 1 && !git__isspace(bol[0])) {
+		if (separator_pos >= 1 && !git3__isspace(bol[0])) {
 			trailer_lines++;
 			possible_continuation_lines = 0;
 			if (recognized_prefix)
 				continue;
-		} else if (git__isspace(bol[0]))
+		} else if (git3__isspace(bol[0]))
 			possible_continuation_lines++;
 		else {
 			non_trailer_lines++;
@@ -266,7 +266,7 @@ static char *extract_trailer_block(const char *message, size_t *len)
 
 	size_t trailer_len = trailer_end - trailer_start;
 
-	char *buffer = git__malloc(trailer_len + 1);
+	char *buffer = git3__malloc(trailer_len + 1);
 	if (buffer == NULL)
 		return NULL;
 
@@ -292,16 +292,16 @@ enum trailer_state {
 #define NEXT(st) { state = (st); ptr++; continue; }
 #define GOTO(st) { state = (st); continue; }
 
-typedef git_array_t(git_message_trailer) git_array_trailer_t;
+typedef git3_array_t(git3_message_trailer) git3_array_trailer_t;
 
-int git_message_trailers(git_message_trailer_array *trailer_arr, const char *message)
+int git3_message_trailers(git3_message_trailer_array *trailer_arr, const char *message)
 {
 	enum trailer_state state = S_START;
 	int rc = 0;
 	char *ptr;
 	char *key = NULL;
 	char *value = NULL;
-	git_array_trailer_t arr = GIT_ARRAY_INIT;
+	git3_array_trailer_t arr = GIT3_ARRAY_INIT;
 
 	size_t trailer_len;
 	char *trailer = extract_trailer_block(message, &trailer_len);
@@ -323,7 +323,7 @@ int git_message_trailers(git_message_trailer_array *trailer_arr, const char *mes
 					goto ret;
 				}
 
-				if (git__isalnum(*ptr) || *ptr == '-') {
+				if (git3__isalnum(*ptr) || *ptr == '-') {
 					/* legal key character */
 					NEXT(S_KEY);
 				}
@@ -391,7 +391,7 @@ int git_message_trailers(git_message_trailer_array *trailer_arr, const char *mes
 				GOTO(S_VALUE_END);
 			}
 			case S_VALUE_END: {
-				git_message_trailer *t = git_array_alloc(arr);
+				git3_message_trailer *t = git3_array_alloc(arr);
 
 				t->key = key;
 				t->value = value;
@@ -423,8 +423,8 @@ ret:
 	return rc;
 }
 
-void git_message_trailer_array_free(git_message_trailer_array *arr)
+void git3_message_trailer_array_free(git3_message_trailer_array *arr)
 {
-	git__free(arr->_trailer_block);
-	git__free(arr->trailers);
+	git3__free(arr->_trailer_block);
+	git3__free(arr->trailers);
 }

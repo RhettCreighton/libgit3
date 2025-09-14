@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "../submodule/submodule_helpers.h"
 #include "repository.h"
 
@@ -9,14 +9,14 @@ void test_repo_reservedname__cleanup(void)
 
 void test_repo_reservedname__includes_shortname_on_win32(void)
 {
-	git_repository *repo;
-	git_str *reserved;
+	git3_repository *repo;
+	git3_str *reserved;
 	size_t reserved_len;
 
 	repo = cl_git_sandbox_init("nasty");
-	cl_assert(git_repository__reserved_names(&reserved, &reserved_len, repo, false));
+	cl_assert(git3_repository__reserved_names(&reserved, &reserved_len, repo, false));
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_assert_equal_i(2, reserved_len);
 	cl_assert_equal_s(".git", reserved[0].ptr);
 	cl_assert_equal_s("GIT~1", reserved[1].ptr);
@@ -28,12 +28,12 @@ void test_repo_reservedname__includes_shortname_on_win32(void)
 
 void test_repo_reservedname__includes_shortname_when_requested(void)
 {
-	git_repository *repo;
-	git_str *reserved;
+	git3_repository *repo;
+	git3_str *reserved;
 	size_t reserved_len;
 
 	repo = cl_git_sandbox_init("nasty");
-	cl_assert(git_repository__reserved_names(&reserved, &reserved_len, repo, true));
+	cl_assert(git3_repository__reserved_names(&reserved, &reserved_len, repo, true));
 
 	cl_assert_equal_i(2, reserved_len);
 	cl_assert_equal_s(".git", reserved[0].ptr);
@@ -45,9 +45,9 @@ void test_repo_reservedname__includes_shortname_when_requested(void)
  */
 void test_repo_reservedname__custom_shortname_recognized(void)
 {
-#ifdef GIT_WIN32
-	git_repository *repo;
-	git_str *reserved;
+#ifdef GIT3_WIN32
+	git3_repository *repo;
+	git3_str *reserved;
 	size_t reserved_len;
 
 	if (!cl_sandbox_supports_8dot3())
@@ -59,7 +59,7 @@ void test_repo_reservedname__custom_shortname_recognized(void)
 	cl_git_write2file("nasty/git~1", "", 0, O_RDWR|O_CREAT, 0666);
 	cl_must_pass(p_rename("nasty/_temp", "nasty/.git"));
 
-	cl_assert(git_repository__reserved_names(&reserved, &reserved_len, repo, true));
+	cl_assert(git3_repository__reserved_names(&reserved, &reserved_len, repo, true));
 
 	cl_assert_equal_i(3, reserved_len);
 	cl_assert_equal_s(".git", reserved[0].ptr);
@@ -75,15 +75,15 @@ void test_repo_reservedname__custom_shortname_recognized(void)
  * typically named with the name of our subrepository.  Consequently,
  * preventing access to the short name of the actual repository path
  * would prevent us from creating files with the same name as the
- * subrepo.  (Eg, a submodule named "libgit2" could not contain a file
- * named "libgit2", which would be unfortunate.)
+ * subrepo.  (Eg, a submodule named "libgit3" could not contain a file
+ * named "libgit3", which would be unfortunate.)
  */
 void test_repo_reservedname__submodule_pointer(void)
 {
-#ifdef GIT_WIN32
-	git_repository *super_repo, *sub_repo;
-	git_submodule *sub;
-	git_str *sub_reserved;
+#ifdef GIT3_WIN32
+	git3_repository *super_repo, *sub_repo;
+	git3_submodule *sub;
+	git3_str *sub_reserved;
 	size_t sub_reserved_len;
 
 	if (!cl_sandbox_supports_8dot3())
@@ -93,17 +93,17 @@ void test_repo_reservedname__submodule_pointer(void)
 
 	assert_submodule_exists(super_repo, "sm_unchanged");
 
-	cl_git_pass(git_submodule_lookup(&sub, super_repo, "sm_unchanged"));
-	cl_git_pass(git_submodule_open(&sub_repo, sub));
+	cl_git_pass(git3_submodule_lookup(&sub, super_repo, "sm_unchanged"));
+	cl_git_pass(git3_submodule_open(&sub_repo, sub));
 
-	cl_assert(git_repository__reserved_names(&sub_reserved, &sub_reserved_len, sub_repo, true));
+	cl_assert(git3_repository__reserved_names(&sub_reserved, &sub_reserved_len, sub_repo, true));
 
 	cl_assert_equal_i(2, sub_reserved_len);
 	cl_assert_equal_s(".git", sub_reserved[0].ptr);
 	cl_assert_equal_s("GIT~1", sub_reserved[1].ptr);
 
-	git_submodule_free(sub);
-	git_repository_free(sub_repo);
+	git3_submodule_free(sub);
+	git3_repository_free(sub_repo);
 #endif
 }
 
@@ -114,19 +114,19 @@ void test_repo_reservedname__submodule_pointer(void)
  */
 void test_repo_reservedname__submodule_pointer_during_create(void)
 {
-	git_repository *repo;
-	git_submodule *sm;
-	git_submodule_update_options update_options = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;
-	git_str url = GIT_STR_INIT;
+	git3_repository *repo;
+	git3_submodule *sm;
+	git3_submodule_update_options update_options = GIT3_SUBMODULE_UPDATE_OPTIONS_INIT;
+	git3_str url = GIT3_STR_INIT;
 
 	repo = setup_fixture_super();
 
-	cl_git_pass(git_str_joinpath(&url, clar_sandbox_path(), "sub.git"));
+	cl_git_pass(git3_str_joinpath(&url, clar_sandbox_path(), "sub.git"));
 	cl_repo_set_string(repo, "submodule.sub.url", url.ptr);
 
-	cl_git_pass(git_submodule_lookup(&sm, repo, "sub"));
-	cl_git_pass(git_submodule_update(sm, 1, &update_options));
+	cl_git_pass(git3_submodule_lookup(&sm, repo, "sub"));
+	cl_git_pass(git3_submodule_update(sm, 1, &update_options));
 
-	git_submodule_free(sm);
-	git_str_dispose(&url);
+	git3_submodule_free(sm);
+	git3_str_dispose(&url);
 }

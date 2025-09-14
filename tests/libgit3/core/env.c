@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "sysdir.h"
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 #define NUM_VARS 5
 static const char *env_vars[NUM_VARS] = {
 	"HOME", "HOMEDRIVE", "HOMEPATH", "USERPROFILE", "PROGRAMFILES"
@@ -35,12 +35,12 @@ void test_core_env__initialize(void)
 
 static void set_global_search_path_from_env(void)
 {
-	cl_git_pass(git_sysdir_set(GIT_SYSDIR_GLOBAL, NULL));
+	cl_git_pass(git3_sysdir_set(GIT3_SYSDIR_GLOBAL, NULL));
 }
 
 static void set_system_search_path_from_env(void)
 {
-	cl_git_pass(git_sysdir_set(GIT_SYSDIR_SYSTEM, NULL));
+	cl_git_pass(git3_sysdir_set(GIT3_SYSDIR_SYSTEM, NULL));
 }
 
 void test_core_env__cleanup(void)
@@ -50,7 +50,7 @@ void test_core_env__cleanup(void)
 
 	for (i = 0; i < NUM_VARS; ++i) {
 		cl_setenv(env_vars[i], env_save[i]);
-		git__free(env_save[i]);
+		git3__free(env_save[i]);
 		env_save[i] = NULL;
 	}
 
@@ -77,12 +77,12 @@ static void setenv_and_check(const char *name, const char *value)
 	else
 		cl_assert(check == NULL);
 
-	git__free(check);
+	git3__free(check);
 }
 
 void test_core_env__0(void)
 {
-	git_str path = GIT_STR_INIT, found = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT, found = GIT3_STR_INIT;
 	char testfile[16], tidx = '0';
 	char **val;
 	const char *testname = "testfile";
@@ -102,41 +102,41 @@ void test_core_env__0(void)
 			continue;
 		}
 
-		cl_git_pass(git_fs_path_prettify(&path, *val, NULL));
+		cl_git_pass(git3_fs_path_prettify(&path, *val, NULL));
 
 		/* vary testfile name in each directory so accidentally leaving
 		 * an environment variable set from a previous iteration won't
 		 * accidentally make this test pass...
 		 */
 		testfile[testlen] = tidx++;
-		cl_git_pass(git_str_joinpath(&path, path.ptr, testfile));
+		cl_git_pass(git3_str_joinpath(&path, path.ptr, testfile));
 		cl_git_mkfile(path.ptr, "find me");
-		git_str_rtruncate_at_char(&path, '/');
+		git3_str_rtruncate_at_char(&path, '/');
 
 		cl_assert_equal_i(
-			GIT_ENOTFOUND, git_sysdir_find_global_file(&found, testfile));
+			GIT3_ENOTFOUND, git3_sysdir_find_global_file(&found, testfile));
 
 		setenv_and_check("HOME", path.ptr);
 		set_global_search_path_from_env();
 
-		cl_git_pass(git_sysdir_find_global_file(&found, testfile));
+		cl_git_pass(git3_sysdir_find_global_file(&found, testfile));
 
 		cl_setenv("HOME", env_save[0]);
 		set_global_search_path_from_env();
 
 		cl_assert_equal_i(
-			GIT_ENOTFOUND, git_sysdir_find_global_file(&found, testfile));
+			GIT3_ENOTFOUND, git3_sysdir_find_global_file(&found, testfile));
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 		setenv_and_check("HOMEDRIVE", NULL);
 		setenv_and_check("HOMEPATH", NULL);
 		setenv_and_check("USERPROFILE", path.ptr);
 		set_global_search_path_from_env();
 
-		cl_git_pass(git_sysdir_find_global_file(&found, testfile));
+		cl_git_pass(git3_sysdir_find_global_file(&found, testfile));
 
 		{
-			int root = git_fs_path_root(path.ptr);
+			int root = git3_fs_path_root(path.ptr);
 			char old;
 
 			if (root >= 0) {
@@ -144,7 +144,7 @@ void test_core_env__0(void)
 				set_global_search_path_from_env();
 
 				cl_assert_equal_i(
-					GIT_ENOTFOUND, git_sysdir_find_global_file(&found, testfile));
+					GIT3_ENOTFOUND, git3_sysdir_find_global_file(&found, testfile));
 
 				old = path.ptr[root];
 				path.ptr[root] = '\0';
@@ -153,7 +153,7 @@ void test_core_env__0(void)
 				setenv_and_check("HOMEPATH", &path.ptr[root]);
 				set_global_search_path_from_env();
 
-				cl_git_pass(git_sysdir_find_global_file(&found, testfile));
+				cl_git_pass(git3_sysdir_find_global_file(&found, testfile));
 			}
 		}
 #endif
@@ -161,30 +161,30 @@ void test_core_env__0(void)
 		(void)p_rmdir(*val);
 	}
 
-	git_str_dispose(&path);
-	git_str_dispose(&found);
+	git3_str_dispose(&path);
+	git3_str_dispose(&found);
 }
 
 
 void test_core_env__1(void)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_global_file(&path, "nonexistentfile"));
+		GIT3_ENOTFOUND, git3_sysdir_find_global_file(&path, "nonexistentfile"));
 
 	cl_git_pass(cl_setenv("HOME", "doesnotexist"));
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_git_pass(cl_setenv("HOMEPATH", "doesnotexist"));
 	cl_git_pass(cl_setenv("USERPROFILE", "doesnotexist"));
 #endif
 	set_global_search_path_from_env();
 
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_global_file(&path, "nonexistentfile"));
+		GIT3_ENOTFOUND, git3_sysdir_find_global_file(&path, "nonexistentfile"));
 
 	cl_git_pass(cl_setenv("HOME", NULL));
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_git_pass(cl_setenv("HOMEPATH", NULL));
 	cl_git_pass(cl_setenv("USERPROFILE", NULL));
 #endif
@@ -192,64 +192,64 @@ void test_core_env__1(void)
 	set_system_search_path_from_env();
 
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_global_file(&path, "nonexistentfile"));
+		GIT3_ENOTFOUND, git3_sysdir_find_global_file(&path, "nonexistentfile"));
 
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_system_file(&path, "nonexistentfile"));
+		GIT3_ENOTFOUND, git3_sysdir_find_system_file(&path, "nonexistentfile"));
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_git_pass(cl_setenv("PROGRAMFILES", NULL));
 	set_system_search_path_from_env();
 
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_system_file(&path, "nonexistentfile"));
+		GIT3_ENOTFOUND, git3_sysdir_find_system_file(&path, "nonexistentfile"));
 #endif
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 static void check_global_searchpath(
-	const char *path, int position, const char *file, git_str *temp)
+	const char *path, int position, const char *file, git3_str *temp)
 {
-	git_str out = GIT_STR_INIT;
+	git3_str out = GIT3_STR_INIT;
 
 	/* build and set new path */
 	if (position < 0)
-		cl_git_pass(git_str_join(temp, GIT_PATH_LIST_SEPARATOR, path, "$PATH"));
+		cl_git_pass(git3_str_join(temp, GIT3_PATH_LIST_SEPARATOR, path, "$PATH"));
 	else if (position > 0)
-		cl_git_pass(git_str_join(temp, GIT_PATH_LIST_SEPARATOR, "$PATH", path));
+		cl_git_pass(git3_str_join(temp, GIT3_PATH_LIST_SEPARATOR, "$PATH", path));
 	else
-		cl_git_pass(git_str_sets(temp, path));
+		cl_git_pass(git3_str_sets(temp, path));
 
-	cl_git_pass(git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, temp->ptr));
+	cl_git_pass(git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, temp->ptr));
 
 	/* get path and make sure $PATH expansion worked */
-	cl_git_pass(git_libgit3_opts(
-		GIT_OPT_GET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, &out));
+	cl_git_pass(git3_libgit3_opts(
+		GIT3_OPT_GET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, &out));
 
 	if (position < 0)
-		cl_assert(git__prefixcmp(out.ptr, path) == 0);
+		cl_assert(git3__prefixcmp(out.ptr, path) == 0);
 	else if (position > 0)
-		cl_assert(git__suffixcmp(out.ptr, path) == 0);
+		cl_assert(git3__suffixcmp(out.ptr, path) == 0);
 	else
 		cl_assert_equal_s(out.ptr, path);
 
 	/* find file using new path */
-	cl_git_pass(git_sysdir_find_global_file(temp, file));
+	cl_git_pass(git3_sysdir_find_global_file(temp, file));
 
 	/* reset path and confirm file not found */
-	cl_git_pass(git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, NULL));
+	cl_git_pass(git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, NULL));
 	cl_assert_equal_i(
-		GIT_ENOTFOUND, git_sysdir_find_global_file(temp, file));
+		GIT3_ENOTFOUND, git3_sysdir_find_global_file(temp, file));
 
-	git_str_dispose(&out);
+	git3_str_dispose(&out);
 }
 
 void test_core_env__2(void)
 {
-	git_str path = GIT_STR_INIT, found = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT, found = GIT3_STR_INIT;
 	char testfile[16], tidx = '0';
 	char **val;
 	const char *testname = "alternate";
@@ -269,19 +269,19 @@ void test_core_env__2(void)
 			continue;
 		}
 
-		cl_git_pass(git_fs_path_prettify(&path, *val, NULL));
+		cl_git_pass(git3_fs_path_prettify(&path, *val, NULL));
 
 		/* vary testfile name so any sloppiness is resetting variables or
 		 * deleting files won't accidentally make a test pass.
 		 */
 		testfile[testlen] = tidx++;
-		cl_git_pass(git_str_joinpath(&path, path.ptr, testfile));
+		cl_git_pass(git3_str_joinpath(&path, path.ptr, testfile));
 		cl_git_mkfile(path.ptr, "find me");
-		git_str_rtruncate_at_char(&path, '/');
+		git3_str_rtruncate_at_char(&path, '/');
 
 		/* default should be NOTFOUND */
 		cl_assert_equal_i(
-			GIT_ENOTFOUND, git_sysdir_find_global_file(&found, testfile));
+			GIT3_ENOTFOUND, git3_sysdir_find_global_file(&found, testfile));
 
 		/* try plain, append $PATH, and prepend $PATH */
 		check_global_searchpath(path.ptr,  0, testfile, &found);
@@ -289,32 +289,32 @@ void test_core_env__2(void)
 		check_global_searchpath(path.ptr,  1, testfile, &found);
 
 		/* cleanup */
-		cl_git_pass(git_str_joinpath(&path, path.ptr, testfile));
+		cl_git_pass(git3_str_joinpath(&path, path.ptr, testfile));
 		(void)p_unlink(path.ptr);
 		(void)p_rmdir(*val);
 	}
 
-	git_str_dispose(&path);
-	git_str_dispose(&found);
+	git3_str_dispose(&path);
+	git3_str_dispose(&found);
 }
 
 void test_core_env__substitution(void)
 {
-  git_str buf = GIT_STR_INIT, expected = GIT_STR_INIT;
+  git3_str buf = GIT3_STR_INIT, expected = GIT3_STR_INIT;
 
   /* Set it to something non-default so we have controllable values */
-  cl_git_pass(git_libgit3_opts(GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, "/tmp/a"));
-  cl_git_pass(git_libgit3_opts(GIT_OPT_GET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, &buf));
+  cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, "/tmp/a"));
+  cl_git_pass(git3_libgit3_opts(GIT3_OPT_GET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, &buf));
   cl_assert_equal_s("/tmp/a", buf.ptr);
 
-  git_str_clear(&buf);
-  cl_git_pass(git_str_join(&buf, GIT_PATH_LIST_SEPARATOR, "$PATH", "/tmp/b"));
-  cl_git_pass(git_libgit3_opts(GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, buf.ptr));
-  cl_git_pass(git_libgit3_opts(GIT_OPT_GET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, &buf));
+  git3_str_clear(&buf);
+  cl_git_pass(git3_str_join(&buf, GIT3_PATH_LIST_SEPARATOR, "$PATH", "/tmp/b"));
+  cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, buf.ptr));
+  cl_git_pass(git3_libgit3_opts(GIT3_OPT_GET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, &buf));
 
-  cl_git_pass(git_str_join(&expected, GIT_PATH_LIST_SEPARATOR, "/tmp/a", "/tmp/b"));
+  cl_git_pass(git3_str_join(&expected, GIT3_PATH_LIST_SEPARATOR, "/tmp/a", "/tmp/b"));
   cl_assert_equal_s(expected.ptr, buf.ptr);
 
-  git_str_dispose(&expected);
-  git_str_dispose(&buf);
+  git3_str_dispose(&expected);
+  git3_str_dispose(&buf);
 }

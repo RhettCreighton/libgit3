@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -23,9 +23,9 @@
 #define is_nl(c) ((c) == '\r' || (c) == '\n')
 
 #define return_os_error(msg) do { \
-	git_error_set(GIT_ERROR_OS, "%s", msg); return -1; } while(0)
+	git3_error_set(GIT3_ERROR_OS, "%s", msg); return -1; } while(0)
 
-GIT_INLINE(size_t) no_nl_len(const char *str, size_t len)
+GIT3_INLINE(size_t) no_nl_len(const char *str, size_t len)
 {
 	size_t i = 0;
 
@@ -35,7 +35,7 @@ GIT_INLINE(size_t) no_nl_len(const char *str, size_t len)
 	return i;
 }
 
-GIT_INLINE(size_t) nl_len(bool *has_nl, const char *str, size_t len)
+GIT3_INLINE(size_t) nl_len(bool *has_nl, const char *str, size_t len)
 {
 	size_t i = no_nl_len(str, len);
 
@@ -49,20 +49,20 @@ GIT_INLINE(size_t) nl_len(bool *has_nl, const char *str, size_t len)
 	return i;
 }
 
-static int progress_write(cli_progress *progress, bool force, git_str *line)
+static int progress_write(cli_progress *progress, bool force, git3_str *line)
 {
 	bool has_nl;
 	size_t no_nl = no_nl_len(line->ptr, line->size);
 	size_t nl = nl_len(&has_nl, line->ptr + no_nl, line->size - no_nl);
-	uint64_t now = git_time_monotonic();
+	uint64_t now = git3_time_monotonic();
 	size_t i;
 
 	/* Avoid spamming the console with progress updates */
 	if (!force && line->ptr[line->size - 1] != '\n' && progress->last_update) {
 		if (now - progress->last_update < PROGRESS_UPDATE_TIME) {
-			git_str_clear(&progress->deferred);
-			git_str_put(&progress->deferred, line->ptr, line->size);
-			return git_str_oom(&progress->deferred) ? -1 : 0;
+			git3_str_clear(&progress->deferred);
+			git3_str_put(&progress->deferred, line->ptr, line->size);
+			return git3_str_oom(&progress->deferred) ? -1 : 0;
 		}
 	}
 
@@ -85,30 +85,30 @@ static int progress_write(cli_progress *progress, bool force, git_str *line)
 	    fflush(stdout) != 0)
 		return_os_error("could not print status");
 
-	git_str_clear(&progress->onscreen);
+	git3_str_clear(&progress->onscreen);
 
 	if (line->ptr[line->size - 1] == '\n') {
 		progress->last_update = 0;
 	} else {
-		git_str_put(&progress->onscreen, line->ptr, line->size);
+		git3_str_put(&progress->onscreen, line->ptr, line->size);
 		progress->last_update = now;
 	}
 
-	git_str_clear(&progress->deferred);
-	return git_str_oom(&progress->onscreen) ? -1 : 0;
+	git3_str_clear(&progress->deferred);
+	return git3_str_oom(&progress->onscreen) ? -1 : 0;
 }
 
 static int progress_printf(cli_progress *progress, bool force, const char *fmt, ...)
-	GIT_FORMAT_PRINTF(3, 4);
+	GIT3_FORMAT_PRINTF(3, 4);
 
 int progress_printf(cli_progress *progress, bool force, const char *fmt, ...)
 {
-	git_str buf = GIT_BUF_INIT;
+	git3_str buf = GIT3_BUF_INIT;
 	va_list ap;
 	int error;
 
 	va_start(ap, fmt);
-	error = git_str_vprintf(&buf, fmt, ap);
+	error = git3_str_vprintf(&buf, fmt, ap);
 	va_end(ap);
 
 	if (error < 0)
@@ -116,7 +116,7 @@ int progress_printf(cli_progress *progress, bool force, const char *fmt, ...)
 
 	error = progress_write(progress, force, &buf);
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 	return error;
 }
 
@@ -129,8 +129,8 @@ static int progress_complete(cli_progress *progress)
 		if (printf("\n") < 0)
 			return_os_error("could not print status");
 
-	git_str_clear(&progress->deferred);
-	git_str_clear(&progress->onscreen);
+	git3_str_clear(&progress->deferred);
+	git3_str_clear(&progress->onscreen);
 	progress->last_update = 0;
 	progress->action_start = 0;
 	progress->action_finish = 0;
@@ -138,7 +138,7 @@ static int progress_complete(cli_progress *progress)
 	return 0;
 }
 
-GIT_INLINE(int) percent(size_t completed, size_t total)
+GIT3_INLINE(int) percent(size_t completed, size_t total)
 {
 	if (total == 0)
 		return (completed == 0) ? 100 : 0;
@@ -155,7 +155,7 @@ int cli_progress_fetch_sideband(const char *str, int len, void *payload)
 		return 0;
 
 	/* Accumulate the sideband data, then print it line-at-a-time. */
-	if (git_str_put(&progress->sideband, str, len) < 0)
+	if (git3_str_put(&progress->sideband, str, len) < 0)
 		return -1;
 
 	str = progress->sideband.ptr;
@@ -180,14 +180,14 @@ int cli_progress_fetch_sideband(const char *str, int len, void *payload)
 		remain -= line_len;
 	}
 
-	git_str_consume_bytes(&progress->sideband, (progress->sideband.size - remain));
+	git3_str_consume_bytes(&progress->sideband, (progress->sideband.size - remain));
 
 	return 0;
 }
 
 static int fetch_receiving(
 	cli_progress *progress,
-	const git_indexer_progress *stats)
+	const git3_indexer_progress *stats)
 {
 	char *recv_units[] = { "B", "KiB", "MiB", "GiB", "TiB", NULL };
 	char *rate_units[] = { "B/s", "KiB/s", "MiB/s", "GiB/s", "TiB/s", NULL };
@@ -198,14 +198,14 @@ static int fetch_receiving(
 	bool done = (stats->received_objects == stats->total_objects);
 
 	if (!progress->action_start)
-		progress->action_start = git_time_monotonic();
+		progress->action_start = git3_time_monotonic();
 
 	if (done && progress->action_finish)
 		now = progress->action_finish;
 	else if (done)
-		progress->action_finish = now = git_time_monotonic();
+		progress->action_finish = now = git3_time_monotonic();
 	else
-		now = git_time_monotonic();
+		now = git3_time_monotonic();
 
 	if (progress->throughput_update &&
 	    now - progress->throughput_update < THROUGHPUT_UPDATE_TIME) {
@@ -244,7 +244,7 @@ static int fetch_receiving(
 
 static int indexer_indexing(
 	cli_progress *progress,
-	const git_indexer_progress *stats)
+	const git3_indexer_progress *stats)
 {
 	bool done = (stats->received_objects == stats->total_objects);
 
@@ -258,7 +258,7 @@ static int indexer_indexing(
 
 static int indexer_resolving(
 	cli_progress *progress,
-	const git_indexer_progress *stats)
+	const git3_indexer_progress *stats)
 {
 	bool done = (stats->indexed_deltas == stats->total_deltas);
 
@@ -269,7 +269,7 @@ static int indexer_resolving(
 		done ? ", done." : "");
 }
 
-int cli_progress_fetch_transfer(const git_indexer_progress *stats, void *payload)
+int cli_progress_fetch_transfer(const git3_indexer_progress *stats, void *payload)
 {
 	cli_progress *progress = (cli_progress *)payload;
 	int error = 0;
@@ -302,14 +302,14 @@ int cli_progress_fetch_transfer(const git_indexer_progress *stats, void *payload
 
 	default:
 		/* should not be reached */
-		GIT_ASSERT(!"unexpected progress state");
+		GIT3_ASSERT(!"unexpected progress state");
 	}
 
 	return error;
 }
 
 int cli_progress_indexer(
-	const git_indexer_progress *stats,
+	const git3_indexer_progress *stats,
 	void *payload)
 {
 	cli_progress *progress = (cli_progress *)payload;
@@ -337,7 +337,7 @@ int cli_progress_indexer(
 
 	default:
 		/* should not be reached */
-		GIT_ASSERT(!"unexpected progress state");
+		GIT3_ASSERT(!"unexpected progress state");
 	}
 
 	return error;
@@ -352,7 +352,7 @@ void cli_progress_checkout(
 	cli_progress *progress = (cli_progress *)payload;
 	bool done = (completed_steps == total_steps);
 
-	GIT_UNUSED(path);
+	GIT3_UNUSED(path);
 
 	if (progress->action != CLI_PROGRESS_CHECKING_OUT) {
 		progress_complete(progress);
@@ -387,9 +387,9 @@ void cli_progress_dispose(cli_progress *progress)
 	if (progress == NULL)
 		return;
 
-	git_str_dispose(&progress->sideband);
-	git_str_dispose(&progress->onscreen);
-	git_str_dispose(&progress->deferred);
+	git3_str_dispose(&progress->sideband);
+	git3_str_dispose(&progress->onscreen);
+	git3_str_dispose(&progress->deferred);
 
 	memset(progress, 0, sizeof(cli_progress));
 }

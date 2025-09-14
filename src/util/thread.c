@@ -1,25 +1,25 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 
-#if !defined(GIT_THREADS)
+#if !defined(GIT3_THREADS)
 
 #define TLSDATA_MAX 16
 
 typedef struct {
 	void *value;
-	void (GIT_SYSTEM_CALL *destroy_fn)(void *);
+	void (GIT3_SYSTEM_CALL *destroy_fn)(void *);
 } tlsdata_value;
 
 static tlsdata_value tlsdata_values[TLSDATA_MAX];
 static int tlsdata_cnt = 0;
 
-int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(void *))
+int git3_tlsdata_init(git3_tlsdata_key *key, void (GIT3_SYSTEM_CALL *destroy_fn)(void *))
 {
 	if (tlsdata_cnt >= TLSDATA_MAX)
 		return -1;
@@ -33,7 +33,7 @@ int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(vo
 	return 0;
 }
 
-int git_tlsdata_set(git_tlsdata_key key, void *value)
+int git3_tlsdata_set(git3_tlsdata_key key, void *value)
 {
 	if (key < 0 || key > tlsdata_cnt)
 		return -1;
@@ -42,7 +42,7 @@ int git_tlsdata_set(git_tlsdata_key key, void *value)
 	return 0;
 }
 
-void *git_tlsdata_get(git_tlsdata_key key)
+void *git3_tlsdata_get(git3_tlsdata_key key)
 {
 	if (key < 0 || key > tlsdata_cnt)
 		return NULL;
@@ -50,7 +50,7 @@ void *git_tlsdata_get(git_tlsdata_key key)
 	return tlsdata_values[key].value;
 }
 
-int git_tlsdata_dispose(git_tlsdata_key key)
+int git3_tlsdata_dispose(git3_tlsdata_key key)
 {
 	void *value;
 	void (*destroy_fn)(void *) = NULL;
@@ -70,9 +70,9 @@ int git_tlsdata_dispose(git_tlsdata_key key)
 	return 0;
 }
 
-#elif defined(GIT_WIN32)
+#elif defined(GIT3_WIN32)
 
-int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(void *))
+int git3_tlsdata_init(git3_tlsdata_key *key, void (GIT3_SYSTEM_CALL *destroy_fn)(void *))
 {
 	DWORD fls_index = FlsAlloc(destroy_fn);
 
@@ -83,7 +83,7 @@ int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(vo
 	return 0;
 }
 
-int git_tlsdata_set(git_tlsdata_key key, void *value)
+int git3_tlsdata_set(git3_tlsdata_key key, void *value)
 {
 	if (!FlsSetValue(key, value))
 		return -1;
@@ -91,12 +91,12 @@ int git_tlsdata_set(git_tlsdata_key key, void *value)
 	return 0;
 }
 
-void *git_tlsdata_get(git_tlsdata_key key)
+void *git3_tlsdata_get(git3_tlsdata_key key)
 {
 	return FlsGetValue(key);
 }
 
-int git_tlsdata_dispose(git_tlsdata_key key)
+int git3_tlsdata_dispose(git3_tlsdata_key key)
 {
 	if (!FlsFree(key))
 		return -1;
@@ -106,7 +106,7 @@ int git_tlsdata_dispose(git_tlsdata_key key)
 
 #elif defined(_POSIX_THREADS)
 
-int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(void *))
+int git3_tlsdata_init(git3_tlsdata_key *key, void (GIT3_SYSTEM_CALL *destroy_fn)(void *))
 {
 	if (pthread_key_create(key, destroy_fn) != 0)
 		return -1;
@@ -114,7 +114,7 @@ int git_tlsdata_init(git_tlsdata_key *key, void (GIT_SYSTEM_CALL *destroy_fn)(vo
 	return 0;
 }
 
-int git_tlsdata_set(git_tlsdata_key key, void *value)
+int git3_tlsdata_set(git3_tlsdata_key key, void *value)
 {
 	if (pthread_setspecific(key, value) != 0)
 		return -1;
@@ -122,12 +122,12 @@ int git_tlsdata_set(git_tlsdata_key key, void *value)
 	return 0;
 }
 
-void *git_tlsdata_get(git_tlsdata_key key)
+void *git3_tlsdata_get(git3_tlsdata_key key)
 {
 	return pthread_getspecific(key);
 }
 
-int git_tlsdata_dispose(git_tlsdata_key key)
+int git3_tlsdata_dispose(git3_tlsdata_key key)
 {
 	if (pthread_key_delete(key) != 0)
 		return -1;

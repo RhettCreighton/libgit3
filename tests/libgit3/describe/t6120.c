@@ -1,10 +1,10 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "describe_helpers.h"
 #include "repository.h"
 
 /* Ported from https://github.com/git/git/blob/adfc1857bdb090786fd9d22c1acec39371c76048/t/t6120-describe.sh */
 
-static git_repository *repo;
+static git3_repository *repo;
 
 void test_describe_t6120__initialize(void)
 {
@@ -18,8 +18,8 @@ void test_describe_t6120__cleanup(void)
 
 void test_describe_t6120__default(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
 
 	assert_describe("A-*", "HEAD", repo, &opts, &fmt_opts);
 	assert_describe("A-*", "HEAD^", repo, &opts, &fmt_opts);
@@ -31,9 +31,9 @@ void test_describe_t6120__default(void)
 
 void test_describe_t6120__tags(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
-	opts.describe_strategy = GIT_DESCRIBE_TAGS;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
+	opts.describe_strategy = GIT3_DESCRIBE_TAGS;
 
 	assert_describe("c-*", "HEAD", repo, &opts, &fmt_opts);
 	assert_describe("c-*", "HEAD^", repo, &opts, &fmt_opts);
@@ -45,9 +45,9 @@ void test_describe_t6120__tags(void)
 
 void test_describe_t6120__all(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
-	opts.describe_strategy = GIT_DESCRIBE_ALL;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
+	opts.describe_strategy = GIT3_DESCRIBE_ALL;
 
 	assert_describe("heads/master", "HEAD", repo, &opts, &fmt_opts);
 	assert_describe("tags/c-*", "HEAD^", repo, &opts, &fmt_opts);
@@ -56,8 +56,8 @@ void test_describe_t6120__all(void)
 
 void test_describe_t6120__longformat(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
 
 	fmt_opts.always_use_long_format = 1;
 
@@ -67,9 +67,9 @@ void test_describe_t6120__longformat(void)
 
 void test_describe_t6120__firstparent(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
-	opts.describe_strategy = GIT_DESCRIBE_TAGS;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
+	opts.describe_strategy = GIT3_DESCRIBE_TAGS;
 
 	assert_describe("c-7-*", "HEAD", repo, &opts, &fmt_opts);
 
@@ -79,8 +79,8 @@ void test_describe_t6120__firstparent(void)
 
 void test_describe_t6120__workdir(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
 
 	assert_describe_workdir("A-*[0-9a-f]", repo, &opts, &fmt_opts);
 	cl_git_mkfile("describe/file", "something different");
@@ -92,20 +92,20 @@ void test_describe_t6120__workdir(void)
 }
 
 static void commit_and_tag(
-	git_time_t *time,
+	git3_time_t *time,
 	const char *commit_msg,
 	const char *tag_name)
 {
-	git_index *index;
-	git_oid commit_id;
-	git_reference *ref;
+	git3_index *index;
+	git3_oid commit_id;
+	git3_reference *ref;
 	
-	cl_git_pass(git_repository_index__weakptr(&index, repo));
+	cl_git_pass(git3_repository_index__weakptr(&index, repo));
 
 	cl_git_append2file("describe/file", "\n");
 	
-	cl_git_pass(git_index_add_bypath(index, "file"));
-	cl_git_pass(git_index_write(index));
+	cl_git_pass(git3_index_add_bypath(index, "file"));
+	cl_git_pass(git3_index_write(index));
 
 	*time += 10;
 	cl_repo_commit_from_index(&commit_id, repo, NULL, *time, commit_msg);
@@ -113,27 +113,27 @@ static void commit_and_tag(
 	if (tag_name == NULL)
 		return;
 
-	cl_git_pass(git_reference_create(&ref, repo, tag_name, &commit_id, 0, NULL));
-	git_reference_free(ref);
+	cl_git_pass(git3_reference_create(&ref, repo, tag_name, &commit_id, 0, NULL));
+	git3_reference_free(ref);
 }
 
 void test_describe_t6120__pattern(void)
 {
-	git_describe_options opts = GIT_DESCRIBE_OPTIONS_INIT;
-	git_describe_format_options fmt_opts = GIT_DESCRIBE_FORMAT_OPTIONS_INIT;
-	git_oid tag_id;
-	git_object *head;
-	git_signature *tagger;
-	git_time_t time;
+	git3_describe_options opts = GIT3_DESCRIBE_OPTIONS_INIT;
+	git3_describe_format_options fmt_opts = GIT3_DESCRIBE_FORMAT_OPTIONS_INIT;
+	git3_oid tag_id;
+	git3_object *head;
+	git3_signature *tagger;
+	git3_time_t time;
 
 	/* set-up matching pattern tests */
-	cl_git_pass(git_revparse_single(&head, repo, "HEAD"));
+	cl_git_pass(git3_revparse_single(&head, repo, "HEAD"));
 
 	time = 1380553019;
-	cl_git_pass(git_signature_new(&tagger, "tagger", "tagger@libgit2.org", time, 0));
-	cl_git_pass(git_tag_create(&tag_id, repo, "test-annotated", head, tagger, "test-annotated", 0));
-	git_signature_free(tagger);
-	git_object_free(head);
+	cl_git_pass(git3_signature_new(&tagger, "tagger", "tagger@libgit3.org", time, 0));
+	cl_git_pass(git3_tag_create(&tag_id, repo, "test-annotated", head, tagger, "test-annotated", 0));
+	git3_signature_free(tagger);
+	git3_object_free(head);
 
 	commit_and_tag(&time, "one more", "refs/tags/test1-lightweight");
 	commit_and_tag(&time, "yet another", "refs/tags/test2-lightweight");
@@ -144,7 +144,7 @@ void test_describe_t6120__pattern(void)
 	opts.pattern = "test-*";
 	assert_describe("test-annotated-*", "HEAD", repo, &opts, &fmt_opts);
 
-	opts.describe_strategy = GIT_DESCRIBE_TAGS;
+	opts.describe_strategy = GIT3_DESCRIBE_TAGS;
 	opts.pattern = "test1-*";
 	assert_describe("test1-lightweight-*", "HEAD", repo, &opts, &fmt_opts);
 

@@ -1,17 +1,17 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "attr_file.h"
 #include "attr_expect.h"
 
-#define get_rule(X) ((git_attr_rule *)git_vector_get(&file->rules,(X)))
-#define get_assign(R,Y) ((git_attr_assignment *)git_vector_get(&(R)->assigns,(Y)))
+#define get_rule(X) ((git3_attr_rule *)git3_vector_get(&file->rules,(X)))
+#define get_assign(R,Y) ((git3_attr_assignment *)git3_vector_get(&(R)->assigns,(Y)))
 
 void test_attr_file__simple_read(void)
 {
-	git_attr_file *file;
-	git_attr_assignment *assign;
-	git_attr_rule *rule;
+	git3_attr_file *file;
+	git3_attr_assignment *assign;
+	git3_attr_rule *rule;
 
-	cl_git_pass(git_attr_file__load_standalone(&file, cl_fixture("attr/attr0")));
+	cl_git_pass(git3_attr_file__load_standalone(&file, cl_fixture("attr/attr0")));
 
 	cl_assert_equal_s(cl_fixture("attr/attr0"), file->entry->path);
 	cl_assert(file->rules.length == 1);
@@ -20,24 +20,24 @@ void test_attr_file__simple_read(void)
 	cl_assert(rule != NULL);
 	cl_assert_equal_s("*", rule->match.pattern);
 	cl_assert(rule->match.length == 1);
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_HASWILD) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_HASWILD) != 0);
 
 	cl_assert(rule->assigns.length == 1);
 	assign = get_assign(rule, 0);
 	cl_assert(assign != NULL);
 	cl_assert_equal_s("binary", assign->name);
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
 
-	git_attr_file__free(file);
+	git3_attr_file__free(file);
 }
 
 void test_attr_file__match_variants(void)
 {
-	git_attr_file *file;
-	git_attr_rule *rule;
-	git_attr_assignment *assign;
+	git3_attr_file *file;
+	git3_attr_rule *rule;
+	git3_attr_assignment *assign;
 
-	cl_git_pass(git_attr_file__load_standalone(&file, cl_fixture("attr/attr1")));
+	cl_git_pass(git3_attr_file__load_standalone(&file, cl_fixture("attr/attr1")));
 
 	cl_assert_equal_s(cl_fixture("attr/attr1"), file->entry->path);
 	cl_assert(file->rules.length == 10);
@@ -52,38 +52,38 @@ void test_attr_file__match_variants(void)
 	cl_assert(rule->assigns.length == 1);
 	assign = get_assign(rule,0);
 	cl_assert_equal_s("attr0", assign->name);
-	cl_assert(assign->name_hash == git_attr_file__name_hash(assign->name));
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
+	cl_assert(assign->name_hash == git3_attr_file__name_hash(assign->name));
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
 
 	rule = get_rule(1);
 	cl_assert_equal_s("pat1", rule->match.pattern);
 	cl_assert(rule->match.length == strlen("pat1"));
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_NEGATIVE) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_NEGATIVE) != 0);
 
 	rule = get_rule(2);
 	cl_assert_equal_s("pat2", rule->match.pattern);
 	cl_assert(rule->match.length == strlen("pat2"));
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_DIRECTORY) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_DIRECTORY) != 0);
 
 	rule = get_rule(3);
 	cl_assert_equal_s("pat3dir/pat3file", rule->match.pattern);
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_FULLPATH) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_FULLPATH) != 0);
 
 	rule = get_rule(4);
 	cl_assert_equal_s("pat4.*", rule->match.pattern);
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_HASWILD) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_HASWILD) != 0);
 
 	rule = get_rule(5);
 	cl_assert_equal_s("*.pat5", rule->match.pattern);
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_HASWILD) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_HASWILD) != 0);
 
 	rule = get_rule(7);
 	cl_assert_equal_s("pat7[a-e]??[xyz]", rule->match.pattern);
 	cl_assert(rule->assigns.length == 1);
-	cl_assert((rule->match.flags & GIT_ATTR_FNMATCH_HASWILD) != 0);
+	cl_assert((rule->match.flags & GIT3_ATTR_FNMATCH_HASWILD) != 0);
 	assign = get_assign(rule,0);
 	cl_assert_equal_s("attr7", assign->name);
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
 
 	rule = get_rule(8);
 	cl_assert_equal_s("pat8 with spaces", rule->match.pattern);
@@ -92,11 +92,11 @@ void test_attr_file__match_variants(void)
 	rule = get_rule(9);
 	cl_assert_equal_s("pat9", rule->match.pattern);
 
-	git_attr_file__free(file);
+	git3_attr_file__free(file);
 }
 
 static void check_one_assign(
-	git_attr_file *file,
+	git3_attr_file *file,
 	int rule_idx,
 	int assign_idx,
 	const char *pattern,
@@ -104,24 +104,24 @@ static void check_one_assign(
 	enum attr_expect_t expected,
 	const char *expected_str)
 {
-	git_attr_rule *rule = get_rule(rule_idx);
-	git_attr_assignment *assign = get_assign(rule, assign_idx);
+	git3_attr_rule *rule = get_rule(rule_idx);
+	git3_attr_assignment *assign = get_assign(rule, assign_idx);
 
 	cl_assert_equal_s(pattern, rule->match.pattern);
 	cl_assert(rule->assigns.length == 1);
 	cl_assert_equal_s(name, assign->name);
-	cl_assert(assign->name_hash == git_attr_file__name_hash(assign->name));
+	cl_assert(assign->name_hash == git3_attr_file__name_hash(assign->name));
 
 	attr_check_expected(expected, expected_str, assign->name, assign->value);
 }
 
 void test_attr_file__assign_variants(void)
 {
-	git_attr_file *file;
-	git_attr_rule *rule;
-	git_attr_assignment *assign;
+	git3_attr_file *file;
+	git3_attr_rule *rule;
+	git3_attr_assignment *assign;
 
-	cl_git_pass(git_attr_file__load_standalone(&file, cl_fixture("attr/attr2")));
+	cl_git_pass(git3_attr_file__load_standalone(&file, cl_fixture("attr/attr2")));
 
 	cl_assert_equal_s(cl_fixture("attr/attr2"), file->entry->path);
 	cl_assert(file->rules.length == 11);
@@ -141,64 +141,64 @@ void test_attr_file__assign_variants(void)
 	/* assignments will be sorted by hash value, so we have to do
 	 * lookups by search instead of by position
 	 */
-	assign = git_attr_rule__lookup_assignment(rule, "multiple");
+	assign = git3_attr_rule__lookup_assignment(rule, "multiple");
 	cl_assert(assign);
 	cl_assert_equal_s("multiple", assign->name);
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
-	assign = git_attr_rule__lookup_assignment(rule, "single");
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
+	assign = git3_attr_rule__lookup_assignment(rule, "single");
 	cl_assert(assign);
 	cl_assert_equal_s("single", assign->name);
-	cl_assert(GIT_ATTR_IS_FALSE(assign->value));
-	assign = git_attr_rule__lookup_assignment(rule, "values");
+	cl_assert(GIT3_ATTR_IS_FALSE(assign->value));
+	assign = git3_attr_rule__lookup_assignment(rule, "values");
 	cl_assert(assign);
 	cl_assert_equal_s("values", assign->name);
 	cl_assert_equal_s("1", assign->value);
-	assign = git_attr_rule__lookup_assignment(rule, "also");
+	assign = git3_attr_rule__lookup_assignment(rule, "also");
 	cl_assert(assign);
 	cl_assert_equal_s("also", assign->name);
 	cl_assert_equal_s("a-really-long-value/*", assign->value);
-	assign = git_attr_rule__lookup_assignment(rule, "happy");
+	assign = git3_attr_rule__lookup_assignment(rule, "happy");
 	cl_assert(assign);
 	cl_assert_equal_s("happy", assign->name);
 	cl_assert_equal_s("yes!", assign->value);
-	assign = git_attr_rule__lookup_assignment(rule, "other");
+	assign = git3_attr_rule__lookup_assignment(rule, "other");
 	cl_assert(!assign);
 
 	rule = get_rule(9);
 	cl_assert_equal_s("pat8", rule->match.pattern);
 	cl_assert(rule->assigns.length == 2);
-	assign = git_attr_rule__lookup_assignment(rule, "again");
+	assign = git3_attr_rule__lookup_assignment(rule, "again");
 	cl_assert(assign);
 	cl_assert_equal_s("again", assign->name);
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
-	assign = git_attr_rule__lookup_assignment(rule, "another");
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
+	assign = git3_attr_rule__lookup_assignment(rule, "another");
 	cl_assert(assign);
 	cl_assert_equal_s("another", assign->name);
 	cl_assert_equal_s("12321", assign->value);
 
 	check_one_assign(file, 10, 0, "pat9", "at-eof", EXPECT_FALSE, NULL);
 
-	git_attr_file__free(file);
+	git3_attr_file__free(file);
 }
 
-static void assert_examples(git_attr_file *file)
+static void assert_examples(git3_attr_file *file)
 {
-	git_attr_rule *rule;
-	git_attr_assignment *assign;
+	git3_attr_rule *rule;
+	git3_attr_assignment *assign;
 
 	rule = get_rule(0);
 	cl_assert_equal_s("*.java", rule->match.pattern);
 	cl_assert(rule->assigns.length == 3);
-	assign = git_attr_rule__lookup_assignment(rule, "diff");
+	assign = git3_attr_rule__lookup_assignment(rule, "diff");
 	cl_assert_equal_s("diff", assign->name);
 	cl_assert_equal_s("java", assign->value);
-	assign = git_attr_rule__lookup_assignment(rule, "crlf");
+	assign = git3_attr_rule__lookup_assignment(rule, "crlf");
 	cl_assert_equal_s("crlf", assign->name);
-	cl_assert(GIT_ATTR_IS_FALSE(assign->value));
-	assign = git_attr_rule__lookup_assignment(rule, "myAttr");
+	cl_assert(GIT3_ATTR_IS_FALSE(assign->value));
+	assign = git3_attr_rule__lookup_assignment(rule, "myAttr");
 	cl_assert_equal_s("myAttr", assign->name);
-	cl_assert(GIT_ATTR_IS_TRUE(assign->value));
-	assign = git_attr_rule__lookup_assignment(rule, "missing");
+	cl_assert(GIT3_ATTR_IS_TRUE(assign->value));
+	assign = git3_attr_rule__lookup_assignment(rule, "missing");
 	cl_assert(assign == NULL);
 
 	rule = get_rule(1);
@@ -206,7 +206,7 @@ static void assert_examples(git_attr_file *file)
 	cl_assert(rule->assigns.length == 1);
 	assign = get_assign(rule, 0);
 	cl_assert_equal_s("myAttr", assign->name);
-	cl_assert(GIT_ATTR_IS_UNSPECIFIED(assign->value));
+	cl_assert(GIT3_ATTR_IS_UNSPECIFIED(assign->value));
 
 	rule = get_rule(2);
 	cl_assert_equal_s("README", rule->match.pattern);
@@ -218,26 +218,26 @@ static void assert_examples(git_attr_file *file)
 
 void test_attr_file__check_attr_examples(void)
 {
-	git_attr_file *file;
+	git3_attr_file *file;
 
-	cl_git_pass(git_attr_file__load_standalone(&file, cl_fixture("attr/attr3")));
+	cl_git_pass(git3_attr_file__load_standalone(&file, cl_fixture("attr/attr3")));
 	cl_assert_equal_s(cl_fixture("attr/attr3"), file->entry->path);
 	cl_assert(file->rules.length == 3);
 
 	assert_examples(file);
 
-	git_attr_file__free(file);
+	git3_attr_file__free(file);
 }
 
 void test_attr_file__whitespace(void)
 {
-	git_attr_file *file;
+	git3_attr_file *file;
 
-	cl_git_pass(git_attr_file__load_standalone(&file, cl_fixture("attr/attr4")));
+	cl_git_pass(git3_attr_file__load_standalone(&file, cl_fixture("attr/attr4")));
 	cl_assert_equal_s(cl_fixture("attr/attr4"), file->entry->path);
 	cl_assert(file->rules.length == 3);
 
 	assert_examples(file);
 
-	git_attr_file__free(file);
+	git3_attr_file__free(file);
 }

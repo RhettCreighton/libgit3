@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -10,15 +10,15 @@
 
 #include "hash/sha.h"
 
-#if defined(GIT_SHA1_OPENSSL_FIPS) || defined(GIT_SHA256_OPENSSL_FIPS)
+#if defined(GIT3_SHA1_OPENSSL_FIPS) || defined(GIT3_SHA256_OPENSSL_FIPS)
 # include <openssl/evp.h>
 #endif
 
-#if defined(GIT_SHA1_OPENSSL) || defined(GIT_SHA256_OPENSSL)
+#if defined(GIT3_SHA1_OPENSSL) || defined(GIT3_SHA256_OPENSSL)
 # include <openssl/sha.h>
 #endif
 
-#if defined(GIT_SHA1_OPENSSL_DYNAMIC)
+#if defined(GIT3_SHA1_OPENSSL_DYNAMIC)
 typedef struct {
 	unsigned int h0, h1, h2, h3, h4;
 	unsigned int Nl, Nh;
@@ -27,7 +27,7 @@ typedef struct {
 } SHA_CTX;
 #endif
 
-#if defined(GIT_SHA256_OPENSSL_DYNAMIC)
+#if defined(GIT3_SHA256_OPENSSL_DYNAMIC)
 typedef struct {
 	unsigned int h[8];
 	unsigned int Nl, Nh;
@@ -36,26 +36,26 @@ typedef struct {
 } SHA256_CTX;
 #endif
 
-#if defined(GIT_SHA1_OPENSSL) || defined(GIT_SHA1_OPENSSL_DYNAMIC)
-struct git_hash_sha1_ctx {
+#if defined(GIT3_SHA1_OPENSSL) || defined(GIT3_SHA1_OPENSSL_DYNAMIC)
+struct git3_hash_sha1_ctx {
 	SHA_CTX c;
 };
 #endif
 
-#ifdef GIT_SHA1_OPENSSL_FIPS
-struct git_hash_sha1_ctx {
+#ifdef GIT3_SHA1_OPENSSL_FIPS
+struct git3_hash_sha1_ctx {
 	EVP_MD_CTX* c;
 };
 #endif
 
-#if defined(GIT_SHA256_OPENSSL) || defined(GIT_SHA256_OPENSSL_DYNAMIC)
-struct git_hash_sha256_ctx {
+#if defined(GIT3_SHA256_OPENSSL) || defined(GIT3_SHA256_OPENSSL_DYNAMIC)
+struct git3_hash_sha256_ctx {
 	SHA256_CTX c;
 };
 #endif
 
-#ifdef GIT_SHA256_OPENSSL_FIPS
-struct git_hash_sha256_ctx {
+#ifdef GIT3_SHA256_OPENSSL_FIPS
+struct git3_hash_sha256_ctx {
 	EVP_MD_CTX* c;
 };
 #endif

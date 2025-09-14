@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -34,11 +34,11 @@ static const cli_opt_spec opts[] = {
 	{ CLI_OPT_TYPE_SWITCH,    "null",       'z', &null_separator, 1,
 	  0,                       NULL,        "use NUL as a separator" },
 
-	{ CLI_OPT_TYPE_SWITCH,    "system",      0,  &config_level, GIT_CONFIG_LEVEL_SYSTEM,
+	{ CLI_OPT_TYPE_SWITCH,    "system",      0,  &config_level, GIT3_CONFIG_LEVEL_SYSTEM,
 	  0,                       NULL,        "read/write to system configuration" },
-	{ CLI_OPT_TYPE_SWITCH,    "global",      0,  &config_level, GIT_CONFIG_LEVEL_GLOBAL,
+	{ CLI_OPT_TYPE_SWITCH,    "global",      0,  &config_level, GIT3_CONFIG_LEVEL_GLOBAL,
 	  CLI_OPT_USAGE_CHOICE,    NULL,        "read/write to global configuration" },
-	{ CLI_OPT_TYPE_SWITCH,    "local",       0,  &config_level, GIT_CONFIG_LEVEL_LOCAL,
+	{ CLI_OPT_TYPE_SWITCH,    "local",       0,  &config_level, GIT3_CONFIG_LEVEL_LOCAL,
 	  CLI_OPT_USAGE_CHOICE,    NULL,        "read/write to local configuration" },
 	{ CLI_OPT_TYPE_VALUE,     "file",        0,  &config_filename, 0,
 	  CLI_OPT_USAGE_CHOICE,   "filename",   "read/write to specified configuration file" },
@@ -78,73 +78,73 @@ static void print_help(void)
 	cli_opt_help_fprint(stdout, opts);
 }
 
-static int get_config(git_config *config)
+static int get_config(git3_config *config)
 {
-	git_buf value = GIT_BUF_INIT;
+	git3_buf value = GIT3_BUF_INIT;
 	char sep = null_separator ? '\0' : '\n';
 	int error;
 
-	error = git_config_get_string_buf(&value, config, name);
+	error = git3_config_get_string_buf(&value, config, name);
 
-	if (error && error != GIT_ENOTFOUND)
+	if (error && error != GIT3_ENOTFOUND)
 		return cli_error_git();
 
-	else if (error == GIT_ENOTFOUND)
+	else if (error == GIT3_ENOTFOUND)
 		return 1;
 
 	printf("%s%c", value.ptr, sep);
 	return 0;
 }
 
-static int add_config(git_config *config)
+static int add_config(git3_config *config)
 {
-	if (git_config_set_multivar(config, name, "$^", value) < 0)
+	if (git3_config_set_multivar(config, name, "$^", value) < 0)
 		return cli_error_git();
 
 	return 0;
 }
 
-static int replace_all_config(git_config *config)
+static int replace_all_config(git3_config *config)
 {
-	if (git_config_set_multivar(config, name, value_pattern ? value_pattern : ".*", value) < 0)
+	if (git3_config_set_multivar(config, name, value_pattern ? value_pattern : ".*", value) < 0)
 		return cli_error_git();
 
 	return 0;
 }
 
-static const char *level_name(git_config_level_t level)
+static const char *level_name(git3_config_level_t level)
 {
 	switch (level) {
-	case GIT_CONFIG_LEVEL_PROGRAMDATA:
+	case GIT3_CONFIG_LEVEL_PROGRAMDATA:
 		return "programdata";
-	case GIT_CONFIG_LEVEL_SYSTEM:
+	case GIT3_CONFIG_LEVEL_SYSTEM:
 		return "system";
-	case GIT_CONFIG_LEVEL_XDG:
+	case GIT3_CONFIG_LEVEL_XDG:
 		return "global";
-	case GIT_CONFIG_LEVEL_GLOBAL:
+	case GIT3_CONFIG_LEVEL_GLOBAL:
 		return "global";
-	case GIT_CONFIG_LEVEL_LOCAL:
+	case GIT3_CONFIG_LEVEL_LOCAL:
 		return "local";
-	case GIT_CONFIG_LEVEL_APP:
+	case GIT3_CONFIG_LEVEL_APP:
 		return "command";
 	default:
 		return "unknown";
 	}
 }
 
-static int list_config(git_config *config)
+static int list_config(git3_config *config)
 {
-	git_config_iterator *iterator;
-	git_config_entry *entry;
+	git3_config_iterator *iterator;
+	git3_config_entry *entry;
 	char data_separator = null_separator ? '\0' : '\t';
 	char kv_separator = null_separator ? '\n' : '=';
 	char entry_separator = null_separator ? '\0' : '\n';
 	int error;
 
-	if (git_config_iterator_new(&iterator, config) < 0)
+	if (git3_config_iterator_new(&iterator, config) < 0)
 		return cli_error_git();
 
-	while ((error = git_config_next(&entry, iterator)) == 0) {
+	while ((error = git3_config_next(&entry, iterator)) == 0) {
 		if (show_scope)
 			printf("%s%c",
 				level_name(entry->level),
@@ -161,17 +161,17 @@ static int list_config(git_config *config)
 			entry_separator);
 	}
 
-	if (error != GIT_ITEROVER)
+	if (error != GIT3_ITEROVER)
 		return cli_error_git();
 
-	git_config_iterator_free(iterator);
+	git3_config_iterator_free(iterator);
 	return 0;
 }
 
 int cmd_config(int argc, char **argv)
 {
-	git_repository *repo = NULL;
-	git_config *config = NULL;
+	git3_repository *repo = NULL;
+	git3_config *config = NULL;
 	cli_repository_open_options open_opts = { argv + 1, argc - 1};
 	cli_opt invalid_opt;
 	int ret = 0;
@@ -185,21 +185,21 @@ int cmd_config(int argc, char **argv)
 	}
 
 	if (config_filename) {
-		if (git_config_new(&config) < 0 ||
-		    git_config_add_file_ondisk(config, config_filename,
-				GIT_CONFIG_LEVEL_APP, NULL, 0) < 0) {
+		if (git3_config_new(&config) < 0 ||
+		    git3_config_add_file_ondisk(config, config_filename,
+				GIT3_CONFIG_LEVEL_APP, NULL, 0) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
 	} else {
 		if (cli_repository_open(&repo, &open_opts) < 0 ||
-		    git_repository_config(&config, repo) < 0) {
+		    git3_repository_config(&config, repo) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
 
 		if (config_level &&
-		    git_config_open_level(&config, config, config_level) < 0) {
+		    git3_config_open_level(&config, config, config_level) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
@@ -235,7 +235,7 @@ int cmd_config(int argc, char **argv)
 	}
 
 done:
-	git_config_free(config);
-	git_repository_free(repo);
+	git3_config_free(config);
+	git3_repository_free(repo);
 	return ret;
 }

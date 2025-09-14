@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_note_h__
@@ -10,31 +10,31 @@
 #include "oid.h"
 
 /**
- * @file git2/notes.h
+ * @file git3/notes.h
  * @brief Notes are metadata attached to an object
- * @defgroup git_note Git notes management routines
+ * @defgroup git3_note Git notes management routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
- * Callback for git_note_foreach.
+ * Callback for git3_note_foreach.
  *
  * @param blob_id object id of the blob containing the message
  * @param annotated_object_id the id of the object being annotated
  * @param payload user-specified data to the foreach function
  * @return 0 on success, or a negative number on failure
  */
-typedef int GIT_CALLBACK(git_note_foreach_cb)(
-	const git_oid *blob_id,
-	const git_oid *annotated_object_id,
+typedef int GIT3_CALLBACK(git3_note_foreach_cb)(
+	const git3_oid *blob_id,
+	const git3_oid *annotated_object_id,
 	void *payload);
 
 /**
  * note iterator
  */
-typedef struct git_iterator git_note_iterator;
+typedef struct git3_iterator git3_note_iterator;
 
 /**
  * Creates a new iterator for notes
@@ -48,9 +48,9 @@ typedef struct git_iterator git_note_iterator;
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_iterator_new(
-	git_note_iterator **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_note_iterator_new(
+	git3_note_iterator **out,
+	git3_repository *repo,
 	const char *notes_ref);
 
 /**
@@ -63,16 +63,16 @@ GIT_EXTERN(int) git_note_iterator_new(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_commit_iterator_new(
-	git_note_iterator **out,
-	git_commit *notes_commit);
+GIT3_EXTERN(int) git3_note_commit_iterator_new(
+	git3_note_iterator **out,
+	git3_commit *notes_commit);
 
 /**
- * Frees an git_note_iterator
+ * Frees an git3_note_iterator
  *
  * @param it pointer to the iterator
  */
-GIT_EXTERN(void) git_note_iterator_free(git_note_iterator *it);
+GIT3_EXTERN(void) git3_note_iterator_free(git3_note_iterator *it);
 
 /**
  * Return the current item (note_id and annotated_id) and advance the iterator
@@ -82,13 +82,13 @@ GIT_EXTERN(void) git_note_iterator_free(git_note_iterator *it);
  * @param annotated_id id of the git object being annotated
  * @param it pointer to the iterator
  *
- * @return 0 (no error), GIT_ITEROVER (iteration is done) or an error code
+ * @return 0 (no error), GIT3_ITEROVER (iteration is done) or an error code
  *         (negative value)
  */
-GIT_EXTERN(int) git_note_next(
-	git_oid *note_id,
-	git_oid *annotated_id,
-	git_note_iterator *it);
+GIT3_EXTERN(int) git3_note_next(
+	git3_oid *note_id,
+	git3_oid *annotated_id,
+	git3_note_iterator *it);
 
 
 /**
@@ -104,11 +104,11 @@ GIT_EXTERN(int) git_note_next(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_read(
-	git_note **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_note_read(
+	git3_note **out,
+	git3_repository *repo,
 	const char *notes_ref,
-	const git_oid *oid);
+	const git3_oid *oid);
 
 
 /**
@@ -123,11 +123,11 @@ GIT_EXTERN(int) git_note_read(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_commit_read(
-	git_note **out,
-	git_repository *repo,
-	git_commit *notes_commit,
-	const git_oid *oid);
+GIT3_EXTERN(int) git3_note_commit_read(
+	git3_note **out,
+	git3_repository *repo,
+	git3_commit *notes_commit,
+	const git3_oid *oid);
 
 /**
  * Get the note author
@@ -135,7 +135,7 @@ GIT_EXTERN(int) git_note_commit_read(
  * @param note the note
  * @return the author
  */
-GIT_EXTERN(const git_signature *) git_note_author(const git_note *note);
+GIT3_EXTERN(const git3_signature *) git3_note_author(const git3_note *note);
 
 /**
  * Get the note committer
@@ -143,7 +143,7 @@ GIT_EXTERN(const git_signature *) git_note_author(const git_note *note);
  * @param note the note
  * @return the committer
  */
-GIT_EXTERN(const git_signature *) git_note_committer(const git_note *note);
+GIT3_EXTERN(const git3_signature *) git3_note_committer(const git3_note *note);
 
 
 /**
@@ -152,7 +152,7 @@ GIT_EXTERN(const git_signature *) git_note_committer(const git_note *note);
  * @param note the note
  * @return the note message
  */
-GIT_EXTERN(const char *) git_note_message(const git_note *note);
+GIT3_EXTERN(const char *) git3_note_message(const git3_note *note);
 
 
 /**
@@ -161,7 +161,7 @@ GIT_EXTERN(const char *) git_note_message(const git_note *note);
  * @param note the note
  * @return the note object's id
  */
-GIT_EXTERN(const git_oid *) git_note_id(const git_note *note);
+GIT3_EXTERN(const git3_oid *) git3_note_id(const git3_note *note);
 
 /**
  * Add a note for an object
@@ -178,13 +178,13 @@ GIT_EXTERN(const git_oid *) git_note_id(const git_note *note);
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_create(
-	git_oid *out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_note_create(
+	git3_oid *out,
+	git3_repository *repo,
 	const char *notes_ref,
-	const git_signature *author,
-	const git_signature *committer,
-	const git_oid *oid,
+	const git3_signature *author,
+	const git3_signature *committer,
+	const git3_oid *oid,
 	const char *note,
 	int force);
 
@@ -208,14 +208,14 @@ GIT_EXTERN(int) git_note_create(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_commit_create(
-	git_oid *notes_commit_out,
-	git_oid *notes_blob_out,
-	git_repository *repo,
-	git_commit *parent,
-	const git_signature *author,
-	const git_signature *committer,
-	const git_oid *oid,
+GIT3_EXTERN(int) git3_note_commit_create(
+	git3_oid *notes_commit_out,
+	git3_oid *notes_blob_out,
+	git3_repository *repo,
+	git3_commit *parent,
+	const git3_signature *author,
+	const git3_signature *committer,
+	const git3_oid *oid,
 	const char *note,
 	int allow_note_overwrite);
 
@@ -231,12 +231,12 @@ GIT_EXTERN(int) git_note_commit_create(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_remove(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_note_remove(
+	git3_repository *repo,
 	const char *notes_ref,
-	const git_signature *author,
-	const git_signature *committer,
-	const git_oid *oid);
+	const git3_signature *author,
+	const git3_signature *committer,
+	const git3_oid *oid);
 
 /**
  * Remove the note for an object
@@ -256,20 +256,20 @@ GIT_EXTERN(int) git_note_remove(
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_commit_remove(
-		git_oid *notes_commit_out,
-		git_repository *repo,
-		git_commit *notes_commit,
-		const git_signature *author,
-		const git_signature *committer,
-		const git_oid *oid);
+GIT3_EXTERN(int) git3_note_commit_remove(
+		git3_oid *notes_commit_out,
+		git3_repository *repo,
+		git3_commit *notes_commit,
+		const git3_signature *author,
+		const git3_signature *committer,
+		const git3_oid *oid);
 
 /**
- * Free a git_note object
+ * Free a git3_note object
  *
- * @param note git_note object
+ * @param note git3_note object
  */
-GIT_EXTERN(void) git_note_free(git_note *note);
+GIT3_EXTERN(void) git3_note_free(git3_note *note);
 
 /**
  * Get the default notes reference for a repository
@@ -279,7 +279,7 @@ GIT_EXTERN(void) git_note_free(git_note *note);
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_note_default_ref(git_buf *out, git_repository *repo);
+GIT3_EXTERN(int) git3_note_default_ref(git3_buf *out, git3_repository *repo);
 
 /**
  * Loop over all the notes within a specified namespace
@@ -297,13 +297,13 @@ GIT_EXTERN(int) git_note_default_ref(git_buf *out, git_repository *repo);
  *
  * @return 0 on success, non-zero callback return value, or error code
  */
-GIT_EXTERN(int) git_note_foreach(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_note_foreach(
+	git3_repository *repo,
 	const char *notes_ref,
-	git_note_foreach_cb note_cb,
+	git3_note_foreach_cb note_cb,
 	void *payload);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

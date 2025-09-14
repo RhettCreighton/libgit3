@@ -1,7 +1,7 @@
 /*
- * libgit2 "status" example - shows how to use the status APIs
+ * libgit3 "status" example - shows how to use the status APIs
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -15,8 +15,8 @@
 #include "common.h"
 
 /**
- * This example demonstrates the use of the libgit2 status APIs,
- * particularly the `git_status_list` object, to roughly simulate the
+ * This example demonstrates the use of the libgit3 status APIs,
+ * particularly the `git3_status_list` object, to roughly simulate the
  * output of running `git status`.  It serves as a simple example of
  * using those APIs to get basic status information.
  *
@@ -44,7 +44,7 @@ enum {
 #define MAX_PATHSPEC 8
 
 struct status_opts {
-	git_status_options statusopt;
+	git3_status_options statusopt;
 	char *repodir;
 	char *pathspec[MAX_PATHSPEC];
 	int npaths;
@@ -56,26 +56,26 @@ struct status_opts {
 };
 
 static void parse_opts(struct status_opts *o, int argc, char *argv[]);
-static void show_branch(git_repository *repo, int format);
-static void print_long(git_status_list *status);
-static void print_short(git_repository *repo, git_status_list *status);
-static int print_submod(git_submodule *sm, const char *name, void *payload);
+static void show_branch(git3_repository *repo, int format);
+static void print_long(git3_status_list *status);
+static void print_short(git3_repository *repo, git3_status_list *status);
+static int print_submod(git3_submodule *sm, const char *name, void *payload);
 
-int lg2_status(git_repository *repo, int argc, char *argv[])
+int lg2_status(git3_repository *repo, int argc, char *argv[])
 {
-	git_status_list *status;
-	struct status_opts o = { GIT_STATUS_OPTIONS_INIT, "." };
+	git3_status_list *status;
+	struct status_opts o = { GIT3_STATUS_OPTIONS_INIT, "." };
 
-	o.statusopt.show  = GIT_STATUS_SHOW_INDEX_AND_WORKDIR;
-	o.statusopt.flags = GIT_STATUS_OPT_INCLUDE_UNTRACKED |
-		GIT_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
-		GIT_STATUS_OPT_SORT_CASE_SENSITIVELY;
+	o.statusopt.show  = GIT3_STATUS_SHOW_INDEX_AND_WORKDIR;
+	o.statusopt.flags = GIT3_STATUS_OPT_INCLUDE_UNTRACKED |
+		GIT3_STATUS_OPT_RENAMES_HEAD_TO_INDEX |
+		GIT3_STATUS_OPT_SORT_CASE_SENSITIVELY;
 
 	parse_opts(&o, argc, argv);
 
-	if (git_repository_is_bare(repo))
+	if (git3_repository_is_bare(repo))
 		fatal("Cannot report status on bare repository",
-			git_repository_path(repo));
+			git3_repository_path(repo));
 
 show_status:
 	if (o.repeat)
@@ -84,17 +84,17 @@ show_status:
 	/**
 	 * Run status on the repository
 	 *
-	 * We use `git_status_list_new()` to generate a list of status
+	 * We use `git3_status_list_new()` to generate a list of status
 	 * information which lets us iterate over it at our
 	 * convenience and extract the data we want to show out of
 	 * each entry.
 	 *
-	 * You can use `git_status_foreach()` or
-	 * `git_status_foreach_ext()` if you'd prefer to execute a
+	 * You can use `git3_status_foreach()` or
+	 * `git3_status_foreach_ext()` if you'd prefer to execute a
 	 * callback for each entry. The latter gives you more control
 	 * about what results are presented.
 	 */
-	check_lg2(git_status_list_new(&status, repo, &o.statusopt),
+	check_lg2(git3_status_list_new(&status, repo, &o.statusopt),
 		"Could not get status", NULL);
 
 	if (o.showbranch)
@@ -102,7 +102,7 @@ show_status:
 
 	if (o.showsubmod) {
 		int submod_count = 0;
-		check_lg2(git_submodule_foreach(repo, print_submod, &submod_count),
+		check_lg2(git3_submodule_foreach(repo, print_submod, &submod_count),
 			"Cannot iterate submodules", o.repodir);
 	}
 
@@ -111,7 +111,7 @@ show_status:
 	else
 		print_short(repo, status);
 
-	git_status_list_free(status);
+	git3_status_list_free(status);
 
 	if (o.repeat) {
 		sleep(o.repeat);
@@ -125,18 +125,18 @@ show_status:
  * If the user asked for the branch, let's show the short name of the
  * branch.
  */
-static void show_branch(git_repository *repo, int format)
+static void show_branch(git3_repository *repo, int format)
 {
 	int error = 0;
 	const char *branch = NULL;
-	git_reference *head = NULL;
+	git3_reference *head = NULL;
 
-	error = git_repository_head(&head, repo);
+	error = git3_repository_head(&head, repo);
 
-	if (error == GIT_EUNBORNBRANCH || error == GIT_ENOTFOUND)
+	if (error == GIT3_EUNBORNBRANCH || error == GIT3_ENOTFOUND)
 		branch = NULL;
 	else if (!error) {
-		branch = git_reference_shorthand(head);
+		branch = git3_reference_shorthand(head);
 	} else
 		check_lg2(error, "failed to get current branch", NULL);
 
@@ -146,17 +146,17 @@ static void show_branch(git_repository *repo, int format)
 	else
 		printf("## %s\n", branch ? branch : "HEAD (no branch)");
 
-	git_reference_free(head);
+	git3_reference_free(head);
 }
 
 /**
  * This function print out an output similar to git's status command
  * in long form, including the command-line hints.
  */
-static void print_long(git_status_list *status)
+static void print_long(git3_status_list *status)
 {
-	size_t i, maxi = git_status_list_entrycount(status);
-	const git_status_entry *s;
+	size_t i, maxi = git3_status_list_entrycount(status);
+	const git3_status_entry *s;
 	int header = 0, changes_in_index = 0;
 	int changed_in_workdir = 0, rm_in_workdir = 0;
 	const char *old_path, *new_path;
@@ -166,23 +166,23 @@ static void print_long(git_status_list *status)
 	for (i = 0; i < maxi; ++i) {
 		char *istatus = NULL;
 
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
-		if (s->status == GIT_STATUS_CURRENT)
+		if (s->status == GIT3_STATUS_CURRENT)
 			continue;
 
-		if (s->status & GIT_STATUS_WT_DELETED)
+		if (s->status & GIT3_STATUS_WT_DELETED)
 			rm_in_workdir = 1;
 
-		if (s->status & GIT_STATUS_INDEX_NEW)
+		if (s->status & GIT3_STATUS_INDEX_NEW)
 			istatus = "new file: ";
-		if (s->status & GIT_STATUS_INDEX_MODIFIED)
+		if (s->status & GIT3_STATUS_INDEX_MODIFIED)
 			istatus = "modified: ";
-		if (s->status & GIT_STATUS_INDEX_DELETED)
+		if (s->status & GIT3_STATUS_INDEX_DELETED)
 			istatus = "deleted:  ";
-		if (s->status & GIT_STATUS_INDEX_RENAMED)
+		if (s->status & GIT3_STATUS_INDEX_RENAMED)
 			istatus = "renamed:  ";
-		if (s->status & GIT_STATUS_INDEX_TYPECHANGE)
+		if (s->status & GIT3_STATUS_INDEX_TYPECHANGE)
 			istatus = "typechange:";
 
 		if (istatus == NULL)
@@ -215,24 +215,24 @@ static void print_long(git_status_list *status)
 	for (i = 0; i < maxi; ++i) {
 		char *wstatus = NULL;
 
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
 		/**
-		 * With `GIT_STATUS_OPT_INCLUDE_UNMODIFIED` (not used in this example)
+		 * With `GIT3_STATUS_OPT_INCLUDE_UNMODIFIED` (not used in this example)
 		 * `index_to_workdir` may not be `NULL` even if there are
-		 * no differences, in which case it will be a `GIT_DELTA_UNMODIFIED`.
+		 * no differences, in which case it will be a `GIT3_DELTA_UNMODIFIED`.
 		 */
-		if (s->status == GIT_STATUS_CURRENT || s->index_to_workdir == NULL)
+		if (s->status == GIT3_STATUS_CURRENT || s->index_to_workdir == NULL)
 			continue;
 
 		/** Print out the output since we know the file has some changes */
-		if (s->status & GIT_STATUS_WT_MODIFIED)
+		if (s->status & GIT3_STATUS_WT_MODIFIED)
 			wstatus = "modified: ";
-		if (s->status & GIT_STATUS_WT_DELETED)
+		if (s->status & GIT3_STATUS_WT_DELETED)
 			wstatus = "deleted:  ";
-		if (s->status & GIT_STATUS_WT_RENAMED)
+		if (s->status & GIT3_STATUS_WT_RENAMED)
 			wstatus = "renamed:  ";
-		if (s->status & GIT_STATUS_WT_TYPECHANGE)
+		if (s->status & GIT3_STATUS_WT_TYPECHANGE)
 			wstatus = "typechange:";
 
 		if (wstatus == NULL)
@@ -265,9 +265,9 @@ static void print_long(git_status_list *status)
 	header = 0;
 
 	for (i = 0; i < maxi; ++i) {
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
-		if (s->status == GIT_STATUS_WT_NEW) {
+		if (s->status == GIT3_STATUS_WT_NEW) {
 
 			if (!header) {
 				printf("# Untracked files:\n");
@@ -285,9 +285,9 @@ static void print_long(git_status_list *status)
 	/** Print ignored files. */
 
 	for (i = 0; i < maxi; ++i) {
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
-		if (s->status == GIT_STATUS_IGNORED) {
+		if (s->status == GIT3_STATUS_IGNORED) {
 
 			if (!header) {
 				printf("# Ignored files:\n");
@@ -308,49 +308,49 @@ static void print_long(git_status_list *status)
  * This version of the output prefixes each path with two status
  * columns and shows submodule status information.
  */
-static void print_short(git_repository *repo, git_status_list *status)
+static void print_short(git3_repository *repo, git3_status_list *status)
 {
-	size_t i, maxi = git_status_list_entrycount(status);
-	const git_status_entry *s;
+	size_t i, maxi = git3_status_list_entrycount(status);
+	const git3_status_entry *s;
 	char istatus, wstatus;
 	const char *extra, *a, *b, *c;
 
 	for (i = 0; i < maxi; ++i) {
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
-		if (s->status == GIT_STATUS_CURRENT)
+		if (s->status == GIT3_STATUS_CURRENT)
 			continue;
 
 		a = b = c = NULL;
 		istatus = wstatus = ' ';
 		extra = "";
 
-		if (s->status & GIT_STATUS_INDEX_NEW)
+		if (s->status & GIT3_STATUS_INDEX_NEW)
 			istatus = 'A';
-		if (s->status & GIT_STATUS_INDEX_MODIFIED)
+		if (s->status & GIT3_STATUS_INDEX_MODIFIED)
 			istatus = 'M';
-		if (s->status & GIT_STATUS_INDEX_DELETED)
+		if (s->status & GIT3_STATUS_INDEX_DELETED)
 			istatus = 'D';
-		if (s->status & GIT_STATUS_INDEX_RENAMED)
+		if (s->status & GIT3_STATUS_INDEX_RENAMED)
 			istatus = 'R';
-		if (s->status & GIT_STATUS_INDEX_TYPECHANGE)
+		if (s->status & GIT3_STATUS_INDEX_TYPECHANGE)
 			istatus = 'T';
 
-		if (s->status & GIT_STATUS_WT_NEW) {
+		if (s->status & GIT3_STATUS_WT_NEW) {
 			if (istatus == ' ')
 				istatus = '?';
 			wstatus = '?';
 		}
-		if (s->status & GIT_STATUS_WT_MODIFIED)
+		if (s->status & GIT3_STATUS_WT_MODIFIED)
 			wstatus = 'M';
-		if (s->status & GIT_STATUS_WT_DELETED)
+		if (s->status & GIT3_STATUS_WT_DELETED)
 			wstatus = 'D';
-		if (s->status & GIT_STATUS_WT_RENAMED)
+		if (s->status & GIT3_STATUS_WT_RENAMED)
 			wstatus = 'R';
-		if (s->status & GIT_STATUS_WT_TYPECHANGE)
+		if (s->status & GIT3_STATUS_WT_TYPECHANGE)
 			wstatus = 'T';
 
-		if (s->status & GIT_STATUS_IGNORED) {
+		if (s->status & GIT3_STATUS_IGNORED) {
 			istatus = '!';
 			wstatus = '!';
 		}
@@ -363,19 +363,19 @@ static void print_short(git_repository *repo, git_status_list *status)
 		 * let's go take a look at its status.
 		 */
 		if (s->index_to_workdir &&
-			s->index_to_workdir->new_file.mode == GIT_FILEMODE_COMMIT)
+			s->index_to_workdir->new_file.mode == GIT3_FILEMODE_COMMIT)
 		{
 			unsigned int smstatus = 0;
 
-			if (!git_submodule_status(&smstatus, repo, s->index_to_workdir->new_file.path,
-						  GIT_SUBMODULE_IGNORE_UNSPECIFIED)) {
-				if (smstatus & GIT_SUBMODULE_STATUS_WD_MODIFIED)
+			if (!git3_submodule_status(&smstatus, repo, s->index_to_workdir->new_file.path,
+						  GIT3_SUBMODULE_IGNORE_UNSPECIFIED)) {
+				if (smstatus & GIT3_SUBMODULE_STATUS_WD_MODIFIED)
 					extra = " (new commits)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED)
+				else if (smstatus & GIT3_SUBMODULE_STATUS_WD_INDEX_MODIFIED)
 					extra = " (modified content)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_WD_MODIFIED)
+				else if (smstatus & GIT3_SUBMODULE_STATUS_WD_WD_MODIFIED)
 					extra = " (modified content)";
-				else if (smstatus & GIT_SUBMODULE_STATUS_WD_UNTRACKED)
+				else if (smstatus & GIT3_SUBMODULE_STATUS_WD_UNTRACKED)
 					extra = " (untracked content)";
 			}
 		}
@@ -410,14 +410,14 @@ static void print_short(git_repository *repo, git_status_list *status)
 	}
 
 	for (i = 0; i < maxi; ++i) {
-		s = git_status_byindex(status, i);
+		s = git3_status_byindex(status, i);
 
-		if (s->status == GIT_STATUS_WT_NEW)
+		if (s->status == GIT3_STATUS_WT_NEW)
 			printf("?? %s\n", s->index_to_workdir->old_file.path);
 	}
 }
 
-static int print_submod(git_submodule *sm, const char *name, void *payload)
+static int print_submod(git3_submodule *sm, const char *name, void *payload)
 {
 	int *count = payload;
 	(void)name;
@@ -427,7 +427,7 @@ static int print_submod(git_submodule *sm, const char *name, void *payload)
 	(*count)++;
 
 	printf("# - submodule '%s' at %s\n",
-		git_submodule_name(sm), git_submodule_path(sm));
+		git3_submodule_name(sm), git3_submodule_path(sm));
 
 	return 0;
 }
@@ -462,19 +462,19 @@ static void parse_opts(struct status_opts *o, int argc, char *argv[])
 				o->format = FORMAT_PORCELAIN;
 		}
 		else if (!strcmp(a, "--ignored"))
-			o->statusopt.flags |= GIT_STATUS_OPT_INCLUDE_IGNORED;
+			o->statusopt.flags |= GIT3_STATUS_OPT_INCLUDE_IGNORED;
 		else if (!strcmp(a, "-uno") ||
 				 !strcmp(a, "--untracked-files=no"))
-			o->statusopt.flags &= ~GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+			o->statusopt.flags &= ~GIT3_STATUS_OPT_INCLUDE_UNTRACKED;
 		else if (!strcmp(a, "-unormal") ||
 				 !strcmp(a, "--untracked-files=normal"))
-			o->statusopt.flags |= GIT_STATUS_OPT_INCLUDE_UNTRACKED;
+			o->statusopt.flags |= GIT3_STATUS_OPT_INCLUDE_UNTRACKED;
 		else if (!strcmp(a, "-uall") ||
 				 !strcmp(a, "--untracked-files=all"))
-			o->statusopt.flags |= GIT_STATUS_OPT_INCLUDE_UNTRACKED |
-				GIT_STATUS_OPT_RECURSE_UNTRACKED_DIRS;
+			o->statusopt.flags |= GIT3_STATUS_OPT_INCLUDE_UNTRACKED |
+				GIT3_STATUS_OPT_RECURSE_UNTRACKED_DIRS;
 		else if (!strcmp(a, "--ignore-submodules=all"))
-			o->statusopt.flags |= GIT_STATUS_OPT_EXCLUDE_SUBMODULES;
+			o->statusopt.flags |= GIT3_STATUS_OPT_EXCLUDE_SUBMODULES;
 		else if (!strncmp(a, "--git-dir=", strlen("--git-dir=")))
 			o->repodir = a + strlen("--git-dir=");
 		else if (!strcmp(a, "--repeat"))

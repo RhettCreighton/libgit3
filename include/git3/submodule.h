@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_submodule_h__
@@ -14,20 +14,20 @@
 #include "checkout.h"
 
 /**
- * @file git2/submodule.h
+ * @file git3/submodule.h
  * @brief Submodules place another repository's contents within this one
  *
- * Submodule support in libgit2 builds a list of known submodules and keeps
+ * Submodule support in libgit3 builds a list of known submodules and keeps
  * it in the repository.  The list is built from the .gitmodules file, the
  * .git/config file, the index, and the HEAD tree.  Items in the working
  * directory that look like submodules (i.e. a git repo) but are not
  * mentioned in those places won't be tracked.
  *
- * @defgroup git_submodule Git submodule management routines
+ * @defgroup git3_submodule Git submodule management routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Return codes for submodule status.
@@ -72,75 +72,75 @@ GIT_BEGIN_DECL
  * * WD_UNTRACKED      - wd contains untracked files
  */
 typedef enum {
-	GIT_SUBMODULE_STATUS_IN_HEAD           = (1u << 0),
-	GIT_SUBMODULE_STATUS_IN_INDEX          = (1u << 1),
-	GIT_SUBMODULE_STATUS_IN_CONFIG         = (1u << 2),
-	GIT_SUBMODULE_STATUS_IN_WD             = (1u << 3),
-	GIT_SUBMODULE_STATUS_INDEX_ADDED       = (1u << 4),
-	GIT_SUBMODULE_STATUS_INDEX_DELETED     = (1u << 5),
-	GIT_SUBMODULE_STATUS_INDEX_MODIFIED    = (1u << 6),
-	GIT_SUBMODULE_STATUS_WD_UNINITIALIZED  = (1u << 7),
-	GIT_SUBMODULE_STATUS_WD_ADDED          = (1u << 8),
-	GIT_SUBMODULE_STATUS_WD_DELETED        = (1u << 9),
-	GIT_SUBMODULE_STATUS_WD_MODIFIED       = (1u << 10),
-	GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED = (1u << 11),
-	GIT_SUBMODULE_STATUS_WD_WD_MODIFIED    = (1u << 12),
-	GIT_SUBMODULE_STATUS_WD_UNTRACKED      = (1u << 13)
-} git_submodule_status_t;
+	GIT3_SUBMODULE_STATUS_IN_HEAD           = (1u << 0),
+	GIT3_SUBMODULE_STATUS_IN_INDEX          = (1u << 1),
+	GIT3_SUBMODULE_STATUS_IN_CONFIG         = (1u << 2),
+	GIT3_SUBMODULE_STATUS_IN_WD             = (1u << 3),
+	GIT3_SUBMODULE_STATUS_INDEX_ADDED       = (1u << 4),
+	GIT3_SUBMODULE_STATUS_INDEX_DELETED     = (1u << 5),
+	GIT3_SUBMODULE_STATUS_INDEX_MODIFIED    = (1u << 6),
+	GIT3_SUBMODULE_STATUS_WD_UNINITIALIZED  = (1u << 7),
+	GIT3_SUBMODULE_STATUS_WD_ADDED          = (1u << 8),
+	GIT3_SUBMODULE_STATUS_WD_DELETED        = (1u << 9),
+	GIT3_SUBMODULE_STATUS_WD_MODIFIED       = (1u << 10),
+	GIT3_SUBMODULE_STATUS_WD_INDEX_MODIFIED = (1u << 11),
+	GIT3_SUBMODULE_STATUS_WD_WD_MODIFIED    = (1u << 12),
+	GIT3_SUBMODULE_STATUS_WD_UNTRACKED      = (1u << 13)
+} git3_submodule_status_t;
 
 /** Submodule source bits */
-#define GIT_SUBMODULE_STATUS__IN_FLAGS		0x000Fu
+#define GIT3_SUBMODULE_STATUS__IN_FLAGS		0x000Fu
 /** Submodule index status */
-#define GIT_SUBMODULE_STATUS__INDEX_FLAGS	0x0070u
+#define GIT3_SUBMODULE_STATUS__INDEX_FLAGS	0x0070u
 /** Submodule working directory status */
-#define GIT_SUBMODULE_STATUS__WD_FLAGS		0x3F80u
+#define GIT3_SUBMODULE_STATUS__WD_FLAGS		0x3F80u
 
 /** Whether the submodule is modified */
-#define GIT_SUBMODULE_STATUS_IS_UNMODIFIED(S) \
-	(((S) & ~GIT_SUBMODULE_STATUS__IN_FLAGS) == 0)
+#define GIT3_SUBMODULE_STATUS_IS_UNMODIFIED(S) \
+	(((S) & ~GIT3_SUBMODULE_STATUS__IN_FLAGS) == 0)
 
 /** Whether the submodule is modified (in the index) */
-#define GIT_SUBMODULE_STATUS_IS_INDEX_UNMODIFIED(S) \
-	(((S) & GIT_SUBMODULE_STATUS__INDEX_FLAGS) == 0)
+#define GIT3_SUBMODULE_STATUS_IS_INDEX_UNMODIFIED(S) \
+	(((S) & GIT3_SUBMODULE_STATUS__INDEX_FLAGS) == 0)
 
 /** Whether the submodule is modified (in the working directory) */
-#define GIT_SUBMODULE_STATUS_IS_WD_UNMODIFIED(S) \
-	(((S) & (GIT_SUBMODULE_STATUS__WD_FLAGS & \
-	~GIT_SUBMODULE_STATUS_WD_UNINITIALIZED)) == 0)
+#define GIT3_SUBMODULE_STATUS_IS_WD_UNMODIFIED(S) \
+	(((S) & (GIT3_SUBMODULE_STATUS__WD_FLAGS & \
+	~GIT3_SUBMODULE_STATUS_WD_UNINITIALIZED)) == 0)
 
 /** Whether the submodule working directory is dirty */
-#define GIT_SUBMODULE_STATUS_IS_WD_DIRTY(S) \
-	(((S) & (GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED | \
-	GIT_SUBMODULE_STATUS_WD_WD_MODIFIED | \
-	GIT_SUBMODULE_STATUS_WD_UNTRACKED)) != 0)
+#define GIT3_SUBMODULE_STATUS_IS_WD_DIRTY(S) \
+	(((S) & (GIT3_SUBMODULE_STATUS_WD_INDEX_MODIFIED | \
+	GIT3_SUBMODULE_STATUS_WD_WD_MODIFIED | \
+	GIT3_SUBMODULE_STATUS_WD_UNTRACKED)) != 0)
 
 /**
  * Function pointer to receive each submodule
  *
- * @param sm git_submodule currently being visited
+ * @param sm git3_submodule currently being visited
  * @param name name of the submodule
  * @param payload value you passed to the foreach function as payload
  * @return 0 on success or error code
  */
-typedef int GIT_CALLBACK(git_submodule_cb)(
-	git_submodule *sm, const char *name, void *payload);
+typedef int GIT3_CALLBACK(git3_submodule_cb)(
+	git3_submodule *sm, const char *name, void *payload);
 
 /**
  * Submodule update options structure
  *
- * Initialize with `GIT_SUBMODULE_UPDATE_OPTIONS_INIT`. Alternatively, you can
- * use `git_submodule_update_options_init`.
+ * Initialize with `GIT3_SUBMODULE_UPDATE_OPTIONS_INIT`. Alternatively, you can
+ * use `git3_submodule_update_options_init`.
  *
  */
-typedef struct git_submodule_update_options {
+typedef struct git3_submodule_update_options {
 	unsigned int version;
 
 	/**
 	 * These options are passed to the checkout step. To disable
-	 * checkout, set the `checkout_strategy` to `GIT_CHECKOUT_NONE`
-	 * or `GIT_CHECKOUT_DRY_RUN`.
+	 * checkout, set the `checkout_strategy` to `GIT3_CHECKOUT_NONE`
+	 * or `GIT3_CHECKOUT_DRY_RUN`.
 	 */
-	git_checkout_options checkout_opts;
+	git3_checkout_options checkout_opts;
 
 	/**
 	 * Options which control the fetch, including callbacks.
@@ -148,37 +148,37 @@ typedef struct git_submodule_update_options {
 	 * The callbacks to use for reporting fetch progress, and for acquiring
 	 * credentials in the event they are needed.
 	 */
-	git_fetch_options fetch_opts;
+	git3_fetch_options fetch_opts;
 
 	/**
 	 * Allow fetching from the submodule's default remote if the target
 	 * commit isn't found. Enabled by default.
 	 */
 	int allow_fetch;
-} git_submodule_update_options;
+} git3_submodule_update_options;
 
-/** Current version for the `git_submodule_update_options` structure */
-#define GIT_SUBMODULE_UPDATE_OPTIONS_VERSION 1
+/** Current version for the `git3_submodule_update_options` structure */
+#define GIT3_SUBMODULE_UPDATE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_submodule_update_options` */
-#define GIT_SUBMODULE_UPDATE_OPTIONS_INIT \
-	{ GIT_SUBMODULE_UPDATE_OPTIONS_VERSION, \
-	  GIT_CHECKOUT_OPTIONS_INIT, \
-	  GIT_FETCH_OPTIONS_INIT, \
+/** Static constructor for `git3_submodule_update_options` */
+#define GIT3_SUBMODULE_UPDATE_OPTIONS_INIT \
+	{ GIT3_SUBMODULE_UPDATE_OPTIONS_VERSION, \
+	  GIT3_CHECKOUT_OPTIONS_INIT, \
+	  GIT3_FETCH_OPTIONS_INIT, \
 	  1 }
 
 /**
- * Initialize git_submodule_update_options structure
+ * Initialize git3_submodule_update_options structure
  *
- * Initializes a `git_submodule_update_options` with default values. Equivalent to
- * creating an instance with `GIT_SUBMODULE_UPDATE_OPTIONS_INIT`.
+ * Initializes a `git3_submodule_update_options` with default values. Equivalent to
+ * creating an instance with `GIT3_SUBMODULE_UPDATE_OPTIONS_INIT`.
  *
- * @param opts The `git_submodule_update_options` struct to initialize.
- * @param version The struct version; pass `GIT_SUBMODULE_UPDATE_OPTIONS_VERSION`.
+ * @param opts The `git3_submodule_update_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_SUBMODULE_UPDATE_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_submodule_update_options_init(
-	git_submodule_update_options *opts, unsigned int version);
+GIT3_EXTERN(int) git3_submodule_update_options_init(
+	git3_submodule_update_options *opts, unsigned int version);
 
 /**
  * Update a submodule. This will clone a missing submodule and
@@ -193,12 +193,12 @@ GIT_EXTERN(int) git_submodule_update_options_init(
  *        return an error if attempting to update an uninitialized repository.
  *        but setting this to true forces them to be updated.
  * @param options configuration options for the update.  If NULL, the
- *        function works as though GIT_SUBMODULE_UPDATE_OPTIONS_INIT was passed.
+ *        function works as though GIT3_SUBMODULE_UPDATE_OPTIONS_INIT was passed.
  * @return 0 on success, any non-zero return value from a callback
  *         function, or a negative value to indicate an error (use
- *         `git_error_last` for a detailed error message).
+ *         `git3_error_last` for a detailed error message).
  */
-GIT_EXTERN(int) git_submodule_update(git_submodule *submodule, int init, git_submodule_update_options *options);
+GIT3_EXTERN(int) git3_submodule_update(git3_submodule *submodule, int init, git3_submodule_update_options *options);
 
 /**
  * Lookup submodule information by name or path.
@@ -211,25 +211,25 @@ GIT_EXTERN(int) git_submodule_update(git_submodule *submodule, int init, git_sub
  * - The submodule is not mentioned in the HEAD, the index, and the config,
  *   but does "exist" in the working directory (i.e. there is a subdirectory
  *   that appears to be a Git repository).  In this case, this function
- *   returns GIT_EEXISTS to indicate a sub-repository exists but not in a
- *   state where a git_submodule can be instantiated.
+ *   returns GIT3_EEXISTS to indicate a sub-repository exists but not in a
+ *   state where a git3_submodule can be instantiated.
  * - The submodule is not mentioned in the HEAD, index, or config and the
  *   working directory doesn't contain a value git repo at that path.
  *   There may or may not be anything else at that path, but nothing that
- *   looks like a submodule.  In this case, this returns GIT_ENOTFOUND.
+ *   looks like a submodule.  In this case, this returns GIT3_ENOTFOUND.
  *
- * You must call `git_submodule_free` when done with the submodule.
+ * You must call `git3_submodule_free` when done with the submodule.
  *
  * @param out Output ptr to submodule; pass NULL to just get return code
  * @param repo The parent repository
  * @param name The name of or path to the submodule; trailing slashes okay
- * @return 0 on success, GIT_ENOTFOUND if submodule does not exist,
- *         GIT_EEXISTS if a repository is found in working directory only,
+ * @return 0 on success, GIT3_ENOTFOUND if submodule does not exist,
+ *         GIT3_EEXISTS if a repository is found in working directory only,
  *         -1 on other errors.
  */
-GIT_EXTERN(int) git_submodule_lookup(
-	git_submodule **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_submodule_lookup(
+	git3_submodule **out,
+	git3_repository *repo,
 	const char *name);
 
 /**
@@ -240,26 +240,26 @@ GIT_EXTERN(int) git_submodule_lookup(
  * @param source Original submodule to copy.
  * @return 0
  */
-GIT_EXTERN(int) git_submodule_dup(git_submodule **out, git_submodule *source);
+GIT3_EXTERN(int) git3_submodule_dup(git3_submodule **out, git3_submodule *source);
 
 /**
  * Release a submodule
  *
  * @param submodule Submodule object
  */
-GIT_EXTERN(void) git_submodule_free(git_submodule *submodule);
+GIT3_EXTERN(void) git3_submodule_free(git3_submodule *submodule);
 
 /**
  * Iterate over all tracked submodules of a repository.
  *
- * See the note on `git_submodule` above.  This iterates over the tracked
+ * See the note on `git3_submodule` above.  This iterates over the tracked
  * submodules as described therein.
  *
  * If you are concerned about items in the working directory that look like
  * submodules but are not tracked, the diff API will generate a diff record
  * for workdir items that look like submodules but are not tracked, showing
  * them as added in the workdir.  Also, the status API will treat the entire
- * subdirectory of a contained git repo as a single GIT_STATUS_WT_NEW item.
+ * subdirectory of a contained git repo as a single GIT3_STATUS_WT_NEW item.
  *
  * @param repo The repository
  * @param callback Function to be called with the name of each submodule.
@@ -267,9 +267,9 @@ GIT_EXTERN(void) git_submodule_free(git_submodule *submodule);
  * @param payload Extra data to pass to callback
  * @return 0 on success, -1 on error, or non-zero return value of callback
  */
-GIT_EXTERN(int) git_submodule_foreach(
-	git_repository *repo,
-	git_submodule_cb callback,
+GIT3_EXTERN(int) git3_submodule_foreach(
+	git3_repository *repo,
+	git3_submodule_cb callback,
 	void *payload);
 
 /**
@@ -283,11 +283,11 @@ GIT_EXTERN(int) git_submodule_foreach(
  *
  * To fully emulate "git submodule add" call this function, then open the
  * submodule repo and perform the clone step as needed (if you don't need
- * anything custom see `git_submodule_add_clone()`). Lastly, call
- * `git_submodule_add_finalize()` to wrap up adding the new submodule and
+ * anything custom see `git3_submodule_add_clone()`). Lastly, call
+ * `git3_submodule_add_finalize()` to wrap up adding the new submodule and
  * .gitmodules to the index to be ready to commit.
  *
- * You must call `git_submodule_free` on the submodule object when done.
+ * You must call `git3_submodule_free` on the submodule object when done.
  *
  * @param out The newly created submodule ready to open for clone
  * @param repo The repository in which you want to create the submodule
@@ -295,12 +295,12 @@ GIT_EXTERN(int) git_submodule_foreach(
  * @param path Path at which the submodule should be created
  * @param use_gitlink Should workdir contain a gitlink to the repo in
  *        .git/modules vs. repo directly in workdir.
- * @return 0 on success, GIT_EEXISTS if submodule already exists,
+ * @return 0 on success, GIT3_EEXISTS if submodule already exists,
  *         -1 on other errors.
  */
-GIT_EXTERN(int) git_submodule_add_setup(
-	git_submodule **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_submodule_add_setup(
+	git3_submodule **out,
+	git3_repository *repo,
 	const char *url,
 	const char *path,
 	int use_gitlink);
@@ -308,18 +308,18 @@ GIT_EXTERN(int) git_submodule_add_setup(
 /**
  * Perform the clone step for a newly created submodule.
  *
- * This performs the necessary `git_clone` to setup a newly-created submodule.
+ * This performs the necessary `git3_clone` to setup a newly-created submodule.
  *
  * @param out The newly created repository object. Optional.
  * @param submodule The submodule currently waiting for its clone.
  * @param opts The options to use.
  *
- * @return 0 on success, -1 on other errors (see git_clone).
+ * @return 0 on success, -1 on other errors (see git3_clone).
  */
-GIT_EXTERN(int) git_submodule_clone(
-	git_repository **out,
-	git_submodule *submodule,
-	const git_submodule_update_options *opts);
+GIT3_EXTERN(int) git3_submodule_clone(
+	git3_repository **out,
+	git3_submodule *submodule,
+	const git3_submodule_update_options *opts);
 
 /**
  * Resolve the setup of a new git submodule.
@@ -332,7 +332,7 @@ GIT_EXTERN(int) git_submodule_clone(
  * @param submodule The submodule to finish adding.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_submodule_add_finalize(git_submodule *submodule);
+GIT3_EXTERN(int) git3_submodule_add_finalize(git3_submodule *submodule);
 
 /**
  * Add current submodule HEAD commit to index of superproject.
@@ -340,12 +340,12 @@ GIT_EXTERN(int) git_submodule_add_finalize(git_submodule *submodule);
  * @param submodule The submodule to add to the index
  * @param write_index Boolean if this should immediately write the index
  *            file.  If you pass this as false, you will have to get the
- *            git_index and explicitly call `git_index_write()` on it to
+ *            git3_index and explicitly call `git3_index_write()` on it to
  *            save the change.
  * @return 0 on success, <0 on failure
  */
-GIT_EXTERN(int) git_submodule_add_to_index(
-	git_submodule *submodule,
+GIT3_EXTERN(int) git3_submodule_add_to_index(
+	git3_submodule *submodule,
 	int write_index);
 
 /**
@@ -353,13 +353,13 @@ GIT_EXTERN(int) git_submodule_add_to_index(
  *
  * This returns a pointer to the repository that contains the submodule.
  * This is a just a reference to the repository that was passed to the
- * original `git_submodule_lookup()` call, so if that repository has been
+ * original `git3_submodule_lookup()` call, so if that repository has been
  * freed, then this may be a dangling reference.
  *
  * @param submodule Pointer to submodule object
- * @return Pointer to `git_repository`
+ * @return Pointer to `git3_repository`
  */
-GIT_EXTERN(git_repository *) git_submodule_owner(git_submodule *submodule);
+GIT3_EXTERN(git3_repository *) git3_submodule_owner(git3_submodule *submodule);
 
 /**
  * Get the name of submodule.
@@ -367,7 +367,7 @@ GIT_EXTERN(git_repository *) git_submodule_owner(git_submodule *submodule);
  * @param submodule Pointer to submodule object
  * @return Pointer to the submodule name
  */
-GIT_EXTERN(const char *) git_submodule_name(git_submodule *submodule);
+GIT3_EXTERN(const char *) git3_submodule_name(git3_submodule *submodule);
 
 /**
  * Get the path to the submodule.
@@ -378,7 +378,7 @@ GIT_EXTERN(const char *) git_submodule_name(git_submodule *submodule);
  * @param submodule Pointer to submodule object
  * @return Pointer to the submodule path
  */
-GIT_EXTERN(const char *) git_submodule_path(git_submodule *submodule);
+GIT3_EXTERN(const char *) git3_submodule_path(git3_submodule *submodule);
 
 /**
  * Get the URL for the submodule.
@@ -386,7 +386,7 @@ GIT_EXTERN(const char *) git_submodule_path(git_submodule *submodule);
  * @param submodule Pointer to submodule object
  * @return Pointer to the submodule url
  */
-GIT_EXTERN(const char *) git_submodule_url(git_submodule *submodule);
+GIT3_EXTERN(const char *) git3_submodule_url(git3_submodule *submodule);
 
 /**
  * Resolve a submodule url relative to the given repository.
@@ -396,7 +396,7 @@ GIT_EXTERN(const char *) git_submodule_url(git_submodule *submodule);
  * @param url Relative url
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_submodule_resolve_url(git_buf *out, git_repository *repo, const char *url);
+GIT3_EXTERN(int) git3_submodule_resolve_url(git3_buf *out, git3_repository *repo, const char *url);
 
 /**
 * Get the branch for the submodule.
@@ -404,12 +404,12 @@ GIT_EXTERN(int) git_submodule_resolve_url(git_buf *out, git_repository *repo, co
 * @param submodule Pointer to submodule object
 * @return Pointer to the submodule branch
 */
-GIT_EXTERN(const char *) git_submodule_branch(git_submodule *submodule);
+GIT3_EXTERN(const char *) git3_submodule_branch(git3_submodule *submodule);
 
 /**
  * Set the branch for the submodule in the configuration
  *
- * After calling this, you may wish to call `git_submodule_sync()` to
+ * After calling this, you may wish to call `git3_submodule_sync()` to
  * write the changes to the checked out submodule repository.
  *
  * @param repo the repository to affect
@@ -417,13 +417,13 @@ GIT_EXTERN(const char *) git_submodule_branch(git_submodule *submodule);
  * @param branch Branch that should be used for the submodule
  * @return 0 on success, <0 on failure
  */
-GIT_EXTERN(int) git_submodule_set_branch(git_repository *repo, const char *name, const char *branch);
+GIT3_EXTERN(int) git3_submodule_set_branch(git3_repository *repo, const char *name, const char *branch);
 
 /**
  * Set the URL for the submodule in the configuration
  *
  *
- * After calling this, you may wish to call `git_submodule_sync()` to
+ * After calling this, you may wish to call `git3_submodule_sync()` to
  * write the changes to the checked out submodule repository.
  *
  * @param repo the repository to affect
@@ -431,62 +431,62 @@ GIT_EXTERN(int) git_submodule_set_branch(git_repository *repo, const char *name,
  * @param url URL that should be used for the submodule
  * @return 0 on success, <0 on failure
  */
-GIT_EXTERN(int) git_submodule_set_url(git_repository *repo, const char *name, const char *url);
+GIT3_EXTERN(int) git3_submodule_set_url(git3_repository *repo, const char *name, const char *url);
 
 /**
  * Get the OID for the submodule in the index.
  *
  * @param submodule Pointer to submodule object
- * @return Pointer to git_oid or NULL if submodule is not in index.
+ * @return Pointer to git3_oid or NULL if submodule is not in index.
  */
-GIT_EXTERN(const git_oid *) git_submodule_index_id(git_submodule *submodule);
+GIT3_EXTERN(const git3_oid *) git3_submodule_index_id(git3_submodule *submodule);
 
 /**
  * Get the OID for the submodule in the current HEAD tree.
  *
  * @param submodule Pointer to submodule object
- * @return Pointer to git_oid or NULL if submodule is not in the HEAD.
+ * @return Pointer to git3_oid or NULL if submodule is not in the HEAD.
  */
-GIT_EXTERN(const git_oid *) git_submodule_head_id(git_submodule *submodule);
+GIT3_EXTERN(const git3_oid *) git3_submodule_head_id(git3_submodule *submodule);
 
 /**
  * Get the OID for the submodule in the current working directory.
  *
  * This returns the OID that corresponds to looking up 'HEAD' in the checked
  * out submodule.  If there are pending changes in the index or anything
- * else, this won't notice that.  You should call `git_submodule_status()`
+ * else, this won't notice that.  You should call `git3_submodule_status()`
  * for a more complete picture about the state of the working directory.
  *
  * @param submodule Pointer to submodule object
- * @return Pointer to git_oid or NULL if submodule is not checked out.
+ * @return Pointer to git3_oid or NULL if submodule is not checked out.
  */
-GIT_EXTERN(const git_oid *) git_submodule_wd_id(git_submodule *submodule);
+GIT3_EXTERN(const git3_oid *) git3_submodule_wd_id(git3_submodule *submodule);
 
 /**
  * Get the ignore rule that will be used for the submodule.
  *
- * These values control the behavior of `git_submodule_status()` for this
+ * These values control the behavior of `git3_submodule_status()` for this
  * submodule.  There are four ignore values:
  *
- *  - **GIT_SUBMODULE_IGNORE_NONE** will consider any change to the contents
+ *  - **GIT3_SUBMODULE_IGNORE_NONE** will consider any change to the contents
  *    of the submodule from a clean checkout to be dirty, including the
  *    addition of untracked files.  This is the default if unspecified.
- *  - **GIT_SUBMODULE_IGNORE_UNTRACKED** examines the contents of the
- *    working tree (i.e. call `git_status_foreach()` on the submodule) but
+ *  - **GIT3_SUBMODULE_IGNORE_UNTRACKED** examines the contents of the
+ *    working tree (i.e. call `git3_status_foreach()` on the submodule) but
  *    UNTRACKED files will not count as making the submodule dirty.
- *  - **GIT_SUBMODULE_IGNORE_DIRTY** means to only check if the HEAD of the
+ *  - **GIT3_SUBMODULE_IGNORE_DIRTY** means to only check if the HEAD of the
  *    submodule has moved for status.  This is fast since it does not need to
  *    scan the working tree of the submodule at all.
- *  - **GIT_SUBMODULE_IGNORE_ALL** means not to open the submodule repo.
+ *  - **GIT3_SUBMODULE_IGNORE_ALL** means not to open the submodule repo.
  *    The working directory will be consider clean so long as there is a
  *    checked out version present.
  *
  * @param submodule The submodule to check
- * @return The current git_submodule_ignore_t valyue what will be used for
+ * @return The current git3_submodule_ignore_t valyue what will be used for
  *         this submodule.
  */
-GIT_EXTERN(git_submodule_ignore_t) git_submodule_ignore(
-	git_submodule *submodule);
+GIT3_EXTERN(git3_submodule_ignore_t) git3_submodule_ignore(
+	git3_submodule *submodule);
 
 /**
  * Set the ignore rule for the submodule in the configuration
@@ -498,23 +498,23 @@ GIT_EXTERN(git_submodule_ignore_t) git_submodule_ignore(
  * @param ignore The new value for the ignore rule
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_submodule_set_ignore(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_submodule_set_ignore(
+	git3_repository *repo,
 	const char *name,
-	git_submodule_ignore_t ignore);
+	git3_submodule_ignore_t ignore);
 
 /**
  * Get the update rule that will be used for the submodule.
  *
  * This value controls the behavior of the `git submodule update` command.
- * There are four useful values documented with `git_submodule_update_t`.
+ * There are four useful values documented with `git3_submodule_update_t`.
  *
  * @param submodule The submodule to check
- * @return The current git_submodule_update_t value that will be used
+ * @return The current git3_submodule_update_t value that will be used
  *         for this submodule.
  */
-GIT_EXTERN(git_submodule_update_t) git_submodule_update_strategy(
-	git_submodule *submodule);
+GIT3_EXTERN(git3_submodule_update_t) git3_submodule_update_strategy(
+	git3_submodule *submodule);
 
 /**
  * Set the update rule for the submodule in the configuration
@@ -526,10 +526,10 @@ GIT_EXTERN(git_submodule_update_t) git_submodule_update_strategy(
  * @param update The new value to use
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_submodule_set_update(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_submodule_set_update(
+	git3_repository *repo,
 	const char *name,
-	git_submodule_update_t update);
+	git3_submodule_update_t update);
 
 /**
  * Read the fetchRecurseSubmodules rule for a submodule.
@@ -537,14 +537,14 @@ GIT_EXTERN(int) git_submodule_set_update(
  * This accesses the submodule.<name>.fetchRecurseSubmodules value for
  * the submodule that controls fetching behavior for the submodule.
  *
- * Note that at this time, libgit2 does not honor this setting and the
+ * Note that at this time, libgit3 does not honor this setting and the
  * fetch functionality current ignores submodules.
  *
  * @param submodule the submodule to examine
  * @return the submodule recursion configuration
  */
-GIT_EXTERN(git_submodule_recurse_t) git_submodule_fetch_recurse_submodules(
-	git_submodule *submodule);
+GIT3_EXTERN(git3_submodule_recurse_t) git3_submodule_fetch_recurse_submodules(
+	git3_submodule *submodule);
 
 /**
  * Set the fetchRecurseSubmodules rule for a submodule in the configuration
@@ -556,17 +556,17 @@ GIT_EXTERN(git_submodule_recurse_t) git_submodule_fetch_recurse_submodules(
  * @param fetch_recurse_submodules the submodule recursion configuration
  * @return old value for fetchRecurseSubmodules
  */
-GIT_EXTERN(int) git_submodule_set_fetch_recurse_submodules(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_submodule_set_fetch_recurse_submodules(
+	git3_repository *repo,
 	const char *name,
-	git_submodule_recurse_t fetch_recurse_submodules);
+	git3_submodule_recurse_t fetch_recurse_submodules);
 
 /**
  * Copy submodule info into ".git/config" file.
  *
  * Just like "git submodule init", this copies information about the
  * submodule into ".git/config".  You can use the accessor functions
- * above to alter the in-memory git_submodule object and control what
+ * above to alter the in-memory git3_submodule object and control what
  * is written to the config, overriding what is in .gitmodules.
  *
  * @param submodule The submodule to write into the superproject config
@@ -574,7 +574,7 @@ GIT_EXTERN(int) git_submodule_set_fetch_recurse_submodules(
  *                  but setting this to true forces them to be updated.
  * @return 0 on success, <0 on failure.
  */
-GIT_EXTERN(int) git_submodule_init(git_submodule *submodule, int overwrite);
+GIT3_EXTERN(int) git3_submodule_init(git3_submodule *submodule, int overwrite);
 
 /**
  * Set up the subrepository for a submodule in preparation for clone.
@@ -589,9 +589,9 @@ GIT_EXTERN(int) git_submodule_init(git_submodule *submodule, int overwrite);
  *        the repo in .git/modules vs. repo directly in workdir.
  * @return 0 on success, <0 on failure.
  */
-GIT_EXTERN(int) git_submodule_repo_init(
-	git_repository **out,
-	const git_submodule *sm,
+GIT3_EXTERN(int) git3_submodule_repo_init(
+	git3_repository **out,
+	const git3_submodule *sm,
 	int use_gitlink);
 
 /**
@@ -605,23 +605,23 @@ GIT_EXTERN(int) git_submodule_repo_init(
  * @param submodule The submodule to copy.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_submodule_sync(git_submodule *submodule);
+GIT3_EXTERN(int) git3_submodule_sync(git3_submodule *submodule);
 
 /**
  * Open the repository for a submodule.
  *
  * This is a newly opened repository object.  The caller is responsible for
- * calling `git_repository_free()` on it when done.  Multiple calls to this
- * function will return distinct `git_repository` objects.  This will only
+ * calling `git3_repository_free()` on it when done.  Multiple calls to this
+ * function will return distinct `git3_repository` objects.  This will only
  * work if the submodule is checked out into the working directory.
  *
  * @param repo Pointer to the submodule repo which was opened
  * @param submodule Submodule to be opened
  * @return 0 on success, <0 if submodule repo could not be opened.
  */
-GIT_EXTERN(int) git_submodule_open(
-	git_repository **repo,
-	git_submodule *submodule);
+GIT3_EXTERN(int) git3_submodule_open(
+	git3_repository **repo,
+	git3_submodule *submodule);
 
 /**
  * Reread submodule info from config, index, and HEAD.
@@ -633,47 +633,47 @@ GIT_EXTERN(int) git_submodule_open(
  * @param force Force reload even if the data doesn't seem out of date
  * @return 0 on success, <0 on error
  */
-GIT_EXTERN(int) git_submodule_reload(git_submodule *submodule, int force);
+GIT3_EXTERN(int) git3_submodule_reload(git3_submodule *submodule, int force);
 
 /**
  * Get the status for a submodule.
  *
  * This looks at a submodule and tries to determine the status.  It
- * will return a combination of the `GIT_SUBMODULE_STATUS` values above.
+ * will return a combination of the `GIT3_SUBMODULE_STATUS` values above.
  * How deeply it examines the working directory to do this will depend
- * on the `git_submodule_ignore_t` value for the submodule.
+ * on the `git3_submodule_ignore_t` value for the submodule.
  *
- * @param status Combination of `GIT_SUBMODULE_STATUS` flags
+ * @param status Combination of `GIT3_SUBMODULE_STATUS` flags
  * @param repo the repository in which to look
  * @param name name of the submodule
  * @param ignore the ignore rules to follow
  * @return 0 on success, <0 on error
  */
-GIT_EXTERN(int) git_submodule_status(
+GIT3_EXTERN(int) git3_submodule_status(
 	unsigned int *status,
-	git_repository *repo,
+	git3_repository *repo,
 	const char *name,
-	git_submodule_ignore_t ignore);
+	git3_submodule_ignore_t ignore);
 
 /**
  * Get the locations of submodule information.
  *
- * This is a bit like a very lightweight version of `git_submodule_status`.
+ * This is a bit like a very lightweight version of `git3_submodule_status`.
  * It just returns a made of the first four submodule status values (i.e.
- * the ones like GIT_SUBMODULE_STATUS_IN_HEAD, etc) that tell you where the
+ * the ones like GIT3_SUBMODULE_STATUS_IN_HEAD, etc) that tell you where the
  * submodule data comes from (i.e. the HEAD commit, gitmodules file, etc.).
  * This can be useful if you want to know if the submodule is present in the
  * working directory at this point in time, etc.
  *
- * @param location_status Combination of first four `GIT_SUBMODULE_STATUS` flags
+ * @param location_status Combination of first four `GIT3_SUBMODULE_STATUS` flags
  * @param submodule Submodule for which to get status
  * @return 0 on success, <0 on error
  */
-GIT_EXTERN(int) git_submodule_location(
+GIT3_EXTERN(int) git3_submodule_location(
 	unsigned int *location_status,
-	git_submodule *submodule);
+	git3_submodule *submodule);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

@@ -1,6 +1,6 @@
 /* test the submodule APIs on repositories where there are no submodules */
 
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "futils.h"
 
@@ -11,120 +11,120 @@ void test_submodule_nosubs__cleanup(void)
 
 void test_submodule_nosubs__lookup(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_submodule *sm = NULL;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_submodule *sm = NULL;
 
 	p_mkdir("status/subrepo", 0777);
 	cl_git_mkfile("status/subrepo/.git", "gitdir: ../.git");
 
-	cl_assert_equal_i(GIT_ENOTFOUND, git_submodule_lookup(&sm, repo, "subdir"));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_submodule_lookup(&sm, repo, "subdir"));
 
-	cl_assert_equal_i(GIT_EEXISTS, git_submodule_lookup(&sm, repo, "subrepo"));
+	cl_assert_equal_i(GIT3_EEXISTS, git3_submodule_lookup(&sm, repo, "subrepo"));
 
-	cl_assert_equal_i(GIT_ENOTFOUND, git_submodule_lookup(&sm, repo, "subdir"));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_submodule_lookup(&sm, repo, "subdir"));
 
-	cl_assert_equal_i(GIT_EEXISTS, git_submodule_lookup(&sm, repo, "subrepo"));
+	cl_assert_equal_i(GIT3_EEXISTS, git3_submodule_lookup(&sm, repo, "subrepo"));
 }
 
-static int fake_submod_cb(git_submodule *sm, const char *n, void *p)
+static int fake_submod_cb(git3_submodule *sm, const char *n, void *p)
 {
-	GIT_UNUSED(sm); GIT_UNUSED(n); GIT_UNUSED(p);
+	GIT3_UNUSED(sm); GIT3_UNUSED(n); GIT3_UNUSED(p);
 	return 0;
 }
 
 void test_submodule_nosubs__foreach(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	cl_git_pass(git_submodule_foreach(repo, fake_submod_cb, NULL));
+	git3_repository *repo = cl_git_sandbox_init("status");
+	cl_git_pass(git3_submodule_foreach(repo, fake_submod_cb, NULL));
 }
 
 void test_submodule_nosubs__add(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_submodule *sm, *sm2;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_submodule *sm, *sm2;
 
-	cl_git_pass(git_submodule_add_setup(&sm, repo, "https://github.com/libgit2/libgit2.git", "submodules/libgit2", 1));
+	cl_git_pass(git3_submodule_add_setup(&sm, repo, "https://github.com/libgit3/libgit3.git", "submodules/libgit3", 1));
 
-	cl_git_pass(git_submodule_lookup(&sm2, repo, "submodules/libgit2"));
-	git_submodule_free(sm2);
+	cl_git_pass(git3_submodule_lookup(&sm2, repo, "submodules/libgit3"));
+	git3_submodule_free(sm2);
 
-	cl_git_pass(git_submodule_foreach(repo, fake_submod_cb, NULL));
+	cl_git_pass(git3_submodule_foreach(repo, fake_submod_cb, NULL));
 
-	git_submodule_free(sm);
+	git3_submodule_free(sm);
 }
 
 void test_submodule_nosubs__bad_gitmodules(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
+	git3_repository *repo = cl_git_sandbox_init("status");
 
 	cl_git_mkfile("status/.gitmodules", "[submodule \"foobar\"]\tpath=blargle\n\turl=\n\tbranch=\n\tupdate=flooble\n\n");
 
 	cl_git_rewritefile("status/.gitmodules", "[submodule \"foobar\"]\tpath=blargle\n\turl=\n\tbranch=\n\tupdate=rebase\n\n");
 
-	cl_git_pass(git_submodule_lookup(NULL, repo, "foobar"));
-	cl_assert_equal_i(GIT_ENOTFOUND, git_submodule_lookup(NULL, repo, "subdir"));
+	cl_git_pass(git3_submodule_lookup(NULL, repo, "foobar"));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_submodule_lookup(NULL, repo, "subdir"));
 }
 
 void test_submodule_nosubs__add_and_delete(void)
 {
-	git_repository *repo = cl_git_sandbox_init("status");
-	git_submodule *sm;
-	git_str buf = GIT_STR_INIT;
+	git3_repository *repo = cl_git_sandbox_init("status");
+	git3_submodule *sm;
+	git3_str buf = GIT3_STR_INIT;
 
-	cl_git_fail(git_submodule_lookup(NULL, repo, "libgit2"));
-	cl_git_fail(git_submodule_lookup(NULL, repo, "submodules/libgit2"));
+	cl_git_fail(git3_submodule_lookup(NULL, repo, "libgit3"));
+	cl_git_fail(git3_submodule_lookup(NULL, repo, "submodules/libgit3"));
 
 	/* create */
 
-	cl_git_pass(git_submodule_add_setup(
-		&sm, repo, "https://github.com/libgit2/libgit2.git", "submodules/libgit2", 1));
-	cl_assert_equal_s("submodules/libgit2", git_submodule_name(sm));
-	cl_assert_equal_s("submodules/libgit2", git_submodule_path(sm));
-	git_submodule_free(sm);
+	cl_git_pass(git3_submodule_add_setup(
+		&sm, repo, "https://github.com/libgit3/libgit3.git", "submodules/libgit3", 1));
+	cl_assert_equal_s("submodules/libgit3", git3_submodule_name(sm));
+	cl_assert_equal_s("submodules/libgit3", git3_submodule_path(sm));
+	git3_submodule_free(sm);
 
-	cl_git_pass(git_futils_readbuffer(&buf, "status/.gitmodules"));
-	cl_assert(strstr(buf.ptr, "[submodule \"submodules/libgit2\"]") != NULL);
-	cl_assert(strstr(buf.ptr, "path = submodules/libgit2") != NULL);
-	git_str_dispose(&buf);
+	cl_git_pass(git3_futils_readbuffer(&buf, "status/.gitmodules"));
+	cl_assert(strstr(buf.ptr, "[submodule \"submodules/libgit3\"]") != NULL);
+	cl_assert(strstr(buf.ptr, "path = submodules/libgit3") != NULL);
+	git3_str_dispose(&buf);
 
 	/* lookup */
 
-	cl_git_fail(git_submodule_lookup(&sm, repo, "libgit2"));
-	cl_git_pass(git_submodule_lookup(&sm, repo, "submodules/libgit2"));
-	cl_assert_equal_s("submodules/libgit2", git_submodule_name(sm));
-	cl_assert_equal_s("submodules/libgit2", git_submodule_path(sm));
-	git_submodule_free(sm);
+	cl_git_fail(git3_submodule_lookup(&sm, repo, "libgit3"));
+	cl_git_pass(git3_submodule_lookup(&sm, repo, "submodules/libgit3"));
+	cl_assert_equal_s("submodules/libgit3", git3_submodule_name(sm));
+	cl_assert_equal_s("submodules/libgit3", git3_submodule_path(sm));
+	git3_submodule_free(sm);
 
 	/* update name */
 
 	cl_git_rewritefile(
 		"status/.gitmodules",
-		"[submodule \"libgit2\"]\n"
-		"  path = submodules/libgit2\n"
-		"  url = https://github.com/libgit2/libgit2.git\n");
+		"[submodule \"libgit3\"]\n"
+		"  path = submodules/libgit3\n"
+		"  url = https://github.com/libgit3/libgit3.git\n");
 
-	cl_git_pass(git_submodule_lookup(&sm, repo, "libgit2"));
-	cl_assert_equal_s("libgit2", git_submodule_name(sm));
-	cl_assert_equal_s("submodules/libgit2", git_submodule_path(sm));
-	git_submodule_free(sm);
-	cl_git_pass(git_submodule_lookup(&sm, repo, "submodules/libgit2"));
-	git_submodule_free(sm);
+	cl_git_pass(git3_submodule_lookup(&sm, repo, "libgit3"));
+	cl_assert_equal_s("libgit3", git3_submodule_name(sm));
+	cl_assert_equal_s("submodules/libgit3", git3_submodule_path(sm));
+	git3_submodule_free(sm);
+	cl_git_pass(git3_submodule_lookup(&sm, repo, "submodules/libgit3"));
+	git3_submodule_free(sm);
 
 	/* revert name update */
 
 	cl_git_rewritefile(
 		"status/.gitmodules",
-		"[submodule \"submodules/libgit2\"]\n"
-		"  path = submodules/libgit2\n"
-		"  url = https://github.com/libgit2/libgit2.git\n");
+		"[submodule \"submodules/libgit3\"]\n"
+		"  path = submodules/libgit3\n"
+		"  url = https://github.com/libgit3/libgit3.git\n");
 
-	cl_git_fail(git_submodule_lookup(&sm, repo, "libgit2"));
-	cl_git_pass(git_submodule_lookup(&sm, repo, "submodules/libgit2"));
-	git_submodule_free(sm);
+	cl_git_fail(git3_submodule_lookup(&sm, repo, "libgit3"));
+	cl_git_pass(git3_submodule_lookup(&sm, repo, "submodules/libgit3"));
+	git3_submodule_free(sm);
 
 	/* remove completely */
 
 	cl_must_pass(p_unlink("status/.gitmodules"));
-	cl_git_fail(git_submodule_lookup(&sm, repo, "libgit2"));
-	cl_git_fail(git_submodule_lookup(&sm, repo, "submodules/libgit2"));
+	cl_git_fail(git3_submodule_lookup(&sm, repo, "libgit3"));
+	cl_git_fail(git3_submodule_lookup(&sm, repo, "submodules/libgit3"));
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 /**
  * An array-of-pointers implementation of Python's Timsort
@@ -24,7 +24,7 @@
 #endif
 
 static int binsearch(
-	void **dst, const void *x, size_t size, git__sort_r_cmp cmp, void *payload)
+	void **dst, const void *x, size_t size, git3__sort_r_cmp cmp, void *payload)
 {
 	int l, c, r;
 	void *lx, *cx;
@@ -69,7 +69,7 @@ static int binsearch(
 
 /* Binary insertion sort, but knowing that the first "start" entries are sorted. Used in timsort. */
 static void bisort(
-	void **dst, size_t start, size_t size, git__sort_r_cmp cmp, void *payload)
+	void **dst, size_t start, size_t size, git3__sort_r_cmp cmp, void *payload)
 {
 	size_t i;
 	void *x;
@@ -100,7 +100,7 @@ struct tsort_run {
 
 struct tsort_store {
 	size_t alloc;
-	git__sort_r_cmp cmp;
+	git3__sort_r_cmp cmp;
 	void *payload;
 	void **storage;
 };
@@ -184,7 +184,7 @@ static int resize(struct tsort_store *store, size_t new_size)
 	if (store->alloc < new_size) {
 		void **tempstore;
 
-		tempstore = git__reallocarray(store->storage, new_size, sizeof(void *));
+		tempstore = git3__reallocarray(store->storage, new_size, sizeof(void *));
 
 		/**
 		 * Do not propagate on OOM; this will abort the sort and
@@ -324,7 +324,7 @@ static ssize_t collapse(void **dst, struct tsort_run *stack, ssize_t stack_curr,
 			stack_curr--; \
 		} \
 		if (store->storage != NULL) {\
-			git__free(store->storage);\
+			git3__free(store->storage);\
 			store->storage = NULL;\
 		}\
 		return;\
@@ -332,8 +332,8 @@ static ssize_t collapse(void **dst, struct tsort_run *stack, ssize_t stack_curr,
 }\
 while (0)
 
-void git__tsort_r(
-	void **dst, size_t size, git__sort_r_cmp cmp, void *payload)
+void git3__tsort_r(
+	void **dst, size_t size, git3__sort_r_cmp cmp, void *payload)
 {
 	struct tsort_store _store, *store = &_store;
 	struct tsort_run run_stack[128];
@@ -373,10 +373,10 @@ void git__tsort_r(
 
 static int tsort_r_cmp(const void *a, const void *b, void *payload)
 {
-	return ((git__tsort_cmp)payload)(a, b);
+	return ((git3__tsort_cmp)payload)(a, b);
 }
 
-void git__tsort(void **dst, size_t size, git__tsort_cmp cmp)
+void git3__tsort(void **dst, size_t size, git3__tsort_cmp cmp)
 {
-	git__tsort_r(dst, size, tsort_r_cmp, cmp);
+	git3__tsort_r(dst, size, tsort_r_cmp, cmp);
 }

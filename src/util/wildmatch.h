@@ -1,14 +1,14 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #ifndef INCLUDE_wildmatch_h__
 #define INCLUDE_wildmatch_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #define WM_CASEFOLD 1
 #define WM_PATHNAME 2

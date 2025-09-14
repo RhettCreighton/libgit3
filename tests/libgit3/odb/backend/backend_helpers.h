@@ -6,7 +6,7 @@ typedef struct {
 } fake_object;
 
 typedef struct {
-	git_odb_backend parent;
+	git3_odb_backend parent;
 
 	int exists_calls;
 	int exists_prefix_calls;
@@ -19,6 +19,6 @@ typedef struct {
 } fake_backend;
 
 int build_fake_backend(
-	git_odb_backend **out,
+	git3_odb_backend **out,
 	const fake_object *objects,
 	bool support_refresh);

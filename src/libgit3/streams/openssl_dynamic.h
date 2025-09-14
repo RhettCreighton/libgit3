@@ -1,14 +1,14 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #ifndef INCLUDE_streams_openssl_dynamic_h__
 #define INCLUDE_streams_openssl_dynamic_h__
 
-#ifdef GIT_HTTPS_OPENSSL_DYNAMIC
+#ifdef GIT3_HTTPS_OPENSSL_DYNAMIC
 
 /* These constants are taken from the OpenSSL 3.0 headers. */
 
@@ -207,8 +207,8 @@ extern int sk_GENERAL_NAME_num(const GENERAL_NAME *sk);
 extern GENERAL_NAME *sk_GENERAL_NAME_value(const GENERAL_NAME *sk, int i);
 extern void GENERAL_NAMES_free(GENERAL_NAME *sk);
 
-extern int git_openssl_stream_dynamic_init(void);
+extern int git3_openssl_stream_dynamic_init(void);
 
-#endif /* GIT_HTTPS_OPENSSL_DYNAMIC */
+#endif /* GIT3_HTTPS_OPENSSL_DYNAMIC */
 
 #endif

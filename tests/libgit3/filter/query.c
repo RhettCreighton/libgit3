@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/filter.h"
 #include "crlf.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_filter_query__initialize(void)
 {
@@ -27,13 +27,13 @@ void test_filter_query__cleanup(void)
 
 static int filter_for(const char *filename, const char *filter)
 {
-	git_filter_list *fl;
+	git3_filter_list *fl;
 	int filtered;
 
-	cl_git_pass(git_filter_list_load(
-		&fl, g_repo, NULL, filename, GIT_FILTER_TO_WORKTREE, 0));
-	filtered = git_filter_list_contains(fl, filter);
-	git_filter_list_free(fl);
+	cl_git_pass(git3_filter_list_load(
+		&fl, g_repo, NULL, filename, GIT3_FILTER_TO_WORKTREE, 0));
+	filtered = git3_filter_list_contains(fl, filter);
+	git3_filter_list_free(fl);
 
 	return filtered;
 }
@@ -89,14 +89,14 @@ void test_filter_query__unknown(void)
 
 void test_filter_query__custom(void)
 {
-	git_filter custom = { GIT_FILTER_VERSION };
+	git3_filter custom = { GIT3_FILTER_VERSION };
 
-	cl_git_pass(git_filter_register(
+	cl_git_pass(git3_filter_register(
 		"custom", &custom, 42));
 
 	cl_assert_equal_i(1, filter_for("foo.custom", "crlf"));
 	cl_assert_equal_i(1, filter_for("foo.custom", "ident"));
 	cl_assert_equal_i(1, filter_for("foo.custom", "custom"));
 
-	git_filter_unregister("custom");
+	git3_filter_unregister("custom");
 }

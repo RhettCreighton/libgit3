@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "repository.h"
 #include "git3/sys/repository.h"
 #include "mailmap_testdata.h"
 
-static git_repository *g_repo;
-static git_mailmap *g_mailmap;
-static git_config *g_config;
+static git3_repository *g_repo;
+static git3_mailmap *g_mailmap;
+static git3_config *g_config;
 
 static const char string_mailmap[] =
 	"# Simple Comment line\n"
@@ -39,23 +39,23 @@ void test_mailmap_parsing__initialize(void)
 
 void test_mailmap_parsing__cleanup(void)
 {
-	git_mailmap_free(g_mailmap);
-	git_config_free(g_config);
+	git3_mailmap_free(g_mailmap);
+	git3_config_free(g_config);
 	cl_git_sandbox_cleanup();
 }
 
 static void check_mailmap_entries(
-	const git_mailmap *mailmap, const mailmap_entry *entries, size_t entries_size)
+	const git3_mailmap *mailmap, const mailmap_entry *entries, size_t entries_size)
 {
-	const git_mailmap_entry *parsed;
+	const git3_mailmap_entry *parsed;
 	size_t idx;
 
 	/* Check the correct # of entries were parsed */
-	cl_assert_equal_sz(entries_size, git_vector_length(&mailmap->entries));
+	cl_assert_equal_sz(entries_size, git3_vector_length(&mailmap->entries));
 
 	/* Make sure looking up each entry succeeds */
 	for (idx = 0; idx < entries_size; ++idx) {
-		parsed = git_mailmap_entry_lookup(
+		parsed = git3_mailmap_entry_lookup(
 			mailmap, entries[idx].replace_name, entries[idx].replace_email);
 
 		cl_assert(parsed);
@@ -67,7 +67,7 @@ static void check_mailmap_entries(
 }
 
 static void check_mailmap_resolve(
-	const git_mailmap *mailmap, const mailmap_entry *resolved, size_t resolved_size)
+	const git3_mailmap *mailmap, const mailmap_entry *resolved, size_t resolved_size)
 {
 	const char *resolved_name = NULL;
 	const char *resolved_email = NULL;
@@ -75,7 +75,7 @@ static void check_mailmap_resolve(
 
 	/* Check that the resolver behaves correctly */
 	for (idx = 0; idx < resolved_size; ++idx) {
-		cl_git_pass(git_mailmap_resolve(
+		cl_git_pass(git3_mailmap_resolve(
 			&resolved_name, &resolved_email, mailmap,
 			resolved[idx].replace_name, resolved[idx].replace_email));
 		cl_assert_equal_s(resolved_name, resolved[idx].real_name);
@@ -89,7 +89,7 @@ static const mailmap_entry resolved_untracked[] = {
 
 void test_mailmap_parsing__string(void)
 {
-	cl_git_pass(git_mailmap_from_buffer(
+	cl_git_pass(git3_mailmap_from_buffer(
 		&g_mailmap, string_mailmap, strlen(string_mailmap)));
 
 	/* We should have parsed all of the entries */
@@ -103,15 +103,15 @@ void test_mailmap_parsing__string(void)
 
 void test_mailmap_parsing__windows_string(void)
 {
-	git_str unixbuf = GIT_STR_INIT;
-	git_str winbuf = GIT_STR_INIT;
+	git3_str unixbuf = GIT3_STR_INIT;
+	git3_str winbuf = GIT3_STR_INIT;
 
 	/* Parse with windows-style line endings */
-	git_str_attach_notowned(&unixbuf, string_mailmap, strlen(string_mailmap));
-	cl_git_pass(git_str_lf_to_crlf(&winbuf, &unixbuf));
+	git3_str_attach_notowned(&unixbuf, string_mailmap, strlen(string_mailmap));
+	cl_git_pass(git3_str_lf_to_crlf(&winbuf, &unixbuf));
 
-	cl_git_pass(git_mailmap_from_buffer(&g_mailmap, winbuf.ptr, winbuf.size));
-	git_str_dispose(&winbuf);
+	cl_git_pass(git3_mailmap_from_buffer(&g_mailmap, winbuf.ptr, winbuf.size));
+	git3_str_dispose(&winbuf);
 
 	/* We should have parsed all of the entries */
 	check_mailmap_entries(g_mailmap, entries, ARRAY_SIZE(entries));
@@ -125,9 +125,9 @@ void test_mailmap_parsing__windows_string(void)
 void test_mailmap_parsing__fromrepo(void)
 {
 	g_repo = cl_git_sandbox_init("mailmap");
-	cl_check(!git_repository_is_bare(g_repo));
+	cl_check(!git3_repository_is_bare(g_repo));
 
-	cl_git_pass(git_mailmap_from_repository(&g_mailmap, g_repo));
+	cl_git_pass(git3_mailmap_from_repository(&g_mailmap, g_repo));
 
 	/* We should have parsed all of the entries */
 	check_mailmap_entries(g_mailmap, entries, ARRAY_SIZE(entries));
@@ -145,10 +145,10 @@ static const mailmap_entry resolved_bare[] = {
 void test_mailmap_parsing__frombare(void)
 {
 	g_repo = cl_git_sandbox_init("mailmap/.gitted");
-	cl_git_pass(git_repository_set_bare(g_repo));
-	cl_check(git_repository_is_bare(g_repo));
+	cl_git_pass(git3_repository_set_bare(g_repo));
+	cl_check(git3_repository_is_bare(g_repo));
 
-	cl_git_pass(git_mailmap_from_repository(&g_mailmap, g_repo));
+	cl_git_pass(git3_mailmap_from_repository(&g_mailmap, g_repo));
 
 	/* We should have parsed all of the entries, except for the untracked one */
 	check_mailmap_entries(g_mailmap, entries, ARRAY_SIZE(entries) - 1);
@@ -178,15 +178,15 @@ static const mailmap_entry resolved_with_file_override[] = {
 void test_mailmap_parsing__file_config(void)
 {
 	g_repo = cl_git_sandbox_init("mailmap");
-	cl_git_pass(git_repository_config(&g_config, g_repo));
+	cl_git_pass(git3_repository_config(&g_config, g_repo));
 
-	cl_git_pass(git_config_set_string(
+	cl_git_pass(git3_config_set_string(
 		g_config, "mailmap.file", cl_fixture("mailmap/file_override")));
 
-	cl_git_pass(git_mailmap_from_repository(&g_mailmap, g_repo));
+	cl_git_pass(git3_mailmap_from_repository(&g_mailmap, g_repo));
 
 	/* Check we don't have duplicate entries */
-	cl_assert_equal_sz(git_vector_length(&g_mailmap->entries), 9);
+	cl_assert_equal_sz(git3_vector_length(&g_mailmap->entries), 9);
 
 	/* Check that resolving the entries works */
 	check_mailmap_resolve(
@@ -213,15 +213,15 @@ static const mailmap_entry resolved_with_blob_override[] = {
 void test_mailmap_parsing__blob_config(void)
 {
 	g_repo = cl_git_sandbox_init("mailmap");
-	cl_git_pass(git_repository_config(&g_config, g_repo));
+	cl_git_pass(git3_repository_config(&g_config, g_repo));
 
-	cl_git_pass(git_config_set_string(
+	cl_git_pass(git3_config_set_string(
 		g_config, "mailmap.blob", "HEAD:blob_override"));
 
-	cl_git_pass(git_mailmap_from_repository(&g_mailmap, g_repo));
+	cl_git_pass(git3_mailmap_from_repository(&g_mailmap, g_repo));
 
 	/* Check we don't have duplicate entries */
-	cl_assert_equal_sz(git_vector_length(&g_mailmap->entries), 9);
+	cl_assert_equal_sz(git3_vector_length(&g_mailmap->entries), 9);
 
 	/* Check that resolving the entries works */
 	check_mailmap_resolve(
@@ -249,18 +249,18 @@ static const mailmap_entry bare_resolved_with_blob_override[] = {
 void test_mailmap_parsing__bare_blob_config(void)
 {
 	g_repo = cl_git_sandbox_init("mailmap/.gitted");
-	cl_git_pass(git_repository_set_bare(g_repo));
-	cl_check(git_repository_is_bare(g_repo));
+	cl_git_pass(git3_repository_set_bare(g_repo));
+	cl_check(git3_repository_is_bare(g_repo));
 
-	cl_git_pass(git_repository_config(&g_config, g_repo));
+	cl_git_pass(git3_repository_config(&g_config, g_repo));
 
-	cl_git_pass(git_config_set_string(
+	cl_git_pass(git3_config_set_string(
 		g_config, "mailmap.blob", "HEAD:blob_override"));
 
-	cl_git_pass(git_mailmap_from_repository(&g_mailmap, g_repo));
+	cl_git_pass(git3_mailmap_from_repository(&g_mailmap, g_repo));
 
 	/* Check that we only have the 2 entries */
-	cl_assert_equal_sz(git_vector_length(&g_mailmap->entries), 2);
+	cl_assert_equal_sz(git3_vector_length(&g_mailmap->entries), 2);
 
 	/* Check that resolving the entries works */
 	check_mailmap_resolve(

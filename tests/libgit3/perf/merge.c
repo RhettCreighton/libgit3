@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "helper__perf__do_merge.h"
 
 /* This test requires a large repo with many files.

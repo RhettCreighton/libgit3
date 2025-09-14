@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_graph_h__
@@ -12,13 +12,13 @@
 #include "oid.h"
 
 /**
- * @file git2/graph.h
+ * @file git3/graph.h
  * @brief Graph traversal routines
- * @defgroup git_revwalk Git graph traversal routines
+ * @defgroup git3_revwalk Git graph traversal routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Count the number of unique commits between two commit objects
@@ -35,7 +35,7 @@ GIT_BEGIN_DECL
  * @param upstream the commit for upstream
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_graph_ahead_behind(size_t *ahead, size_t *behind, git_repository *repo, const git_oid *local, const git_oid *upstream);
+GIT3_EXTERN(int) git3_graph_ahead_behind(size_t *ahead, size_t *behind, git3_repository *repo, const git3_oid *local, const git3_oid *upstream);
 
 
 /**
@@ -50,10 +50,10 @@ GIT_EXTERN(int) git_graph_ahead_behind(size_t *ahead, size_t *behind, git_reposi
  * @return 1 if the given commit is a descendant of the potential ancestor,
  * 0 if not, error code otherwise.
  */
-GIT_EXTERN(int) git_graph_descendant_of(
-	git_repository *repo,
-	const git_oid *commit,
-	const git_oid *ancestor);
+GIT3_EXTERN(int) git3_graph_descendant_of(
+	git3_repository *repo,
+	const git3_oid *commit,
+	const git3_oid *ancestor);
 
 /**
  * Determine if a commit is reachable from any of a list of commits by
@@ -66,13 +66,13 @@ GIT_EXTERN(int) git_graph_descendant_of(
  * @return 1 if the given commit is an ancestor of any of the given potential
  * descendants, 0 if not, error code otherwise.
  */
-GIT_EXTERN(int) git_graph_reachable_from_any(
-	git_repository *repo,
-	const git_oid *commit,
-	const git_oid descendant_array[],
+GIT3_EXTERN(int) git3_graph_reachable_from_any(
+	git3_repository *repo,
+	const git3_oid *commit,
+	const git3_oid descendant_array[],
 	size_t length);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

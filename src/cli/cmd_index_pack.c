@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -50,9 +50,9 @@ static void print_help(void)
 int cmd_index_pack(int argc, char **argv)
 {
 	cli_opt invalid_opt;
-	git_indexer *idx = NULL;
-	git_indexer_options idx_opts = GIT_INDEXER_OPTIONS_INIT;
-	git_indexer_progress stats = {0};
+	git3_indexer *idx = NULL;
+	git3_indexer_options idx_opts = GIT3_INDEXER_OPTIONS_INIT;
+	git3_indexer_progress stats = {0};
 	char buf[BUFFER_SIZE];
 	ssize_t read_len;
 	int fd, ret;
@@ -77,12 +77,12 @@ int cmd_index_pack(int argc, char **argv)
 		goto done;
 	}
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	idx_opts.oid_type = GIT_OID_SHA1;
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	idx_opts.oid_type = GIT3_OID_SHA1;
 
-	ret = git_indexer_new(&idx, ".", &idx_opts);
+	ret = git3_indexer_new(&idx, ".", &idx_opts);
 #else
-	ret = git_indexer_new(&idx, ".", 0, NULL, &idx_opts);
+	ret = git3_indexer_new(&idx, ".", 0, NULL, &idx_opts);
 #endif
 
 	if (ret < 0) {
@@ -91,13 +91,13 @@ int cmd_index_pack(int argc, char **argv)
 	}
 
 	while ((read_len = p_read(fd, buf, sizeof(buf))) > 0) {
-		if (git_indexer_append(idx, buf, (size_t)read_len, &stats) < 0) {
+		if (git3_indexer_append(idx, buf, (size_t)read_len, &stats) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
 	}
 
-	if (git_indexer_commit(idx, &stats) < 0) {
+	if (git3_indexer_commit(idx, &stats) < 0) {
 		ret = cli_error_git();
 		goto done;
 	}
@@ -109,6 +109,6 @@ done:
 		p_close(fd);
 
 	cli_progress_dispose(&progress);
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 	return ret;
 }

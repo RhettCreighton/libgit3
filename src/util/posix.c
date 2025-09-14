@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -13,7 +13,7 @@
 
 size_t p_fsync__cnt = 0;
 
-#ifndef GIT_WIN32
+#ifndef GIT3_WIN32
 
 #ifdef NO_ADDRINFO
 
@@ -26,13 +26,13 @@ int p_getaddrinfo(
 	struct addrinfo *ainfo, *ai;
 	int p = 0;
 
-	GIT_UNUSED(hints);
+	GIT3_UNUSED(hints);
 
-	if ((ainfo = git__malloc(sizeof(struct addrinfo))) == NULL)
+	if ((ainfo = git3__malloc(sizeof(struct addrinfo))) == NULL)
 		return -1;
 
 	if ((ainfo->ai_hostent = gethostbyname(host)) == NULL) {
-		git__free(ainfo);
+		git3__free(ainfo);
 		return -2;
 	}
 
@@ -65,7 +65,7 @@ int p_getaddrinfo(
 	ai = ainfo;
 
 	for (p = 1; ainfo->ai_hostent->h_addr_list[p] != NULL; p++) {
-		if (!(ai->ai_next = git__malloc(sizeof(struct addrinfo)))) {
+		if (!(ai->ai_next = git3__malloc(sizeof(struct addrinfo)))) {
 			p_freeaddrinfo(ainfo);
 			return -1;
 		}
@@ -89,7 +89,7 @@ void p_freeaddrinfo(struct addrinfo *info)
 
 	while(p != NULL) {
 		next = p->ai_next;
-		git__free(p);
+		git3__free(p);
 		p = next;
 	}
 }
@@ -109,7 +109,7 @@ int p_open(const char *path, volatile int flags, ...)
 {
 	mode_t mode = 0;
 
-	#ifdef GIT_DEBUG_STRICT_OPEN
+	#ifdef GIT3_DEBUG_STRICT_OPEN
 	if (strstr(path, "//") != NULL) {
 		errno = EACCES;
 		return -1;
@@ -136,16 +136,16 @@ int p_getcwd(char *buffer_out, size_t size)
 {
 	char *cwd_buffer;
 
-	GIT_ASSERT_ARG(buffer_out);
-	GIT_ASSERT_ARG(size > 0);
+	GIT3_ASSERT_ARG(buffer_out);
+	GIT3_ASSERT_ARG(size > 0);
 
 	cwd_buffer = getcwd(buffer_out, size);
 
 	if (cwd_buffer == NULL)
 		return -1;
 
-	git_fs_path_mkposix(buffer_out);
-	git_fs_path_string_to_dir(buffer_out, size); /* append trailing slash */
+	git3_fs_path_mkposix(buffer_out);
+	git3_fs_path_string_to_dir(buffer_out, size); /* append trailing slash */
 
 	return 0;
 }
@@ -163,14 +163,14 @@ int p_rename(const char *from, const char *to)
 	return -1;
 }
 
-#endif /* GIT_WIN32 */
+#endif /* GIT3_WIN32 */
 
-ssize_t p_read(git_file fd, void *buf, size_t cnt)
+ssize_t p_read(git3_file fd, void *buf, size_t cnt)
 {
 	char *b = buf;
 
-	if (!git__is_ssizet(cnt)) {
-#ifdef GIT_WIN32
+	if (!git3__is_ssizet(cnt)) {
+#ifdef GIT3_WIN32
 		SetLastError(ERROR_INVALID_PARAMETER);
 #endif
 		errno = EINVAL;
@@ -179,7 +179,7 @@ ssize_t p_read(git_file fd, void *buf, size_t cnt)
 
 	while (cnt) {
 		ssize_t r;
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 		r = read(fd, b, cnt > INT_MAX ? INT_MAX : (unsigned int)cnt);
 #else
 		r = read(fd, b, cnt);
@@ -197,20 +197,20 @@ ssize_t p_read(git_file fd, void *buf, size_t cnt)
 	return (b - (char *)buf);
 }
 
-int p_write(git_file fd, const void *buf, size_t cnt)
+int p_write(git3_file fd, const void *buf, size_t cnt)
 {
 	const char *b = buf;
 
 	while (cnt) {
 		ssize_t r;
-#ifdef GIT_WIN32
-		GIT_ASSERT((size_t)((unsigned int)cnt) == cnt);
+#ifdef GIT3_WIN32
+		GIT3_ASSERT((size_t)((unsigned int)cnt) == cnt);
 		r = write(fd, b, (unsigned int)cnt);
 #else
 		r = write(fd, b, cnt);
 #endif
 		if (r < 0) {
-			if (errno == EINTR || GIT_ISBLOCKED(errno))
+			if (errno == EINTR || GIT3_ISBLOCKED(errno))
 				continue;
 			return -1;
 		}
@@ -228,14 +228,14 @@ int p_write(git_file fd, const void *buf, size_t cnt)
 
 #include "map.h"
 
-int git__page_size(size_t *page_size)
+int git3__page_size(size_t *page_size)
 {
 	/* dummy; here we don't need any alignment anyway */
 	*page_size = 4096;
 	return 0;
 }
 
-int git__mmap_alignment(size_t *alignment)
+int git3__mmap_alignment(size_t *alignment)
 {
 	/* dummy; here we don't need any alignment anyway */
 	*alignment = 4096;
@@ -243,29 +243,29 @@ int git__mmap_alignment(size_t *alignment)
 }
 
 
-int p_mmap(git_map *out, size_t len, int prot, int flags, int fd, off64_t offset)
+int p_mmap(git3_map *out, size_t len, int prot, int flags, int fd, off64_t offset)
 {
 	const char *ptr;
 	size_t remaining_len;
 
-	GIT_MMAP_VALIDATE(out, len, prot, flags);
+	GIT3_MMAP_VALIDATE(out, len, prot, flags);
 
 	/* writes cannot be emulated without handling pagefaults since write happens by
 	 * writing to mapped memory */
-	if (prot & GIT_PROT_WRITE) {
-		git_error_set(GIT_ERROR_OS, "trying to map %s-writeable",
-				((flags & GIT_MAP_TYPE) == GIT_MAP_SHARED) ? "shared": "private");
+	if (prot & GIT3_PROT_WRITE) {
+		git3_error_set(GIT3_ERROR_OS, "trying to map %s-writeable",
+				((flags & GIT3_MAP_TYPE) == GIT3_MAP_SHARED) ? "shared": "private");
 		return -1;
 	}
 
-	if (!git__is_ssizet(len)) {
+	if (!git3__is_ssizet(len)) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	out->len = 0;
-	out->data = git__malloc(len);
-	GIT_ERROR_CHECK_ALLOC(out->data);
+	out->data = git3__malloc(len);
+	GIT3_ERROR_CHECK_ALLOC(out->data);
 
 	remaining_len = len;
 	ptr = (const char *)out->data;
@@ -273,8 +273,8 @@ int p_mmap(git_map *out, size_t len, int prot, int flags, int fd, off64_t offset
 		ssize_t nb;
 		HANDLE_EINTR(nb, p_pread(fd, (void *)ptr, remaining_len, offset));
 		if (nb <= 0) {
-			git_error_set(GIT_ERROR_OS, "mmap emulation failed");
-			git__free(out->data);
+			git3_error_set(GIT3_ERROR_OS, "mmap emulation failed");
+			git3__free(out->data);
 			out->data = NULL;
 			return -1;
 		}
@@ -288,10 +288,10 @@ int p_mmap(git_map *out, size_t len, int prot, int flags, int fd, off64_t offset
 	return 0;
 }
 
-int p_munmap(git_map *map)
+int p_munmap(git3_map *map)
 {
-	GIT_ASSERT_ARG(map);
-	git__free(map->data);
+	GIT3_ASSERT_ARG(map);
+	git3__free(map->data);
 
 	/* Initializing will help debug use-after-free */
 	map->len = 0;
@@ -302,11 +302,11 @@ int p_munmap(git_map *map)
 
 #endif
 
-#if defined(GIT_IO_POLL) || defined(GIT_IO_WSAPOLL)
+#if defined(GIT3_IO_POLL) || defined(GIT3_IO_WSAPOLL)
 
 /* Handled by posix.h; this test simplifies the final else */
 
-#elif defined(GIT_IO_SELECT)
+#elif defined(GIT3_IO_SELECT)
 
 int p_poll(struct pollfd *fds, unsigned int nfds, int timeout_ms)
 {

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "grafts.h"
 
@@ -15,45 +15,45 @@
 #define OID_TRUNCATED "392f4beef7d0d15b2bc5b1abe1a754eba0ec36d"
 #define OID_NONHEX    "9f8a746e9ax7b58cc840016bc3944d5ad262acb5"
 
-static git_grafts *grafts;
+static git3_grafts *grafts;
 
 void test_grafts_parse__initialize(void)
 {
-	cl_git_pass(git_grafts_new(&grafts, GIT_OID_SHA1));
+	cl_git_pass(git3_grafts_new(&grafts, GIT3_OID_SHA1));
 }
 
 void test_grafts_parse__cleanup(void)
 {
-	git_grafts_free(grafts);
+	git3_grafts_free(grafts);
 	grafts = NULL;
 }
 
-static void assert_parse_succeeds(git_grafts *grafts, const char *string, size_t n)
+static void assert_parse_succeeds(git3_grafts *grafts, const char *string, size_t n)
 {
-	cl_git_pass(git_grafts_parse(grafts, string, strlen(string)));
-	cl_assert_equal_i(git_grafts_size(grafts), n);
+	cl_git_pass(git3_grafts_parse(grafts, string, strlen(string)));
+	cl_assert_equal_i(git3_grafts_size(grafts), n);
 }
 
-static void assert_parse_fails(git_grafts *grafts, const char *string)
+static void assert_parse_fails(git3_grafts *grafts, const char *string)
 {
-	cl_git_fail(git_grafts_parse(grafts, string, strlen(string)));
+	cl_git_fail(git3_grafts_parse(grafts, string, strlen(string)));
 }
 
-static void assert_graft_contains(git_grafts *grafts, const char *graft, size_t n, ...)
+static void assert_graft_contains(git3_grafts *grafts, const char *graft, size_t n, ...)
 {
-	git_commit_graft *commit;
-	git_oid oid;
+	git3_commit_graft *commit;
+	git3_oid oid;
 	va_list ap;
 	size_t i = 0;
 
-	cl_git_pass(git_oid_from_string(&oid, graft, GIT_OID_SHA1));
-	cl_git_pass(git_grafts_get(&commit, grafts, &oid));
+	cl_git_pass(git3_oid_from_string(&oid, graft, GIT3_OID_SHA1));
+	cl_git_pass(git3_grafts_get(&commit, grafts, &oid));
 	cl_assert_equal_oid(&commit->oid, &oid);
 	cl_assert_equal_i(commit->parents.size, n);
 
 	va_start(ap, n);
 	while (i < n) {
-		cl_git_pass(git_oid_from_string(&oid, va_arg(ap, const char *), GIT_OID_SHA1));
+		cl_git_pass(git3_oid_from_string(&oid, va_arg(ap, const char *), GIT3_OID_SHA1));
 		cl_assert_equal_oid(&commit->parents.ptr[i], &oid);
 		i++;
 	}

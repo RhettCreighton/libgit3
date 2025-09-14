@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 
-#ifndef GIT_WIN32
+#ifndef GIT3_WIN32
 
 #include <limits.h>
 #include <stdlib.h>
@@ -35,10 +35,10 @@ char *p_realpath(const char *pathname, char *resolved)
 	/*
 	 * If resolved == NULL, the system has allocated the result
 	 * string. We need to strdup this into _our_ allocator pool
-	 * so that callers can free it with git__free.
+	 * so that callers can free it with git3__free.
 	 */
 	if (!resolved) {
-		char *dup = git__strdup(result);
+		char *dup = git3__strdup(result);
 		free(result);
 
 		result = dup;

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "transports/smart.h"
 
 enum expected_status {
@@ -10,148 +10,148 @@ static void assert_flush_parses(const char *line)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_FLUSH);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_FLUSH);
 	cl_assert_equal_strn(endptr, line + 4, linelen - 4);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_data_pkt_parses(const char *line, const char *expected_data, size_t expected_len)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_data *pkt;
-	git_pkt_parse_data pkt_parse_data = { 1, GIT_OID_SHA1 };
+	git3_pkt_data *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 1, GIT3_OID_SHA1 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_DATA);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_DATA);
 	cl_assert_equal_i(pkt->len, expected_len);
 	cl_assert_equal_strn(pkt->data, expected_data, expected_len);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_sideband_progress_parses(const char *line, const char *expected_data, size_t expected_len)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_progress *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_progress *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_PROGRESS);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_PROGRESS);
 	cl_assert_equal_i(pkt->len, expected_len);
 	cl_assert_equal_strn(pkt->data, expected_data, expected_len);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_error_parses(const char *line, const char *expected_error, size_t expected_len)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_err *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_err *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_ERR);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_ERR);
 	cl_assert_equal_i(pkt->len, expected_len);
 	cl_assert_equal_strn(pkt->error, expected_error, expected_len);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
-static void assert_ack_parses(const char *line, const char *expected_oid, enum git_ack_status expected_status)
+static void assert_ack_parses(const char *line, const char *expected_oid, enum git3_ack_status expected_status)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_ack *pkt;
-	git_oid oid;
-	git_pkt_parse_data pkt_parse_data = { 1, GIT_OID_SHA1 };
+	git3_pkt_ack *pkt;
+	git3_oid oid;
+	git3_pkt_parse_data pkt_parse_data = { 1, GIT3_OID_SHA1 };
 
-	cl_git_pass(git_oid_from_string(&oid, expected_oid, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&oid, expected_oid, GIT3_OID_SHA1));
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_ACK);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_ACK);
 	cl_assert_equal_oid(&pkt->oid, &oid);
 	cl_assert_equal_i(pkt->status, expected_status);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_nak_parses(const char *line)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_NAK);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_NAK);
 	cl_assert_equal_strn(endptr, line + 7, linelen - 7);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_comment_parses(const char *line, const char *expected_comment)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_comment *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_comment *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_COMMENT);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_COMMENT);
 	cl_assert_equal_strn(pkt->comment, expected_comment, strlen(expected_comment));
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_ok_parses(const char *line, const char *expected_ref)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_ok *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_ok *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_OK);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_OK);
 	cl_assert_equal_strn(pkt->ref, expected_ref, strlen(expected_ref));
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_unpack_parses(const char *line, bool ok)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_unpack *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_unpack *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_UNPACK);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_UNPACK);
 	cl_assert_equal_i(pkt->unpack_ok, ok);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_ng_parses(const char *line, const char *expected_ref, const char *expected_msg)
 {
 	size_t linelen = strlen(line) + 1;
 	const char *endptr;
-	git_pkt_ng *pkt;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_ng *pkt;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_NG);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_NG);
 	cl_assert_equal_strn(pkt->ref, expected_ref, strlen(expected_ref));
 	cl_assert_equal_strn(pkt->msg, expected_msg, strlen(expected_msg));
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 #define assert_ref_parses(line, expected_oid, expected_ref, expected_capabilities) \
@@ -161,14 +161,14 @@ static void assert_ref_parses_(const char *line, size_t linelen, const char *exp
 	const char *expected_ref, const char *expected_capabilities)
 {
 	const char *endptr;
-	git_pkt_ref *pkt;
-	git_oid oid;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_ref *pkt;
+	git3_oid oid;
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	cl_git_pass(git_oid_from_string(&oid, expected_oid, GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&oid, expected_oid, GIT3_OID_SHA1));
 
-	cl_git_pass(git_pkt_parse_line((git_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
-	cl_assert_equal_i(pkt->type, GIT_PKT_REF);
+	cl_git_pass(git3_pkt_parse_line((git3_pkt **) &pkt, &endptr, line, linelen, &pkt_parse_data));
+	cl_assert_equal_i(pkt->type, GIT3_PKT_REF);
 	cl_assert_equal_oid(&pkt->head.oid, &oid);
 	cl_assert_equal_strn(pkt->head.name, expected_ref, strlen(expected_ref));
 	if (expected_capabilities)
@@ -176,16 +176,16 @@ static void assert_ref_parses_(const char *line, size_t linelen, const char *exp
 	else
 		cl_assert_equal_p(NULL, pkt->capabilities);
 
-	git_pkt_free((git_pkt *) pkt);
+	git3_pkt_free((git3_pkt *) pkt);
 }
 
 static void assert_pkt_fails(const char *line)
 {
 	const char *endptr;
-	git_pkt_parse_data pkt_parse_data = { 0 };
+	git3_pkt_parse_data pkt_parse_data = { 0 };
 
-	git_pkt *pkt;
-	cl_git_fail(git_pkt_parse_line(&pkt, &endptr, line, strlen(line) + 1, &pkt_parse_data));
+	git3_pkt *pkt;
+	cl_git_fail(git3_pkt_parse_line(&pkt, &endptr, line, strlen(line) + 1, &pkt_parse_data));
 }
 
 void test_transports_smart_packet__parsing_garbage_fails(void)
@@ -241,13 +241,13 @@ void test_transports_smart_packet__ack_pkt(void)
 			  "0000000000000000000000000000000000000000", 0);
 	assert_ack_parses("0039ACK 0000000000000000000000000000000000000000 continue",
 			  "0000000000000000000000000000000000000000",
-			  GIT_ACK_CONTINUE);
+			  GIT3_ACK_CONTINUE);
 	assert_ack_parses("0037ACK 0000000000000000000000000000000000000000 common",
 			  "0000000000000000000000000000000000000000",
-			  GIT_ACK_COMMON);
+			  GIT3_ACK_COMMON);
 	assert_ack_parses("0037ACK 0000000000000000000000000000000000000000 ready",
 			  "0000000000000000000000000000000000000000",
-			  GIT_ACK_READY);
+			  GIT3_ACK_READY);
 
 	/* these should fail as they don't have OIDs */
 	assert_pkt_fails("0007ACK");

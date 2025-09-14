@@ -1,4 +1,4 @@
-#if defined(GIT_WIN32)
+#if defined(GIT3_WIN32)
 
 struct perf__timer
 {

@@ -8,8 +8,8 @@ add_executable(lg2 ${SRC_EXAMPLES})
 # Ensure that we do not use deprecated functions internally
 add_definitions(-DGIT_DEPRECATE_HARD)
 
-target_include_directories(lg2 PRIVATE ${LIBGIT2_INCLUDES} ${LIBGIT2_DEPENDENCY_INCLUDES})
-target_include_directories(lg2 SYSTEM PRIVATE ${LIBGIT2_SYSTEM_INCLUDES})
+target_include_directories(lg2 PRIVATE ${LIBGIT3_INCLUDES} ${LIBGIT3_DEPENDENCY_INCLUDES})
+target_include_directories(lg2 SYSTEM PRIVATE ${LIBGIT3_SYSTEM_INCLUDES})
 
 if(WIN32 OR ANDROID)
 	target_link_libraries(lg2 libgit3package)

@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/merge.h"
 #include "merge.h"
 #include "../merge_helpers.h"
 #include "futils.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-resolve"
 
@@ -25,8 +25,8 @@ void test_merge_trees_renames__cleanup(void)
 
 void test_merge_trees_renames__index(void)
 {
-	git_index *index;
-	git_merge_options *opts = NULL;
+	git3_index *index;
+	git3_merge_options *opts = NULL;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e", 0, "0a-no-change.txt" },
@@ -198,13 +198,13 @@ void test_merge_trees_renames__index(void)
 	cl_assert(merge_test_names(index, merge_name_entries, 9));
 	cl_assert(merge_test_reuc(index, merge_reuc_entries, 10));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_renames__no_rename_index(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "68c6c84b091926c7d90aa6a79b2bc3bb6adccd8e", 0, "0a-no-change.txt" },
@@ -241,7 +241,7 @@ void test_merge_trees_renames__no_rename_index(void)
 		{ 0100644, "b69fe837e4cecfd4c9a40cdca7c138468687df07", 3, "7-both-renamed.txt" },
 	};
 
-	opts.flags &= ~GIT_MERGE_FIND_RENAMES;
+	opts.flags &= ~GIT3_MERGE_FIND_RENAMES;
 
 	cl_git_pass(merge_trees_from_branches(&index, repo,
 		BRANCH_RENAME_OURS, BRANCH_RENAME_THEIRS,
@@ -249,13 +249,13 @@ void test_merge_trees_renames__no_rename_index(void)
 
 	cl_assert(merge_test_index(index, merge_index_entries, 32));
 
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_renames__submodules(void)
 {
-	git_index *index;
-	git_merge_options *opts = NULL;
+	git3_index *index;
+	git3_merge_options *opts = NULL;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "cd3e8d4aa06bdc781f264171030bc28f2b370fee", 0, ".gitmodules" },
@@ -271,62 +271,62 @@ void test_merge_trees_renames__submodules(void)
 		"submodule_rename1", "submodule_rename2",
 		opts));
 	cl_assert(merge_test_index(index, merge_index_entries, 7));
-	git_index_free(index);
+	git3_index_free(index);
 }
 
 void test_merge_trees_renames__cache_recomputation(void)
 {
-	git_oid blob, binary, ancestor_oid, theirs_oid, ours_oid;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
-	git_str path = GIT_STR_INIT;
-	git_treebuilder *builder;
-	git_tree *ancestor_tree, *their_tree, *our_tree;
-	git_index *index;
+	git3_oid blob, binary, ancestor_oid, theirs_oid, ours_oid;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
+	git3_str path = GIT3_STR_INIT;
+	git3_treebuilder *builder;
+	git3_tree *ancestor_tree, *their_tree, *our_tree;
+	git3_index *index;
 	size_t blob_size;
 	void *data;
 	size_t i;
 
-	cl_git_pass(git_oid_from_string(&blob, "a2d8d1824c68541cca94ffb90f79291eba495921", GIT_OID_SHA1));
+	cl_git_pass(git3_oid_from_string(&blob, "a2d8d1824c68541cca94ffb90f79291eba495921", GIT3_OID_SHA1));
 
 	/*
 	 * Create a 50MB blob that consists of NUL bytes only. It is important
 	 * that this blob is of a special format, most importantly it cannot
 	 * contain more than four non-consecutive newlines or NUL bytes. This
-	 * is because of git_hashsig's inner workings where all files with less
+	 * is because of git3_hashsig's inner workings where all files with less
 	 * than four "lines" are deemed to small.
 	 */
 	blob_size = 50 * 1024 * 1024;
-	cl_assert(data = git__calloc(blob_size, 1));
-	cl_git_pass(git_blob_create_from_buffer(&binary, repo, data, blob_size));
+	cl_assert(data = git3__calloc(blob_size, 1));
+	cl_git_pass(git3_blob_create_from_buffer(&binary, repo, data, blob_size));
 
 	/*
 	 * Create the common ancestor, which has 1000 dummy blobs and the binary
 	 * blob. The dummy blobs serve as potential rename targets for the
 	 * dummy blob.
 	 */
-	cl_git_pass(git_treebuilder_new(&builder, repo, NULL));
+	cl_git_pass(git3_treebuilder_new(&builder, repo, NULL));
 	for (i = 0; i < 1000; i++) {
-		cl_git_pass(git_str_printf(&path, "%"PRIuZ".txt", i));
-		cl_git_pass(git_treebuilder_insert(NULL, builder, path.ptr, &blob, GIT_FILEMODE_BLOB));
-		git_str_clear(&path);
+		cl_git_pass(git3_str_printf(&path, "%"PRIuZ".txt", i));
+		cl_git_pass(git3_treebuilder_insert(NULL, builder, path.ptr, &blob, GIT3_FILEMODE_BLOB));
+		git3_str_clear(&path);
 	}
-	cl_git_pass(git_treebuilder_insert(NULL, builder, "original.bin", &binary, GIT_FILEMODE_BLOB));
-	cl_git_pass(git_treebuilder_write(&ancestor_oid, builder));
+	cl_git_pass(git3_treebuilder_insert(NULL, builder, "original.bin", &binary, GIT3_FILEMODE_BLOB));
+	cl_git_pass(git3_treebuilder_write(&ancestor_oid, builder));
 
 	/* We now the binary blob in our tree. */
-	cl_git_pass(git_treebuilder_remove(builder, "original.bin"));
-	cl_git_pass(git_treebuilder_insert(NULL, builder, "renamed.bin", &binary, GIT_FILEMODE_BLOB));
-	cl_git_pass(git_treebuilder_write(&ours_oid, builder));
+	cl_git_pass(git3_treebuilder_remove(builder, "original.bin"));
+	cl_git_pass(git3_treebuilder_insert(NULL, builder, "renamed.bin", &binary, GIT3_FILEMODE_BLOB));
+	cl_git_pass(git3_treebuilder_write(&ours_oid, builder));
 
-	git_treebuilder_free(builder);
+	git3_treebuilder_free(builder);
 
 	/* And move everything into a subdirectory in their tree. */
-	cl_git_pass(git_treebuilder_new(&builder, repo, NULL));
-	cl_git_pass(git_treebuilder_insert(NULL, builder, "subdir", &ancestor_oid, GIT_FILEMODE_TREE));
-	cl_git_pass(git_treebuilder_write(&theirs_oid, builder));
+	cl_git_pass(git3_treebuilder_new(&builder, repo, NULL));
+	cl_git_pass(git3_treebuilder_insert(NULL, builder, "subdir", &ancestor_oid, GIT3_FILEMODE_TREE));
+	cl_git_pass(git3_treebuilder_write(&theirs_oid, builder));
 
 	/*
-	 * Now merge ancestor, ours and theirs. As `git_hashsig` refuses to
+	 * Now merge ancestor, ours and theirs. As `git3_hashsig` refuses to
 	 * create a hash signature for the 50MB binary file, we historically
 	 * didn't cache the hashsig computation for it. As a result, we now
 	 * started looking up the 50MB blob and scanning it at least 1000
@@ -337,24 +337,24 @@ void test_merge_trees_renames__cache_recomputation(void)
 	 * minutes on my machine to compute the following merge.
 	 */
 	opts.target_limit = 5000;
-	cl_git_pass(git_tree_lookup(&ancestor_tree, repo, &ancestor_oid));
-	cl_git_pass(git_tree_lookup(&their_tree, repo, &theirs_oid));
-	cl_git_pass(git_tree_lookup(&our_tree, repo, &ours_oid));
-	cl_git_pass(git_merge_trees(&index, repo, ancestor_tree, our_tree, their_tree, &opts));
+	cl_git_pass(git3_tree_lookup(&ancestor_tree, repo, &ancestor_oid));
+	cl_git_pass(git3_tree_lookup(&their_tree, repo, &theirs_oid));
+	cl_git_pass(git3_tree_lookup(&our_tree, repo, &ours_oid));
+	cl_git_pass(git3_merge_trees(&index, repo, ancestor_tree, our_tree, their_tree, &opts));
 
-	git_treebuilder_free(builder);
-	git_str_dispose(&path);
-	git_index_free(index);
-	git_tree_free(ancestor_tree);
-	git_tree_free(their_tree);
-	git_tree_free(our_tree);
-	git__free(data);
+	git3_treebuilder_free(builder);
+	git3_str_dispose(&path);
+	git3_index_free(index);
+	git3_tree_free(ancestor_tree);
+	git3_tree_free(their_tree);
+	git3_tree_free(our_tree);
+	git3__free(data);
 }
 
 void test_merge_trees_renames__emptyfile_renames(void)
 {
-	git_index *index;
-	git_merge_options *opts = NULL;
+	git3_index *index;
+	git3_merge_options *opts = NULL;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391", 1, "bar" },
@@ -367,5 +367,5 @@ void test_merge_trees_renames__emptyfile_renames(void)
 		"emptyfile_renames", "emptyfile_renames-branch",
 		opts));
 	cl_assert(merge_test_index(index, merge_index_entries, 4));
-	git_index_free(index);
+	git3_index_free(index);
 }

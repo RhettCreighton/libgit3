@@ -12,22 +12,22 @@
 /*
  * One blob in a commit that is being suspected
  */
-typedef struct git_blame__origin {
+typedef struct git3_blame__origin {
 	int refcnt;
-	struct git_blame__origin *previous;
-	git_commit *commit;
-	git_blob *blob;
-	char path[GIT_FLEX_ARRAY];
-} git_blame__origin;
+	struct git3_blame__origin *previous;
+	git3_commit *commit;
+	git3_blob *blob;
+	char path[GIT3_FLEX_ARRAY];
+} git3_blame__origin;
 
 /*
- * Each group of lines is described by a git_blame__entry; it can be split
+ * Each group of lines is described by a git3_blame__entry; it can be split
  * as we pass blame to the parents.  They form a linked list in the
  * scoreboard structure, sorted by the target line number.
  */
-typedef struct git_blame__entry {
-	struct git_blame__entry *prev;
-	struct git_blame__entry *next;
+typedef struct git3_blame__entry {
+	struct git3_blame__entry *prev;
+	struct git3_blame__entry *next;
 
 	/* the first line of this group in the final image;
 	 * internally all line numbers are 0 based.
@@ -38,7 +38,7 @@ typedef struct git_blame__entry {
 	size_t num_lines;
 
 	/* the commit that introduced this group into the final image */
-	git_blame__origin *suspect;
+	git3_blame__origin *suspect;
 
 	/* true if the suspect is truly guilty; false while we have not
 	 * checked if the group came from one of its parents.
@@ -62,35 +62,35 @@ typedef struct git_blame__entry {
 	/* Whether this entry has been tracked to a boundary commit.
 	 */
 	bool is_boundary;
-} git_blame__entry;
+} git3_blame__entry;
 
-struct git_blame {
+struct git3_blame {
 	char *path;
-	git_repository *repository;
-	git_mailmap *mailmap;
-	git_blame_options options;
+	git3_repository *repository;
+	git3_mailmap *mailmap;
+	git3_blame_options options;
 
-	git_vector hunks;
-	git_array_t(git_blame_line) lines;
-	git_vector paths;
+	git3_vector hunks;
+	git3_array_t(git3_blame_line) lines;
+	git3_vector paths;
 
-	git_blob *final_blob;
-	git_array_t(size_t) line_index;
+	git3_blob *final_blob;
+	git3_array_t(size_t) line_index;
 
 	size_t current_diff_line;
-	git_blame_hunk *current_hunk;
+	git3_blame_hunk *current_hunk;
 
 	/* Scoreboard fields */
-	git_commit *final;
-	git_blame__entry *ent;
+	git3_commit *final;
+	git3_blame__entry *ent;
 	int num_lines;
 	const char *final_buf;
 	size_t final_buf_size;
 };
 
-git_blame *git_blame__alloc(
-	git_repository *repo,
-	git_blame_options opts,
+git3_blame *git3_blame__alloc(
+	git3_repository *repo,
+	git3_blame_options opts,
 	const char *path);
 
 #endif

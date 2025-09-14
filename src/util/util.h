@@ -1,18 +1,18 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_util_h__
 #define INCLUDE_util_h__
 
 #include "str.h"
-#include "git2_util.h"
+#include "git3_util.h"
 #include "strnlen.h"
 #include "thread.h"
 
-#ifndef GIT_WIN32
+#ifndef GIT3_WIN32
 # include <ctype.h>
 #endif
 
@@ -27,14 +27,14 @@
 #endif
 
 #if defined(__GNUC__)
-# define GIT_CONTAINER_OF(ptr, type, member) \
+# define GIT3_CONTAINER_OF(ptr, type, member) \
 	__builtin_choose_expr( \
 	    __builtin_offsetof(type, member) == 0 && \
 	    __builtin_types_compatible_p(__typeof__(&((type *) 0)->member), __typeof__(ptr)), \
 		((type *) (ptr)), \
 		(void)0)
 #else
-# define GIT_CONTAINER_OF(ptr, type, member) (type *)(ptr)
+# define GIT3_CONTAINER_OF(ptr, type, member) (type *)(ptr)
 #endif
 
 /**
@@ -52,47 +52,47 @@
 #define CASESELECT(IGNORE_CASE, ICASE, CASE) \
 	((IGNORE_CASE) ? (ICASE) : (CASE))
 
-extern int git__prefixcmp(const char *str, const char *prefix);
-extern int git__prefixcmp_icase(const char *str, const char *prefix);
-extern int git__prefixncmp(const char *str, size_t str_n, const char *prefix);
-extern int git__prefixncmp_icase(const char *str, size_t str_n, const char *prefix);
-extern int git__suffixcmp(const char *str, const char *suffix);
+extern int git3__prefixcmp(const char *str, const char *prefix);
+extern int git3__prefixcmp_icase(const char *str, const char *prefix);
+extern int git3__prefixncmp(const char *str, size_t str_n, const char *prefix);
+extern int git3__prefixncmp_icase(const char *str, size_t str_n, const char *prefix);
+extern int git3__suffixcmp(const char *str, const char *suffix);
 
-GIT_INLINE(int) git__signum(int val)
+GIT3_INLINE(int) git3__signum(int val)
 {
 	return ((val > 0) - (val < 0));
 }
 
-extern int git__strntol32(int32_t *n, const char *buff, size_t buff_len, const char **end_buf, int base);
-extern int git__strntol64(int64_t *n, const char *buff, size_t buff_len, const char **end_buf, int base);
+extern int git3__strntol32(int32_t *n, const char *buff, size_t buff_len, const char **end_buf, int base);
+extern int git3__strntol64(int64_t *n, const char *buff, size_t buff_len, const char **end_buf, int base);
 
 
-extern void git__hexdump(const char *buffer, size_t n);
-extern uint32_t git__hash(const void *key, int len, uint32_t seed);
+extern void git3__hexdump(const char *buffer, size_t n);
+extern uint32_t git3__hash(const void *key, int len, uint32_t seed);
 
 /* 32-bit cross-platform rotl */
 #ifdef _MSC_VER /* use built-in method in MSVC */
-#	define git__rotl(v, s) (uint32_t)_rotl(v, s)
+#	define git3__rotl(v, s) (uint32_t)_rotl(v, s)
 #else /* use bitops in GCC; with o2 this gets optimized to a rotl instruction */
-#	define git__rotl(v, s) (uint32_t)(((uint32_t)(v) << (s)) | ((uint32_t)(v) >> (32 - (s))))
+#	define git3__rotl(v, s) (uint32_t)(((uint32_t)(v) << (s)) | ((uint32_t)(v) >> (32 - (s))))
 #endif
 
-extern char *git__strtok(char **end, const char *sep);
-extern char *git__strsep(char **end, const char *sep);
+extern char *git3__strtok(char **end, const char *sep);
+extern char *git3__strsep(char **end, const char *sep);
 
-extern void git__strntolower(char *str, size_t len);
-extern void git__strtolower(char *str);
+extern void git3__strntolower(char *str, size_t len);
+extern void git3__strtolower(char *str);
 
-extern size_t git__linenlen(const char *buffer, size_t buffer_len);
+extern size_t git3__linenlen(const char *buffer, size_t buffer_len);
 
-GIT_INLINE(const char *) git__next_line(const char *s)
+GIT3_INLINE(const char *) git3__next_line(const char *s)
 {
 	while (*s && *s != '\n') s++;
 	while (*s == '\n' || *s == '\r') s++;
 	return s;
 }
 
-GIT_INLINE(const void *) git__memrchr(const void *s, int c, size_t n)
+GIT3_INLINE(const void *) git3__memrchr(const void *s, int c, size_t n)
 {
 	const unsigned char *cp;
 
@@ -107,34 +107,34 @@ GIT_INLINE(const void *) git__memrchr(const void *s, int c, size_t n)
 	return NULL;
 }
 
-extern const void * git__memmem(const void *haystack, size_t haystacklen,
+extern const void * git3__memmem(const void *haystack, size_t haystacklen,
 				const void *needle, size_t needlelen);
 
-typedef int (*git__tsort_cmp)(const void *a, const void *b);
+typedef int (*git3__tsort_cmp)(const void *a, const void *b);
 
-extern void git__tsort(void **dst, size_t size, git__tsort_cmp cmp);
+extern void git3__tsort(void **dst, size_t size, git3__tsort_cmp cmp);
 
-typedef int (*git__sort_r_cmp)(const void *a, const void *b, void *payload);
+typedef int (*git3__sort_r_cmp)(const void *a, const void *b, void *payload);
 
-extern void git__tsort_r(
-	void **dst, size_t size, git__sort_r_cmp cmp, void *payload);
+extern void git3__tsort_r(
+	void **dst, size_t size, git3__sort_r_cmp cmp, void *payload);
 
-extern void git__qsort_r(
-	void *els, size_t nel, size_t elsize, git__sort_r_cmp cmp, void *payload);
+extern void git3__qsort_r(
+	void *els, size_t nel, size_t elsize, git3__sort_r_cmp cmp, void *payload);
 
 /**
  * @param position If non-NULL, this will be set to the position where the
  * 		element is or would be inserted if not found.
- * @return 0 if found; GIT_ENOTFOUND if not found
+ * @return 0 if found; GIT3_ENOTFOUND if not found
  */
-extern int git__bsearch(
+extern int git3__bsearch(
 	void **array,
 	size_t array_len,
 	const void *key,
 	int (*compare)(const void *key, const void *element),
 	size_t *position);
 
-extern int git__bsearch_r(
+extern int git3__bsearch_r(
 	void **array,
 	size_t array_len,
 	const void *key,
@@ -142,52 +142,52 @@ extern int git__bsearch_r(
 	void *payload,
 	size_t *position);
 
-#define git__strcmp strcmp
-#define git__strncmp strncmp
+#define git3__strcmp strcmp
+#define git3__strncmp strncmp
 
-extern int git__strcmp_cb(const void *a, const void *b);
-extern int git__strcasecmp_cb(const void *a, const void *b);
+extern int git3__strcmp_cb(const void *a, const void *b);
+extern int git3__strcasecmp_cb(const void *a, const void *b);
 
-extern int git__strcasecmp(const char *a, const char *b);
-extern int git__strncasecmp(const char *a, const char *b, size_t sz);
+extern int git3__strcasecmp(const char *a, const char *b);
+extern int git3__strncasecmp(const char *a, const char *b, size_t sz);
 
-extern int git__strcasesort_cmp(const char *a, const char *b);
+extern int git3__strcasesort_cmp(const char *a, const char *b);
 
 /*
  * Compare some NUL-terminated `a` to a possibly non-NUL terminated
  * `b` of length `b_len`; like `strncmp` but ensuring that
  * `strlen(a) == b_len` as well.
  */
-GIT_INLINE(int) git__strlcmp(const char *a, const char *b, size_t b_len)
+GIT3_INLINE(int) git3__strlcmp(const char *a, const char *b, size_t b_len)
 {
 	int cmp = strncmp(a, b, b_len);
 	return cmp ? cmp : (int)a[b_len];
 }
 
 typedef struct {
-	git_atomic32 refcount;
+	git3_atomic32 refcount;
 	void *owner;
-} git_refcount;
+} git3_refcount;
 
-typedef void (*git_refcount_freeptr)(void *r);
+typedef void (*git3_refcount_freeptr)(void *r);
 
-#define GIT_REFCOUNT_INC(r) { \
-	git_atomic32_inc(&(r)->rc.refcount);	\
+#define GIT3_REFCOUNT_INC(r) { \
+	git3_atomic32_inc(&(r)->rc.refcount);	\
 }
 
-#define GIT_REFCOUNT_DEC(_r, do_free) { \
-	git_refcount *r = &(_r)->rc; \
-	int val = git_atomic32_dec(&r->refcount); \
+#define GIT3_REFCOUNT_DEC(_r, do_free) { \
+	git3_refcount *r = &(_r)->rc; \
+	int val = git3_atomic32_dec(&r->refcount); \
 	if (val <= 0 && r->owner == NULL) { do_free(_r); } \
 }
 
-#define GIT_REFCOUNT_OWN(r, o) { \
-	(void)git_atomic_swap((r)->rc.owner, o); \
+#define GIT3_REFCOUNT_OWN(r, o) { \
+	(void)git3_atomic_swap((r)->rc.owner, o); \
 }
 
-#define GIT_REFCOUNT_OWNER(r) git_atomic_load((r)->rc.owner)
+#define GIT3_REFCOUNT_OWNER(r) git3_atomic_load((r)->rc.owner)
 
-#define GIT_REFCOUNT_VAL(r) git_atomic32_get((r)->rc.refcount)
+#define GIT3_REFCOUNT_VAL(r) git3_atomic32_get((r)->rc.refcount)
 
 
 static signed char from_hex[] = {
@@ -209,21 +209,21 @@ static signed char from_hex[] = {
 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, /* f0 */
 };
 
-GIT_INLINE(int) git__fromhex(char h)
+GIT3_INLINE(int) git3__fromhex(char h)
 {
 	return from_hex[(unsigned char) h];
 }
 
-GIT_INLINE(int) git__ishex(const char *str)
+GIT3_INLINE(int) git3__ishex(const char *str)
 {
 	unsigned i;
 	for (i=0; str[i] != '\0'; i++)
-		if (git__fromhex(str[i]) < 0)
+		if (git3__fromhex(str[i]) < 0)
 			return 0;
 	return 1;
 }
 
-GIT_INLINE(size_t) git__size_t_bitmask(size_t v)
+GIT3_INLINE(size_t) git3__size_t_bitmask(size_t v)
 {
 	v--;
 	v |= v >> 1;
@@ -235,17 +235,17 @@ GIT_INLINE(size_t) git__size_t_bitmask(size_t v)
 	return v;
 }
 
-GIT_INLINE(size_t) git__size_t_powerof2(size_t v)
+GIT3_INLINE(size_t) git3__size_t_powerof2(size_t v)
 {
-	return git__size_t_bitmask(v) + 1;
+	return git3__size_t_bitmask(v) + 1;
 }
 
-GIT_INLINE(bool) git__isspace_nonlf(int c)
+GIT3_INLINE(bool) git3__isspace_nonlf(int c)
 {
 	return (c == ' ' || c == '\t' || c == '\f' || c == '\r' || c == '\v');
 }
 
-GIT_INLINE(bool) git__iswildcard(int c)
+GIT3_INLINE(bool) git3__iswildcard(int c)
 {
 	return (c == '*' || c == '?' || c == '[');
 }
@@ -256,7 +256,7 @@ GIT_INLINE(bool) git__iswildcard(int c)
  * Valid values for true are: 'true', 'yes', 'on'
  * Valid values for false are: 'false', 'no', 'off'
  */
-extern int git__parse_bool(int *out, const char *value);
+extern int git3__parse_bool(int *out, const char *value);
 
 /*
  * Unescapes a string in-place.
@@ -265,13 +265,13 @@ extern int git__parse_bool(int *out, const char *value);
  * - "jackie\" -> "jacky\"
  * - "chan\\" -> "chan\"
  */
-extern size_t git__unescape(char *str);
+extern size_t git3__unescape(char *str);
 
 /*
  * Safely zero-out memory, making sure that the compiler
  * doesn't optimize away the operation.
  */
-GIT_INLINE(void) git__memzero(void *data, size_t size)
+GIT3_INLINE(void) git3__memzero(void *data, size_t size)
 {
 #ifdef _MSC_VER
 	SecureZeroMemory((PVOID)data, size);
@@ -283,9 +283,9 @@ GIT_INLINE(void) git__memzero(void *data, size_t size)
 #endif
 }
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 
-GIT_INLINE(uint64_t) git_time_monotonic(void)
+GIT3_INLINE(uint64_t) git3_time_monotonic(void)
 {
 	/* GetTickCount64 returns the number of milliseconds that have
 	 * elapsed since the system was started. */
@@ -297,7 +297,7 @@ GIT_INLINE(uint64_t) git_time_monotonic(void)
 #include <mach/mach_time.h>
 #include <sys/time.h>
 
-GIT_INLINE(uint64_t) git_time_monotonic(void)
+GIT3_INLINE(uint64_t) git3_time_monotonic(void)
 {
 	static double scaling_factor = 0;
 
@@ -322,7 +322,7 @@ GIT_INLINE(uint64_t) git_time_monotonic(void)
 
 #include <proto/timer.h>
 
-GIT_INLINE(uint64_t) git_time_monotonic(void)
+GIT3_INLINE(uint64_t) git3_time_monotonic(void)
 {
 	struct TimeVal tv;
 	ITimer->GetUpTime(&tv);
@@ -333,7 +333,7 @@ GIT_INLINE(uint64_t) git_time_monotonic(void)
 
 #include <sys/time.h>
 
-GIT_INLINE(uint64_t) git_time_monotonic(void)
+GIT3_INLINE(uint64_t) git3_time_monotonic(void)
 {
 	struct timeval tv;
 
@@ -350,12 +350,12 @@ GIT_INLINE(uint64_t) git_time_monotonic(void)
 
 #endif
 
-extern int git__getenv(git_str *out, const char *name);
+extern int git3__getenv(git3_str *out, const char *name);
 
-extern int git__online_cpus(void);
+extern int git3__online_cpus(void);
 
-GIT_INLINE(int) git__noop(void) { return 0; }
-GIT_INLINE(int) git__noop_args(void *a, ...) { GIT_UNUSED(a); return 0; }
+GIT3_INLINE(int) git3__noop(void) { return 0; }
+GIT3_INLINE(int) git3__noop_args(void *a, ...) { GIT3_UNUSED(a); return 0; }
 
 #include "alloc.h"
 

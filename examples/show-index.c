@@ -1,7 +1,7 @@
 /*
- * libgit2 "showindex" example - shows how to extract data from the index
+ * libgit3 "showindex" example - shows how to extract data from the index
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -14,14 +14,14 @@
 
 #include "common.h"
 
-int lg2_show_index(git_repository *repo, int argc, char **argv)
+int lg2_show_index(git3_repository *repo, int argc, char **argv)
 {
-	git_index *index;
+	git3_index *index;
 	size_t i, ecount;
 	char *dir = ".";
 	size_t dirlen;
-	char out[GIT_OID_SHA1_HEXSIZE+1];
-	out[GIT_OID_SHA1_HEXSIZE] = '\0';
+	char out[GIT3_OID_SHA1_HEXSIZE+1];
+	out[GIT3_OID_SHA1_HEXSIZE] = '\0';
 
 	if (argc > 2)
 		fatal("usage: showindex [<repo-dir>]", NULL);
@@ -30,26 +30,26 @@ int lg2_show_index(git_repository *repo, int argc, char **argv)
 
 	dirlen = strlen(dir);
 	if (dirlen > 5 && strcmp(dir + dirlen - 5, "index") == 0) {
-		check_lg2(git_index_open(&index, dir), "could not open index", dir);
+		check_lg2(git3_index_open(&index, dir), "could not open index", dir);
 	} else {
-		check_lg2(git_repository_open_ext(&repo, dir, 0, NULL), "could not open repository", dir);
-		check_lg2(git_repository_index(&index, repo), "could not open repository index", NULL);
-		git_repository_free(repo);
+		check_lg2(git3_repository_open_ext(&repo, dir, 0, NULL), "could not open repository", dir);
+		check_lg2(git3_repository_index(&index, repo), "could not open repository index", NULL);
+		git3_repository_free(repo);
 	}
 
-	git_index_read(index, 0);
+	git3_index_read(index, 0);
 
-	ecount = git_index_entrycount(index);
+	ecount = git3_index_entrycount(index);
 	if (!ecount)
 		printf("Empty index\n");
 
 	for (i = 0; i < ecount; ++i) {
-		const git_index_entry *e = git_index_get_byindex(index, i);
+		const git3_index_entry *e = git3_index_get_byindex(index, i);
 
-		git_oid_fmt(out, &e->id);
+		git3_oid_fmt(out, &e->id);
 
 		printf("File Path: %s\n", e->path);
-		printf("    Stage: %d\n", git_index_entry_stage(e));
+		printf("    Stage: %d\n", git3_index_entry_stage(e));
 		printf(" Blob SHA: %s\n", out);
 		printf("File Mode: %07o\n", e->mode);
 		printf("File Size: %d bytes\n", (int)e->file_size);
@@ -60,7 +60,7 @@ int lg2_show_index(git_repository *repo, int argc, char **argv)
 		printf("\n");
 	}
 
-	git_index_free(index);
+	git3_index_free(index);
 
 	return 0;
 }

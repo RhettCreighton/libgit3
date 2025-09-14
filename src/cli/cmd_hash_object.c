@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -47,41 +47,41 @@ static void print_help(void)
 }
 
 static int hash_buf(
-	git_odb *odb,
-	git_str *buf,
-	git_object_t object_type,
-	git_oid_t oid_type)
+	git3_odb *odb,
+	git3_str *buf,
+	git3_object_t object_type,
+	git3_oid_t oid_type)
 {
-	git_oid oid;
+	git3_oid oid;
 
 	if (!literally) {
 		int valid = 0;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-		if (git_object_rawcontent_is_valid(&valid, buf->ptr, buf->size, object_type, oid_type) < 0 || !valid)
+#ifdef GIT3_EXPERIMENTAL_SHA256
+		if (git3_object_rawcontent_is_valid(&valid, buf->ptr, buf->size, object_type, oid_type) < 0 || !valid)
 			return cli_error_git();
 #else
-		GIT_UNUSED(oid_type);
+		GIT3_UNUSED(oid_type);
 
-		if (git_object_rawcontent_is_valid(&valid, buf->ptr, buf->size, object_type) < 0 || !valid)
+		if (git3_object_rawcontent_is_valid(&valid, buf->ptr, buf->size, object_type) < 0 || !valid)
 			return cli_error_git();
 #endif
 	}
 
 	if (write_object) {
-		if (git_odb_write(&oid, odb, buf->ptr, buf->size, object_type) < 0)
+		if (git3_odb_write(&oid, odb, buf->ptr, buf->size, object_type) < 0)
 			return cli_error_git();
 	} else {
-#ifdef GIT_EXPERIMENTAL_SHA256
-		if (git_odb_hash(&oid, buf->ptr, buf->size, object_type, GIT_OID_SHA1) < 0)
+#ifdef GIT3_EXPERIMENTAL_SHA256
+		if (git3_odb_hash(&oid, buf->ptr, buf->size, object_type, GIT3_OID_SHA1) < 0)
 			return cli_error_git();
 #else
-		if (git_odb_hash(&oid, buf->ptr, buf->size, object_type) < 0)
+		if (git3_odb_hash(&oid, buf->ptr, buf->size, object_type) < 0)
 			return cli_error_git();
 #endif
 	}
 
-	if (printf("%s\n", git_oid_tostr_s(&oid)) < 0)
+	if (printf("%s\n", git3_oid_tostr_s(&oid)) < 0)
 		return cli_error_os();
 
 	return 0;
@@ -90,12 +90,12 @@ static int hash_buf(
 int cmd_hash_object(int argc, char **argv)
 {
 	cli_repository_open_options open_opts = { argv + 1, argc - 1};
-	git_repository *repo = NULL;
-	git_odb *odb = NULL;
-	git_oid_t oid_type;
-	git_str buf = GIT_STR_INIT;
+	git3_repository *repo = NULL;
+	git3_odb *odb = NULL;
+	git3_oid_t oid_type;
+	git3_str buf = GIT3_STR_INIT;
 	cli_opt invalid_opt;
-	git_object_t object_type = GIT_OBJECT_BLOB;
+	git3_object_t object_type = GIT3_OBJECT_BLOB;
 	char **filename;
 	int ret = 0;
 
@@ -107,25 +107,25 @@ int cmd_hash_object(int argc, char **argv)
 		return 0;
 	}
 
-	if (type_name && (object_type = git_object_string2type(type_name)) == GIT_OBJECT_INVALID)
+	if (type_name && (object_type = git3_object_string2type(type_name)) == GIT3_OBJECT_INVALID)
 		return cli_error_usage("invalid object type '%s'", type_name);
 
 	if (write_object &&
 	    (cli_repository_open(&repo, &open_opts) < 0 ||
-	     git_repository_odb(&odb, repo) < 0)) {
+	     git3_repository_odb(&odb, repo) < 0)) {
 		ret = cli_error_git();
 		goto done;
 	}
 
-	oid_type = git_repository_oid_type(repo);
+	oid_type = git3_repository_oid_type(repo);
 
 	/*
 	 * TODO: we're reading blobs, we shouldn't pull them all into main
 	 * memory, we should just stream them into the odb instead.
-	 * (Or create a `git_odb_writefile` API.)
+	 * (Or create a `git3_odb_writefile` API.)
 	 */
 	if (read_stdin) {
-		if (git_futils_readbuffer_fd_full(&buf, fileno(stdin)) < 0) {
+		if (git3_futils_readbuffer_fd_full(&buf, fileno(stdin)) < 0) {
 			ret = cli_error_git();
 			goto done;
 		}
@@ -134,7 +134,7 @@ int cmd_hash_object(int argc, char **argv)
 			goto done;
 	} else {
 		for (filename = filenames; *filename; filename++) {
-			if (git_futils_readbuffer(&buf, *filename) < 0) {
+			if (git3_futils_readbuffer(&buf, *filename) < 0) {
 				ret = cli_error_git();
 				goto done;
 			}
@@ -145,8 +145,8 @@ int cmd_hash_object(int argc, char **argv)
 	}
 
 done:
-	git_str_dispose(&buf);
-	git_odb_free(odb);
-	git_repository_free(repo);
+	git3_str_dispose(&buf);
+	git3_odb_free(odb);
+	git3_repository_free(repo);
 	return ret;
 }

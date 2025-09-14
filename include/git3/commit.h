@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_commit_h__
@@ -13,9 +13,9 @@
 #include "object.h"
 
 /**
- * @file git2/commit.h
+ * @file git3/commit.h
  * @brief A representation of a set of changes in the repository
- * @defgroup git_commit Git commit parsing, formatting routines
+ * @defgroup git3_commit Git commit parsing, formatting routines
  * @ingroup Git
  *
  * A commit represents a set of changes made to the files within a
@@ -23,12 +23,12 @@
  * changes were made.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Lookup a commit object from a repository.
  *
- * The returned object should be released with `git_commit_free` when no
+ * The returned object should be released with `git3_commit_free` when no
  * longer needed.
  *
  * @param commit pointer to the looked up commit
@@ -37,17 +37,17 @@ GIT_BEGIN_DECL
  *		an annotated tag it will be peeled back to the commit.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_lookup(
-	git_commit **commit, git_repository *repo, const git_oid *id);
+GIT3_EXTERN(int) git3_commit_lookup(
+	git3_commit **commit, git3_repository *repo, const git3_oid *id);
 
 /**
  * Lookup a commit object from a repository, given a prefix of its
  * identifier (short id).
  *
- * The returned object should be released with `git_commit_free` when no
+ * The returned object should be released with `git3_commit_free` when no
  * longer needed.
  *
- * @see git_object_lookup_prefix
+ * @see git3_object_lookup_prefix
  *
  * @param commit pointer to the looked up commit
  * @param repo the repo to use when locating the commit.
@@ -56,13 +56,13 @@ GIT_EXTERN(int) git_commit_lookup(
  * @param len the length of the short identifier
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_lookup_prefix(
-	git_commit **commit, git_repository *repo, const git_oid *id, size_t len);
+GIT3_EXTERN(int) git3_commit_lookup_prefix(
+	git3_commit **commit, git3_repository *repo, const git3_oid *id, size_t len);
 
 /**
  * Close an open commit
  *
- * This is a wrapper around git_object_free()
+ * This is a wrapper around git3_object_free()
  *
  * IMPORTANT:
  * It *is* necessary to call this method when you stop
@@ -71,7 +71,7 @@ GIT_EXTERN(int) git_commit_lookup_prefix(
  * @param commit the commit to close
  */
 
-GIT_EXTERN(void) git_commit_free(git_commit *commit);
+GIT3_EXTERN(void) git3_commit_free(git3_commit *commit);
 
 /**
  * Get the id of a commit.
@@ -79,7 +79,7 @@ GIT_EXTERN(void) git_commit_free(git_commit *commit);
  * @param commit a previously loaded commit.
  * @return object identity for the commit.
  */
-GIT_EXTERN(const git_oid *) git_commit_id(const git_commit *commit);
+GIT3_EXTERN(const git3_oid *) git3_commit_id(const git3_commit *commit);
 
 /**
  * Get the repository that contains the commit.
@@ -87,7 +87,7 @@ GIT_EXTERN(const git_oid *) git_commit_id(const git_commit *commit);
  * @param commit A previously loaded commit.
  * @return Repository that contains this commit.
  */
-GIT_EXTERN(git_repository *) git_commit_owner(const git_commit *commit);
+GIT3_EXTERN(git3_repository *) git3_commit_owner(const git3_commit *commit);
 
 /**
  * Get the encoding for the message of a commit,
@@ -99,7 +99,7 @@ GIT_EXTERN(git_repository *) git_commit_owner(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return NULL, or the encoding
  */
-GIT_EXTERN(const char *) git_commit_message_encoding(const git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_message_encoding(const git3_commit *commit);
 
 /**
  * Get the full message of a commit.
@@ -110,7 +110,7 @@ GIT_EXTERN(const char *) git_commit_message_encoding(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return the message of a commit
  */
-GIT_EXTERN(const char *) git_commit_message(const git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_message(const git3_commit *commit);
 
 /**
  * Get the full raw message of a commit.
@@ -118,7 +118,7 @@ GIT_EXTERN(const char *) git_commit_message(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return the raw message of a commit
  */
-GIT_EXTERN(const char *) git_commit_message_raw(const git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_message_raw(const git3_commit *commit);
 
 /**
  * Get the short "summary" of the git commit message.
@@ -129,7 +129,7 @@ GIT_EXTERN(const char *) git_commit_message_raw(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return the summary of a commit or NULL on error
  */
-GIT_EXTERN(const char *) git_commit_summary(git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_summary(git3_commit *commit);
 
 /**
  * Get the long "body" of the git commit message.
@@ -142,7 +142,7 @@ GIT_EXTERN(const char *) git_commit_summary(git_commit *commit);
  * @return the body of a commit or NULL when no the message only
  *   consists of a summary
  */
-GIT_EXTERN(const char *) git_commit_body(git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_body(git3_commit *commit);
 
 /**
  * Get the commit time (i.e. committer time) of a commit.
@@ -150,7 +150,7 @@ GIT_EXTERN(const char *) git_commit_body(git_commit *commit);
  * @param commit a previously loaded commit.
  * @return the time of a commit
  */
-GIT_EXTERN(git_time_t) git_commit_time(const git_commit *commit);
+GIT3_EXTERN(git3_time_t) git3_commit_time(const git3_commit *commit);
 
 /**
  * Get the commit timezone offset (i.e. committer's preferred timezone) of a commit.
@@ -158,7 +158,7 @@ GIT_EXTERN(git_time_t) git_commit_time(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return positive or negative timezone offset, in minutes from UTC
  */
-GIT_EXTERN(int) git_commit_time_offset(const git_commit *commit);
+GIT3_EXTERN(int) git3_commit_time_offset(const git3_commit *commit);
 
 /**
  * Get the committer of a commit.
@@ -166,7 +166,7 @@ GIT_EXTERN(int) git_commit_time_offset(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return the committer of a commit
  */
-GIT_EXTERN(const git_signature *) git_commit_committer(const git_commit *commit);
+GIT3_EXTERN(const git3_signature *) git3_commit_committer(const git3_commit *commit);
 
 /**
  * Get the author of a commit.
@@ -174,35 +174,35 @@ GIT_EXTERN(const git_signature *) git_commit_committer(const git_commit *commit)
  * @param commit a previously loaded commit.
  * @return the author of a commit
  */
-GIT_EXTERN(const git_signature *) git_commit_author(const git_commit *commit);
+GIT3_EXTERN(const git3_signature *) git3_commit_author(const git3_commit *commit);
 
 /**
  * Get the committer of a commit, using the mailmap to map names and email
  * addresses to canonical real names and email addresses.
  *
- * Call `git_signature_free` to free the signature.
+ * Call `git3_signature_free` to free the signature.
  *
  * @param out a pointer to store the resolved signature.
  * @param commit a previously loaded commit.
  * @param mailmap the mailmap to resolve with. (may be NULL)
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_committer_with_mailmap(
-	git_signature **out, const git_commit *commit, const git_mailmap *mailmap);
+GIT3_EXTERN(int) git3_commit_committer_with_mailmap(
+	git3_signature **out, const git3_commit *commit, const git3_mailmap *mailmap);
 
 /**
  * Get the author of a commit, using the mailmap to map names and email
  * addresses to canonical real names and email addresses.
  *
- * Call `git_signature_free` to free the signature.
+ * Call `git3_signature_free` to free the signature.
  *
  * @param out a pointer to store the resolved signature.
  * @param commit a previously loaded commit.
  * @param mailmap the mailmap to resolve with. (may be NULL)
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_author_with_mailmap(
-	git_signature **out, const git_commit *commit, const git_mailmap *mailmap);
+GIT3_EXTERN(int) git3_commit_author_with_mailmap(
+	git3_signature **out, const git3_commit *commit, const git3_mailmap *mailmap);
 
 /**
  * Get the full raw text of the commit header.
@@ -210,7 +210,7 @@ GIT_EXTERN(int) git_commit_author_with_mailmap(
  * @param commit a previously loaded commit
  * @return the header text of the commit
  */
-GIT_EXTERN(const char *) git_commit_raw_header(const git_commit *commit);
+GIT3_EXTERN(const char *) git3_commit_raw_header(const git3_commit *commit);
 
 /**
  * Get the tree pointed to by a commit.
@@ -219,17 +219,17 @@ GIT_EXTERN(const char *) git_commit_raw_header(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_tree(git_tree **tree_out, const git_commit *commit);
+GIT3_EXTERN(int) git3_commit_tree(git3_tree **tree_out, const git3_commit *commit);
 
 /**
  * Get the id of the tree pointed to by a commit. This differs from
- * `git_commit_tree` in that no attempts are made to fetch an object
+ * `git3_commit_tree` in that no attempts are made to fetch an object
  * from the ODB.
  *
  * @param commit a previously loaded commit.
  * @return the id of tree pointed to by commit.
  */
-GIT_EXTERN(const git_oid *) git_commit_tree_id(const git_commit *commit);
+GIT3_EXTERN(const git3_oid *) git3_commit_tree_id(const git3_commit *commit);
 
 /**
  * Get the number of parents of this commit
@@ -237,7 +237,7 @@ GIT_EXTERN(const git_oid *) git_commit_tree_id(const git_commit *commit);
  * @param commit a previously loaded commit.
  * @return integer of count of parents
  */
-GIT_EXTERN(unsigned int) git_commit_parentcount(const git_commit *commit);
+GIT3_EXTERN(unsigned int) git3_commit_parentcount(const git3_commit *commit);
 
 /**
  * Get the specified parent of the commit.
@@ -247,22 +247,22 @@ GIT_EXTERN(unsigned int) git_commit_parentcount(const git_commit *commit);
  * @param n the position of the parent (from 0 to `parentcount`)
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_parent(
-	git_commit **out,
-	const git_commit *commit,
+GIT3_EXTERN(int) git3_commit_parent(
+	git3_commit **out,
+	const git3_commit *commit,
 	unsigned int n);
 
 /**
  * Get the oid of a specified parent for a commit. This is different from
- * `git_commit_parent`, which will attempt to load the parent commit from
+ * `git3_commit_parent`, which will attempt to load the parent commit from
  * the ODB.
  *
  * @param commit a previously loaded commit.
  * @param n the position of the parent (from 0 to `parentcount`)
  * @return the id of the parent, NULL on error.
  */
-GIT_EXTERN(const git_oid *) git_commit_parent_id(
-	const git_commit *commit,
+GIT3_EXTERN(const git3_oid *) git3_commit_parent_id(
+	const git3_commit *commit,
 	unsigned int n);
 
 /**
@@ -276,12 +276,12 @@ GIT_EXTERN(const git_oid *) git_commit_parent_id(
  * @param ancestor Pointer where to store the ancestor commit
  * @param commit a previously loaded commit.
  * @param n the requested generation
- * @return 0 on success; GIT_ENOTFOUND if no matching ancestor exists
+ * @return 0 on success; GIT3_ENOTFOUND if no matching ancestor exists
  * or an error code
  */
-GIT_EXTERN(int) git_commit_nth_gen_ancestor(
-	git_commit **ancestor,
-	const git_commit *commit,
+GIT3_EXTERN(int) git3_commit_nth_gen_ancestor(
+	git3_commit **ancestor,
+	const git3_commit *commit,
 	unsigned int n);
 
 /**
@@ -291,17 +291,17 @@ GIT_EXTERN(int) git_commit_nth_gen_ancestor(
  * overwritten
  * @param commit the commit to look in
  * @param field the header field to return
- * @return 0 on succeess, GIT_ENOTFOUND if the field does not exist,
+ * @return 0 on succeess, GIT3_ENOTFOUND if the field does not exist,
  * or an error code
  */
-GIT_EXTERN(int) git_commit_header_field(git_buf *out, const git_commit *commit, const char *field);
+GIT3_EXTERN(int) git3_commit_header_field(git3_buf *out, const git3_commit *commit, const char *field);
 
 /**
  * Extract the signature from a commit
  *
  * If the id is not for a commit, the error class will be
- * `GIT_ERROR_INVALID`. If the commit does not have a signature, the
- * error class will be `GIT_ERROR_OBJECT`.
+ * `GIT3_ERROR_INVALID`. If the commit does not have a signature, the
+ * error class will be `GIT3_ERROR_OBJECT`.
  *
  * @param signature the signature block; existing content will be
  * overwritten
@@ -311,16 +311,16 @@ GIT_EXTERN(int) git_commit_header_field(git_buf *out, const git_commit *commit, 
  * @param commit_id the commit from which to extract the data
  * @param field the name of the header field containing the signature
  * block; pass `NULL` to extract the default 'gpgsig'
- * @return 0 on success, GIT_ENOTFOUND if the id is not for a commit
+ * @return 0 on success, GIT3_ENOTFOUND if the id is not for a commit
  * or the commit does not have a signature.
  */
-GIT_EXTERN(int) git_commit_extract_signature(git_buf *signature, git_buf *signed_data, git_repository *repo, git_oid *commit_id, const char *field);
+GIT3_EXTERN(int) git3_commit_extract_signature(git3_buf *signature, git3_buf *signed_data, git3_repository *repo, git3_oid *commit_id, const char *field);
 
 /**
- * Create new commit in the repository from a list of `git_object` pointers
+ * Create new commit in the repository from a list of `git3_object` pointers
  *
  * The message will **not** be cleaned up automatically. You can do that
- * with the `git_message_prettify()` function.
+ * with the `git3_message_prettify()` function.
  *
  * @param id Pointer in which to store the OID of the newly created commit
  *
@@ -345,13 +345,13 @@ GIT_EXTERN(int) git_commit_extract_signature(git_buf *signature, git_buf *signed
  *
  * @param message Full message for this commit
  *
- * @param tree An instance of a `git_tree` object that will
+ * @param tree An instance of a `git3_tree` object that will
  *  be used as the tree for the commit. This tree object must
  *  also be owned by the given `repo`.
  *
  * @param parent_count Number of parents for this commit
  *
- * @param parents Array of `parent_count` pointers to `git_commit`
+ * @param parents Array of `parent_count` pointers to `git3_commit`
  *  objects that will be used as the parents for this commit. This
  *  array may be NULL if `parent_count` is 0 (root commit). All the
  *  given commits must be owned by the `repo`.
@@ -360,29 +360,29 @@ GIT_EXTERN(int) git_commit_extract_signature(git_buf *signature, git_buf *signed
  *	The created commit will be written to the Object Database and
  *	the given reference will be updated to point to it
  */
-GIT_EXTERN(int) git_commit_create(
-	git_oid *id,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_commit_create(
+	git3_oid *id,
+	git3_repository *repo,
 	const char *update_ref,
-	const git_signature *author,
-	const git_signature *committer,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree,
+	const git3_tree *tree,
 	size_t parent_count,
-	const git_commit *parents[]);
+	const git3_commit *parents[]);
 
 /**
  * Create new commit in the repository using a variable argument list.
  *
  * The message will **not** be cleaned up automatically. You can do that
- * with the `git_message_prettify()` function.
+ * with the `git3_message_prettify()` function.
  *
  * The parents for the commit are specified as a variable list of pointers
- * to `const git_commit *`. Note that this is a convenience method which may
+ * to `const git3_commit *`. Note that this is a convenience method which may
  * not be safe to export for certain languages or compilers
  *
- * All other parameters remain the same as `git_commit_create()`.
+ * All other parameters remain the same as `git3_commit_create()`.
  *
  * @param id Pointer in which to store the OID of the newly created commit
  *
@@ -407,7 +407,7 @@ GIT_EXTERN(int) git_commit_create(
  *
  * @param message Full message for this commit
  *
- * @param tree An instance of a `git_tree` object that will
+ * @param tree An instance of a `git3_tree` object that will
  *  be used as the tree for the commit. This tree object must
  *  also be owned by the given `repo`.
  *
@@ -417,15 +417,15 @@ GIT_EXTERN(int) git_commit_create(
  *	The created commit will be written to the Object Database and
  *	the given reference will be updated to point to it
  */
-GIT_EXTERN(int) git_commit_create_v(
-	git_oid *id,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_commit_create_v(
+	git3_oid *id,
+	git3_repository *repo,
 	const char *update_ref,
-	const git_signature *author,
-	const git_signature *committer,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree,
+	const git3_tree *tree,
 	size_t parent_count,
 	...);
 
@@ -442,20 +442,20 @@ typedef struct {
 	unsigned int allow_empty_commit : 1;
 
 	/** The commit author, or NULL for the default. */
-	const git_signature *author;
+	const git3_signature *author;
 
 	/** The committer, or NULL for the default. */
-	const git_signature *committer;
+	const git3_signature *committer;
 
 	/** Encoding for the commit message; leave NULL for default. */
 	const char *message_encoding;
-} git_commit_create_options;
+} git3_commit_create_options;
 
-/** Current version for the `git_commit_create_options` structure */
-#define GIT_COMMIT_CREATE_OPTIONS_VERSION 1
+/** Current version for the `git3_commit_create_options` structure */
+#define GIT3_COMMIT_CREATE_OPTIONS_VERSION 1
 
-/** Static constructor for `git_commit_create_options` */
-#define GIT_COMMIT_CREATE_OPTIONS_INIT { GIT_COMMIT_CREATE_OPTIONS_VERSION }
+/** Static constructor for `git3_commit_create_options` */
+#define GIT3_COMMIT_CREATE_OPTIONS_INIT { GIT3_COMMIT_CREATE_OPTIONS_VERSION }
 
 /**
  * Commits the staged changes in the repository; this is a near analog to
@@ -467,13 +467,13 @@ typedef struct {
  * @param repo repository to commit changes in
  * @param message the commit message
  * @param opts options for creating the commit
- * @return 0 on success, GIT_EUNCHANGED if there were no changes to commit, or an error code
+ * @return 0 on success, GIT3_EUNCHANGED if there were no changes to commit, or an error code
  */
-GIT_EXTERN(int) git_commit_create_from_stage(
-	git_oid *id,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_commit_create_from_stage(
+	git3_oid *id,
+	git3_repository *repo,
 	const char *message,
-	const git_commit_create_options *opts);
+	const git3_commit_create_options *opts);
 
 /**
  * Amend an existing commit by replacing only non-NULL values.
@@ -482,17 +482,17 @@ GIT_EXTERN(int) git_commit_create_from_stage(
  * except that any non-NULL values will be updated.  The new commit has
  * the same parents as the old commit.
  *
- * The `update_ref` value works as in the regular `git_commit_create()`,
+ * The `update_ref` value works as in the regular `git3_commit_create()`,
  * updating the ref to point to the newly rewritten commit.  If you want
  * to amend a commit that is not currently the tip of the branch and then
  * rewrite the following commits to reach a ref, pass this as NULL and
  * update the rest of the commit chain and ref separately.
  *
- * Unlike `git_commit_create()`, the `author`, `committer`, `message`,
+ * Unlike `git3_commit_create()`, the `author`, `committer`, `message`,
  * `message_encoding`, and `tree` parameters can be NULL in which case this
  * will use the values from the original `commit_to_amend`.
  *
- * All parameters have the same meanings as in `git_commit_create()`.
+ * All parameters have the same meanings as in `git3_commit_create()`.
  *
  * @param id Pointer in which to store the OID of the newly created commit
  *
@@ -517,7 +517,7 @@ GIT_EXTERN(int) git_commit_create_from_stage(
  *
  * @param message Full message for this commit
  *
- * @param tree An instance of a `git_tree` object that will
+ * @param tree An instance of a `git3_tree` object that will
  *  be used as the tree for the commit. This tree object must
  *  also be owned by the given `repo`.
  *
@@ -525,20 +525,20 @@ GIT_EXTERN(int) git_commit_create_from_stage(
  *	The created commit will be written to the Object Database and
  *	the given reference will be updated to point to it
  */
-GIT_EXTERN(int) git_commit_amend(
-	git_oid *id,
-	const git_commit *commit_to_amend,
+GIT3_EXTERN(int) git3_commit_amend(
+	git3_oid *id,
+	const git3_commit *commit_to_amend,
 	const char *update_ref,
-	const git_signature *author,
-	const git_signature *committer,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree);
+	const git3_tree *tree);
 
 /**
  * Create a commit and write it into a buffer
  *
- * Create a commit as with `git_commit_create()` but instead of
+ * Create a commit as with `git3_commit_create()` but instead of
  * writing it to the objectdb, write the contents of the object into a
  * buffer.
  *
@@ -557,29 +557,29 @@ GIT_EXTERN(int) git_commit_amend(
  *
  * @param message Full message for this commit
  *
- * @param tree An instance of a `git_tree` object that will
+ * @param tree An instance of a `git3_tree` object that will
  *  be used as the tree for the commit. This tree object must
  *  also be owned by the given `repo`.
  *
  * @param parent_count Number of parents for this commit
  *
- * @param parents Array of `parent_count` pointers to `git_commit`
+ * @param parents Array of `parent_count` pointers to `git3_commit`
  *  objects that will be used as the parents for this commit. This
  *  array may be NULL if `parent_count` is 0 (root commit). All the
  *  given commits must be owned by the `repo`.
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_create_buffer(
-	git_buf *out,
-	git_repository *repo,
-	const git_signature *author,
-	const git_signature *committer,
+GIT3_EXTERN(int) git3_commit_create_buffer(
+	git3_buf *out,
+	git3_repository *repo,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree,
+	const git3_tree *tree,
 	size_t parent_count,
-	const git_commit *parents[]);
+	const git3_commit *parents[]);
 
 /**
  * Create a commit object from the given buffer and signature
@@ -597,9 +597,9 @@ GIT_EXTERN(int) git_commit_create_buffer(
  * signature. Leave `NULL` for the default of "gpgsig"
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_commit_create_with_signature(
-	git_oid *out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_commit_create_with_signature(
+	git3_oid *out,
+	git3_repository *repo,
 	const char *commit_content,
 	const char *signature,
 	const char *signature_field);
@@ -612,15 +612,15 @@ GIT_EXTERN(int) git_commit_create_with_signature(
  * @param source Original commit to copy
  * @return 0
  */
-GIT_EXTERN(int) git_commit_dup(git_commit **out, git_commit *source);
+GIT3_EXTERN(int) git3_commit_dup(git3_commit **out, git3_commit *source);
 
 /**
  * Commit creation callback: used when a function is going to create
- * commits (for example, in `git_rebase_commit`) to allow callers to
+ * commits (for example, in `git3_rebase_commit`) to allow callers to
  * override the commit creation behavior.  For example, users may
  * wish to sign commits by providing this information to
- * `git_commit_create_buffer`, signing that buffer, then calling
- * `git_commit_create_with_signature`.  The resultant commit id
+ * `git3_commit_create_buffer`, signing that buffer, then calling
+ * `git3_commit_create_with_signature`.  The resultant commit id
  * should be set in the `out` object id parameter.
  *
  * @param out pointer that this callback will populate with the object
@@ -635,41 +635,41 @@ GIT_EXTERN(int) git_commit_dup(git_commit **out, git_commit *source);
  * @param parents the commit parents
  * @param payload the payload pointer in the rebase options
  * @return 0 if this callback has created the commit and populated the out
- *         parameter, GIT_PASSTHROUGH if the callback has not created a
+ *         parameter, GIT3_PASSTHROUGH if the callback has not created a
  *         commit and wants the calling function to create the commit as
  *         if no callback had been specified, any other value to stop
  *         and return a failure
  */
-typedef int (*git_commit_create_cb)(
-	git_oid *out,
-	const git_signature *author,
-	const git_signature *committer,
+typedef int (*git3_commit_create_cb)(
+	git3_oid *out,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree,
+	const git3_tree *tree,
 	size_t parent_count,
-	const git_commit *parents[],
+	const git3_commit *parents[],
 	void *payload);
 
 /** An array of commits returned from the library */
-typedef struct git_commitarray {
-	git_commit *const *commits;
+typedef struct git3_commitarray {
+	git3_commit *const *commits;
 	size_t count;
-} git_commitarray;
+} git3_commitarray;
 
 /**
  * Free the commits contained in a commit array.  This method should
- * be called on `git_commitarray` objects that were provided by the
+ * be called on `git3_commitarray` objects that were provided by the
  * library.  Not doing so will result in a memory leak.
  *
- * This does not free the `git_commitarray` itself, since the library
+ * This does not free the `git3_commitarray` itself, since the library
  * will never allocate that object directly itself.
  *
- * @param array The git_commitarray that contains commits to free
+ * @param array The git3_commitarray that contains commits to free
  */
-GIT_EXTERN(void) git_commitarray_dispose(git_commitarray *array);
+GIT3_EXTERN(void) git3_commitarray_dispose(git3_commitarray *array);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

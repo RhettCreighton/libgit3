@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "helper__perf__timer.h"
 
-#if defined(GIT_WIN32)
+#if defined(GIT3_WIN32)
 
 void perf__timer__start(perf_timer *t)
 {

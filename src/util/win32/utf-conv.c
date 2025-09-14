@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "utf-conv.h"
 
-GIT_INLINE(void) git__set_errno(void)
+GIT3_INLINE(void) git3__set_errno(void)
 {
 	if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 		errno = ENAMETOOLONG;
@@ -15,13 +15,13 @@ GIT_INLINE(void) git__set_errno(void)
 		errno = EINVAL;
 }
 
-int git_utf8_to_16(wchar_t *dest, size_t dest_size, const char *src)
+int git3_utf8_to_16(wchar_t *dest, size_t dest_size, const char *src)
 {
 	/* Length of -1 indicates NULL termination of the input string. */
-	return git_utf8_to_16_with_len(dest, dest_size, src, -1);
+	return git3_utf8_to_16_with_len(dest, dest_size, src, -1);
 }
 
-int git_utf8_to_16_with_len(
+int git3_utf8_to_16_with_len(
 	wchar_t *dest,
 	size_t _dest_size,
 	const char *src,
@@ -40,18 +40,18 @@ int git_utf8_to_16_with_len(
 		src, src_len, dest, dest_size) - 1;
 
 	if (len < 0)
-		git__set_errno();
+		git3__set_errno();
 
 	return len;
 }
 
-int git_utf8_from_16(char *dest, size_t dest_size, const wchar_t *src)
+int git3_utf8_from_16(char *dest, size_t dest_size, const wchar_t *src)
 {
 	/* Length of -1 indicates NULL termination of the input string. */
-	return git_utf8_from_16_with_len(dest, dest_size, src, -1);
+	return git3_utf8_from_16_with_len(dest, dest_size, src, -1);
 }
 
-int git_utf8_from_16_with_len(
+int git3_utf8_from_16_with_len(
 	char *dest,
 	size_t _dest_size,
 	const wchar_t *src,
@@ -70,18 +70,18 @@ int git_utf8_from_16_with_len(
 		src, src_len, dest, dest_size, NULL, NULL) - 1;
 
 	if (len < 0)
-		git__set_errno();
+		git3__set_errno();
 
 	return len;
 }
 
-int git_utf8_to_16_alloc(wchar_t **dest, const char *src)
+int git3_utf8_to_16_alloc(wchar_t **dest, const char *src)
 {
 	/* Length of -1 indicates NULL termination of the input string. */
-	return git_utf8_to_16_alloc_with_len(dest, src, -1);
+	return git3_utf8_to_16_alloc_with_len(dest, src, -1);
 }
 
-int git_utf8_to_16_alloc_with_len(wchar_t **dest, const char *src, int src_len)
+int git3_utf8_to_16_alloc_with_len(wchar_t **dest, const char *src, int src_len)
 {
 	int utf16_size;
 
@@ -91,31 +91,31 @@ int git_utf8_to_16_alloc_with_len(wchar_t **dest, const char *src, int src_len)
 		src, src_len, NULL, 0);
 
 	if (!utf16_size) {
-		git__set_errno();
+		git3__set_errno();
 		return -1;
 	}
 
-	*dest = git__mallocarray(utf16_size, sizeof(wchar_t));
-	GIT_ERROR_CHECK_ALLOC(*dest);
+	*dest = git3__mallocarray(utf16_size, sizeof(wchar_t));
+	GIT3_ERROR_CHECK_ALLOC(*dest);
 
-	utf16_size = git_utf8_to_16_with_len(*dest, (size_t)utf16_size,
+	utf16_size = git3_utf8_to_16_with_len(*dest, (size_t)utf16_size,
 		src, src_len);
 
 	if (utf16_size < 0) {
-		git__free(*dest);
+		git3__free(*dest);
 		*dest = NULL;
 	}
 
 	return utf16_size;
 }
 
-int git_utf8_from_16_alloc(char **dest, const wchar_t *src)
+int git3_utf8_from_16_alloc(char **dest, const wchar_t *src)
 {
 	/* Length of -1 indicates NULL termination of the input string. */
-	return git_utf8_from_16_alloc_with_len(dest, src, -1);
+	return git3_utf8_from_16_alloc_with_len(dest, src, -1);
 }
 
-int git_utf8_from_16_alloc_with_len(char **dest, const wchar_t *src, int src_len)
+int git3_utf8_from_16_alloc_with_len(char **dest, const wchar_t *src, int src_len)
 {
 	int utf8_size;
 
@@ -125,18 +125,18 @@ int git_utf8_from_16_alloc_with_len(char **dest, const wchar_t *src, int src_len
 		src, src_len, NULL, 0, NULL, NULL);
 
 	if (!utf8_size) {
-		git__set_errno();
+		git3__set_errno();
 		return -1;
 	}
 
-	*dest = git__malloc(utf8_size);
-	GIT_ERROR_CHECK_ALLOC(*dest);
+	*dest = git3__malloc(utf8_size);
+	GIT3_ERROR_CHECK_ALLOC(*dest);
 
 	utf8_size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS,
 		src, src_len, *dest, utf8_size, NULL, NULL);
 
 	if (utf8_size < 0) {
-		git__free(*dest);
+		git3__free(*dest);
 		*dest = NULL;
 	}
 

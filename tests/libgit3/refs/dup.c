@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "refs.h"
 
-static git_repository *g_repo;
+static git3_repository *g_repo;
 
 void test_refs_dup__initialize(void)
 {
@@ -15,28 +15,28 @@ void test_refs_dup__cleanup(void)
 
 void test_refs_dup__direct(void)
 {
-	git_reference *a, *b;
+	git3_reference *a, *b;
 
-	cl_git_pass(git_reference_lookup(&a, g_repo, "refs/heads/master"));
-	cl_git_pass(git_reference_dup(&b, a));
+	cl_git_pass(git3_reference_lookup(&a, g_repo, "refs/heads/master"));
+	cl_git_pass(git3_reference_dup(&b, a));
 
-	cl_assert(git_reference_cmp(a, b) == 0);
-	cl_assert(git_reference_owner(b) == g_repo);
+	cl_assert(git3_reference_cmp(a, b) == 0);
+	cl_assert(git3_reference_owner(b) == g_repo);
 
-	git_reference_free(b);
-	git_reference_free(a);
+	git3_reference_free(b);
+	git3_reference_free(a);
 }
 
 void test_refs_dup__symbolic(void)
 {
-	git_reference *a, *b;
+	git3_reference *a, *b;
 
-	cl_git_pass(git_reference_lookup(&a, g_repo, "HEAD"));
-	cl_git_pass(git_reference_dup(&b, a));
+	cl_git_pass(git3_reference_lookup(&a, g_repo, "HEAD"));
+	cl_git_pass(git3_reference_dup(&b, a));
 
-	cl_assert(git_reference_cmp(a, b) == 0);
-	cl_assert(git_reference_owner(b) == g_repo);
+	cl_assert(git3_reference_cmp(a, b) == 0);
+	cl_assert(git3_reference_owner(b) == g_repo);
 
-	git_reference_free(b);
-	git_reference_free(a);
+	git3_reference_free(b);
+	git3_reference_free(a);
 }

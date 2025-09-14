@@ -1,7 +1,7 @@
 /*
- * libgit2 "remote" example - shows how to modify remotes for a repo
+ * libgit3 "remote" example - shows how to modify remotes for a repo
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -19,7 +19,7 @@
  * documentation for that (try "git help remote") to understand what this
  * program is emulating.
  *
- * This demonstrates using the libgit2 APIs to modify remotes of a repository.
+ * This demonstrates using the libgit3 APIs to modify remotes of a repository.
  */
 
 enum subcmd {
@@ -38,17 +38,17 @@ struct remote_opts {
 	char **argv;
 };
 
-static int cmd_add(git_repository *repo, struct remote_opts *o);
-static int cmd_remove(git_repository *repo, struct remote_opts *o);
-static int cmd_rename(git_repository *repo, struct remote_opts *o);
-static int cmd_seturl(git_repository *repo, struct remote_opts *o);
-static int cmd_show(git_repository *repo, struct remote_opts *o);
+static int cmd_add(git3_repository *repo, struct remote_opts *o);
+static int cmd_remove(git3_repository *repo, struct remote_opts *o);
+static int cmd_rename(git3_repository *repo, struct remote_opts *o);
+static int cmd_seturl(git3_repository *repo, struct remote_opts *o);
+static int cmd_show(git3_repository *repo, struct remote_opts *o);
 
 static void parse_subcmd(
 	struct remote_opts *opt, int argc, char **argv);
 static void usage(const char *msg, const char *arg);
 
-int lg2_remote(git_repository *repo, int argc, char *argv[])
+int lg2_remote(git3_repository *repo, int argc, char *argv[])
 {
 	int retval = 0;
 	struct remote_opts opt = {0};
@@ -77,10 +77,10 @@ int lg2_remote(git_repository *repo, int argc, char *argv[])
 	return retval;
 }
 
-static int cmd_add(git_repository *repo, struct remote_opts *o)
+static int cmd_add(git3_repository *repo, struct remote_opts *o)
 {
 	char *name, *url;
-	git_remote *remote = {0};
+	git3_remote *remote = {0};
 
 	if (o->argc != 2)
 		usage("you need to specify a name and URL", NULL);
@@ -88,13 +88,13 @@ static int cmd_add(git_repository *repo, struct remote_opts *o)
 	name = o->argv[0];
 	url = o->argv[1];
 
-	check_lg2(git_remote_create(&remote, repo, name, url),
+	check_lg2(git3_remote_create(&remote, repo, name, url),
 			"could not create remote", NULL);
 
 	return 0;
 }
 
-static int cmd_remove(git_repository *repo, struct remote_opts *o)
+static int cmd_remove(git3_repository *repo, struct remote_opts *o)
 {
 	char *name;
 
@@ -103,17 +103,17 @@ static int cmd_remove(git_repository *repo, struct remote_opts *o)
 
 	name = o->argv[0];
 
-	check_lg2(git_remote_delete(repo, name),
+	check_lg2(git3_remote_delete(repo, name),
 			"could not delete remote", name);
 
 	return 0;
 }
 
-static int cmd_rename(git_repository *repo, struct remote_opts *o)
+static int cmd_rename(git3_repository *repo, struct remote_opts *o)
 {
 	int i, retval;
 	char *old, *new;
-	git_strarray problems = {0};
+	git3_strarray problems = {0};
 
 	if (o->argc != 2)
 		usage("you need to specify old and new remote name", NULL);
@@ -121,7 +121,7 @@ static int cmd_rename(git_repository *repo, struct remote_opts *o)
 	old = o->argv[0];
 	new = o->argv[1];
 
-	retval = git_remote_rename(&problems, repo, old, new);
+	retval = git3_remote_rename(&problems, repo, old, new);
 	if (!retval)
 		return 0;
 
@@ -129,12 +129,12 @@ static int cmd_rename(git_repository *repo, struct remote_opts *o)
 		puts(problems.strings[0]);
 	}
 
-	git_strarray_dispose(&problems);
+	git3_strarray_dispose(&problems);
 
 	return retval;
 }
 
-static int cmd_seturl(git_repository *repo, struct remote_opts *o)
+static int cmd_seturl(git3_repository *repo, struct remote_opts *o)
 {
 	int i, retval, push = 0;
 	char *name = NULL, *url = NULL;
@@ -157,22 +157,22 @@ static int cmd_seturl(git_repository *repo, struct remote_opts *o)
 		usage("you need to specify remote and the new URL", NULL);
 
 	if (push)
-		retval = git_remote_set_pushurl(repo, name, url);
+		retval = git3_remote_set_pushurl(repo, name, url);
 	else
-		retval = git_remote_set_url(repo, name, url);
+		retval = git3_remote_set_url(repo, name, url);
 
 	check_lg2(retval, "could not set URL", url);
 
 	return 0;
 }
 
-static int cmd_show(git_repository *repo, struct remote_opts *o)
+static int cmd_show(git3_repository *repo, struct remote_opts *o)
 {
 	int i;
 	const char *arg, *name, *fetch, *push;
 	int verbose = 0;
-	git_strarray remotes = {0};
-	git_remote *remote = {0};
+	git3_strarray remotes = {0};
+	git3_remote *remote = {0};
 
 	for (i = 0; i < o->argc; i++) {
 		arg = o->argv[i];
@@ -182,7 +182,7 @@ static int cmd_show(git_repository *repo, struct remote_opts *o)
 		}
 	}
 
-	check_lg2(git_remote_list(&remotes, repo),
+	check_lg2(git3_remote_list(&remotes, repo),
 		"could not retrieve remotes", NULL);
 
 	for (i = 0; i < (int) remotes.count; i++) {
@@ -192,22 +192,22 @@ static int cmd_show(git_repository *repo, struct remote_opts *o)
 			continue;
 		}
 
-		check_lg2(git_remote_lookup(&remote, repo, name),
+		check_lg2(git3_remote_lookup(&remote, repo, name),
 			"could not look up remote", name);
 
-		fetch = git_remote_url(remote);
+		fetch = git3_remote_url(remote);
 		if (fetch)
 			printf("%s\t%s (fetch)\n", name, fetch);
-		push = git_remote_pushurl(remote);
+		push = git3_remote_pushurl(remote);
 		/* use fetch URL if no distinct push URL has been set */
 		push = push ? push : fetch;
 		if (push)
 			printf("%s\t%s (push)\n", name, push);
 
-		git_remote_free(remote);
+		git3_remote_free(remote);
 	}
 
-	git_strarray_dispose(&remotes);
+	git3_strarray_dispose(&remotes);
 
 	return 0;
 }

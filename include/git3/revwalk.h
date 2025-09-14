@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_revwalk_h__
@@ -12,13 +12,13 @@
 #include "oid.h"
 
 /**
- * @file git2/revwalk.h
+ * @file git3/revwalk.h
  * @brief Traverse (walk) the commit graph (revision history)
- * @defgroup git_revwalk Traverse (walk) the commit graph (revision history)
+ * @defgroup git3_revwalk Traverse (walk) the commit graph (revision history)
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Flags to specify the sorting which a revwalk should perform.
@@ -28,29 +28,29 @@ typedef enum {
 	 * Sort the output with the same default method from `git`: reverse
 	 * chronological order. This is the default sorting for new walkers.
 	 */
-	GIT_SORT_NONE = 0,
+	GIT3_SORT_NONE = 0,
 
 	/**
 	 * Sort the repository contents in topological order (no parents before
 	 * all of its children are shown); this sorting mode can be combined
 	 * with time sorting to produce `git`'s `--date-order``.
 	 */
-	GIT_SORT_TOPOLOGICAL = 1 << 0,
+	GIT3_SORT_TOPOLOGICAL = 1 << 0,
 
 	/**
 	 * Sort the repository contents by commit time;
 	 * this sorting mode can be combined with
 	 * topological sorting.
 	 */
-	GIT_SORT_TIME = 1 << 1,
+	GIT3_SORT_TIME = 1 << 1,
 
 	/**
 	 * Iterate through the repository contents in reverse
 	 * order; this sorting mode can be combined with
 	 * any of the above.
 	 */
-	GIT_SORT_REVERSE = 1 << 2
-} git_sort_t;
+	GIT3_SORT_REVERSE = 1 << 2
+} git3_sort_t;
 
 /**
  * Allocate a new revision walker to iterate through a repo.
@@ -70,7 +70,7 @@ typedef enum {
  * @param repo the repo to walk through
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_new(git_revwalk **out, git_repository *repo);
+GIT3_EXTERN(int) git3_revwalk_new(git3_revwalk **out, git3_repository *repo);
 
 /**
  * Reset the revision walker for reuse.
@@ -86,7 +86,7 @@ GIT_EXTERN(int) git_revwalk_new(git_revwalk **out, git_repository *repo);
  * @param walker handle to reset.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_reset(git_revwalk *walker);
+GIT3_EXTERN(int) git3_revwalk_reset(git3_revwalk *walker);
 
 /**
  * Add a new root for the traversal
@@ -105,7 +105,7 @@ GIT_EXTERN(int) git_revwalk_reset(git_revwalk *walker);
  * @param id the oid of the commit to start from.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_push(git_revwalk *walk, const git_oid *id);
+GIT3_EXTERN(int) git3_revwalk_push(git3_revwalk *walk, const git3_oid *id);
 
 /**
  * Push matching references
@@ -123,7 +123,7 @@ GIT_EXTERN(int) git_revwalk_push(git_revwalk *walk, const git_oid *id);
  * @param glob the glob pattern references should match
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_push_glob(git_revwalk *walk, const char *glob);
+GIT3_EXTERN(int) git3_revwalk_push_glob(git3_revwalk *walk, const char *glob);
 
 /**
  * Push the repository's HEAD
@@ -131,7 +131,7 @@ GIT_EXTERN(int) git_revwalk_push_glob(git_revwalk *walk, const char *glob);
  * @param walk the walker being used for the traversal
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_push_head(git_revwalk *walk);
+GIT3_EXTERN(int) git3_revwalk_push_head(git3_revwalk *walk);
 
 /**
  * Mark a commit (and its ancestors) uninteresting for the output.
@@ -146,7 +146,7 @@ GIT_EXTERN(int) git_revwalk_push_head(git_revwalk *walk);
  * @param commit_id the oid of commit that will be ignored during the traversal
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id);
+GIT3_EXTERN(int) git3_revwalk_hide(git3_revwalk *walk, const git3_oid *commit_id);
 
 /**
  * Hide matching references.
@@ -165,7 +165,7 @@ GIT_EXTERN(int) git_revwalk_hide(git_revwalk *walk, const git_oid *commit_id);
  * @param glob the glob pattern references should match
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_hide_glob(git_revwalk *walk, const char *glob);
+GIT3_EXTERN(int) git3_revwalk_hide_glob(git3_revwalk *walk, const char *glob);
 
 /**
  * Hide the repository's HEAD
@@ -173,7 +173,7 @@ GIT_EXTERN(int) git_revwalk_hide_glob(git_revwalk *walk, const char *glob);
  * @param walk the walker being used for the traversal
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_hide_head(git_revwalk *walk);
+GIT3_EXTERN(int) git3_revwalk_hide_head(git3_revwalk *walk);
 
 /**
  * Push the OID pointed to by a reference
@@ -184,7 +184,7 @@ GIT_EXTERN(int) git_revwalk_hide_head(git_revwalk *walk);
  * @param refname the reference to push
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_push_ref(git_revwalk *walk, const char *refname);
+GIT3_EXTERN(int) git3_revwalk_push_ref(git3_revwalk *walk, const char *refname);
 
 /**
  * Hide the OID pointed to by a reference
@@ -195,7 +195,7 @@ GIT_EXTERN(int) git_revwalk_push_ref(git_revwalk *walk, const char *refname);
  * @param refname the reference to hide
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_hide_ref(git_revwalk *walk, const char *refname);
+GIT3_EXTERN(int) git3_revwalk_hide_ref(git3_revwalk *walk, const char *refname);
 
 /**
  * Get the next commit from the revision walk.
@@ -213,9 +213,9 @@ GIT_EXTERN(int) git_revwalk_hide_ref(git_revwalk *walk, const char *refname);
  * @param out Pointer where to store the oid of the next commit
  * @param walk the walker to pop the commit from.
  * @return 0 if the next commit was found;
- *	GIT_ITEROVER if there are no commits left to iterate
+ *	GIT3_ITEROVER if there are no commits left to iterate
  */
-GIT_EXTERN(int) git_revwalk_next(git_oid *out, git_revwalk *walk);
+GIT3_EXTERN(int) git3_revwalk_next(git3_oid *out, git3_revwalk *walk);
 
 /**
  * Change the sorting mode when iterating through the
@@ -224,17 +224,17 @@ GIT_EXTERN(int) git_revwalk_next(git_oid *out, git_revwalk *walk);
  * Changing the sorting mode resets the walker.
  *
  * @param walk the walker being used for the traversal.
- * @param sort_mode combination of GIT_SORT_XXX flags
+ * @param sort_mode combination of GIT3_SORT_XXX flags
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_sorting(git_revwalk *walk, unsigned int sort_mode);
+GIT3_EXTERN(int) git3_revwalk_sorting(git3_revwalk *walk, unsigned int sort_mode);
 
 /**
  * Push and hide the respective endpoints of the given range.
  *
  * The range should be of the form
  *   <commit>..<commit>
- * where each <commit> is in the form accepted by 'git_revparse_single'.
+ * where each <commit> is in the form accepted by 'git3_revparse_single'.
  * The left-hand commit will be hidden and the right-hand commit pushed.
  *
  * @param walk the walker being used for the traversal
@@ -242,7 +242,7 @@ GIT_EXTERN(int) git_revwalk_sorting(git_revwalk *walk, unsigned int sort_mode);
  * @return 0 or an error code
  *
  */
-GIT_EXTERN(int) git_revwalk_push_range(git_revwalk *walk, const char *range);
+GIT3_EXTERN(int) git3_revwalk_push_range(git3_revwalk *walk, const char *range);
 
 /**
  * Simplify the history by first-parent
@@ -252,7 +252,7 @@ GIT_EXTERN(int) git_revwalk_push_range(git_revwalk *walk, const char *range);
  * @param walk The revision walker.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_revwalk_simplify_first_parent(git_revwalk *walk);
+GIT3_EXTERN(int) git3_revwalk_simplify_first_parent(git3_revwalk *walk);
 
 
 /**
@@ -260,7 +260,7 @@ GIT_EXTERN(int) git_revwalk_simplify_first_parent(git_revwalk *walk);
  *
  * @param walk traversal handle to close. If NULL nothing occurs.
  */
-GIT_EXTERN(void) git_revwalk_free(git_revwalk *walk);
+GIT3_EXTERN(void) git3_revwalk_free(git3_revwalk *walk);
 
 /**
  * Return the repository on which this walker
@@ -269,7 +269,7 @@ GIT_EXTERN(void) git_revwalk_free(git_revwalk *walk);
  * @param walk the revision walker
  * @return the repository being walked
  */
-GIT_EXTERN(git_repository *) git_revwalk_repository(git_revwalk *walk);
+GIT3_EXTERN(git3_repository *) git3_revwalk_repository(git3_revwalk *walk);
 
 /**
  * This is a callback function that user can provide to hide a
@@ -280,8 +280,8 @@ GIT_EXTERN(git_repository *) git_revwalk_repository(git_revwalk *walk);
  * @param payload User-specified pointer to data to be passed as data payload
  * @return non-zero to hide the commmit and it parent.
  */
-typedef int GIT_CALLBACK(git_revwalk_hide_cb)(
-	const git_oid *commit_id,
+typedef int GIT3_CALLBACK(git3_revwalk_hide_cb)(
+	const git3_oid *commit_id,
 	void *payload);
 
 /**
@@ -292,12 +292,12 @@ typedef int GIT_CALLBACK(git_revwalk_hide_cb)(
  * @param payload  data payload to be passed to callback function
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_revwalk_add_hide_cb(
-	git_revwalk *walk,
-	git_revwalk_hide_cb hide_cb,
+GIT3_EXTERN(int) git3_revwalk_add_hide_cb(
+	git3_revwalk *walk,
+	git3_revwalk_hide_cb hide_cb,
 	void *payload);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

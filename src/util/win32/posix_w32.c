@@ -1,11 +1,11 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include "../posix.h"
 #include "../futils.h"
@@ -40,11 +40,11 @@
  */
 #define WIN32_MODE_MASK (_S_IREAD | _S_IWRITE)
 
-unsigned long git_win32__createfile_sharemode =
+unsigned long git3_win32__createfile_sharemode =
  FILE_SHARE_READ | FILE_SHARE_WRITE;
-int git_win32__retries = 10;
+int git3_win32__retries = 10;
 
-GIT_INLINE(void) set_errno(void)
+GIT3_INLINE(void) set_errno(void)
 {
 	switch (GetLastError()) {
 	case ERROR_FILE_NOT_FOUND:
@@ -157,7 +157,7 @@ GIT_INLINE(void) set_errno(void)
 	}
 }
 
-GIT_INLINE(bool) last_error_retryable(void)
+GIT3_INLINE(bool) last_error_retryable(void)
 {
 	int os_error = GetLastError();
 
@@ -168,11 +168,11 @@ GIT_INLINE(bool) last_error_retryable(void)
 #define do_with_retries(fn, remediation) \
 	do {                                                             \
 		int __retry, __ret;                                          \
-		for (__retry = git_win32__retries; __retry; __retry--) {     \
-			if ((__ret = (fn)) != GIT_RETRY)                         \
+		for (__retry = git3_win32__retries; __retry; __retry--) {     \
+			if ((__ret = (fn)) != GIT3_RETRY)                         \
 				return __ret;                                        \
 			if (__retry > 1 && (__ret = (remediation)) != 0) {       \
-				if (__ret == GIT_RETRY)                              \
+				if (__ret == GIT3_RETRY)                              \
 					continue;                                        \
 				return __ret;                                        \
 			}                                                        \
@@ -194,7 +194,7 @@ static int ensure_writable(wchar_t *path)
 	if (!SetFileAttributesW(path, (attrs & ~FILE_ATTRIBUTE_READONLY)))
 		goto on_error;
 
-	return GIT_RETRY;
+	return GIT3_RETRY;
 
 on_error:
 	set_errno();
@@ -204,7 +204,7 @@ on_error:
 /**
  * Truncate or extend file.
  *
- * We now take a "git_off_t" rather than "long" because
+ * We now take a "git3_off_t" rather than "long" because
  * files may be longer than 2Gb.
  */
 int p_ftruncate(int fd, off64_t size)
@@ -228,11 +228,11 @@ int p_ftruncate(int fd, off64_t size)
 
 int p_mkdir(const char *path, mode_t mode)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 
-	GIT_UNUSED(mode);
+	GIT3_UNUSED(mode);
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	return _wmkdir(buf);
@@ -240,13 +240,13 @@ int p_mkdir(const char *path, mode_t mode)
 
 int p_link(const char *old, const char *new)
 {
-	GIT_UNUSED(old);
-	GIT_UNUSED(new);
+	GIT3_UNUSED(old);
+	GIT3_UNUSED(new);
 	errno = ENOSYS;
 	return -1;
 }
 
-GIT_INLINE(int) unlink_once(const wchar_t *path)
+GIT3_INLINE(int) unlink_once(const wchar_t *path)
 {
 	DWORD error;
 
@@ -268,7 +268,7 @@ out:
 	SetLastError(error);
 
 	if (last_error_retryable())
-		return GIT_RETRY;
+		return GIT3_RETRY;
 
 	set_errno();
 	return -1;
@@ -276,9 +276,9 @@ out:
 
 int p_unlink(const char *path)
 {
-	git_win32_path wpath;
+	git3_win32_path wpath;
 
-	if (git_win32_path_from_utf8(wpath, path) < 0)
+	if (git3_win32_path_from_utf8(wpath, path) < 0)
 		return -1;
 
 	do_with_retries(unlink_once(wpath), ensure_writable(wpath));
@@ -322,7 +322,7 @@ static int lstat_w(
 		if (!buf)
 			return 0;
 
-		return git_win32__file_attribute_to_stat(buf, &fdata, path);
+		return git3_win32__file_attribute_to_stat(buf, &fdata, path);
 	}
 
 	switch (GetLastError()) {
@@ -366,13 +366,13 @@ static int lstat_w(
 
 static int do_lstat(const char *path, struct stat *buf, bool posixly_correct)
 {
-	git_win32_path path_w;
+	git3_win32_path path_w;
 	int len;
 
-	if ((len = git_win32_path_from_utf8(path_w, path)) < 0)
+	if ((len = git3_win32_path_from_utf8(path_w, path)) < 0)
 		return -1;
 
-	git_win32_path_trim_end(path_w, len);
+	git3_win32_path_trim_end(path_w, len);
 
 	return lstat_w(path_w, buf, posixly_correct);
 }
@@ -389,8 +389,8 @@ int p_lstat_posixly(const char *filename, struct stat *buf)
 
 int p_readlink(const char *path, char *buf, size_t bufsiz)
 {
-	git_win32_path path_w, target_w;
-	git_win32_utf8_path target;
+	git3_win32_path path_w, target_w;
+	git3_win32_utf8_path target;
 	int len;
 
 	/* readlink(2) does not NULL-terminate the string written
@@ -400,9 +400,9 @@ int p_readlink(const char *path, char *buf, size_t bufsiz)
 	 * could occur in the middle of the encoding of a code point,
 	 * we need to buffer the result on the stack. */
 
-	if (git_win32_path_from_utf8(path_w, path) < 0 ||
-		git_win32_path_readlink_w(target_w, path_w) < 0 ||
-		(len = git_win32_path_to_utf8(target, target_w)) < 0)
+	if (git3_win32_path_from_utf8(path_w, path) < 0 ||
+		git3_win32_path_readlink_w(target_w, path_w) < 0 ||
+		(len = git3_win32_path_to_utf8(target, target_w)) < 0)
 		return -1;
 
 	bufsiz = min((size_t)len, bufsiz);
@@ -413,38 +413,38 @@ int p_readlink(const char *path, char *buf, size_t bufsiz)
 
 static bool target_is_dir(const char *target, const char *path)
 {
-	git_str resolved = GIT_STR_INIT;
-	git_win32_path resolved_w;
+	git3_str resolved = GIT3_STR_INIT;
+	git3_win32_path resolved_w;
 	bool isdir = true;
 
-	if (git_fs_path_is_absolute(target))
-		git_win32_path_from_utf8(resolved_w, target);
-	else if (git_fs_path_dirname_r(&resolved, path) < 0 ||
-		 git_fs_path_apply_relative(&resolved, target) < 0 ||
-		 git_win32_path_from_utf8(resolved_w, resolved.ptr) < 0)
+	if (git3_fs_path_is_absolute(target))
+		git3_win32_path_from_utf8(resolved_w, target);
+	else if (git3_fs_path_dirname_r(&resolved, path) < 0 ||
+		 git3_fs_path_apply_relative(&resolved, target) < 0 ||
+		 git3_win32_path_from_utf8(resolved_w, resolved.ptr) < 0)
 		goto out;
 
 	isdir = GetFileAttributesW(resolved_w) & FILE_ATTRIBUTE_DIRECTORY;
 
 out:
-	git_str_dispose(&resolved);
+	git3_str_dispose(&resolved);
 	return isdir;
 }
 
 int p_symlink(const char *target, const char *path)
 {
-	git_win32_path target_w, path_w;
+	git3_win32_path target_w, path_w;
 	DWORD dwFlags;
 
 	/*
 	 * Convert both target and path to Windows-style paths. Note that we do
-	 * not want to use `git_win32_path_from_utf8` for converting the target,
+	 * not want to use `git3_win32_path_from_utf8` for converting the target,
 	 * as that function will automatically pre-pend the current working
 	 * directory in case the path is not absolute. As Git will instead use
 	 * relative symlinks, this is not something we want.
 	 */
-	if (git_win32_path_from_utf8(path_w, path) < 0 ||
-	    git_win32_path_relative_from_utf8(target_w, target) < 0)
+	if (git3_win32_path_from_utf8(path_w, path) < 0 ||
+	    git3_win32_path_relative_from_utf8(target_w, target) < 0)
 		return -1;
 
 	dwFlags = SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
@@ -466,7 +466,7 @@ struct open_opts {
 	int osf_flags;
 };
 
-GIT_INLINE(void) open_opts_from_posix(struct open_opts *opts, int flags, mode_t mode)
+GIT3_INLINE(void) open_opts_from_posix(struct open_opts *opts, int flags, mode_t mode)
 {
 	memset(opts, 0, sizeof(struct open_opts));
 
@@ -482,7 +482,7 @@ GIT_INLINE(void) open_opts_from_posix(struct open_opts *opts, int flags, mode_t 
 		break;
 	}
 
-	opts->sharing = (DWORD)git_win32__createfile_sharemode;
+	opts->sharing = (DWORD)git3_win32__createfile_sharemode;
 
 	switch (flags & (O_CREAT | O_TRUNC | O_EXCL)) {
 	case O_CREAT | O_EXCL:
@@ -512,7 +512,7 @@ GIT_INLINE(void) open_opts_from_posix(struct open_opts *opts, int flags, mode_t 
 	opts->security.bInheritHandle = 0;
 }
 
-GIT_INLINE(int) open_once(
+GIT3_INLINE(int) open_once(
 	const wchar_t *path,
 	struct open_opts *opts)
 {
@@ -523,7 +523,7 @@ GIT_INLINE(int) open_once(
 
 	if (handle == INVALID_HANDLE_VALUE) {
 		if (last_error_retryable())
-			return GIT_RETRY;
+			return GIT3_RETRY;
 
 		set_errno();
 		return -1;
@@ -537,18 +537,18 @@ GIT_INLINE(int) open_once(
 
 int p_open(const char *path, int flags, ...)
 {
-	git_win32_path wpath;
+	git3_win32_path wpath;
 	mode_t mode = 0;
 	struct open_opts opts = {0};
 
-	#ifdef GIT_DEBUG_STRICT_OPEN
+	#ifdef GIT3_DEBUG_STRICT_OPEN
 	if (strstr(path, "//") != NULL) {
 		errno = EACCES;
 		return -1;
 	}
 	#endif
 
-	if (git_win32_path_from_utf8(wpath, path) < 0)
+	if (git3_win32_path_from_utf8(wpath, path) < 0)
 		return -1;
 
 	if (flags & O_CREAT) {
@@ -573,12 +573,12 @@ int p_creat(const char *path, mode_t mode)
 
 int p_utimes(const char *path, const struct p_timeval times[2])
 {
-	git_win32_path wpath;
+	git3_win32_path wpath;
 	int fd, error;
 	DWORD attrs_orig, attrs_new = 0;
 	struct open_opts opts = { 0 };
 
-	if (git_win32_path_from_utf8(wpath, path) < 0)
+	if (git3_win32_path_from_utf8(wpath, path) < 0)
 		return -1;
 
 	attrs_orig = GetFileAttributesW(wpath);
@@ -587,7 +587,7 @@ int p_utimes(const char *path, const struct p_timeval times[2])
 		attrs_new = attrs_orig & ~FILE_ATTRIBUTE_READONLY;
 
 		if (!SetFileAttributesW(wpath, attrs_new)) {
-			git_error_set(GIT_ERROR_OS, "failed to set attributes");
+			git3_error_set(GIT3_ERROR_OS, "failed to set attributes");
 			return -1;
 		}
 	}
@@ -625,8 +625,8 @@ int p_futimes(int fd, const struct p_timeval times[2])
 		SystemTimeToFileTime(&st, &mtime);
 	}
 	else {
-		git_win32__timeval_to_filetime(&atime, times[0]);
-		git_win32__timeval_to_filetime(&mtime, times[1]);
+		git3_win32__timeval_to_filetime(&atime, times[0]);
+		git3_win32__timeval_to_filetime(&mtime, times[1]);
 	}
 
 	if ((handle = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE)
@@ -640,16 +640,16 @@ int p_futimes(int fd, const struct p_timeval times[2])
 
 int p_getcwd(char *buffer_out, size_t size)
 {
-	git_win32_path buf;
-	wchar_t *cwd = _wgetcwd(buf, GIT_WIN_PATH_UTF16);
+	git3_win32_path buf;
+	wchar_t *cwd = _wgetcwd(buf, GIT3_WIN_PATH_UTF16);
 
 	if (!cwd)
 		return -1;
 
-	git_win32_path_remove_namespace(cwd, wcslen(cwd));
+	git3_win32_path_remove_namespace(cwd, wcslen(cwd));
 
 	/* Convert the working directory back to UTF-8 */
-	if (git_utf8_from_16(buffer_out, size, cwd) < 0) {
+	if (git3_utf8_from_16(buffer_out, size, cwd) < 0) {
 		DWORD code = GetLastError();
 
 		if (code == ERROR_INSUFFICIENT_BUFFER)
@@ -660,12 +660,12 @@ int p_getcwd(char *buffer_out, size_t size)
 		return -1;
 	}
 
-	git_fs_path_mkposix(buffer_out);
+	git3_fs_path_mkposix(buffer_out);
 	return 0;
 }
 
 static int getfinalpath_w(
-	git_win32_path dest,
+	git3_win32_path dest,
 	const wchar_t *path)
 {
 	HANDLE hFile;
@@ -681,19 +681,19 @@ static int getfinalpath_w(
 		return -1;
 
 	/* Call GetFinalPathNameByHandle */
-	dwChars = GetFinalPathNameByHandleW(hFile, dest, GIT_WIN_PATH_UTF16, FILE_NAME_NORMALIZED);
+	dwChars = GetFinalPathNameByHandleW(hFile, dest, GIT3_WIN_PATH_UTF16, FILE_NAME_NORMALIZED);
 	CloseHandle(hFile);
 
-	if (!dwChars || dwChars >= GIT_WIN_PATH_UTF16)
+	if (!dwChars || dwChars >= GIT3_WIN_PATH_UTF16)
 		return -1;
 
 	/* The path may be delivered to us with a namespace prefix; remove */
-	return (int)git_win32_path_remove_namespace(dest, dwChars);
+	return (int)git3_win32_path_remove_namespace(dest, dwChars);
 }
 
-static int follow_and_lstat_link(git_win32_path path, struct stat *buf)
+static int follow_and_lstat_link(git3_win32_path path, struct stat *buf)
 {
-	git_win32_path target_w;
+	git3_win32_path target_w;
 
 	if (getfinalpath_w(target_w, path) < 0)
 		return -1;
@@ -713,16 +713,16 @@ int p_fstat(int fd, struct stat *buf)
 		return -1;
 	}
 
-	git_win32__file_information_to_stat(buf, &fhInfo);
+	git3_win32__file_information_to_stat(buf, &fhInfo);
 	return 0;
 }
 
 int p_stat(const char *path, struct stat *buf)
 {
-	git_win32_path path_w;
+	git3_win32_path path_w;
 	int len;
 
-	if ((len = git_win32_path_from_utf8(path_w, path)) < 0 ||
+	if ((len = git3_win32_path_from_utf8(path_w, path)) < 0 ||
 		lstat_w(path_w, buf, false) < 0)
 		return -1;
 
@@ -736,9 +736,9 @@ int p_stat(const char *path, struct stat *buf)
 
 int p_chdir(const char *path)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	return _wchdir(buf);
@@ -746,9 +746,9 @@ int p_chdir(const char *path)
 
 int p_chmod(const char *path, mode_t mode)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	return _wchmod(buf, mode);
@@ -756,10 +756,10 @@ int p_chmod(const char *path, mode_t mode)
 
 int p_rmdir(const char *path)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 	int error;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	error = _wrmdir(buf);
@@ -787,10 +787,10 @@ int p_rmdir(const char *path)
 
 char *p_realpath(const char *orig_path, char *buffer)
 {
-	git_win32_path orig_path_w, buffer_w;
+	git3_win32_path orig_path_w, buffer_w;
 	DWORD long_len;
 
-	if (git_win32_path_from_utf8(orig_path_w, orig_path) < 0)
+	if (git3_win32_path_from_utf8(orig_path_w, orig_path) < 0)
 		return NULL;
 
 	/*
@@ -801,7 +801,7 @@ char *p_realpath(const char *orig_path, char *buffer)
 	 * is used to resolve the path -- which is a concurrency issue because the current
 	 * directory is a process-wide variable.
 	 */
-	if (!GetFullPathNameW(orig_path_w, GIT_WIN_PATH_UTF16, buffer_w, NULL)) {
+	if (!GetFullPathNameW(orig_path_w, GIT3_WIN_PATH_UTF16, buffer_w, NULL)) {
 		if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
 			errno = ENAMETOOLONG;
 		else
@@ -814,7 +814,7 @@ char *p_realpath(const char *orig_path, char *buffer)
 	 * Then, the path is canonicalized. eg, on macOS,
 	 * "/TMP" -> "/private/tmp". For this, we need GetLongPathName.
 	 */
-	if ((long_len = GetLongPathNameW(buffer_w, buffer_w, GIT_WIN_PATH_UTF16)) == 0) {
+	if ((long_len = GetLongPathNameW(buffer_w, buffer_w, GIT3_WIN_PATH_UTF16)) == 0) {
 		DWORD error = GetLastError();
 
 		if (error == ERROR_FILE_NOT_FOUND ||
@@ -828,23 +828,23 @@ char *p_realpath(const char *orig_path, char *buffer)
 		return NULL;
 	}
 
-	if (long_len > GIT_WIN_PATH_UTF16) {
+	if (long_len > GIT3_WIN_PATH_UTF16) {
 		errno = ENAMETOOLONG;
 		return NULL;
 	}
 
-	if (!buffer && !(buffer = git__malloc(GIT_WIN_PATH_UTF8))) {
+	if (!buffer && !(buffer = git3__malloc(GIT3_WIN_PATH_UTF8))) {
 		errno = ENOMEM;
 		return NULL;
 	}
 
 	/* Convert the path to UTF-8. If the caller provided a buffer, then it
-	 * is assumed to be GIT_WIN_PATH_UTF8 characters in size. If it isn't,
+	 * is assumed to be GIT3_WIN_PATH_UTF8 characters in size. If it isn't,
 	 * then we may overflow. */
-	if (git_win32_path_to_utf8(buffer, buffer_w) < 0)
+	if (git3_win32_path_to_utf8(buffer, buffer_w) < 0)
 		return NULL;
 
-	git_fs_path_mkposix(buffer);
+	git3_fs_path_mkposix(buffer);
 	return buffer;
 }
 
@@ -885,21 +885,21 @@ int p_snprintf(char *buffer, size_t count, const char *format, ...)
 
 int p_access(const char *path, mode_t mode)
 {
-	git_win32_path buf;
+	git3_win32_path buf;
 
-	if (git_win32_path_from_utf8(buf, path) < 0)
+	if (git3_win32_path_from_utf8(buf, path) < 0)
 		return -1;
 
 	return _waccess(buf, mode & WIN32_MODE_MASK);
 }
 
-GIT_INLINE(int) rename_once(const wchar_t *from, const wchar_t *to)
+GIT3_INLINE(int) rename_once(const wchar_t *from, const wchar_t *to)
 {
 	if (MoveFileExW(from, to, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED))
 		return 0;
 
 	if (last_error_retryable())
-		return GIT_RETRY;
+		return GIT3_RETRY;
 
 	set_errno();
 	return -1;
@@ -907,27 +907,27 @@ GIT_INLINE(int) rename_once(const wchar_t *from, const wchar_t *to)
 
 int p_rename(const char *from, const char *to)
 {
-	git_win32_path wfrom, wto;
+	git3_win32_path wfrom, wto;
 
-	if (git_win32_path_from_utf8(wfrom, from) < 0 ||
-		git_win32_path_from_utf8(wto, to) < 0)
+	if (git3_win32_path_from_utf8(wfrom, from) < 0 ||
+		git3_win32_path_from_utf8(wto, to) < 0)
 		return -1;
 
 	do_with_retries(rename_once(wfrom, wto), ensure_writable(wto));
 }
 
-int p_recv(GIT_SOCKET socket, void *buffer, size_t length, int flags)
+int p_recv(GIT3_SOCKET socket, void *buffer, size_t length, int flags)
 {
 	if ((size_t)((int)length) != length)
-		return -1; /* git_error_set will be done by caller */
+		return -1; /* git3_error_set will be done by caller */
 
 	return recv(socket, buffer, (int)length, flags);
 }
 
-int p_send(GIT_SOCKET socket, const void *buffer, size_t length, int flags)
+int p_send(GIT3_SOCKET socket, const void *buffer, size_t length, int flags)
 {
 	if ((size_t)((int)length) != length)
-		return -1; /* git_error_set will be done by caller */
+		return -1; /* git3_error_set will be done by caller */
 
 	return send(socket, buffer, (int)length, flags);
 }
@@ -1008,7 +1008,7 @@ ssize_t p_pread(int fd, void *data, size_t size, off64_t offset)
 	off64_t final_offset = 0;
 
 	/* Fail if the final offset would have overflowed to match POSIX semantics. */
-	if (!git__is_ssizet(size) || git__add_int64_overflow(&final_offset, offset, (int64_t)size)) {
+	if (!git3__is_ssizet(size) || git3__add_int64_overflow(&final_offset, offset, (int64_t)size)) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -1043,7 +1043,7 @@ ssize_t p_pwrite(int fd, const void *data, size_t size, off64_t offset)
 	off64_t final_offset = 0;
 
 	/* Fail if the final offset would have overflowed to match POSIX semantics. */
-	if (!git__is_ssizet(size) || git__add_int64_overflow(&final_offset, offset, (int64_t)size)) {
+	if (!git3__is_ssizet(size) || git3__add_int64_overflow(&final_offset, offset, (int64_t)size)) {
 		errno = EINVAL;
 		return -1;
 	}

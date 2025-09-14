@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,7 +12,7 @@
 /* In elements, not bytes */
 #define MIN_ALLOCSIZE	8
 
-GIT_INLINE(size_t) compute_new_size(git_vector *v)
+GIT3_INLINE(size_t) compute_new_size(git3_vector *v)
 {
 	size_t new_size = v->_alloc_size;
 
@@ -28,15 +28,15 @@ GIT_INLINE(size_t) compute_new_size(git_vector *v)
 	return new_size;
 }
 
-GIT_INLINE(int) resize_vector(git_vector *v, size_t new_size)
+GIT3_INLINE(int) resize_vector(git3_vector *v, size_t new_size)
 {
 	void *new_contents;
 
 	if (new_size == 0)
 		return 0;
 
-	new_contents = git__reallocarray(v->contents, new_size, sizeof(void *));
-	GIT_ERROR_CHECK_ALLOC(new_contents);
+	new_contents = git3__reallocarray(v->contents, new_size, sizeof(void *));
+	GIT3_ERROR_CHECK_ALLOC(new_contents);
 
 	v->_alloc_size = new_size;
 	v->contents = new_contents;
@@ -44,17 +44,17 @@ GIT_INLINE(int) resize_vector(git_vector *v, size_t new_size)
 	return 0;
 }
 
-int git_vector_size_hint(git_vector *v, size_t size_hint)
+int git3_vector_size_hint(git3_vector *v, size_t size_hint)
 {
 	if (v->_alloc_size >= size_hint)
 		return 0;
 	return resize_vector(v, size_hint);
 }
 
-int git_vector_dup(git_vector *v, const git_vector *src, git_vector_cmp cmp)
+int git3_vector_dup(git3_vector *v, const git3_vector *src, git3_vector_cmp cmp)
 {
-	GIT_ASSERT_ARG(v);
-	GIT_ASSERT_ARG(src);
+	GIT3_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(src);
 
 	v->_alloc_size = 0;
 	v->contents = NULL;
@@ -62,13 +62,13 @@ int git_vector_dup(git_vector *v, const git_vector *src, git_vector_cmp cmp)
 	v->length = src->length;
 	v->flags  = src->flags;
 	if (cmp != src->_cmp)
-		git_vector_set_sorted(v, 0);
+		git3_vector_set_sorted(v, 0);
 
 	if (src->length) {
 		size_t bytes;
-		GIT_ERROR_CHECK_ALLOC_MULTIPLY(&bytes, src->length, sizeof(void *));
-		v->contents = git__malloc(bytes);
-		GIT_ERROR_CHECK_ALLOC(v->contents);
+		GIT3_ERROR_CHECK_ALLOC_MULTIPLY(&bytes, src->length, sizeof(void *));
+		v->contents = git3__malloc(bytes);
+		GIT3_ERROR_CHECK_ALLOC(v->contents);
 		v->_alloc_size = src->length;
 		memcpy(v->contents, src->contents, bytes);
 	}
@@ -76,19 +76,19 @@ int git_vector_dup(git_vector *v, const git_vector *src, git_vector_cmp cmp)
 	return 0;
 }
 
-void git_vector_dispose(git_vector *v)
+void git3_vector_dispose(git3_vector *v)
 {
 	if (!v)
 		return;
 
-	git__free(v->contents);
+	git3__free(v->contents);
 	v->contents = NULL;
 
 	v->length = 0;
 	v->_alloc_size = 0;
 }
 
-void git_vector_dispose_deep(git_vector *v)
+void git3_vector_dispose_deep(git3_vector *v)
 {
 	size_t i;
 
@@ -96,27 +96,27 @@ void git_vector_dispose_deep(git_vector *v)
 		return;
 
 	for (i = 0; i < v->length; ++i) {
-		git__free(v->contents[i]);
+		git3__free(v->contents[i]);
 		v->contents[i] = NULL;
 	}
 
-	git_vector_dispose(v);
+	git3_vector_dispose(v);
 }
 
-int git_vector_init(git_vector *v, size_t initial_size, git_vector_cmp cmp)
+int git3_vector_init(git3_vector *v, size_t initial_size, git3_vector_cmp cmp)
 {
-	GIT_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(v);
 
 	v->_alloc_size = 0;
 	v->_cmp = cmp;
 	v->length = 0;
-	v->flags = GIT_VECTOR_SORTED;
+	v->flags = GIT3_VECTOR_SORTED;
 	v->contents = NULL;
 
 	return resize_vector(v, max(initial_size, MIN_ALLOCSIZE));
 }
 
-void **git_vector_detach(size_t *size, size_t *asize, git_vector *v)
+void **git3_vector_detach(size_t *size, size_t *asize, git3_vector *v)
 {
 	void **data = v->contents;
 
@@ -132,9 +132,9 @@ void **git_vector_detach(size_t *size, size_t *asize, git_vector *v)
 	return data;
 }
 
-int git_vector_insert(git_vector *v, void *element)
+int git3_vector_insert(git3_vector *v, void *element)
 {
-	GIT_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(v);
 
 	if (v->length >= v->_alloc_size &&
 		resize_vector(v, compute_new_size(v)) < 0)
@@ -142,22 +142,22 @@ int git_vector_insert(git_vector *v, void *element)
 
 	v->contents[v->length++] = element;
 
-	git_vector_set_sorted(v, v->length <= 1);
+	git3_vector_set_sorted(v, v->length <= 1);
 
 	return 0;
 }
 
-int git_vector_insert_sorted(
-	git_vector *v, void *element, int (*on_dup)(void **old, void *new))
+int git3_vector_insert_sorted(
+	git3_vector *v, void *element, int (*on_dup)(void **old, void *new))
 {
 	int result;
 	size_t pos;
 
-	GIT_ASSERT_ARG(v);
-	GIT_ASSERT(v->_cmp);
+	GIT3_ASSERT_ARG(v);
+	GIT3_ASSERT(v->_cmp);
 
-	if (!git_vector_is_sorted(v))
-		git_vector_sort(v);
+	if (!git3_vector_is_sorted(v))
+		git3_vector_sort(v);
 
 	if (v->length >= v->_alloc_size &&
 		resize_vector(v, compute_new_size(v)) < 0)
@@ -167,7 +167,7 @@ int git_vector_insert_sorted(
 	 * invoke it.  If it returns non-zero, then cancel insert, otherwise
 	 * proceed with normal insert.
 	 */
-	if (!git__bsearch(v->contents, v->length, element, v->_cmp, &pos) &&
+	if (!git3__bsearch(v->contents, v->length, element, v->_cmp, &pos) &&
 		on_dup && (result = on_dup(&v->contents[pos], element)) < 0)
 		return result;
 
@@ -182,43 +182,43 @@ int git_vector_insert_sorted(
 	return 0;
 }
 
-void git_vector_sort(git_vector *v)
+void git3_vector_sort(git3_vector *v)
 {
-	if (git_vector_is_sorted(v) || !v->_cmp)
+	if (git3_vector_is_sorted(v) || !v->_cmp)
 		return;
 
 	if (v->length > 1)
-		git__tsort(v->contents, v->length, v->_cmp);
-	git_vector_set_sorted(v, 1);
+		git3__tsort(v->contents, v->length, v->_cmp);
+	git3_vector_set_sorted(v, 1);
 }
 
-int git_vector_bsearch2(
+int git3_vector_bsearch2(
 	size_t *at_pos,
-	git_vector *v,
-	git_vector_cmp key_lookup,
+	git3_vector *v,
+	git3_vector_cmp key_lookup,
 	const void *key)
 {
-	GIT_ASSERT_ARG(v);
-	GIT_ASSERT_ARG(key);
-	GIT_ASSERT(key_lookup);
+	GIT3_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(key);
+	GIT3_ASSERT(key_lookup);
 
 	/* need comparison function to sort the vector */
 	if (!v->_cmp)
 		return -1;
 
-	git_vector_sort(v);
+	git3_vector_sort(v);
 
-	return git__bsearch(v->contents, v->length, key, key_lookup, at_pos);
+	return git3__bsearch(v->contents, v->length, key, key_lookup, at_pos);
 }
 
-int git_vector_search2(
-	size_t *at_pos, const git_vector *v, git_vector_cmp key_lookup, const void *key)
+int git3_vector_search2(
+	size_t *at_pos, const git3_vector *v, git3_vector_cmp key_lookup, const void *key)
 {
 	size_t i;
 
-	GIT_ASSERT_ARG(v);
-	GIT_ASSERT_ARG(key);
-	GIT_ASSERT(key_lookup);
+	GIT3_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(key);
+	GIT3_ASSERT(key_lookup);
 
 	for (i = 0; i < v->length; ++i) {
 		if (key_lookup(key, v->contents[i]) == 0) {
@@ -229,7 +229,7 @@ int git_vector_search2(
 		}
 	}
 
-	return GIT_ENOTFOUND;
+	return GIT3_ENOTFOUND;
 }
 
 static int strict_comparison(const void *a, const void *b)
@@ -237,19 +237,19 @@ static int strict_comparison(const void *a, const void *b)
 	return (a == b) ? 0 : -1;
 }
 
-int git_vector_search(size_t *at_pos, const git_vector *v, const void *entry)
+int git3_vector_search(size_t *at_pos, const git3_vector *v, const void *entry)
 {
-	return git_vector_search2(at_pos, v, v->_cmp ? v->_cmp : strict_comparison, entry);
+	return git3_vector_search2(at_pos, v, v->_cmp ? v->_cmp : strict_comparison, entry);
 }
 
-int git_vector_remove(git_vector *v, size_t idx)
+int git3_vector_remove(git3_vector *v, size_t idx)
 {
 	size_t shift_count;
 
-	GIT_ASSERT_ARG(v);
+	GIT3_ASSERT_ARG(v);
 
 	if (idx >= v->length)
-		return GIT_ENOTFOUND;
+		return GIT3_ENOTFOUND;
 
 	shift_count = v->length - idx - 1;
 
@@ -261,27 +261,27 @@ int git_vector_remove(git_vector *v, size_t idx)
 	return 0;
 }
 
-void git_vector_pop(git_vector *v)
+void git3_vector_pop(git3_vector *v)
 {
 	if (v->length > 0)
 		v->length--;
 }
 
-void git_vector_uniq(git_vector *v, void  (*git_free_cb)(void *))
+void git3_vector_uniq(git3_vector *v, void  (*git3_free_cb)(void *))
 {
-	git_vector_cmp cmp;
+	git3_vector_cmp cmp;
 	size_t i, j;
 
 	if (v->length <= 1)
 		return;
 
-	git_vector_sort(v);
+	git3_vector_sort(v);
 	cmp = v->_cmp ? v->_cmp : strict_comparison;
 
 	for (i = 0, j = 1 ; j < v->length; ++j)
 		if (!cmp(v->contents[i], v->contents[j])) {
-			if (git_free_cb)
-				git_free_cb(v->contents[i]);
+			if (git3_free_cb)
+				git3_free_cb(v->contents[i]);
 
 			v->contents[i] = v->contents[j];
 		} else
@@ -290,9 +290,9 @@ void git_vector_uniq(git_vector *v, void  (*git_free_cb)(void *))
 	v->length -= j - i - 1;
 }
 
-void git_vector_remove_matching(
-	git_vector *v,
-	int (*match)(const git_vector *v, size_t idx, void *payload),
+void git3_vector_remove_matching(
+	git3_vector *v,
+	int (*match)(const git3_vector *v, size_t idx, void *payload),
 	void *payload)
 {
 	size_t i, j;
@@ -307,15 +307,15 @@ void git_vector_remove_matching(
 	v->length = i;
 }
 
-void git_vector_clear(git_vector *v)
+void git3_vector_clear(git3_vector *v)
 {
 	v->length = 0;
-	git_vector_set_sorted(v, 1);
+	git3_vector_set_sorted(v, 1);
 }
 
-void git_vector_swap(git_vector *a, git_vector *b)
+void git3_vector_swap(git3_vector *a, git3_vector *b)
 {
-	git_vector t;
+	git3_vector t;
 
 	if (a != b) {
 		memcpy(&t, a, sizeof(t));
@@ -324,7 +324,7 @@ void git_vector_swap(git_vector *a, git_vector *b)
 	}
 }
 
-int git_vector_resize_to(git_vector *v, size_t new_length)
+int git3_vector_resize_to(git3_vector *v, size_t new_length)
 {
 	if (new_length > v->_alloc_size &&
 		resize_vector(v, new_length) < 0)
@@ -339,14 +339,14 @@ int git_vector_resize_to(git_vector *v, size_t new_length)
 	return 0;
 }
 
-int git_vector_insert_null(git_vector *v, size_t idx, size_t insert_len)
+int git3_vector_insert_null(git3_vector *v, size_t idx, size_t insert_len)
 {
 	size_t new_length;
 
-	GIT_ASSERT_ARG(insert_len > 0);
-	GIT_ASSERT_ARG(idx <= v->length);
+	GIT3_ASSERT_ARG(insert_len > 0);
+	GIT3_ASSERT_ARG(idx <= v->length);
 
-	GIT_ERROR_CHECK_ALLOC_ADD(&new_length, v->length, insert_len);
+	GIT3_ERROR_CHECK_ALLOC_ADD(&new_length, v->length, insert_len);
 
 	if (new_length > v->_alloc_size && resize_vector(v, new_length) < 0)
 		return -1;
@@ -359,17 +359,17 @@ int git_vector_insert_null(git_vector *v, size_t idx, size_t insert_len)
 	return 0;
 }
 
-int git_vector_remove_range(git_vector *v, size_t idx, size_t remove_len)
+int git3_vector_remove_range(git3_vector *v, size_t idx, size_t remove_len)
 {
 	size_t new_length = v->length - remove_len;
 	size_t end_idx = 0;
 
-	GIT_ASSERT_ARG(remove_len > 0);
+	GIT3_ASSERT_ARG(remove_len > 0);
 
-	if (git__add_sizet_overflow(&end_idx, idx, remove_len))
-		GIT_ASSERT(0);
+	if (git3__add_sizet_overflow(&end_idx, idx, remove_len))
+		GIT3_ASSERT(0);
 
-	GIT_ASSERT(end_idx <= v->length);
+	GIT3_ASSERT(end_idx <= v->length);
 
 	if (end_idx < v->length)
 		memmove(&v->contents[idx], &v->contents[end_idx],
@@ -381,10 +381,10 @@ int git_vector_remove_range(git_vector *v, size_t idx, size_t remove_len)
 	return 0;
 }
 
-int git_vector_set(void **old, git_vector *v, size_t position, void *value)
+int git3_vector_set(void **old, git3_vector *v, size_t position, void *value)
 {
 	if (position + 1 > v->length) {
-		if (git_vector_resize_to(v, position + 1) < 0)
+		if (git3_vector_resize_to(v, position + 1) < 0)
 			return -1;
 	}
 
@@ -396,11 +396,11 @@ int git_vector_set(void **old, git_vector *v, size_t position, void *value)
 	return 0;
 }
 
-int git_vector_verify_sorted(const git_vector *v)
+int git3_vector_verify_sorted(const git3_vector *v)
 {
 	size_t i;
 
-	if (!git_vector_is_sorted(v))
+	if (!git3_vector_is_sorted(v))
 		return -1;
 
 	for (i = 1; i < v->length; ++i) {
@@ -411,7 +411,7 @@ int git_vector_verify_sorted(const git_vector *v)
 	return 0;
 }
 
-void git_vector_reverse(git_vector *v)
+void git3_vector_reverse(git3_vector *v)
 {
 	size_t a, b;
 

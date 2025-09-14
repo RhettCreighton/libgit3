@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_buf_h__
@@ -10,27 +10,27 @@
 #include "common.h"
 
 /**
- * @file git2/buffer.h
+ * @file git3/buffer.h
  * @brief A data structure to return data to callers
  * @ingroup Git
  *
- * The `git_buf` buffer is used to return arbitrary data - typically
+ * The `git3_buf` buffer is used to return arbitrary data - typically
  * strings - to callers. Callers are responsible for freeing the memory
- * in a buffer with the `git_buf_dispose` function.
+ * in a buffer with the `git3_buf_dispose` function.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
- * A data buffer for exporting data from libgit2
+ * A data buffer for exporting data from libgit3
  *
- * Sometimes libgit2 wants to return an allocated data buffer to the
+ * Sometimes libgit3 wants to return an allocated data buffer to the
  * caller and have the caller take responsibility for freeing that memory.
- * To make ownership clear in these cases, libgit2 uses  `git_buf` to
- * return this data.  Callers should use `git_buf_dispose()` to release
+ * To make ownership clear in these cases, libgit3 uses  `git3_buf` to
+ * return this data.  Callers should use `git3_buf_dispose()` to release
  * the memory when they are done.
  *
- * A `git_buf` contains a pointer to a NUL-terminated C string, and
+ * A `git3_buf` contains a pointer to a NUL-terminated C string, and
  * the length of the string (not including the NUL terminator).
  */
 typedef struct {
@@ -52,25 +52,25 @@ typedef struct {
 	 * not including a NUL terminator.
 	 */
 	size_t size;
-} git_buf;
+} git3_buf;
 
 /**
- * Use to initialize a `git_buf` before passing it to a function that
+ * Use to initialize a `git3_buf` before passing it to a function that
  * will populate it.
  */
-#define GIT_BUF_INIT { NULL, 0, 0 }
+#define GIT3_BUF_INIT { NULL, 0, 0 }
 
 /**
- * Free the memory referred to by the git_buf.
+ * Free the memory referred to by the git3_buf.
  *
- * Note that this does not free the `git_buf` itself, just the memory
+ * Note that this does not free the `git3_buf` itself, just the memory
  * pointed to by `buffer->ptr`.
  *
  * @param buffer The buffer to deallocate
  */
-GIT_EXTERN(void) git_buf_dispose(git_buf *buffer);
+GIT3_EXTERN(void) git3_buf_dispose(git3_buf *buffer);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

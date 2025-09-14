@@ -1,9 +1,9 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "path.h"
 #include "futils.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_ignore_path__initialize(void)
 {
@@ -23,7 +23,7 @@ static void assert_is_ignored_(
 	int is_ignored = 0;
 
 	cl_git_expect(
-		git_ignore_path_is_ignored(&is_ignored, g_repo, filepath), 0, file, func, line);
+		git3_ignore_path_is_ignored(&is_ignored, g_repo, filepath), 0, file, func, line);
 
 	clar__assert_equal(
 		file, func, line, "expected != is_ignored", 1, "%d",
@@ -257,7 +257,7 @@ void test_ignore_path__skip_gitignore_directory(void)
 {
 	cl_git_rewritefile("attr/.git/info/exclude", "/NewFolder\n/NewFolder/NewFolder");
 	cl_must_pass(p_unlink("attr/.gitignore"));
-	cl_assert(!git_fs_path_exists("attr/.gitignore"));
+	cl_assert(!git3_fs_path_exists("attr/.gitignore"));
 	p_mkdir("attr/.gitignore", 0777);
 	cl_git_mkfile("attr/.gitignore/garbage.txt", "new_file\n");
 
@@ -270,7 +270,7 @@ void test_ignore_path__skip_gitignore_directory(void)
 void test_ignore_path__subdirectory_gitignore(void)
 {
 	cl_must_pass(p_unlink("attr/.gitignore"));
-	cl_assert(!git_fs_path_exists("attr/.gitignore"));
+	cl_assert(!git3_fs_path_exists("attr/.gitignore"));
 	cl_git_mkfile(
 		"attr/.gitignore",
 		"file1\n");
@@ -286,34 +286,34 @@ void test_ignore_path__subdirectory_gitignore(void)
 
 void test_ignore_path__expand_tilde_to_homedir(void)
 {
-	git_str homefile = GIT_STR_INIT;
-	git_config *cfg;
+	git3_str homefile = GIT3_STR_INIT;
+	git3_config *cfg;
 
 	assert_is_ignored(false, "example.global_with_tilde");
 
 	cl_fake_homedir(&homefile);
-	cl_git_pass(git_str_joinpath(&homefile, homefile.ptr, "globalexclude"));
+	cl_git_pass(git3_str_joinpath(&homefile, homefile.ptr, "globalexclude"));
 
 	/* construct fake home with fake global excludes */
 	cl_git_mkfile(homefile.ptr, "# found me\n*.global_with_tilde\n");
 
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_string(cfg, "core.excludesfile", "~/globalexclude"));
-	git_config_free(cfg);
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_string(cfg, "core.excludesfile", "~/globalexclude"));
+	git3_config_free(cfg);
 
-	git_attr_cache_flush(g_repo); /* must reset to pick up change */
+	git3_attr_cache_flush(g_repo); /* must reset to pick up change */
 
 	assert_is_ignored(true, "example.global_with_tilde");
 
-	cl_git_pass(git_futils_rmdir_r("home", NULL, GIT_RMDIR_REMOVE_FILES));
+	cl_git_pass(git3_futils_rmdir_r("home", NULL, GIT3_RMDIR_REMOVE_FILES));
 
 	cl_fake_homedir_cleanup(NULL);
 
-	git_attr_cache_flush(g_repo); /* must reset to pick up change */
+	git3_attr_cache_flush(g_repo); /* must reset to pick up change */
 
 	assert_is_ignored(false, "example.global_with_tilde");
 
-	git_str_dispose(&homefile);
+	git3_str_dispose(&homefile);
 }
 
 /* Ensure that the .gitignore in the subdirectory only affects
@@ -379,7 +379,7 @@ void test_ignore_path__dont_ignore_files_for_folder(void)
 
 void test_ignore_path__symlink_to_outside(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_skip();
 #endif
 
@@ -413,14 +413,14 @@ void test_ignore_path__unignore_dir_succeeds(void)
 
 void test_ignore_path__case_insensitive_unignores_previous_rule(void)
 {
-	git_config *cfg;
+	git3_config *cfg;
 
 	cl_git_rewritefile("attr/.gitignore",
 		"/case\n"
 		"!/Case/\n");
 
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_bool(cfg, "core.ignorecase", true));
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_bool(cfg, "core.ignorecase", true));
 
 	cl_must_pass(p_mkdir("attr/case", 0755));
 	cl_git_mkfile("attr/case/file", "content");
@@ -430,14 +430,14 @@ void test_ignore_path__case_insensitive_unignores_previous_rule(void)
 
 void test_ignore_path__case_sensitive_unignore_does_nothing(void)
 {
-	git_config *cfg;
+	git3_config *cfg;
 
 	cl_git_rewritefile("attr/.gitignore",
 		"/case\n"
 		"!/Case/\n");
 
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_bool(cfg, "core.ignorecase", false));
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_bool(cfg, "core.ignorecase", false));
 
 	cl_must_pass(p_mkdir("attr/case", 0755));
 	cl_git_mkfile("attr/case/file", "content");
@@ -540,7 +540,7 @@ void test_ignore_path__escaped_slash(void)
 		"trailing\\\\\n"
 	);
 
-#ifndef GIT_WIN32
+#ifndef GIT3_WIN32
 	assert_is_ignored(true, "\\");
 	assert_is_ignored(true, "\\preceding");
 #endif

@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_helpers.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_diff_rename__initialize(void)
 {
@@ -60,21 +60,21 @@ void test_diff_rename__match_oid(void)
 {
 	const char *old_sha = INITIAL_COMMIT;
 	const char *new_sha = COPY_RENAME_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
 
-	/* Must pass GIT_DIFF_INCLUDE_UNMODIFIED if you expect to emulate
+	/* Must pass GIT3_DIFF_INCLUDE_UNMODIFIED if you expect to emulate
 	 * --find-copies-harder during rename transformion...
 	 */
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	/* git diff --no-renames \
@@ -82,109 +82,109 @@ void test_diff_rename__match_oid(void)
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a
 	 */
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
 
 	/* git diff 31e47d8c1fa36d7f8d537b96158e3f024de0a9f2 \
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a
 	 * don't use NULL opts to avoid config `diff.renames` contamination
 	 */
-	opts.flags = GIT_DIFF_FIND_RENAMES;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_RENAMES;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	/* git diff --find-copies-harder \
 	 *          31e47d8c1fa36d7f8d537b96158e3f024de0a9f2 \
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a
 	 */
-	opts.flags = GIT_DIFF_FIND_COPIES_FROM_UNMODIFIED;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_COPIES_FROM_UNMODIFIED;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	/* git diff --find-copies-harder -M100 -B100 \
 	 *          31e47d8c1fa36d7f8d537b96158e3f024de0a9f2 \
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a
 	 */
-	opts.flags = GIT_DIFF_FIND_COPIES_FROM_UNMODIFIED |
-		GIT_DIFF_FIND_EXACT_MATCH_ONLY;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_COPIES_FROM_UNMODIFIED |
+		GIT3_DIFF_FIND_EXACT_MATCH_ONLY;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__checks_options_version(void)
 {
 	const char *old_sha = INITIAL_COMMIT;
 	const char *new_sha = COPY_RENAME_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
-	const git_error *err;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	const git3_error *err;
 
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	cl_git_pass(git_diff_tree_to_tree(
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	opts.version = 0;
-	cl_git_fail(git_diff_find_similar(diff, &opts));
-	err = git_error_last();
-	cl_assert_equal_i(GIT_ERROR_INVALID, err->klass);
+	cl_git_fail(git3_diff_find_similar(diff, &opts));
+	err = git3_error_last();
+	cl_assert_equal_i(GIT3_ERROR_INVALID, err->klass);
 
-	git_error_clear();
+	git3_error_clear();
 	opts.version = 1024;
-	cl_git_fail(git_diff_find_similar(diff, &opts));
-	err = git_error_last();
-	cl_assert_equal_i(GIT_ERROR_INVALID, err->klass);
+	cl_git_fail(git3_diff_find_similar(diff, &opts));
+	err = git3_error_last();
+	cl_assert_equal_i(GIT3_ERROR_INVALID, err->klass);
 
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__not_exact_match(void)
@@ -192,10 +192,10 @@ void test_diff_rename__not_exact_match(void)
 	const char *sha0 = COPY_RENAME_COMMIT;
 	const char *sha1 = REWRITE_COPY_COMMIT;
 	const char *sha2 = RENAME_MODIFICATION_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	/* == Changes =====================================================
@@ -208,12 +208,12 @@ void test_diff_rename__not_exact_match(void)
 	old_tree = resolve_commit_oid_to_tree(g_repo, sha0);
 	new_tree = resolve_commit_oid_to_tree(g_repo, sha1);
 
-	/* Must pass GIT_DIFF_INCLUDE_UNMODIFIED if you expect to emulate
+	/* Must pass GIT3_DIFF_INCLUDE_UNMODIFIED if you expect to emulate
 	 * --find-copies-harder during rename transformion...
 	 */
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	/* git diff --no-renames \
@@ -221,13 +221,13 @@ void test_diff_rename__not_exact_match(void)
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084
 	 */
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
 
 	/* git diff -M 2bc7f351d20b53f1c72c16c4b036e491c478c49a \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084
@@ -235,65 +235,65 @@ void test_diff_rename__not_exact_match(void)
 	 * must not pass NULL for opts because it will pick up environment
 	 * values for "diff.renames" and test won't be consistent.
 	 */
-	opts.flags = GIT_DIFF_FIND_RENAMES;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_RENAMES;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* git diff -M -C \
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084
 	 */
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_COPIES;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_RENAMES | GIT3_DIFF_FIND_COPIES;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* git diff -M -C --find-copies-harder --break-rewrites \
 	 *          2bc7f351d20b53f1c72c16c4b036e491c478c49a \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084
 	 */
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL;
+	opts.flags = GIT3_DIFF_FIND_ALL;
 	opts.break_rewrite_threshold = 70;
 
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* == Changes =====================================================
 	 * songofseven.txt -> untimely.txt    (rename, convert to crlf)
@@ -302,11 +302,11 @@ void test_diff_rename__not_exact_match(void)
 	 * sevencities.txt -> songof7cities.txt (rename, small text changes)
 	 */
 
-	git_tree_free(old_tree);
+	git3_tree_free(old_tree);
 	old_tree = new_tree;
 	new_tree = resolve_commit_oid_to_tree(g_repo, sha2);
 
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
 	/* git diff --no-renames \
@@ -314,45 +314,45 @@ void test_diff_rename__not_exact_match(void)
 	 *          19dd32dfb1520a64e5bbaae8dce6ef423dfa2f13
 	 */
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_DELETED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_DELETED]);
+	git3_diff_free(diff);
 
 	/* git diff -M -C \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084 \
 	 *          19dd32dfb1520a64e5bbaae8dce6ef423dfa2f13
 	 */
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_COPIES;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_RENAMES | GIT3_DIFF_FIND_COPIES;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* git diff -M -C --find-copies-harder --break-rewrites \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084 \
 	 *          19dd32dfb1520a64e5bbaae8dce6ef423dfa2f13
-	 * with libgit2 default similarity comparison...
+	 * with libgit3 default similarity comparison...
 	 */
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	/* the default match algorithm is going to find the internal
 	 * whitespace differences in the lines of sixserving.txt to be
@@ -361,109 +361,109 @@ void test_diff_rename__not_exact_match(void)
 	 */
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* git diff -M -C --find-copies-harder --break-rewrites \
 	 *          1c068dee5790ef1580cfc4cd670915b48d790084 \
 	 *          19dd32dfb1520a64e5bbaae8dce6ef423dfa2f13
 	 * with ignore_space whitespace comparison
 	 */
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_IGNORE_WHITESPACE;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_IGNORE_WHITESPACE;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	/* Ignoring whitespace, this should no longer split sixserver.txt */
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__test_small_files(void)
 {
-	git_index *index;
-	git_reference *head_reference;
-	git_commit *head_commit;
-	git_tree *head_tree;
-	git_tree *commit_tree;
-	git_signature *signature;
-	git_diff *diff;
-	git_oid oid;
-	const git_diff_delta *delta;
-	git_diff_options diff_options = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options find_options = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_index *index;
+	git3_reference *head_reference;
+	git3_commit *head_commit;
+	git3_tree *head_tree;
+	git3_tree *commit_tree;
+	git3_signature *signature;
+	git3_diff *diff;
+	git3_oid oid;
+	const git3_diff_delta *delta;
+	git3_diff_options diff_options = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options find_options = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_mkfile("renames/small.txt", "Hello World!\n");
-	cl_git_pass(git_index_add_bypath(index, "small.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "small.txt"));
 
-	cl_git_pass(git_repository_head(&head_reference, g_repo));
-	cl_git_pass(git_reference_peel((git_object**)&head_commit, head_reference, GIT_OBJECT_COMMIT));
-	cl_git_pass(git_commit_tree(&head_tree, head_commit));
-	cl_git_pass(git_index_write_tree(&oid, index));
-	cl_git_pass(git_tree_lookup(&commit_tree, g_repo, &oid));
-	cl_git_pass(git_signature_new(&signature, "Rename", "rename@example.com", 1404157834, 0));
-	cl_git_pass(git_commit_create(&oid, g_repo, "HEAD", signature, signature, NULL, "Test commit", commit_tree, 1, (const git_commit**)&head_commit));
+	cl_git_pass(git3_repository_head(&head_reference, g_repo));
+	cl_git_pass(git3_reference_peel((git3_object**)&head_commit, head_reference, GIT3_OBJECT_COMMIT));
+	cl_git_pass(git3_commit_tree(&head_tree, head_commit));
+	cl_git_pass(git3_index_write_tree(&oid, index));
+	cl_git_pass(git3_tree_lookup(&commit_tree, g_repo, &oid));
+	cl_git_pass(git3_signature_new(&signature, "Rename", "rename@example.com", 1404157834, 0));
+	cl_git_pass(git3_commit_create(&oid, g_repo, "HEAD", signature, signature, NULL, "Test commit", commit_tree, 1, (const git3_commit**)&head_commit));
 
 	cl_git_mkfile("renames/copy.txt", "Hello World!\n");
 	cl_git_rmfile("renames/small.txt");
 
-	diff_options.flags = GIT_DIFF_INCLUDE_UNTRACKED;
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, commit_tree, &diff_options));
-	find_options.flags = GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_FOR_UNTRACKED;
-	cl_git_pass(git_diff_find_similar(diff, &find_options));
+	diff_options.flags = GIT3_DIFF_INCLUDE_UNTRACKED;
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, commit_tree, &diff_options));
+	find_options.flags = GIT3_DIFF_FIND_RENAMES | GIT3_DIFF_FIND_FOR_UNTRACKED;
+	cl_git_pass(git3_diff_find_similar(diff, &find_options));
 
-	cl_assert_equal_i(git_diff_num_deltas(diff), 1);
-	delta = git_diff_get_delta(diff, 0);
-	cl_assert_equal_i(delta->status, GIT_DELTA_RENAMED);
+	cl_assert_equal_i(git3_diff_num_deltas(diff), 1);
+	delta = git3_diff_get_delta(diff, 0);
+	cl_assert_equal_i(delta->status, GIT3_DELTA_RENAMED);
 	cl_assert_equal_s(delta->old_file.path, "small.txt");
 	cl_assert_equal_s(delta->new_file.path, "copy.txt");
 
-	git_diff_free(diff);
-	git_signature_free(signature);
-	git_tree_free(commit_tree);
-	git_tree_free(head_tree);
-	git_commit_free(head_commit);
-	git_reference_free(head_reference);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_signature_free(signature);
+	git3_tree_free(commit_tree);
+	git3_tree_free(head_tree);
+	git3_commit_free(head_commit);
+	git3_reference_free(head_reference);
+	git3_index_free(index);
 }
 
 void test_diff_rename__working_directory_changes(void)
 {
 	const char *sha0 = COPY_RENAME_COMMIT;
 	const char *blobsha = "66311f5cfbe7836c27510a3ba2f43e282e2c8bba";
-	git_oid id;
-	git_tree *tree;
-	git_blob *blob;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_oid id;
+	git3_tree *tree;
+	git3_blob *blob;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
-	git_str old_content = GIT_STR_INIT, content = GIT_STR_INIT;;
+	git3_str old_content = GIT3_STR_INIT, content = GIT3_STR_INIT;;
 
 	tree = resolve_commit_oid_to_tree(g_repo, sha0);
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED | GIT_DIFF_INCLUDE_UNTRACKED;
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED | GIT3_DIFF_INCLUDE_UNTRACKED;
 
 	/*
 	$ git cat-file -p 2bc7f351d20b53f1c72c16c4b036e491c478c49a^{tree}
@@ -482,109 +482,109 @@ void test_diff_rename__working_directory_changes(void)
 	9a69d960ae94b060f56c2a8702545e2bb1abb935 untimely.txt
 	*/
 
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
 
 	/* git diff --no-renames 2bc7f351d20b53f1c72c16c4b036e491c478c49a */
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
 	/* git diff -M 2bc7f351d20b53f1c72c16c4b036e491c478c49a */
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* rewrite files in the working directory with / without CRLF changes */
 
 	cl_git_pass(
-		git_futils_readbuffer(&old_content, "renames/songof7cities.txt"));
+		git3_futils_readbuffer(&old_content, "renames/songof7cities.txt"));
 	cl_git_pass(
-		git_str_lf_to_crlf(&content, &old_content));
+		git3_str_lf_to_crlf(&content, &old_content));
 	cl_git_pass(
-		git_futils_writebuffer(&content, "renames/songof7cities.txt", 0, 0));
+		git3_futils_writebuffer(&content, "renames/songof7cities.txt", 0, 0));
 
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
 
 	/* git diff -M 2bc7f351d20b53f1c72c16c4b036e491c478c49a */
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* try a different whitespace option */
 
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE;
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE;
 	opts.rename_threshold = 70;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* try a different matching option */
 
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_EXACT_MATCH_ONLY;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_EXACT_MATCH_ONLY;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNTRACKED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNTRACKED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_DELETED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
 	/* again with exact match blob */
 
-	cl_git_pass(git_oid_from_string(&id, blobsha, GIT_OID_SHA1));
-	cl_git_pass(git_blob_lookup(&blob, g_repo, &id));
-	cl_git_pass(git_str_set(
-		&content, git_blob_rawcontent(blob), (size_t)git_blob_rawsize(blob)));
+	cl_git_pass(git3_oid_from_string(&id, blobsha, GIT3_OID_SHA1));
+	cl_git_pass(git3_blob_lookup(&blob, g_repo, &id));
+	cl_git_pass(git3_str_set(
+		&content, git3_blob_rawcontent(blob), (size_t)git3_blob_rawsize(blob)));
 	cl_git_rewritefile("renames/songof7cities.txt", content.ptr);
-	git_blob_free(blob);
+	git3_blob_free(blob);
 
-	cl_git_pass(git_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
+	cl_git_pass(git3_diff_tree_to_workdir(&diff, g_repo, tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_EXACT_MATCH_ONLY;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_EXACT_MATCH_ONLY;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	/*
 	fprintf(stderr, "\n\n");
@@ -592,44 +592,44 @@ void test_diff_rename__working_directory_changes(void)
 	*/
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 
-	git_tree_free(tree);
-	git_str_dispose(&content);
-	git_str_dispose(&old_content);
+	git3_tree_free(tree);
+	git3_str_dispose(&content);
+	git3_str_dispose(&old_content);
 }
 
 void test_diff_rename__patch(void)
 {
 	const char *sha0 = COPY_RENAME_COMMIT;
 	const char *sha1 = REWRITE_COPY_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
-	git_patch *patch;
-	const git_diff_delta *delta;
-	git_buf buf = GIT_BUF_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	git3_patch *patch;
+	const git3_diff_delta *delta;
+	git3_buf buf = GIT3_BUF_INIT;
 	const char *expected = "diff --git a/sixserving.txt b/ikeepsix.txt\nindex ad0a8e5..36020db 100644\n--- a/sixserving.txt\n+++ b/ikeepsix.txt\n@@ -1,3 +1,6 @@\n+I Keep Six Honest Serving-Men\n+=============================\n+\n I KEEP six honest serving-men\n  (They taught me all I knew);\n Their names are What and Why and When\n@@ -21,4 +24,4 @@ She sends'em abroad on her own affairs,\n One million Hows, two million Wheres,\n And seven million Whys!\n \n-                -- Rudyard Kipling\n+  -- Rudyard Kipling\n";
 
 	old_tree = resolve_commit_oid_to_tree(g_repo, sha0);
 	new_tree = resolve_commit_oid_to_tree(g_repo, sha1);
 
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	cl_git_pass(git_diff_tree_to_tree(
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	cl_git_pass(git3_diff_tree_to_tree(
 		&diff, g_repo, old_tree, new_tree, &diffopts));
 
-	opts.flags = GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_COPIES;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_RENAMES | GIT3_DIFF_FIND_COPIES;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	/* == Changes =====================================================
 	 * sixserving.txt  -> ikeepsix.txt    (copy, add title, >80% match)
@@ -638,293 +638,293 @@ void test_diff_rename__patch(void)
 	 * songofseven.txt -> songofseven.txt (major rewrite, <20% match - split)
 	 */
 
-	cl_assert_equal_i(4, (int)git_diff_num_deltas(diff));
+	cl_assert_equal_i(4, (int)git3_diff_num_deltas(diff));
 
-	cl_git_pass(git_patch_from_diff(&patch, diff, 0));
-	cl_assert((delta = git_patch_get_delta(patch)) != NULL);
-	cl_assert_equal_i(GIT_DELTA_COPIED, (int)delta->status);
+	cl_git_pass(git3_patch_from_diff(&patch, diff, 0));
+	cl_assert((delta = git3_patch_get_delta(patch)) != NULL);
+	cl_assert_equal_i(GIT3_DELTA_COPIED, (int)delta->status);
 
-	cl_git_pass(git_patch_to_buf(&buf, patch));
+	cl_git_pass(git3_patch_to_buf(&buf, patch));
 	cl_assert_equal_s(expected, buf.ptr);
-	git_buf_dispose(&buf);
+	git3_buf_dispose(&buf);
 
-	git_patch_free(patch);
+	git3_patch_free(patch);
 
-	cl_assert((delta = git_diff_get_delta(diff, 1)) != NULL);
-	cl_assert_equal_i(GIT_DELTA_UNMODIFIED, (int)delta->status);
+	cl_assert((delta = git3_diff_get_delta(diff, 1)) != NULL);
+	cl_assert_equal_i(GIT3_DELTA_UNMODIFIED, (int)delta->status);
 
-	cl_assert((delta = git_diff_get_delta(diff, 2)) != NULL);
-	cl_assert_equal_i(GIT_DELTA_MODIFIED, (int)delta->status);
+	cl_assert((delta = git3_diff_get_delta(diff, 2)) != NULL);
+	cl_assert_equal_i(GIT3_DELTA_MODIFIED, (int)delta->status);
 
-	cl_assert((delta = git_diff_get_delta(diff, 3)) != NULL);
-	cl_assert_equal_i(GIT_DELTA_MODIFIED, (int)delta->status);
+	cl_assert((delta = git3_diff_get_delta(diff, 3)) != NULL);
+	cl_assert_equal_i(GIT3_DELTA_MODIFIED, (int)delta->status);
 
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__file_exchange(void)
 {
-	git_str c1 = GIT_STR_INIT, c2 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT, c2 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/untimely.txt"));
-	cl_git_pass(git_futils_readbuffer(&c2, "renames/songof7cities.txt"));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/songof7cities.txt", 0, 0));
-	cl_git_pass(git_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/untimely.txt"));
+	cl_git_pass(git3_futils_readbuffer(&c2, "renames/songof7cities.txt"));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/songof7cities.txt", 0, 0));
+	cl_git_pass(git3_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "songof7cities.txt"));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "songof7cities.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
-
-	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
-		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
-	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
-	git_str_dispose(&c1);
-	git_str_dispose(&c2);
+	memset(&exp, 0, sizeof(exp));
+	cl_git_pass(git3_diff_foreach(
+		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
+	cl_assert_equal_i(2, exp.files);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_RENAMED]);
+
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+
+	git3_str_dispose(&c1);
+	git3_str_dispose(&c2);
 }
 
 void test_diff_rename__file_exchange_three(void)
 {
-	git_str c1 = GIT_STR_INIT, c2 = GIT_STR_INIT, c3 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT, c2 = GIT3_STR_INIT, c3 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/untimely.txt"));
-	cl_git_pass(git_futils_readbuffer(&c2, "renames/songof7cities.txt"));
-	cl_git_pass(git_futils_readbuffer(&c3, "renames/ikeepsix.txt"));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/untimely.txt"));
+	cl_git_pass(git3_futils_readbuffer(&c2, "renames/songof7cities.txt"));
+	cl_git_pass(git3_futils_readbuffer(&c3, "renames/ikeepsix.txt"));
 
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/ikeepsix.txt", 0, 0));
-	cl_git_pass(git_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
-	cl_git_pass(git_futils_writebuffer(&c3, "renames/songof7cities.txt", 0, 0));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/ikeepsix.txt", 0, 0));
+	cl_git_pass(git3_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
+	cl_git_pass(git3_futils_writebuffer(&c3, "renames/songof7cities.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "songof7cities.txt"));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
-	cl_git_pass(git_index_add_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "songof7cities.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "ikeepsix.txt"));
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
-
-	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
-		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
-	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_MODIFIED]);
-
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_MODIFIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
-	git_str_dispose(&c1);
-	git_str_dispose(&c2);
-	git_str_dispose(&c3);
+	memset(&exp, 0, sizeof(exp));
+	cl_git_pass(git3_diff_foreach(
+		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
+	cl_assert_equal_i(3, exp.files);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_RENAMED]);
+
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+
+	git3_str_dispose(&c1);
+	git3_str_dispose(&c2);
+	git3_str_dispose(&c3);
 }
 
 void test_diff_rename__file_partial_exchange(void)
 {
-	git_str c1 = GIT_STR_INIT, c2 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT, c2 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 	int i;
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/untimely.txt"));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/songof7cities.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/untimely.txt"));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/songof7cities.txt", 0, 0));
 	for (i = 0; i < 100; ++i)
-		cl_git_pass(git_str_puts(&c2, "this is not the content you are looking for\n"));
-	cl_git_pass(git_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
+		cl_git_pass(git3_str_puts(&c2, "this is not the content you are looking for\n"));
+	cl_git_pass(git3_futils_writebuffer(&c2, "renames/untimely.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "songof7cities.txt"));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "songof7cities.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
 
-	git_str_dispose(&c1);
-	git_str_dispose(&c2);
+	git3_str_dispose(&c1);
+	git3_str_dispose(&c2);
 }
 
 void test_diff_rename__rename_and_copy_from_same_source(void)
 {
-	git_str c1 = GIT_STR_INIT, c2 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT, c2 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	/* put the first 2/3 of file into one new place
 	 * and the second 2/3 of file into another new place
 	 */
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/songof7cities.txt"));
-	cl_git_pass(git_str_set(&c2, c1.ptr, c1.size));
-	git_str_truncate(&c1, c1.size * 2 / 3);
-	git_str_consume(&c2, ((char *)c2.ptr) + (c2.size / 3));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/song_a.txt", 0, 0));
-	cl_git_pass(git_futils_writebuffer(&c2, "renames/song_b.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/songof7cities.txt"));
+	cl_git_pass(git3_str_set(&c2, c1.ptr, c1.size));
+	git3_str_truncate(&c1, c1.size * 2 / 3);
+	git3_str_consume(&c2, ((char *)c2.ptr) + (c2.size / 3));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/song_a.txt", 0, 0));
+	cl_git_pass(git3_futils_writebuffer(&c2, "renames/song_b.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "song_a.txt"));
-	cl_git_pass(git_index_add_bypath(index, "song_b.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "song_a.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "song_b.txt"));
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
-
-	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
-		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
-	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(4, exp.file_status[GIT_DELTA_UNMODIFIED]);
-
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(6, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_COPIED]);
-	cl_assert_equal_i(4, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(4, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
-	git_str_dispose(&c1);
-	git_str_dispose(&c2);
+	memset(&exp, 0, sizeof(exp));
+	cl_git_pass(git3_diff_foreach(
+		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
+	cl_assert_equal_i(6, exp.files);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_COPIED]);
+	cl_assert_equal_i(4, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+
+	git3_str_dispose(&c1);
+	git3_str_dispose(&c2);
 }
 
 void test_diff_rename__from_deleted_to_split(void)
 {
-	git_str c1 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	/* old file is missing, new file is actually old file renamed */
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/songof7cities.txt"));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/songof7cities.txt"));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_remove_bypath(index, "songof7cities.txt"));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_remove_bypath(index, "songof7cities.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
-
-	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
-		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
-	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_UNMODIFIED]);
-
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
-	git_str_dispose(&c1);
+	memset(&exp, 0, sizeof(exp));
+	cl_git_pass(git3_diff_foreach(
+		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
+	cl_assert_equal_i(4, exp.files);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+
+	git3_str_dispose(&c1);
 }
 
 struct rename_expected
@@ -938,19 +938,19 @@ struct rename_expected
 	size_t idx;
 };
 
-static int test_names_expected(const git_diff_delta *delta, float progress, void *p)
+static int test_names_expected(const git3_diff_delta *delta, float progress, void *p)
 {
 	struct rename_expected *expected = p;
 
-	GIT_UNUSED(progress);
+	GIT3_UNUSED(progress);
 
 	cl_assert(expected->idx < expected->len);
 
 	cl_assert_equal_i(delta->status, expected->status[expected->idx]);
 
-	cl_assert(git__strcmp(expected->sources[expected->idx],
+	cl_assert(git3__strcmp(expected->sources[expected->idx],
 		delta->old_file.path) == 0);
-	cl_assert(git__strcmp(expected->targets[expected->idx],
+	cl_assert(git3__strcmp(expected->targets[expected->idx],
 		delta->new_file.path) == 0);
 
 	expected->idx++;
@@ -960,37 +960,37 @@ static int test_names_expected(const git_diff_delta *delta, float progress, void
 
 void test_diff_rename__rejected_match_can_match_others(void)
 {
-	git_reference *head, *selfsimilar;
-	git_index *index;
-	git_tree *tree;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
-	git_str one = GIT_STR_INIT, two = GIT_STR_INIT;
-	unsigned int status[] = { GIT_DELTA_RENAMED, GIT_DELTA_RENAMED };
+	git3_reference *head, *selfsimilar;
+	git3_index *index;
+	git3_tree *tree;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	git3_str one = GIT3_STR_INIT, two = GIT3_STR_INIT;
+	unsigned int status[] = { GIT3_DELTA_RENAMED, GIT3_DELTA_RENAMED };
 	const char *sources[] = { "Class1.cs", "Class2.cs" };
 	const char *targets[] = { "ClassA.cs", "ClassB.cs" };
 	struct rename_expected expect = { 2, status, sources, targets };
 	char *ptr;
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE;
-	findopts.flags = GIT_DIFF_FIND_RENAMES;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
+	findopts.flags = GIT3_DIFF_FIND_RENAMES;
 
-	cl_git_pass(git_reference_lookup(&head, g_repo, "HEAD"));
-	cl_git_pass(git_reference_symbolic_set_target(
+	cl_git_pass(git3_reference_lookup(&head, g_repo, "HEAD"));
+	cl_git_pass(git3_reference_symbolic_set_target(
 		&selfsimilar, head, "refs/heads/renames_similar", NULL));
-	cl_git_pass(git_checkout_head(g_repo, &opts));
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_checkout_head(g_repo, &opts));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
-	cl_git_pass(git_futils_readbuffer(&one, "renames/Class1.cs"));
-	cl_git_pass(git_futils_readbuffer(&two, "renames/Class2.cs"));
+	cl_git_pass(git3_futils_readbuffer(&one, "renames/Class1.cs"));
+	cl_git_pass(git3_futils_readbuffer(&two, "renames/Class2.cs"));
 
 	cl_git_pass(p_unlink("renames/Class1.cs"));
 	cl_git_pass(p_unlink("renames/Class2.cs"));
 
-	cl_git_pass(git_index_remove_bypath(index, "Class1.cs"));
-	cl_git_pass(git_index_remove_bypath(index, "Class2.cs"));
+	cl_git_pass(git3_index_remove_bypath(index, "Class1.cs"));
+	cl_git_pass(git3_index_remove_bypath(index, "Class2.cs"));
 
 	cl_assert(ptr = strstr(one.ptr, "Class1"));
 	ptr[5] = 'A';
@@ -999,317 +999,317 @@ void test_diff_rename__rejected_match_can_match_others(void)
 	ptr[5] = 'B';
 
 	cl_git_pass(
-		git_futils_writebuffer(&one, "renames/ClassA.cs", O_RDWR|O_CREAT, 0777));
+		git3_futils_writebuffer(&one, "renames/ClassA.cs", O_RDWR|O_CREAT, 0777));
 	cl_git_pass(
-		git_futils_writebuffer(&two, "renames/ClassB.cs", O_RDWR|O_CREAT, 0777));
+		git3_futils_writebuffer(&two, "renames/ClassB.cs", O_RDWR|O_CREAT, 0777));
 
-	cl_git_pass(git_index_add_bypath(index, "ClassA.cs"));
-	cl_git_pass(git_index_add_bypath(index, "ClassB.cs"));
+	cl_git_pass(git3_index_add_bypath(index, "ClassA.cs"));
+	cl_git_pass(git3_index_add_bypath(index, "ClassB.cs"));
 
-	cl_git_pass(git_index_write(index));
-
-	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+	cl_git_pass(git3_index_write(index));
 
 	cl_git_pass(
-		git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(
+		git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
+
+	cl_git_pass(git3_diff_foreach(
 		diff, test_names_expected, NULL, NULL, NULL, &expect));
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
-	git_reference_free(head);
-	git_reference_free(selfsimilar);
-	git_str_dispose(&one);
-	git_str_dispose(&two);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+	git3_reference_free(head);
+	git3_reference_free(selfsimilar);
+	git3_str_dispose(&one);
+	git3_str_dispose(&two);
 }
 
 static void write_similarity_file_two(const char *filename, size_t b_lines)
 {
-	git_str contents = GIT_STR_INIT;
+	git3_str contents = GIT3_STR_INIT;
 	size_t i;
 
 	for (i = 0; i < b_lines; i++)
-		git_str_printf(&contents, "%02d - bbbbb\r\n", (int)(i+1));
+		git3_str_printf(&contents, "%02d - bbbbb\r\n", (int)(i+1));
 
 	for (i = b_lines; i < 50; i++)
-		git_str_printf(&contents, "%02d - aaaaa%s", (int)(i+1), (i == 49 ? "" : "\r\n"));
+		git3_str_printf(&contents, "%02d - aaaaa%s", (int)(i+1), (i == 49 ? "" : "\r\n"));
 
 	cl_git_pass(
-		git_futils_writebuffer(&contents, filename, O_RDWR|O_CREAT, 0777));
+		git3_futils_writebuffer(&contents, filename, O_RDWR|O_CREAT, 0777));
 
-	git_str_dispose(&contents);
+	git3_str_dispose(&contents);
 }
 
 void test_diff_rename__rejected_match_can_match_others_two(void)
 {
-	git_reference *head, *selfsimilar;
-	git_index *index;
-	git_tree *tree;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
-	unsigned int status[] = { GIT_DELTA_RENAMED, GIT_DELTA_RENAMED };
+	git3_reference *head, *selfsimilar;
+	git3_index *index;
+	git3_tree *tree;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	unsigned int status[] = { GIT3_DELTA_RENAMED, GIT3_DELTA_RENAMED };
 	const char *sources[] = { "a.txt", "b.txt" };
 	const char *targets[] = { "c.txt", "d.txt" };
 	struct rename_expected expect = { 2, status, sources, targets };
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE;
-	findopts.flags = GIT_DIFF_FIND_RENAMES;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
+	findopts.flags = GIT3_DIFF_FIND_RENAMES;
 
-	cl_git_pass(git_reference_lookup(&head, g_repo, "HEAD"));
-	cl_git_pass(git_reference_symbolic_set_target(
+	cl_git_pass(git3_reference_lookup(&head, g_repo, "HEAD"));
+	cl_git_pass(git3_reference_symbolic_set_target(
 		&selfsimilar, head, "refs/heads/renames_similar_two", NULL));
-	cl_git_pass(git_checkout_head(g_repo, &opts));
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_checkout_head(g_repo, &opts));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_pass(p_unlink("renames/a.txt"));
 	cl_git_pass(p_unlink("renames/b.txt"));
 
-	cl_git_pass(git_index_remove_bypath(index, "a.txt"));
-	cl_git_pass(git_index_remove_bypath(index, "b.txt"));
+	cl_git_pass(git3_index_remove_bypath(index, "a.txt"));
+	cl_git_pass(git3_index_remove_bypath(index, "b.txt"));
 
 	write_similarity_file_two("renames/c.txt", 7);
 	write_similarity_file_two("renames/d.txt", 8);
 
-	cl_git_pass(git_index_add_bypath(index, "c.txt"));
-	cl_git_pass(git_index_add_bypath(index, "d.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "c.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "d.txt"));
 
-	cl_git_pass(git_index_write(index));
-
-	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+	cl_git_pass(git3_index_write(index));
 
 	cl_git_pass(
-		git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(
+		git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
+
+	cl_git_pass(git3_diff_foreach(
 		diff, test_names_expected, NULL, NULL, NULL, &expect));
 	cl_assert(expect.idx > 0);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
-	git_reference_free(head);
-	git_reference_free(selfsimilar);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+	git3_reference_free(head);
+	git3_reference_free(selfsimilar);
 }
 
 void test_diff_rename__rejected_match_can_match_others_three(void)
 {
-	git_reference *head, *selfsimilar;
-	git_index *index;
-	git_tree *tree;
-	git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_reference *head, *selfsimilar;
+	git3_index *index;
+	git3_tree *tree;
+	git3_checkout_options opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
 	/* Both cannot be renames from a.txt */
-	unsigned int status[] = { GIT_DELTA_ADDED, GIT_DELTA_RENAMED };
+	unsigned int status[] = { GIT3_DELTA_ADDED, GIT3_DELTA_RENAMED };
 	const char *sources[] = { "0001.txt", "a.txt" };
 	const char *targets[] = { "0001.txt", "0002.txt" };
 	struct rename_expected expect = { 2, status, sources, targets };
 
-	opts.checkout_strategy = GIT_CHECKOUT_FORCE;
-	findopts.flags = GIT_DIFF_FIND_RENAMES;
+	opts.checkout_strategy = GIT3_CHECKOUT_FORCE;
+	findopts.flags = GIT3_DIFF_FIND_RENAMES;
 
-	cl_git_pass(git_reference_lookup(&head, g_repo, "HEAD"));
-	cl_git_pass(git_reference_symbolic_set_target(
+	cl_git_pass(git3_reference_lookup(&head, g_repo, "HEAD"));
+	cl_git_pass(git3_reference_symbolic_set_target(
 		&selfsimilar, head, "refs/heads/renames_similar_two", NULL));
-	cl_git_pass(git_checkout_head(g_repo, &opts));
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_checkout_head(g_repo, &opts));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_pass(p_unlink("renames/a.txt"));
 
-	cl_git_pass(git_index_remove_bypath(index, "a.txt"));
+	cl_git_pass(git3_index_remove_bypath(index, "a.txt"));
 
 	write_similarity_file_two("renames/0001.txt", 7);
 	write_similarity_file_two("renames/0002.txt", 0);
 
-	cl_git_pass(git_index_add_bypath(index, "0001.txt"));
-	cl_git_pass(git_index_add_bypath(index, "0002.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "0001.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "0002.txt"));
 
-	cl_git_pass(git_index_write(index));
-
-	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+	cl_git_pass(git3_index_write(index));
 
 	cl_git_pass(
-		git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(
+		git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
+
+	cl_git_pass(git3_diff_foreach(
 		diff, test_names_expected, NULL, NULL, NULL, &expect));
 
 	cl_assert(expect.idx == expect.len);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
-	git_reference_free(head);
-	git_reference_free(selfsimilar);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
+	git3_reference_free(head);
+	git3_reference_free(selfsimilar);
 }
 
 void test_diff_rename__can_rename_from_rewrite(void)
 {
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	unsigned int status[] = { GIT_DELTA_RENAMED, GIT_DELTA_RENAMED };
+	unsigned int status[] = { GIT3_DELTA_RENAMED, GIT3_DELTA_RENAMED };
 	const char *sources[] = { "ikeepsix.txt", "songof7cities.txt" };
 	const char *targets[] = { "songof7cities.txt", "this-is-a-rename.txt" };
 	struct rename_expected expect = { 2, status, sources, targets };
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_pass(p_rename("renames/songof7cities.txt", "renames/this-is-a-rename.txt"));
 	cl_git_pass(p_rename("renames/ikeepsix.txt", "renames/songof7cities.txt"));
 
-	cl_git_pass(git_index_remove_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_index_remove_bypath(index, "ikeepsix.txt"));
 
-	cl_git_pass(git_index_add_bypath(index, "songof7cities.txt"));
-	cl_git_pass(git_index_add_bypath(index, "this-is-a-rename.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "songof7cities.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "this-is-a-rename.txt"));
 
-	cl_git_pass(git_index_write(index));
-
-	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+	cl_git_pass(git3_index_write(index));
 
 	cl_git_pass(
-		git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	findopts.flags |= GIT_DIFF_FIND_AND_BREAK_REWRITES |
-		GIT_DIFF_FIND_REWRITES |
-		GIT_DIFF_FIND_RENAMES_FROM_REWRITES;
+	cl_git_pass(
+		git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	findopts.flags |= GIT3_DIFF_FIND_AND_BREAK_REWRITES |
+		GIT3_DIFF_FIND_REWRITES |
+		GIT3_DIFF_FIND_RENAMES_FROM_REWRITES;
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
+
+	cl_git_pass(git3_diff_foreach(
 		diff, test_names_expected, NULL, NULL, NULL, &expect));
 
 	cl_assert(expect.idx == expect.len);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
 }
 
 void test_diff_rename__case_changes_are_split(void)
 {
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff = NULL;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff = NULL;
 	diff_expects exp;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
 	cl_git_pass(p_rename("renames/ikeepsix.txt", "renames/IKEEPSIX.txt"));
 
-	cl_git_pass(git_index_remove_bypath(index, "ikeepsix.txt"));
-	cl_git_pass(git_index_add_bypath(index, "IKEEPSIX.txt"));
-	cl_git_pass(git_index_write(index));
+	cl_git_pass(git3_index_remove_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "IKEEPSIX.txt"));
+	cl_git_pass(git3_index_write(index));
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, NULL));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, NULL));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(1, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
-	git_index_free(index);
-	git_tree_free(tree);
+	git3_diff_free(diff);
+	git3_index_free(index);
+	git3_tree_free(tree);
 }
 
 void test_diff_rename__unmodified_can_be_renamed(void)
 {
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff = NULL;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff = NULL;
 	diff_expects exp;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
 	cl_git_pass(p_rename("renames/ikeepsix.txt", "renames/ikeepsix2.txt"));
 
-	cl_git_pass(git_index_remove_bypath(index, "ikeepsix.txt"));
-	cl_git_pass(git_index_add_bypath(index, "ikeepsix2.txt"));
-	cl_git_pass(git_index_write(index));
+	cl_git_pass(git3_index_remove_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "ikeepsix2.txt"));
+	cl_git_pass(git3_index_write(index));
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-
-	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
-		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
-	cl_assert_equal_i(1, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(1, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
-	git_index_free(index);
-	git_tree_free(tree);
+	memset(&exp, 0, sizeof(exp));
+	cl_git_pass(git3_diff_foreach(
+		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
+	cl_assert_equal_i(1, exp.files);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+
+	git3_diff_free(diff);
+	git3_index_free(index);
+	git3_tree_free(tree);
 }
 
 void test_diff_rename__rewrite_on_single_file(void)
 {
-	git_index *index;
-	git_diff *diff = NULL;
+	git3_index *index;
+	git3_diff *diff = NULL;
 	diff_expects exp;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNTRACKED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	findopts.flags = GIT_DIFF_FIND_FOR_UNTRACKED |
-		GIT_DIFF_FIND_AND_BREAK_REWRITES |
-		GIT_DIFF_FIND_RENAMES_FROM_REWRITES;
+	findopts.flags = GIT3_DIFF_FIND_FOR_UNTRACKED |
+		GIT3_DIFF_FIND_AND_BREAK_REWRITES |
+		GIT3_DIFF_FIND_RENAMES_FROM_REWRITES;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_rewritefile("renames/ikeepsix.txt",
 		"This is enough content for the file to be rewritten.\n" \
@@ -1329,126 +1329,126 @@ void test_diff_rename__rewrite_on_single_file(void)
 		"This is enough content for the file to be rewritten.\n" \
 		"This is enough content for the file to be rewritten.\n");
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
 
 	memset(&exp, 0, sizeof(exp));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_index_free(index);
 }
 
 void test_diff_rename__can_find_copy_to_split(void)
 {
-	git_str c1 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/songof7cities.txt"));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/songof7cities.txt"));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
 
-	git_str_dispose(&c1);
+	git3_str_dispose(&c1);
 }
 
 void test_diff_rename__can_delete_unmodified_deltas(void)
 {
-	git_str c1 = GIT_STR_INIT;
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_str c1 = GIT3_STR_INIT;
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
-	cl_git_pass(git_futils_readbuffer(&c1, "renames/songof7cities.txt"));
-	cl_git_pass(git_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
+	cl_git_pass(git3_futils_readbuffer(&c1, "renames/songof7cities.txt"));
+	cl_git_pass(git3_futils_writebuffer(&c1, "renames/untimely.txt", 0, 0));
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, g_repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, g_repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, g_repo));
-	cl_git_pass(git_index_read_tree(index, tree));
-	cl_git_pass(git_index_add_bypath(index, "untimely.txt"));
+	cl_git_pass(git3_repository_index(&index, g_repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
+	cl_git_pass(git3_index_add_bypath(index, "untimely.txt"));
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, g_repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(3, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(3, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_REMOVE_UNMODIFIED;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_REMOVE_UNMODIFIED;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
 
-	git_str_dispose(&c1);
+	git3_str_dispose(&c1);
 }
 
 void test_diff_rename__can_delete_unmodified_deltas_including_submodule(void)
 {
-	git_repository *repo; /* "submodules" */
-	git_index *index;
-	git_tree *tree;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_repository *repo; /* "submodules" */
+	git3_index *index;
+	git3_tree *tree;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	cl_git_sandbox_cleanup(); /* Don't use "renames" for this test */
@@ -1457,32 +1457,32 @@ void test_diff_rename__can_delete_unmodified_deltas_including_submodule(void)
 	cl_repo_set_bool(repo, "core.autocrlf", false);
 
 	cl_git_pass(
-		git_revparse_single((git_object **)&tree, repo, "HEAD^{tree}"));
+		git3_revparse_single((git3_object **)&tree, repo, "HEAD^{tree}"));
 
-	cl_git_pass(git_repository_index(&index, repo));
-	cl_git_pass(git_index_read_tree(index, tree));
+	cl_git_pass(git3_repository_index(&index, repo));
+	cl_git_pass(git3_index_read_tree(index, tree));
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNMODIFIED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNMODIFIED;
 
-	cl_git_pass(git_diff_tree_to_index(&diff, repo, tree, index, &diffopts));
+	cl_git_pass(git3_diff_tree_to_index(&diff, repo, tree, index, &diffopts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(5, exp.file_status[GIT_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(5, exp.file_status[GIT3_DELTA_UNMODIFIED]);
 
-	opts.flags = GIT_DIFF_FIND_ALL | GIT_DIFF_FIND_REMOVE_UNMODIFIED;
-	cl_git_pass(git_diff_find_similar(diff, &opts));
+	opts.flags = GIT3_DIFF_FIND_ALL | GIT3_DIFF_FIND_REMOVE_UNMODIFIED;
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
 
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(0, exp.files);
 
-	git_diff_free(diff);
-	git_tree_free(tree);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_tree_free(tree);
+	git3_index_free(index);
 
 	cl_git_sandbox_cleanup();
 }
@@ -1493,81 +1493,81 @@ void test_diff_rename__matches_config_behavior(void)
 	const char *sha1 = COPY_RENAME_COMMIT;
 	const char *sha2 = REWRITE_COPY_COMMIT;
 
-	git_tree *tree0, *tree1, *tree2;
-	git_config *cfg;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *tree0, *tree1, *tree2;
+	git3_config *cfg;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
-	opts.flags = GIT_DIFF_FIND_BY_CONFIG;
+	opts.flags = GIT3_DIFF_FIND_BY_CONFIG;
 	tree0 = resolve_commit_oid_to_tree(g_repo, sha0);
 	tree1 = resolve_commit_oid_to_tree(g_repo, sha1);
 	tree2 = resolve_commit_oid_to_tree(g_repo, sha2);
 
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	cl_git_pass(git_repository_config(&cfg, g_repo));
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
 
 	/* diff.renames = false; no rename detection should happen */
-	cl_git_pass(git_config_set_bool(cfg, "diff.renames", false));
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_config_set_bool(cfg, "diff.renames", false));
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree0, tree1, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	git3_diff_free(diff);
 
 	/* diff.renames = true; should act like -M */
-	cl_git_pass(git_config_set_bool(cfg, "diff.renames", true));
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_config_set_bool(cfg, "diff.renames", true));
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree0, tree1, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(3, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	git3_diff_free(diff);
 
 	/* diff.renames = copies; should act like -M -C */
-	cl_git_pass(git_config_set_string(cfg, "diff.renames", "copies"));
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_config_set_string(cfg, "diff.renames", "copies"));
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree1, tree2, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	git3_diff_free(diff);
 
-	/* NULL find options is the same as GIT_DIFF_FIND_BY_CONFIG */
-	cl_git_pass(git_diff_tree_to_tree(
+	/* NULL find options is the same as GIT3_DIFF_FIND_BY_CONFIG */
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree1, tree2, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, NULL));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, NULL));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	git3_diff_free(diff);
 
 	/* Cleanup */
-	git_tree_free(tree0);
-	git_tree_free(tree1);
-	git_tree_free(tree2);
-	git_config_free(cfg);
+	git3_tree_free(tree0);
+	git3_tree_free(tree1);
+	git3_tree_free(tree2);
+	git3_config_free(cfg);
 }
 
 void test_diff_rename__can_override_thresholds_when_obeying_config(void)
@@ -1575,54 +1575,54 @@ void test_diff_rename__can_override_thresholds_when_obeying_config(void)
 	const char *sha1 = COPY_RENAME_COMMIT;
 	const char *sha2 = REWRITE_COPY_COMMIT;
 
-	git_tree *tree1, *tree2;
-	git_config *cfg;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *tree1, *tree2;
+	git3_config *cfg;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	tree1 = resolve_commit_oid_to_tree(g_repo, sha1);
 	tree2 = resolve_commit_oid_to_tree(g_repo, sha2);
 
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	opts.flags = GIT_DIFF_FIND_BY_CONFIG;
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	opts.flags = GIT3_DIFF_FIND_BY_CONFIG;
 
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_string(cfg, "diff.renames", "copies"));
-	git_config_free(cfg);
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_string(cfg, "diff.renames", "copies"));
+	git3_config_free(cfg);
 
 	/* copy threshold = 96%, should see creation of ikeepsix.txt */
 	opts.copy_threshold = 96;
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree1, tree2, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	git3_diff_free(diff);
 
 	/* copy threshold = 20%, should see sixserving.txt => ikeepsix.txt */
 	opts.copy_threshold = 20;
-	cl_git_pass(git_diff_tree_to_tree(
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree1, tree2, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(4, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNMODIFIED]);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_COPIED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNMODIFIED]);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_COPIED]);
+	git3_diff_free(diff);
 
 	/* Cleanup */
-	git_tree_free(tree1);
-	git_tree_free(tree2);
+	git3_tree_free(tree1);
+	git3_tree_free(tree2);
 }
 
 void test_diff_rename__by_config_doesnt_mess_with_whitespace_settings(void)
@@ -1630,141 +1630,141 @@ void test_diff_rename__by_config_doesnt_mess_with_whitespace_settings(void)
 	const char *sha1 = REWRITE_COPY_COMMIT;
 	const char *sha2 = RENAME_MODIFICATION_COMMIT;
 
-	git_tree *tree1, *tree2;
-	git_config *cfg;
-	git_diff *diff;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *tree1, *tree2;
+	git3_config *cfg;
+	git3_diff *diff;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 	diff_expects exp;
 
 	tree1 = resolve_commit_oid_to_tree(g_repo, sha1);
 	tree2 = resolve_commit_oid_to_tree(g_repo, sha2);
 
-	diffopts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	opts.flags = GIT_DIFF_FIND_BY_CONFIG;
+	diffopts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	opts.flags = GIT3_DIFF_FIND_BY_CONFIG;
 
-	cl_git_pass(git_repository_config(&cfg, g_repo));
-	cl_git_pass(git_config_set_string(cfg, "diff.renames", "copies"));
-	git_config_free(cfg);
+	cl_git_pass(git3_repository_config(&cfg, g_repo));
+	cl_git_pass(git3_config_set_string(cfg, "diff.renames", "copies"));
+	git3_config_free(cfg);
 
 	/* Don't ignore whitespace; this should find a change in sixserving.txt */
-	opts.flags |= 0 | GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE;
-	cl_git_pass(git_diff_tree_to_tree(
+	opts.flags |= 0 | GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE;
+	cl_git_pass(git3_diff_tree_to_tree(
 				&diff, g_repo, tree1, tree2, &diffopts));
 	memset(&exp, 0, sizeof(exp));
-	cl_git_pass(git_diff_find_similar(diff, &opts));
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_find_similar(diff, &opts));
+	cl_git_pass(git3_diff_foreach(diff,
 				diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(5, exp.files);
-	cl_assert_equal_i(2, exp.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_ADDED]);
-	git_diff_free(diff);
+	cl_assert_equal_i(2, exp.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_ADDED]);
+	git3_diff_free(diff);
 
 	/* Cleanup */
-	git_tree_free(tree1);
-	git_tree_free(tree2);
+	git3_tree_free(tree1);
+	git3_tree_free(tree2);
 }
 
 static void expect_files_renamed(const char *one, const char *two, uint32_t whitespace_flags)
 {
-	git_index *index;
-	git_diff *diff = NULL;
+	git3_index *index;
+	git3_diff *diff = NULL;
 	diff_expects exp;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNTRACKED;
-	findopts.flags = GIT_DIFF_FIND_FOR_UNTRACKED |
-		GIT_DIFF_FIND_AND_BREAK_REWRITES |
-		GIT_DIFF_FIND_RENAMES_FROM_REWRITES |
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNTRACKED;
+	findopts.flags = GIT3_DIFF_FIND_FOR_UNTRACKED |
+		GIT3_DIFF_FIND_AND_BREAK_REWRITES |
+		GIT3_DIFF_FIND_RENAMES_FROM_REWRITES |
 		whitespace_flags;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_rewritefile("renames/ikeepsix.txt", one);
-	cl_git_pass(git_index_add_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "ikeepsix.txt"));
 
 	cl_git_rmfile("renames/ikeepsix.txt");
 	cl_git_rewritefile("renames/ikeepsix2.txt", two);
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
 
 	memset(&exp, 0, sizeof(exp));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(1, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_RENAMED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_RENAMED]);
 
-	git_diff_free(diff);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_index_free(index);
 }
 
 /* test some variations on empty and blank files */
 void test_diff_rename__empty_files_renamed(void)
 {
 	/* empty files are identical when ignoring whitespace or not */
-	expect_files_renamed("", "", GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE);
-	expect_files_renamed("", "",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("", "", GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE);
+	expect_files_renamed("", "",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
 }
 
 /* test that blank files are similar when ignoring whitespace */
 void test_diff_rename__blank_files_renamed_when_ignoring_whitespace(void)
 {
-	expect_files_renamed("", "\n\n",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
-	expect_files_renamed("", "\r\n\r\n",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
-	expect_files_renamed("\r\n\r\n", "\n\n\n",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("", "\n\n",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("", "\r\n\r\n",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("\r\n\r\n", "\n\n\n",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
 
-	expect_files_renamed("    ", "\n\n",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
-	expect_files_renamed("   \n   \n", "\n\n",  GIT_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("    ", "\n\n",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
+	expect_files_renamed("   \n   \n", "\n\n",  GIT3_DIFF_FIND_IGNORE_WHITESPACE);
 }
 
 /* blank files are not similar when whitespace is not ignored */
 static void expect_files_not_renamed(const char *one, const char *two, uint32_t whitespace_flags)
 {
-	git_index *index;
-	git_diff *diff = NULL;
+	git3_index *index;
+	git3_diff *diff = NULL;
 	diff_expects exp;
-	git_diff_options diffopts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options findopts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_diff_options diffopts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options findopts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
-	diffopts.flags = GIT_DIFF_INCLUDE_UNTRACKED;
+	diffopts.flags = GIT3_DIFF_INCLUDE_UNTRACKED;
 
-	findopts.flags = GIT_DIFF_FIND_FOR_UNTRACKED |
+	findopts.flags = GIT3_DIFF_FIND_FOR_UNTRACKED |
 		whitespace_flags;
 
-	cl_git_pass(git_repository_index(&index, g_repo));
+	cl_git_pass(git3_repository_index(&index, g_repo));
 
 	cl_git_rewritefile("renames/ikeepsix.txt", one);
-	cl_git_pass(git_index_add_bypath(index, "ikeepsix.txt"));
+	cl_git_pass(git3_index_add_bypath(index, "ikeepsix.txt"));
 
 	cl_git_rmfile("renames/ikeepsix.txt");
 	cl_git_rewritefile("renames/ikeepsix2.txt", two);
 
-	cl_git_pass(git_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
-	cl_git_pass(git_diff_find_similar(diff, &findopts));
+	cl_git_pass(git3_diff_index_to_workdir(&diff, g_repo, index, &diffopts));
+	cl_git_pass(git3_diff_find_similar(diff, &findopts));
 
 	memset(&exp, 0, sizeof(exp));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &exp));
 	cl_assert_equal_i(2, exp.files);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, exp.file_status[GIT_DELTA_UNTRACKED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, exp.file_status[GIT3_DELTA_UNTRACKED]);
 
-	git_diff_free(diff);
-	git_index_free(index);
+	git3_diff_free(diff);
+	git3_index_free(index);
 }
 
 /* test that blank files are similar when ignoring renames */
 void test_diff_rename__blank_files_not_renamed_when_not_ignoring_whitespace(void)
 {
-	expect_files_not_renamed("", "\r\n\r\n\r\n",  GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE);
-	expect_files_not_renamed("", "\n\n\n\n",  GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE);
-	expect_files_not_renamed("\n\n\n\n", "\r\n\r\n\r\n",  GIT_DIFF_FIND_DONT_IGNORE_WHITESPACE);
+	expect_files_not_renamed("", "\r\n\r\n\r\n",  GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE);
+	expect_files_not_renamed("", "\n\n\n\n",  GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE);
+	expect_files_not_renamed("\n\n\n\n", "\r\n\r\n\r\n",  GIT3_DIFF_FIND_DONT_IGNORE_WHITESPACE);
 }
 
 /* test that 100% renames and copies emit the correct patch file
@@ -1776,11 +1776,11 @@ void test_diff_rename__identical(void)
 {
 	const char *old_sha = INITIAL_COMMIT;
 	const char *new_sha = COPY_RENAME_COMMIT;
-	git_tree *old_tree, *new_tree;
-    git_diff *diff;
-	git_diff_options diff_opts = GIT_DIFF_OPTIONS_INIT;
-	git_diff_find_options find_opts = GIT_DIFF_FIND_OPTIONS_INIT;
-	git_buf diff_buf = GIT_BUF_INIT;
+	git3_tree *old_tree, *new_tree;
+    git3_diff *diff;
+	git3_diff_options diff_opts = GIT3_DIFF_OPTIONS_INIT;
+	git3_diff_find_options find_opts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	git3_buf diff_buf = GIT3_BUF_INIT;
 	const char *expected =
 		"diff --git a/serving.txt b/sixserving.txt\n"
 		"similarity index 100%\n"
@@ -1794,32 +1794,32 @@ void test_diff_rename__identical(void)
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
 
-	diff_opts.flags |= GIT_DIFF_INCLUDE_UNMODIFIED;
-	find_opts.flags = GIT_DIFF_FIND_COPIES_FROM_UNMODIFIED |
-		GIT_DIFF_FIND_EXACT_MATCH_ONLY;
+	diff_opts.flags |= GIT3_DIFF_INCLUDE_UNMODIFIED;
+	find_opts.flags = GIT3_DIFF_FIND_COPIES_FROM_UNMODIFIED |
+		GIT3_DIFF_FIND_EXACT_MATCH_ONLY;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff,
+	cl_git_pass(git3_diff_tree_to_tree(&diff,
 		g_repo, old_tree, new_tree, &diff_opts));
-	cl_git_pass(git_diff_find_similar(diff, &find_opts));
+	cl_git_pass(git3_diff_find_similar(diff, &find_opts));
 
-	cl_git_pass(git_diff_to_buf(&diff_buf, diff, GIT_DIFF_FORMAT_PATCH));
+	cl_git_pass(git3_diff_to_buf(&diff_buf, diff, GIT3_DIFF_FORMAT_PATCH));
 
 	cl_assert_equal_s(expected, diff_buf.ptr);
 
-	git_buf_dispose(&diff_buf);
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_buf_dispose(&diff_buf);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__rewrite_and_delete(void)
 {
 	const char *old_sha = RENAME_MODIFICATION_COMMIT;
 	const char *new_sha = REWRITE_DELETE_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_find_options find_opts = GIT_DIFF_FIND_OPTIONS_INIT;
-	git_buf diff_buf = GIT_BUF_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_find_options find_opts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	git3_buf diff_buf = GIT3_BUF_INIT;
 	const char *expected =
 		"diff --git a/ikeepsix.txt b/ikeepsix.txt\n"
 		"deleted file mode 100644\n"
@@ -1948,29 +1948,29 @@ void test_diff_rename__rewrite_and_delete(void)
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
 
-	find_opts.flags = GIT_DIFF_FIND_RENAMES_FROM_REWRITES;
+	find_opts.flags = GIT3_DIFF_FIND_RENAMES_FROM_REWRITES;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
-	cl_git_pass(git_diff_find_similar(diff, &find_opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
+	cl_git_pass(git3_diff_find_similar(diff, &find_opts));
 
-	cl_git_pass(git_diff_to_buf(&diff_buf, diff, GIT_DIFF_FORMAT_PATCH));
+	cl_git_pass(git3_diff_to_buf(&diff_buf, diff, GIT3_DIFF_FORMAT_PATCH));
 
 	cl_assert_equal_s(expected, diff_buf.ptr);
 
-	git_buf_dispose(&diff_buf);
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_buf_dispose(&diff_buf);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 void test_diff_rename__delete_and_rename(void)
 {
 	const char *old_sha = RENAME_MODIFICATION_COMMIT;
 	const char *new_sha = DELETE_RENAME_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_find_options find_opts = GIT_DIFF_FIND_OPTIONS_INIT;
-	git_buf diff_buf = GIT_BUF_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_find_options find_opts = GIT3_DIFF_FIND_OPTIONS_INIT;
+	git3_buf diff_buf = GIT3_BUF_INIT;
 	const char *expected =
 		"diff --git a/sixserving.txt b/sixserving.txt\n"
 		"deleted file mode 100644\n"
@@ -2011,19 +2011,19 @@ void test_diff_rename__delete_and_rename(void)
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
 
-	find_opts.flags = GIT_DIFF_FIND_RENAMES_FROM_REWRITES;
+	find_opts.flags = GIT3_DIFF_FIND_RENAMES_FROM_REWRITES;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
-	cl_git_pass(git_diff_find_similar(diff, &find_opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
+	cl_git_pass(git3_diff_find_similar(diff, &find_opts));
 
-	cl_git_pass(git_diff_to_buf(&diff_buf, diff, GIT_DIFF_FORMAT_PATCH));
+	cl_git_pass(git3_diff_to_buf(&diff_buf, diff, GIT3_DIFF_FORMAT_PATCH));
 
 	cl_assert_equal_s(expected, diff_buf.ptr);
 
-	git_buf_dispose(&diff_buf);
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_buf_dispose(&diff_buf);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }
 
 /*
@@ -2034,7 +2034,7 @@ void test_diff_rename__delete_and_rename(void)
  * clears out the files from the initial commit and installs
  * four files. And then there's the modification commit which
  * mutates the files in such a way as to trigger the bug in
- * libgit2.
+ * libgit3.
  * commit db98035f715427eef1f5e17f03e1801c05301e9e
  *   serving.txt     (deleted)
  *   sevencities.txt (deleted)
@@ -2045,7 +2045,7 @@ void test_diff_rename__delete_and_rename(void)
  * commit 7e7bfb88ba9bc65fd700fee1819cf1c317aafa56
  *   This deletes CCC and makes slight modifications
  *   to AAA, BBB, and DDD. The find_best_matches loop
- *   for git_diff_find_similar computes the following:
+ *   for git3_diff_find_similar computes the following:
  *   CCC    moved to    AAA     (similarity 91)
  *   CCC    copied to   AAA     (similarity 91)
  *   DDD    moved to    BBB     (similarity 52)
@@ -2062,19 +2062,19 @@ void test_diff_rename__break_rewrite(void)
 {
 	const char *old_sha = BREAK_REWRITE_BASE_COMMIT;
 	const char *new_sha = BREAK_REWRITE_COMMIT;
-	git_tree *old_tree, *new_tree;
-	git_diff *diff;
-	git_diff_find_options find_opts = GIT_DIFF_FIND_OPTIONS_INIT;
+	git3_tree *old_tree, *new_tree;
+	git3_diff *diff;
+	git3_diff_find_options find_opts = GIT3_DIFF_FIND_OPTIONS_INIT;
 
 	old_tree = resolve_commit_oid_to_tree(g_repo, old_sha);
 	new_tree = resolve_commit_oid_to_tree(g_repo, new_sha);
 
-	find_opts.flags = GIT_DIFF_FIND_RENAMES | GIT_DIFF_FIND_COPIES | GIT_DIFF_BREAK_REWRITES | GIT_DIFF_BREAK_REWRITES_FOR_RENAMES_ONLY;
+	find_opts.flags = GIT3_DIFF_FIND_RENAMES | GIT3_DIFF_FIND_COPIES | GIT3_DIFF_BREAK_REWRITES | GIT3_DIFF_BREAK_REWRITES_FOR_RENAMES_ONLY;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
-	cl_git_pass(git_diff_find_similar(diff, &find_opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, old_tree, new_tree, NULL));
+	cl_git_pass(git3_diff_find_similar(diff, &find_opts));
 
-	git_diff_free(diff);
-	git_tree_free(old_tree);
-	git_tree_free(new_tree);
+	git3_diff_free(diff);
+	git3_tree_free(old_tree);
+	git3_tree_free(new_tree);
 }

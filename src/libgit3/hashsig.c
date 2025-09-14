@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -34,11 +34,11 @@ typedef struct {
 	hashsig_t values[HASHSIG_HEAP_SIZE];
 } hashsig_heap;
 
-struct git_hashsig {
+struct git3_hashsig {
 	hashsig_heap mins;
 	hashsig_heap maxs;
 	size_t lines;
-	git_hashsig_option_t opt;
+	git3_hashsig_option_t opt;
 };
 
 #define HEAP_LCHILD_OF(I) (((I)<<1)+1)
@@ -55,14 +55,14 @@ static void hashsig_heap_init(hashsig_heap *h, hashsig_cmp cmp)
 static int hashsig_cmp_max(const void *a, const void *b, void *payload)
 {
 	hashsig_t av = *(const hashsig_t *)a, bv = *(const hashsig_t *)b;
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 	return (av < bv) ? -1 : (av > bv) ? 1 : 0;
 }
 
 static int hashsig_cmp_min(const void *a, const void *b, void *payload)
 {
 	hashsig_t av = *(const hashsig_t *)a, bv = *(const hashsig_t *)b;
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 	return (av > bv) ? -1 : (av < bv) ? 1 : 0;
 }
 
@@ -108,7 +108,7 @@ static void hashsig_heap_down(hashsig_heap *h, int el)
 static void hashsig_heap_sort(hashsig_heap *h)
 {
 	/* only need to do this at the end for signature comparison */
-	git__qsort_r(h->values, h->size, sizeof(hashsig_t), h->cmp, NULL);
+	git3__qsort_r(h->values, h->size, sizeof(hashsig_t), h->cmp, NULL);
 }
 
 static void hashsig_heap_insert(hashsig_heap *h, hashsig_t val)
@@ -134,21 +134,21 @@ typedef struct {
 } hashsig_in_progress;
 
 static int hashsig_in_progress_init(
-	hashsig_in_progress *prog, git_hashsig *sig)
+	hashsig_in_progress *prog, git3_hashsig *sig)
 {
 	int i;
 
 	/* no more than one can be set */
-	GIT_ASSERT(!(sig->opt & GIT_HASHSIG_IGNORE_WHITESPACE) ||
-		   !(sig->opt & GIT_HASHSIG_SMART_WHITESPACE));
+	GIT3_ASSERT(!(sig->opt & GIT3_HASHSIG_IGNORE_WHITESPACE) ||
+		   !(sig->opt & GIT3_HASHSIG_SMART_WHITESPACE));
 
-	if (sig->opt & GIT_HASHSIG_IGNORE_WHITESPACE) {
+	if (sig->opt & GIT3_HASHSIG_IGNORE_WHITESPACE) {
 		for (i = 0; i < 256; ++i)
-			prog->ignore_ch[i] = git__isspace_nonlf(i);
+			prog->ignore_ch[i] = git3__isspace_nonlf(i);
 		prog->use_ignores = 1;
-	} else if (sig->opt & GIT_HASHSIG_SMART_WHITESPACE) {
+	} else if (sig->opt & GIT3_HASHSIG_SMART_WHITESPACE) {
 		for (i = 0; i < 256; ++i)
-			prog->ignore_ch[i] = git__isspace(i);
+			prog->ignore_ch[i] = git3__isspace(i);
 		prog->use_ignores = 1;
 	} else {
 		memset(prog, 0, sizeof(*prog));
@@ -158,7 +158,7 @@ static int hashsig_in_progress_init(
 }
 
 static int hashsig_add_hashes(
-	git_hashsig *sig,
+	git3_hashsig *sig,
 	const uint8_t *data,
 	size_t size,
 	hashsig_in_progress *prog)
@@ -175,15 +175,15 @@ static int hashsig_add_hashes(
 			ch = *scan;
 
 			if (use_ignores)
-				for (; scan < end && git__isspace_nonlf(ch); ch = *scan)
+				for (; scan < end && git3__isspace_nonlf(ch); ch = *scan)
 					++scan;
 			else if (sig->opt &
-					 (GIT_HASHSIG_IGNORE_WHITESPACE | GIT_HASHSIG_SMART_WHITESPACE))
+					 (GIT3_HASHSIG_IGNORE_WHITESPACE | GIT3_HASHSIG_SMART_WHITESPACE))
 				for (; scan < end && ch == '\r'; ch = *scan)
 					++scan;
 
 			/* peek at next character to decide what to do next */
-			if (sig->opt & GIT_HASHSIG_SMART_WHITESPACE)
+			if (sig->opt & GIT3_HASHSIG_SMART_WHITESPACE)
 				use_ignores = (ch == '\n');
 
 			if (scan >= end)
@@ -214,13 +214,13 @@ static int hashsig_add_hashes(
 	return 0;
 }
 
-static int hashsig_finalize_hashes(git_hashsig *sig)
+static int hashsig_finalize_hashes(git3_hashsig *sig)
 {
 	if (sig->mins.size < HASHSIG_HEAP_MIN_SIZE &&
-		!(sig->opt & GIT_HASHSIG_ALLOW_SMALL_FILES)) {
-		git_error_set(GIT_ERROR_INVALID,
+		!(sig->opt & GIT3_HASHSIG_ALLOW_SMALL_FILES)) {
+		git3_error_set(GIT3_ERROR_INVALID,
 			"file too small for similarity signature calculation");
-		return GIT_EBUFS;
+		return GIT3_EBUFS;
 	}
 
 	hashsig_heap_sort(&sig->mins);
@@ -229,9 +229,9 @@ static int hashsig_finalize_hashes(git_hashsig *sig)
 	return 0;
 }
 
-static git_hashsig *hashsig_alloc(git_hashsig_option_t opts)
+static git3_hashsig *hashsig_alloc(git3_hashsig_option_t opts)
 {
-	git_hashsig *sig = git__calloc(1, sizeof(git_hashsig));
+	git3_hashsig *sig = git3__calloc(1, sizeof(git3_hashsig));
 	if (!sig)
 		return NULL;
 
@@ -242,16 +242,16 @@ static git_hashsig *hashsig_alloc(git_hashsig_option_t opts)
 	return sig;
 }
 
-int git_hashsig_create(
-	git_hashsig **out,
+int git3_hashsig_create(
+	git3_hashsig **out,
 	const char *buf,
 	size_t buflen,
-	git_hashsig_option_t opts)
+	git3_hashsig_option_t opts)
 {
 	int error;
 	hashsig_in_progress prog;
-	git_hashsig *sig = hashsig_alloc(opts);
-	GIT_ERROR_CHECK_ALLOC(sig);
+	git3_hashsig *sig = hashsig_alloc(opts);
+	GIT3_ERROR_CHECK_ALLOC(sig);
 
 	if ((error = hashsig_in_progress_init(&prog, sig)) < 0)
 		return error;
@@ -264,25 +264,25 @@ int git_hashsig_create(
 	if (!error)
 		*out = sig;
 	else
-		git_hashsig_free(sig);
+		git3_hashsig_free(sig);
 
 	return error;
 }
 
-int git_hashsig_create_fromfile(
-	git_hashsig **out,
+int git3_hashsig_create_fromfile(
+	git3_hashsig **out,
 	const char *path,
-	git_hashsig_option_t opts)
+	git3_hashsig_option_t opts)
 {
 	uint8_t buf[0x1000];
 	ssize_t buflen = 0;
 	int error = 0, fd;
 	hashsig_in_progress prog;
-	git_hashsig *sig = hashsig_alloc(opts);
-	GIT_ERROR_CHECK_ALLOC(sig);
+	git3_hashsig *sig = hashsig_alloc(opts);
+	GIT3_ERROR_CHECK_ALLOC(sig);
 
-	if ((fd = git_futils_open_ro(path)) < 0) {
-		git__free(sig);
+	if ((fd = git3_futils_open_ro(path)) < 0) {
+		git3__free(sig);
 		return fd;
 	}
 
@@ -294,7 +294,7 @@ int git_hashsig_create_fromfile(
 	while (!error) {
 		if ((buflen = p_read(fd, buf, sizeof(buf))) <= 0) {
 			if ((error = (int)buflen) < 0)
-				git_error_set(GIT_ERROR_OS,
+				git3_error_set(GIT3_ERROR_OS,
 					"read error on '%s' calculating similarity hashes", path);
 			break;
 		}
@@ -310,21 +310,21 @@ int git_hashsig_create_fromfile(
 	if (!error)
 		*out = sig;
 	else
-		git_hashsig_free(sig);
+		git3_hashsig_free(sig);
 
 	return error;
 }
 
-void git_hashsig_free(git_hashsig *sig)
+void git3_hashsig_free(git3_hashsig *sig)
 {
-	git__free(sig);
+	git3__free(sig);
 }
 
 static int hashsig_heap_compare(const hashsig_heap *a, const hashsig_heap *b)
 {
 	int matches = 0, i, j, cmp;
 
-	GIT_ASSERT_WITH_RETVAL(a->cmp == b->cmp, 0);
+	GIT3_ASSERT_WITH_RETVAL(a->cmp == b->cmp, 0);
 
 	/* hash heaps are sorted - just look for overlap vs total */
 
@@ -343,7 +343,7 @@ static int hashsig_heap_compare(const hashsig_heap *a, const hashsig_heap *b)
 	return HASHSIG_SCALE * (matches * 2) / (a->size + b->size);
 }
 
-int git_hashsig_compare(const git_hashsig *a, const git_hashsig *b)
+int git3_hashsig_compare(const git3_hashsig *a, const git3_hashsig *b)
 {
 	/* if we have no elements in either file then each file is either
 	 * empty or blank.  if we're ignoring whitespace then the files are
@@ -351,7 +351,7 @@ int git_hashsig_compare(const git_hashsig *a, const git_hashsig *b)
 	 */
 	if (a->mins.size == 0 && b->mins.size == 0) {
 		if ((!a->lines && !b->lines) ||
-			(a->opt & GIT_HASHSIG_IGNORE_WHITESPACE))
+			(a->opt & GIT3_HASHSIG_IGNORE_WHITESPACE))
 			return HASHSIG_SCALE;
 		else
 			return 0;

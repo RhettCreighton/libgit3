@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_index_h__
@@ -11,27 +11,27 @@
 #include "git3/types.h"
 
 /**
- * @file git2/sys/index.h
+ * @file git3/sys/index.h
  * @brief Low-level index manipulation routines
- * @defgroup git_index Low-level index manipulation routines
+ * @defgroup git3_index Low-level index manipulation routines
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /** Representation of a rename conflict entry in the index. */
-typedef struct git_index_name_entry {
+typedef struct git3_index_name_entry {
 	char *ancestor;
 	char *ours;
 	char *theirs;
-} git_index_name_entry;
+} git3_index_name_entry;
 
 /** Representation of a resolve undo entry in the index. */
-typedef struct git_index_reuc_entry {
+typedef struct git3_index_reuc_entry {
 	uint32_t mode[3];
-	git_oid oid[3];
+	git3_oid oid[3];
 	char *path;
-} git_index_reuc_entry;
+} git3_index_reuc_entry;
 
 /** @name Conflict Name entry functions
  *
@@ -45,7 +45,7 @@ typedef struct git_index_reuc_entry {
  * @param index an existing index object
  * @return integer of count of current filename conflict entries
  */
-GIT_EXTERN(size_t) git_index_name_entrycount(git_index *index);
+GIT3_EXTERN(size_t) git3_index_name_entrycount(git3_index *index);
 
 /**
  * Get a filename conflict entry from the index.
@@ -57,8 +57,8 @@ GIT_EXTERN(size_t) git_index_name_entrycount(git_index *index);
  * @param n the position of the entry
  * @return a pointer to the filename conflict entry; NULL if out of bounds
  */
-GIT_EXTERN(const git_index_name_entry *) git_index_name_get_byindex(
-	git_index *index, size_t n);
+GIT3_EXTERN(const git3_index_name_entry *) git3_index_name_get_byindex(
+	git3_index *index, size_t n);
 
 /**
  * Record the filenames involved in a rename conflict.
@@ -69,7 +69,7 @@ GIT_EXTERN(const git_index_name_entry *) git_index_name_get_byindex(
  * @param theirs the path of the file as it existed in their tree
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_index_name_add(git_index *index,
+GIT3_EXTERN(int) git3_index_name_add(git3_index *index,
 	const char *ancestor, const char *ours, const char *theirs);
 
 /**
@@ -78,7 +78,7 @@ GIT_EXTERN(int) git_index_name_add(git_index *index,
  * @param index an existing index object
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_index_name_clear(git_index *index);
+GIT3_EXTERN(int) git3_index_name_clear(git3_index *index);
 
 /**@}*/
 
@@ -95,7 +95,7 @@ GIT_EXTERN(int) git_index_name_clear(git_index *index);
  * @param index an existing index object
  * @return integer of count of current resolve undo entries
  */
-GIT_EXTERN(size_t) git_index_reuc_entrycount(git_index *index);
+GIT3_EXTERN(size_t) git3_index_reuc_entrycount(git3_index *index);
 
 /**
  * Finds the resolve undo entry that points to the given path in the Git
@@ -104,9 +104,9 @@ GIT_EXTERN(size_t) git_index_reuc_entrycount(git_index *index);
  * @param at_pos the address to which the position of the reuc entry is written (optional)
  * @param index an existing index object
  * @param path path to search
- * @return 0 if found, < 0 otherwise (GIT_ENOTFOUND)
+ * @return 0 if found, < 0 otherwise (GIT3_ENOTFOUND)
  */
-GIT_EXTERN(int) git_index_reuc_find(size_t *at_pos, git_index *index, const char *path);
+GIT3_EXTERN(int) git3_index_reuc_find(size_t *at_pos, git3_index *index, const char *path);
 
 /**
  * Get a resolve undo entry from the index.
@@ -118,7 +118,7 @@ GIT_EXTERN(int) git_index_reuc_find(size_t *at_pos, git_index *index, const char
  * @param path path to search
  * @return the resolve undo entry; NULL if not found
  */
-GIT_EXTERN(const git_index_reuc_entry *) git_index_reuc_get_bypath(git_index *index, const char *path);
+GIT3_EXTERN(const git3_index_reuc_entry *) git3_index_reuc_get_bypath(git3_index *index, const char *path);
 
 /**
  * Get a resolve undo entry from the index.
@@ -130,7 +130,7 @@ GIT_EXTERN(const git_index_reuc_entry *) git_index_reuc_get_bypath(git_index *in
  * @param n the position of the entry
  * @return a pointer to the resolve undo entry; NULL if out of bounds
  */
-GIT_EXTERN(const git_index_reuc_entry *) git_index_reuc_get_byindex(git_index *index, size_t n);
+GIT3_EXTERN(const git3_index_reuc_entry *) git3_index_reuc_get_byindex(git3_index *index, size_t n);
 
 /**
  * Adds a resolve undo entry for a file based on the given parameters.
@@ -154,10 +154,10 @@ GIT_EXTERN(const git_index_reuc_entry *) git_index_reuc_get_byindex(git_index *i
  * @param their_id oid of their file
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_index_reuc_add(git_index *index, const char *path,
-	int ancestor_mode, const git_oid *ancestor_id,
-	int our_mode, const git_oid *our_id,
-	int their_mode, const git_oid *their_id);
+GIT3_EXTERN(int) git3_index_reuc_add(git3_index *index, const char *path,
+	int ancestor_mode, const git3_oid *ancestor_id,
+	int our_mode, const git3_oid *our_id,
+	int their_mode, const git3_oid *their_id);
 
 /**
  * Remove an resolve undo entry from the index
@@ -166,7 +166,7 @@ GIT_EXTERN(int) git_index_reuc_add(git_index *index, const char *path,
  * @param n position of the resolve undo entry to remove
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_index_reuc_remove(git_index *index, size_t n);
+GIT3_EXTERN(int) git3_index_reuc_remove(git3_index *index, size_t n);
 
 /**
  * Remove all resolve undo entries from the index
@@ -174,10 +174,10 @@ GIT_EXTERN(int) git_index_reuc_remove(git_index *index, size_t n);
  * @param index an existing index object
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_index_reuc_clear(git_index *index);
+GIT3_EXTERN(int) git3_index_reuc_clear(git3_index *index);
 
 /**@}*/
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 #endif

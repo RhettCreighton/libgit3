@@ -1,9 +1,9 @@
 /*
- * libgit2 packfile fuzzer target.
+ * libgit3 packfile fuzzer target.
  *
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -16,8 +16,8 @@
 
 #include "standalone_driver.h"
 
-static git_odb *odb = NULL;
-static git_odb_backend *mempack = NULL;
+static git3_odb *odb = NULL;
+static git3_odb_backend *mempack = NULL;
 
 /* Arbitrary object to seed the ODB. */
 static const unsigned char base_obj[] = { 07, 076 };
@@ -25,28 +25,28 @@ static const unsigned int base_obj_len = 2;
 
 int LLVMFuzzerInitialize(int *argc, char ***argv)
 {
-	GIT_UNUSED(argc);
-	GIT_UNUSED(argv);
+	GIT3_UNUSED(argc);
+	GIT3_UNUSED(argv);
 
-	if (git_libgit3_init() < 0) {
-		fprintf(stderr, "Failed to initialize libgit2\n");
+	if (git3_libgit3_init() < 0) {
+		fprintf(stderr, "Failed to initialize libgit3\n");
 		abort();
 	}
-	if (git_libgit3_opts(GIT_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0) {
+	if (git3_libgit3_opts(GIT3_OPT_SET_PACK_MAX_OBJECTS, 10000000) < 0) {
 		fprintf(stderr, "Failed to limit maximum pack object count\n");
 		abort();
 	}
 
-	if (git_odb_new(&odb) < 0) {
+	if (git3_odb_new(&odb) < 0) {
 		fprintf(stderr, "Failed to create the odb\n");
 		abort();
 	}
 
-	if (git_mempack_new(&mempack) < 0) {
+	if (git3_mempack_new(&mempack) < 0) {
 		fprintf(stderr, "Failed to create the mempack\n");
 		abort();
 	}
-	if (git_odb_add_backend(odb, mempack, 999) < 0) {
+	if (git3_odb_add_backend(odb, mempack, 999) < 0) {
 		fprintf(stderr, "Failed to add the mempack\n");
 		abort();
 	}
@@ -55,10 +55,10 @@ int LLVMFuzzerInitialize(int *argc, char ***argv)
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-	git_indexer_progress stats = {0, 0};
-	git_indexer *indexer = NULL;
-	git_str path = GIT_STR_INIT;
-	git_oid oid;
+	git3_indexer_progress stats = {0, 0};
+	git3_indexer *indexer = NULL;
+	git3_str path = GIT3_STR_INIT;
+	git3_oid oid;
 	bool append_hash = false;
 	int error;
 
@@ -69,22 +69,22 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 		fprintf(stderr, "Global state not initialized\n");
 		abort();
 	}
-	git_mempack_reset(mempack);
+	git3_mempack_reset(mempack);
 
-	if (git_odb_write(&oid, odb, base_obj, base_obj_len, GIT_OBJECT_BLOB) < 0) {
+	if (git3_odb_write(&oid, odb, base_obj, base_obj_len, GIT3_OBJECT_BLOB) < 0) {
 		fprintf(stderr, "Failed to add an object to the odb\n");
 		abort();
 	}
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	error = git_indexer_new(&indexer, ".", NULL);
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	error = git3_indexer_new(&indexer, ".", NULL);
 #else
-	error = git_indexer_new(&indexer, ".", 0, odb, NULL);
+	error = git3_indexer_new(&indexer, ".", 0, odb, NULL);
 #endif
 
 	if (error < 0) {
 		fprintf(stderr, "Failed to create the indexer: %s\n",
-			git_error_last()->message);
+			git3_error_last()->message);
 		abort();
 	}
 
@@ -96,41 +96,41 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 	++data;
 	--size;
 
-	if (git_indexer_append(indexer, data, size, &stats) < 0)
+	if (git3_indexer_append(indexer, data, size, &stats) < 0)
 		goto cleanup;
 	if (append_hash) {
-#ifdef GIT_EXPERIMENTAL_SHA256
-		if (git_odb_hash(&oid, data, size, GIT_OBJECT_BLOB, GIT_OID_SHA1) < 0) {
+#ifdef GIT3_EXPERIMENTAL_SHA256
+		if (git3_odb_hash(&oid, data, size, GIT3_OBJECT_BLOB, GIT3_OID_SHA1) < 0) {
 			fprintf(stderr, "Failed to compute the SHA1 hash\n");
 			abort();
 		}
 #else
-		if (git_odb_hash(&oid, data, size, GIT_OBJECT_BLOB) < 0) {
+		if (git3_odb_hash(&oid, data, size, GIT3_OBJECT_BLOB) < 0) {
 			fprintf(stderr, "Failed to compute the SHA1 hash\n");
 			abort();
 		}
 #endif
 
-		if (git_indexer_append(indexer, &oid.id, GIT_OID_SHA1_SIZE, &stats) < 0) {
+		if (git3_indexer_append(indexer, &oid.id, GIT3_OID_SHA1_SIZE, &stats) < 0) {
 			goto cleanup;
 		}
 	}
-	if (git_indexer_commit(indexer, &stats) < 0)
+	if (git3_indexer_commit(indexer, &stats) < 0)
 		goto cleanup;
 
-	if (git_str_printf(&path, "pack-%s.idx", git_indexer_name(indexer)) < 0)
+	if (git3_str_printf(&path, "pack-%s.idx", git3_indexer_name(indexer)) < 0)
 		goto cleanup;
-	p_unlink(git_str_cstr(&path));
+	p_unlink(git3_str_cstr(&path));
 
-	git_str_clear(&path);
+	git3_str_clear(&path);
 
-	if (git_str_printf(&path, "pack-%s.pack", git_indexer_name(indexer)) < 0)
+	if (git3_str_printf(&path, "pack-%s.pack", git3_indexer_name(indexer)) < 0)
 		goto cleanup;
-	p_unlink(git_str_cstr(&path));
+	p_unlink(git3_str_cstr(&path));
 
 cleanup:
-	git_mempack_reset(mempack);
-	git_indexer_free(indexer);
-	git_str_dispose(&path);
+	git3_mempack_reset(mempack);
+	git3_indexer_free(indexer);
+	git3_str_dispose(&path);
 	return 0;
 }

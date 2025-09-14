@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "repository.h"
 #include "git3/reflog.h"
@@ -8,7 +8,7 @@
 static const char *current_master_tip = "099fabac3a9ea935598528c27f866e34089c2eff";
 static const char *current_head_target = "refs/heads/master";
 
-static git_repository *g_repo;
+static git3_repository *g_repo;
 
 void test_refs_create__initialize(void)
 {
@@ -20,234 +20,234 @@ void test_refs_create__cleanup(void)
 {
 	cl_git_sandbox_cleanup();
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_STRICT_OBJECT_CREATION, 1));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_STRICT_SYMBOLIC_REF_CREATION, 1));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_FSYNC_GITDIR, 0));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_OBJECT_CREATION, 1));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_SYMBOLIC_REF_CREATION, 1));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_FSYNC_GITDIR, 0));
 }
 
 void test_refs_create__symbolic(void)
 {
 	/* create a new symbolic reference */
-	git_reference *new_reference, *looked_up_ref, *resolved_ref;
-	git_repository *repo2;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref, *resolved_ref;
+	git3_repository *repo2;
+	git3_oid id;
 
 	const char *new_head_tracker = "ANOTHER_HEAD_TRACKER";
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
 	/* Create and write the new symbolic reference */
-	cl_git_pass(git_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, current_head_target, 0, NULL));
+	cl_git_pass(git3_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, current_head_target, 0, NULL));
 
 	/* Ensure the reference can be looked-up... */
-	cl_git_pass(git_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
-	cl_assert(git_reference_type(looked_up_ref) & GIT_REFERENCE_SYMBOLIC);
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
+	cl_assert(git3_reference_type(looked_up_ref) & GIT3_REFERENCE_SYMBOLIC);
 	cl_assert(reference_is_packed(looked_up_ref) == 0);
 	cl_assert_equal_s(looked_up_ref->name, new_head_tracker);
 
 	/* ...peeled.. */
-	cl_git_pass(git_reference_resolve(&resolved_ref, looked_up_ref));
-	cl_assert(git_reference_type(resolved_ref) == GIT_REFERENCE_DIRECT);
+	cl_git_pass(git3_reference_resolve(&resolved_ref, looked_up_ref));
+	cl_assert(git3_reference_type(resolved_ref) == GIT3_REFERENCE_DIRECT);
 
 	/* ...and that it points to the current master tip */
-	cl_assert_equal_oid(&id, git_reference_target(resolved_ref));
-	git_reference_free(looked_up_ref);
-	git_reference_free(resolved_ref);
+	cl_assert_equal_oid(&id, git3_reference_target(resolved_ref));
+	git3_reference_free(looked_up_ref);
+	git3_reference_free(resolved_ref);
 
 	/* Similar test with a fresh new repository */
-	cl_git_pass(git_repository_open(&repo2, "testrepo"));
+	cl_git_pass(git3_repository_open(&repo2, "testrepo"));
 
-	cl_git_pass(git_reference_lookup(&looked_up_ref, repo2, new_head_tracker));
-	cl_git_pass(git_reference_resolve(&resolved_ref, looked_up_ref));
-	cl_assert_equal_oid(&id, git_reference_target(resolved_ref));
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, repo2, new_head_tracker));
+	cl_git_pass(git3_reference_resolve(&resolved_ref, looked_up_ref));
+	cl_assert_equal_oid(&id, git3_reference_target(resolved_ref));
 
-	git_repository_free(repo2);
+	git3_repository_free(repo2);
 
-	git_reference_free(new_reference);
-	git_reference_free(looked_up_ref);
-	git_reference_free(resolved_ref);
+	git3_reference_free(new_reference);
+	git3_reference_free(looked_up_ref);
+	git3_reference_free(resolved_ref);
 }
 
 void test_refs_create__symbolic_with_arbitrary_content(void)
 {
-	git_reference *new_reference, *looked_up_ref;
-	git_repository *repo2;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref;
+	git3_repository *repo2;
+	git3_oid id;
 
 	const char *new_head_tracker = "ANOTHER_HEAD_TRACKER";
 	const char *arbitrary_target = "ARBITRARY DATA";
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
 	/* Attempt to create symbolic ref with arbitrary data in target
 	 * fails by default
 	 */
-	cl_git_fail(git_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, arbitrary_target, 0, NULL));
+	cl_git_fail(git3_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, arbitrary_target, 0, NULL));
 
-	git_libgit3_opts(GIT_OPT_ENABLE_STRICT_SYMBOLIC_REF_CREATION, 0);
+	git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_SYMBOLIC_REF_CREATION, 0);
 
 	/* With strict target validation disabled, ref creation succeeds */
-	cl_git_pass(git_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, arbitrary_target, 0, NULL));
+	cl_git_pass(git3_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, arbitrary_target, 0, NULL));
 
 	/* Ensure the reference can be looked-up... */
-	cl_git_pass(git_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
-	cl_assert(git_reference_type(looked_up_ref) & GIT_REFERENCE_SYMBOLIC);
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
+	cl_assert(git3_reference_type(looked_up_ref) & GIT3_REFERENCE_SYMBOLIC);
 	cl_assert(reference_is_packed(looked_up_ref) == 0);
 	cl_assert_equal_s(looked_up_ref->name, new_head_tracker);
-	git_reference_free(looked_up_ref);
+	git3_reference_free(looked_up_ref);
 
 	/* Ensure the target is what we expect it to be */
-	cl_assert_equal_s(git_reference_symbolic_target(new_reference), arbitrary_target);
+	cl_assert_equal_s(git3_reference_symbolic_target(new_reference), arbitrary_target);
 
 	/* Similar test with a fresh new repository object */
-	cl_git_pass(git_repository_open(&repo2, "testrepo"));
+	cl_git_pass(git3_repository_open(&repo2, "testrepo"));
 
 	/* Ensure the reference can be looked-up... */
-	cl_git_pass(git_reference_lookup(&looked_up_ref, repo2, new_head_tracker));
-	cl_assert(git_reference_type(looked_up_ref) & GIT_REFERENCE_SYMBOLIC);
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, repo2, new_head_tracker));
+	cl_assert(git3_reference_type(looked_up_ref) & GIT3_REFERENCE_SYMBOLIC);
 	cl_assert(reference_is_packed(looked_up_ref) == 0);
 	cl_assert_equal_s(looked_up_ref->name, new_head_tracker);
 
 	/* Ensure the target is what we expect it to be */
-	cl_assert_equal_s(git_reference_symbolic_target(new_reference), arbitrary_target);
+	cl_assert_equal_s(git3_reference_symbolic_target(new_reference), arbitrary_target);
 
-	git_repository_free(repo2);
-	git_reference_free(new_reference);
-	git_reference_free(looked_up_ref);
+	git3_repository_free(repo2);
+	git3_reference_free(new_reference);
+	git3_reference_free(looked_up_ref);
 }
 
 void test_refs_create__deep_symbolic(void)
 {
 	/* create a deep symbolic reference */
-	git_reference *new_reference, *looked_up_ref, *resolved_ref;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref, *resolved_ref;
+	git3_oid id;
 
 	const char *new_head_tracker = "deep/rooted/tracker";
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
-	cl_git_pass(git_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, current_head_target, 0, NULL));
-	cl_git_pass(git_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
-	cl_git_pass(git_reference_resolve(&resolved_ref, looked_up_ref));
-	cl_assert_equal_oid(&id, git_reference_target(resolved_ref));
+	cl_git_pass(git3_reference_symbolic_create(&new_reference, g_repo, new_head_tracker, current_head_target, 0, NULL));
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, g_repo, new_head_tracker));
+	cl_git_pass(git3_reference_resolve(&resolved_ref, looked_up_ref));
+	cl_assert_equal_oid(&id, git3_reference_target(resolved_ref));
 
-	git_reference_free(new_reference);
-	git_reference_free(looked_up_ref);
-	git_reference_free(resolved_ref);
+	git3_reference_free(new_reference);
+	git3_reference_free(looked_up_ref);
+	git3_reference_free(resolved_ref);
 }
 
 void test_refs_create__oid(void)
 {
 	/* create a new OID reference */
-	git_reference *new_reference, *looked_up_ref;
-	git_repository *repo2;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref;
+	git3_repository *repo2;
+	git3_oid id;
 
 	const char *new_head = "refs/heads/new-head";
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
 	/* Create and write the new object id reference */
-	cl_git_pass(git_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
+	cl_git_pass(git3_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
 
 	/* Ensure the reference can be looked-up... */
-	cl_git_pass(git_reference_lookup(&looked_up_ref, g_repo, new_head));
-	cl_assert(git_reference_type(looked_up_ref) & GIT_REFERENCE_DIRECT);
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, g_repo, new_head));
+	cl_assert(git3_reference_type(looked_up_ref) & GIT3_REFERENCE_DIRECT);
 	cl_assert(reference_is_packed(looked_up_ref) == 0);
 	cl_assert_equal_s(looked_up_ref->name, new_head);
 
 	/* ...and that it points to the current master tip */
-	cl_assert_equal_oid(&id, git_reference_target(looked_up_ref));
-	git_reference_free(looked_up_ref);
+	cl_assert_equal_oid(&id, git3_reference_target(looked_up_ref));
+	git3_reference_free(looked_up_ref);
 
 	/* Similar test with a fresh new repository */
-	cl_git_pass(git_repository_open(&repo2, "testrepo"));
+	cl_git_pass(git3_repository_open(&repo2, "testrepo"));
 
-	cl_git_pass(git_reference_lookup(&looked_up_ref, repo2, new_head));
-	cl_assert_equal_oid(&id, git_reference_target(looked_up_ref));
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, repo2, new_head));
+	cl_assert_equal_oid(&id, git3_reference_target(looked_up_ref));
 
-	git_repository_free(repo2);
+	git3_repository_free(repo2);
 
-	git_reference_free(new_reference);
-	git_reference_free(looked_up_ref);
+	git3_reference_free(new_reference);
+	git3_reference_free(looked_up_ref);
 }
 
 /* Can by default create a reference that targets at an unknown id */
 void test_refs_create__oid_unknown_succeeds_without_strict(void)
 {
-	git_reference *new_reference, *looked_up_ref;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref;
+	git3_oid id;
 
 	const char *new_head = "refs/heads/new-head";
 
-	git_oid_from_string(&id, "deadbeef3f795b2b4353bcce3a527ad0a4f7f644", GIT_OID_SHA1);
+	git3_oid_from_string(&id, "deadbeef3f795b2b4353bcce3a527ad0a4f7f644", GIT3_OID_SHA1);
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_STRICT_OBJECT_CREATION, 0));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_STRICT_OBJECT_CREATION, 0));
 
 	/* Create and write the new object id reference */
-	cl_git_pass(git_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
-	git_reference_free(new_reference);
+	cl_git_pass(git3_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
+	git3_reference_free(new_reference);
 
 	/* Ensure the reference can't be looked-up... */
-	cl_git_pass(git_reference_lookup(&looked_up_ref, g_repo, new_head));
-	git_reference_free(looked_up_ref);
+	cl_git_pass(git3_reference_lookup(&looked_up_ref, g_repo, new_head));
+	git3_reference_free(looked_up_ref);
 }
 
 /* Strict object enforcement enforces valid object id */
 void test_refs_create__oid_unknown_fails_by_default(void)
 {
-	git_reference *new_reference, *looked_up_ref;
-	git_oid id;
+	git3_reference *new_reference, *looked_up_ref;
+	git3_oid id;
 
 	const char *new_head = "refs/heads/new-head";
 
-	git_oid_from_string(&id, "deadbeef3f795b2b4353bcce3a527ad0a4f7f644", GIT_OID_SHA1);
+	git3_oid_from_string(&id, "deadbeef3f795b2b4353bcce3a527ad0a4f7f644", GIT3_OID_SHA1);
 
 	/* Create and write the new object id reference */
-	cl_git_fail(git_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
+	cl_git_fail(git3_reference_create(&new_reference, g_repo, new_head, &id, 0, NULL));
 
 	/* Ensure the reference can't be looked-up... */
-	cl_git_fail(git_reference_lookup(&looked_up_ref, g_repo, new_head));
+	cl_git_fail(git3_reference_lookup(&looked_up_ref, g_repo, new_head));
 }
 
 void test_refs_create__propagate_eexists(void)
 {
-	git_oid oid;
+	git3_oid oid;
 
 	/* Make sure it works for oid and for symbolic both */
-	cl_git_pass(git_oid_from_string(&oid, current_master_tip, GIT_OID_SHA1));
-	cl_git_fail_with(GIT_EEXISTS, git_reference_create(NULL, g_repo, current_head_target, &oid, false, NULL));
-	cl_git_fail_with(GIT_EEXISTS, git_reference_symbolic_create(NULL, g_repo, "HEAD", current_head_target, false, NULL));
+	cl_git_pass(git3_oid_from_string(&oid, current_master_tip, GIT3_OID_SHA1));
+	cl_git_fail_with(GIT3_EEXISTS, git3_reference_create(NULL, g_repo, current_head_target, &oid, false, NULL));
+	cl_git_fail_with(GIT3_EEXISTS, git3_reference_symbolic_create(NULL, g_repo, "HEAD", current_head_target, false, NULL));
 }
 
 void test_refs_create__existing_dir_propagates_edirectory(void)
 {
-	git_reference *new_reference, *fail_reference;
-	git_oid id;
+	git3_reference *new_reference, *fail_reference;
+	git3_oid id;
 	const char *dir_head = "refs/heads/new-dir/new-head",
 		*fail_head = "refs/heads/new-dir";
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
 	/* Create and write the new object id reference */
-	cl_git_pass(git_reference_create(&new_reference, g_repo, dir_head, &id, 1, NULL));
-	cl_git_fail_with(GIT_EDIRECTORY,
-		git_reference_create(&fail_reference, g_repo, fail_head, &id, false, NULL));
+	cl_git_pass(git3_reference_create(&new_reference, g_repo, dir_head, &id, 1, NULL));
+	cl_git_fail_with(GIT3_EDIRECTORY,
+		git3_reference_create(&fail_reference, g_repo, fail_head, &id, false, NULL));
 
-	git_reference_free(new_reference);
+	git3_reference_free(new_reference);
 }
 
 static void test_invalid_name(const char *name)
 {
-	git_reference *new_reference;
-	git_oid id;
+	git3_reference *new_reference;
+	git3_oid id;
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
-	cl_assert_equal_i(GIT_EINVALIDSPEC, git_reference_create(
+	cl_assert_equal_i(GIT3_EINVALIDSPEC, git3_reference_create(
 		&new_reference, g_repo, name, &id, 0, NULL));
 
-	cl_assert_equal_i(GIT_EINVALIDSPEC, git_reference_symbolic_create(
+	cl_assert_equal_i(GIT3_EINVALIDSPEC, git3_reference_symbolic_create(
 		&new_reference, g_repo, name, current_head_target, 0, NULL));
 }
 
@@ -268,21 +268,21 @@ void test_refs_create__creating_a_reference_with_an_invalid_name_returns_EINVALI
 
 static void test_win32_name(const char *name)
 {
-	git_reference *new_reference = NULL;
-	git_oid id;
+	git3_reference *new_reference = NULL;
+	git3_oid id;
 	int ret;
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
 
-	ret = git_reference_create(&new_reference, g_repo, name, &id, 0, NULL);
+	ret = git3_reference_create(&new_reference, g_repo, name, &id, 0, NULL);
 
-#ifdef GIT_WIN32
-	cl_assert_equal_i(GIT_EINVALIDSPEC, ret);
+#ifdef GIT3_WIN32
+	cl_assert_equal_i(GIT3_EINVALIDSPEC, ret);
 #else
 	cl_git_pass(ret);
 #endif
 
-	git_reference_free(new_reference);
+	git3_reference_free(new_reference);
 }
 
 void test_refs_create__creating_a_loose_ref_with_invalid_windows_name(void)
@@ -300,7 +300,7 @@ void test_refs_create__creating_a_loose_ref_with_invalid_windows_name(void)
  * Creating a packed ref involves fsync'ing the packed ref file
  * and (on non-Windows) the containing directory.
  */
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 static int expected_fsyncs_create = 2, expected_fsyncs_compress = 1;
 #else
 static int expected_fsyncs_create = 4, expected_fsyncs_compress = 2;
@@ -308,22 +308,22 @@ static int expected_fsyncs_create = 4, expected_fsyncs_compress = 2;
 
 static void count_fsyncs(size_t *create_count, size_t *compress_count)
 {
-	git_reference *ref = NULL;
-	git_refdb *refdb;
-	git_oid id;
+	git3_reference *ref = NULL;
+	git3_refdb *refdb;
+	git3_oid id;
 
 	p_fsync__cnt = 0;
 
-	git_oid_from_string(&id, current_master_tip, GIT_OID_SHA1);
-	cl_git_pass(git_reference_create(&ref, g_repo, "refs/heads/fsync_test", &id, 0, "log message"));
-	git_reference_free(ref);
+	git3_oid_from_string(&id, current_master_tip, GIT3_OID_SHA1);
+	cl_git_pass(git3_reference_create(&ref, g_repo, "refs/heads/fsync_test", &id, 0, "log message"));
+	git3_reference_free(ref);
 
 	*create_count = p_fsync__cnt;
 	p_fsync__cnt = 0;
 
-	cl_git_pass(git_repository_refdb(&refdb, g_repo));
-	cl_git_pass(git_refdb_compress(refdb));
-	git_refdb_free(refdb);
+	cl_git_pass(git3_repository_refdb(&refdb, g_repo));
+	cl_git_pass(git3_refdb_compress(refdb));
+	git3_refdb_free(refdb);
 
 	*compress_count = p_fsync__cnt;
 	p_fsync__cnt = 0;
@@ -342,7 +342,7 @@ void test_refs_create__fsyncs_when_global_opt_set(void)
 {
 	size_t create_count, compress_count;
 
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_FSYNC_GITDIR, 1));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_FSYNC_GITDIR, 1));
 	count_fsyncs(&create_count, &compress_count);
 
 	cl_assert_equal_i(expected_fsyncs_create, create_count);

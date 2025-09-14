@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "index.h"
 #include "git3/sys/index.h"
 #include "git3/repository.h"
 #include "../reset/reset_helpers.h"
 
-static git_repository *repo;
-static git_index *repo_index;
+static git3_repository *repo;
+static git3_index *repo_index;
 
 #define TEST_REPO_PATH "nsecs"
 
@@ -13,12 +13,12 @@ static git_index *repo_index;
 void test_index_nsec__initialize(void)
 {
 	repo = cl_git_sandbox_init("nsecs");
-	git_repository_index(&repo_index, repo);
+	git3_repository_index(&repo_index, repo);
 }
 
 void test_index_nsec__cleanup(void)
 {
-	git_index_free(repo_index);
+	git3_index_free(repo_index);
 	repo_index = NULL;
 
 	cl_git_sandbox_cleanup();
@@ -47,28 +47,28 @@ static bool try_create_file_with_nsec_timestamp(const char *path)
  */
 static bool should_expect_nsecs(void)
 {
-	git_str nsec_path = GIT_STR_INIT;
+	git3_str nsec_path = GIT3_STR_INIT;
 	bool expect;
 
-	git_str_joinpath(&nsec_path, clar_sandbox_path(), "nsec_test");
+	git3_str_joinpath(&nsec_path, clar_sandbox_path(), "nsec_test");
 
 	expect = try_create_file_with_nsec_timestamp(nsec_path.ptr);
 
 	cl_must_pass(p_unlink(nsec_path.ptr));
 
-	git_str_dispose(&nsec_path);
+	git3_str_dispose(&nsec_path);
 
 	return expect;
 }
 
 static bool has_nsecs(void)
 {
-	const git_index_entry *entry;
+	const git3_index_entry *entry;
 	size_t i;
 	bool has_nsecs = false;
 
-	for (i = 0; i < git_index_entrycount(repo_index); i++) {
-		entry = git_index_get_byindex(repo_index, i);
+	for (i = 0; i < git3_index_entrycount(repo_index); i++) {
+		entry = git3_index_get_byindex(repo_index, i);
 
 		if (entry->ctime.nanoseconds || entry->mtime.nanoseconds) {
 			has_nsecs = true;
@@ -86,7 +86,7 @@ void test_index_nsec__has_nanos(void)
 
 void test_index_nsec__staging_maintains_other_nanos(void)
 {
-	const git_index_entry *entry;
+	const git3_index_entry *entry;
 	bool expect_nsec, test_file_has_nsec;
 
 	expect_nsec = should_expect_nsecs();
@@ -94,15 +94,15 @@ void test_index_nsec__staging_maintains_other_nanos(void)
 
 	cl_assert_equal_b(expect_nsec, test_file_has_nsec);
 
-	cl_git_pass(git_index_add_bypath(repo_index, "a.txt"));
-	cl_git_pass(git_index_write(repo_index));
+	cl_git_pass(git3_index_add_bypath(repo_index, "a.txt"));
+	cl_git_pass(git3_index_write(repo_index));
 
-	cl_git_pass(git_index_write(repo_index));
+	cl_git_pass(git3_index_write(repo_index));
 
-	git_index_read(repo_index, 1);
+	git3_index_read(repo_index, 1);
 	cl_assert_equal_b(true, has_nsecs());
 
-	cl_assert((entry = git_index_get_bypath(repo_index, "a.txt", 0)));
+	cl_assert((entry = git3_index_get_bypath(repo_index, "a.txt", 0)));
 
 	/* if we are writing nanoseconds to the index, expect them to be
 	 * nonzero.
@@ -118,12 +118,12 @@ void test_index_nsec__staging_maintains_other_nanos(void)
 
 void test_index_nsec__status_doesnt_clear_nsecs(void)
 {
-	git_status_list *statuslist;
+	git3_status_list *statuslist;
 
-	cl_git_pass(git_status_list_new(&statuslist, repo, NULL));
+	cl_git_pass(git3_status_list_new(&statuslist, repo, NULL));
 
-	git_index_read(repo_index, 1);
+	git3_index_read(repo_index, 1);
 	cl_assert_equal_b(true, has_nsecs());
 
-	git_status_list_free(statuslist);
+	git3_status_list_free(statuslist);
 }

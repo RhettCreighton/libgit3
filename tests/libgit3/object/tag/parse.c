@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "object.h"
 #include "signature.h"
 #include "tag.h"
@@ -9,17 +9,17 @@ static void assert_tag_parses(const char *data, size_t datalen,
 	const char *expected_tagger,
 	const char *expected_message)
 {
-	git_tag *tag;
+	git3_tag *tag;
 
 	if (!datalen)
 		datalen = strlen(data);
 
-	cl_git_pass(git_object__from_raw((git_object **) &tag, data, datalen, GIT_OBJECT_TAG, GIT_OID_SHA1));
-	cl_assert_equal_i(tag->type, GIT_OBJECT_TAG);
+	cl_git_pass(git3_object__from_raw((git3_object **) &tag, data, datalen, GIT3_OBJECT_TAG, GIT3_OID_SHA1));
+	cl_assert_equal_i(tag->type, GIT3_OBJECT_TAG);
 
 	if (expected_oid) {
-		git_oid oid;
-		cl_git_pass(git_oid_from_string(&oid, expected_oid, GIT_OID_SHA1));
+		git3_oid oid;
+		cl_git_pass(git3_oid_from_string(&oid, expected_oid, GIT3_OID_SHA1));
 		cl_assert_equal_oid(&oid, &tag->target);
 	}
 
@@ -29,14 +29,14 @@ static void assert_tag_parses(const char *data, size_t datalen,
 		cl_assert_equal_s(tag->message, NULL);
 
 	if (expected_tagger) {
-		git_signature *tagger;
-		cl_git_pass(git_signature_from_buffer(&tagger, expected_tagger));
+		git3_signature *tagger;
+		cl_git_pass(git3_signature_from_buffer(&tagger, expected_tagger));
 		cl_assert_equal_s(tagger->name, tag->tagger->name);
 		cl_assert_equal_s(tagger->email, tag->tagger->email);
 		cl_assert_equal_i(tagger->when.time, tag->tagger->when.time);
 		cl_assert_equal_i(tagger->when.offset, tag->tagger->when.offset);
 		cl_assert_equal_i(tagger->when.sign, tag->tagger->when.sign);
-		git_signature_free(tagger);
+		git3_signature_free(tagger);
 	} else {
 		cl_assert_equal_s(tag->tagger, NULL);
 	}
@@ -46,15 +46,15 @@ static void assert_tag_parses(const char *data, size_t datalen,
 	else
 		cl_assert_equal_s(tag->message, NULL);
 
-	git_object__free(&tag->object);
+	git3_object__free(&tag->object);
 }
 
 static void assert_tag_fails(const char *data, size_t datalen)
 {
-	git_object *object;
+	git3_object *object;
 	if (!datalen)
 		datalen = strlen(data);
-	cl_git_fail(git_object__from_raw(&object, data, datalen, GIT_OBJECT_TAG, GIT_OID_SHA1));
+	cl_git_fail(git3_object__from_raw(&object, data, datalen, GIT3_OBJECT_TAG, GIT3_OID_SHA1));
 }
 
 void test_object_tag_parse__valid_tag_parses(void)
@@ -214,5 +214,5 @@ void test_object_tag_parse__no_oob_read_when_searching_message(void)
 	 * expected one.
 	 */
 	assert_tag_fails(tag, strlen(tag) - strlen("\n\nMessage"));
-	cl_assert(strstr(git_error_last()->message, "tag contains no message"));
+	cl_assert(strstr(git3_error_last()->message, "tag contains no message"));
 }

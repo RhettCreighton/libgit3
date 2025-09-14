@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "odb.h"
 #include "git3/odb_backend.h"
 #include "posix.h"
@@ -14,7 +14,7 @@ static void write_object_files(object_data *d)
 {
 	int fd;
 
-	if (p_mkdir(d->dir, GIT_OBJECT_DIR_MODE) < 0)
+	if (p_mkdir(d->dir, GIT3_OBJECT_DIR_MODE) < 0)
 		cl_assert(errno == EEXIST);
 
 	cl_assert((fd = p_creat(d->file, S_IREAD | S_IWRITE)) >= 0);
@@ -23,9 +23,9 @@ static void write_object_files(object_data *d)
 	p_close(fd);
 }
 
-static void cmp_objects(git_rawobj *o, object_data *d)
+static void cmp_objects(git3_rawobj *o, object_data *d)
 {
-	cl_assert(o->type == git_object_string2type(d->type));
+	cl_assert(o->type == git3_object_string2type(d->type));
 	cl_assert(o->len == d->dlen);
 
 	if (o->len > 0)
@@ -34,19 +34,19 @@ static void cmp_objects(git_rawobj *o, object_data *d)
 
 static void test_read_object(object_data *data)
 {
-	git_oid id;
-	git_odb_object *obj;
-	git_odb *odb;
-	git_rawobj tmp;
-	git_odb_options opts = GIT_ODB_OPTIONS_INIT;
+	git3_oid id;
+	git3_odb_object *obj;
+	git3_odb *odb;
+	git3_rawobj tmp;
+	git3_odb_options opts = GIT3_ODB_OPTIONS_INIT;
 
 	opts.oid_type = data->id_type;
 
 	write_object_files(data);
 
-	cl_git_pass(git_odb_open_ext(&odb, "test-objects", &opts));
-	cl_git_pass(git_oid_from_string(&id, data->id, data->id_type));
-	cl_git_pass(git_odb_read(&obj, odb, &id));
+	cl_git_pass(git3_odb_open_ext(&odb, "test-objects", &opts));
+	cl_git_pass(git3_oid_from_string(&id, data->id, data->id_type));
+	cl_git_pass(git3_odb_read(&obj, odb, &id));
 
 	tmp.data = obj->buffer;
 	tmp.len = obj->cached.size;
@@ -54,55 +54,55 @@ static void test_read_object(object_data *data)
 
 	cmp_objects(&tmp, data);
 
-	git_odb_object_free(obj);
-	git_odb_free(odb);
+	git3_odb_object_free(obj);
+	git3_odb_free(odb);
 }
 
 static void test_read_header(object_data *data)
 {
-	git_oid id;
-	git_odb *odb;
+	git3_oid id;
+	git3_odb *odb;
 	size_t len;
-	git_object_t type;
-	git_odb_options opts = GIT_ODB_OPTIONS_INIT;
+	git3_object_t type;
+	git3_odb_options opts = GIT3_ODB_OPTIONS_INIT;
 
 	opts.oid_type = data->id_type;
 
 	write_object_files(data);
 
-	cl_git_pass(git_odb_open_ext(&odb, "test-objects", &opts));
-	cl_git_pass(git_oid_from_string(&id, data->id, data->id_type));
-	cl_git_pass(git_odb_read_header(&len, &type, odb, &id));
+	cl_git_pass(git3_odb_open_ext(&odb, "test-objects", &opts));
+	cl_git_pass(git3_oid_from_string(&id, data->id, data->id_type));
+	cl_git_pass(git3_odb_read_header(&len, &type, odb, &id));
 
 	cl_assert_equal_sz(data->dlen, len);
-	cl_assert_equal_i(git_object_string2type(data->type), type);
+	cl_assert_equal_i(git3_object_string2type(data->type), type);
 
-	git_odb_free(odb);
+	git3_odb_free(odb);
 }
 
 static void test_readstream_object(object_data *data, size_t blocksize)
 {
-	git_oid id;
-	git_odb *odb;
-	git_odb_stream *stream;
-	git_rawobj tmp;
+	git3_oid id;
+	git3_odb *odb;
+	git3_odb_stream *stream;
+	git3_rawobj tmp;
 	char buf[2048], *ptr = buf;
 	size_t remain;
 	int ret;
-	git_odb_options opts = GIT_ODB_OPTIONS_INIT;
+	git3_odb_options opts = GIT3_ODB_OPTIONS_INIT;
 
 	opts.oid_type = data->id_type;
 
 	write_object_files(data);
 
-	cl_git_pass(git_odb_open_ext(&odb, "test-objects", &opts));
-	cl_git_pass(git_oid_from_string(&id, data->id, data->id_type));
-	cl_git_pass(git_odb_open_rstream(&stream, &tmp.len, &tmp.type, odb, &id));
+	cl_git_pass(git3_odb_open_ext(&odb, "test-objects", &opts));
+	cl_git_pass(git3_oid_from_string(&id, data->id, data->id_type));
+	cl_git_pass(git3_odb_open_rstream(&stream, &tmp.len, &tmp.type, odb, &id));
 
 	remain = tmp.len;
 
 	while (remain) {
-		cl_assert((ret = git_odb_stream_read(stream, ptr, blocksize)) >= 0);
+		cl_assert((ret = git3_odb_stream_read(stream, ptr, blocksize)) >= 0);
 		if (ret == 0)
 			break;
 
@@ -117,76 +117,76 @@ static void test_readstream_object(object_data *data, size_t blocksize)
 
 	cmp_objects(&tmp, data);
 
-	git_odb_stream_free(stream);
-	git_odb_free(odb);
+	git3_odb_stream_free(stream);
+	git3_odb_free(odb);
 }
 
 void test_odb_loose__initialize(void)
 {
 	p_fsync__cnt = 0;
-	cl_must_pass(p_mkdir("test-objects", GIT_OBJECT_DIR_MODE));
+	cl_must_pass(p_mkdir("test-objects", GIT3_OBJECT_DIR_MODE));
 }
 
 void test_odb_loose__cleanup(void)
 {
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_FSYNC_GITDIR, 0));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_FSYNC_GITDIR, 0));
 	cl_fixture_cleanup("test-objects");
 }
 
 void test_odb_loose__exists_sha1(void)
 {
-	git_oid id, id2;
-	git_odb *odb;
+	git3_oid id, id2;
+	git3_odb *odb;
 
 	write_object_files(&one);
-	cl_git_pass(git_odb_open(&odb, "test-objects"));
+	cl_git_pass(git3_odb_open(&odb, "test-objects"));
 
-	cl_git_pass(git_oid_from_string(&id, one.id, GIT_OID_SHA1));
-	cl_assert(git_odb_exists(odb, &id));
+	cl_git_pass(git3_oid_from_string(&id, one.id, GIT3_OID_SHA1));
+	cl_assert(git3_odb_exists(odb, &id));
 
-	cl_git_pass(git_oid_from_prefix(&id, "8b137891", 8, GIT_OID_SHA1));
-	cl_git_pass(git_odb_exists_prefix(&id2, odb, &id, 8));
-	cl_assert_equal_i(0, git_oid_streq(&id2, one.id));
+	cl_git_pass(git3_oid_from_prefix(&id, "8b137891", 8, GIT3_OID_SHA1));
+	cl_git_pass(git3_odb_exists_prefix(&id2, odb, &id, 8));
+	cl_assert_equal_i(0, git3_oid_streq(&id2, one.id));
 
 	/* Test for a missing object */
-	cl_git_pass(git_oid_from_string(&id, "8b137891791fe96927ad78e64b0aad7bded08baa", GIT_OID_SHA1));
-	cl_assert(!git_odb_exists(odb, &id));
+	cl_git_pass(git3_oid_from_string(&id, "8b137891791fe96927ad78e64b0aad7bded08baa", GIT3_OID_SHA1));
+	cl_assert(!git3_odb_exists(odb, &id));
 
-	cl_git_pass(git_oid_from_prefix(&id, "8b13789a", 8, GIT_OID_SHA1));
-	cl_assert_equal_i(GIT_ENOTFOUND, git_odb_exists_prefix(&id2, odb, &id, 8));
+	cl_git_pass(git3_oid_from_prefix(&id, "8b13789a", 8, GIT3_OID_SHA1));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_odb_exists_prefix(&id2, odb, &id, 8));
 
-	git_odb_free(odb);
+	git3_odb_free(odb);
 }
 
 void test_odb_loose__exists_sha256(void)
 {
-#ifndef GIT_EXPERIMENTAL_SHA256
+#ifndef GIT3_EXPERIMENTAL_SHA256
 	cl_skip();
 #else
-	git_oid id, id2;
-	git_odb *odb;
-	git_odb_options odb_opts = GIT_ODB_OPTIONS_INIT;
+	git3_oid id, id2;
+	git3_odb *odb;
+	git3_odb_options odb_opts = GIT3_ODB_OPTIONS_INIT;
 
-	odb_opts.oid_type = GIT_OID_SHA256;
+	odb_opts.oid_type = GIT3_OID_SHA256;
 
 	write_object_files(&one_sha256);
-	cl_git_pass(git_odb_open_ext(&odb, "test-objects", &odb_opts));
+	cl_git_pass(git3_odb_open_ext(&odb, "test-objects", &odb_opts));
 
-	cl_git_pass(git_oid_from_string(&id, one_sha256.id, GIT_OID_SHA256));
-	cl_assert(git_odb_exists(odb, &id));
+	cl_git_pass(git3_oid_from_string(&id, one_sha256.id, GIT3_OID_SHA256));
+	cl_assert(git3_odb_exists(odb, &id));
 
-	cl_git_pass(git_oid_from_prefix(&id, "4c0d52d1", 8, GIT_OID_SHA256));
-	cl_git_pass(git_odb_exists_prefix(&id2, odb, &id, 8));
-	cl_assert_equal_i(0, git_oid_streq(&id2, one_sha256.id));
+	cl_git_pass(git3_oid_from_prefix(&id, "4c0d52d1", 8, GIT3_OID_SHA256));
+	cl_git_pass(git3_odb_exists_prefix(&id2, odb, &id, 8));
+	cl_assert_equal_i(0, git3_oid_streq(&id2, one_sha256.id));
 
 	/* Test for a missing object */
-	cl_git_pass(git_oid_from_string(&id, "4c0d52d180c61d01ce1a91dec5ee58f0cbe65fd59433aea803ab927965493faa", GIT_OID_SHA256));
-	cl_assert(!git_odb_exists(odb, &id));
+	cl_git_pass(git3_oid_from_string(&id, "4c0d52d180c61d01ce1a91dec5ee58f0cbe65fd59433aea803ab927965493faa", GIT3_OID_SHA256));
+	cl_assert(!git3_odb_exists(odb, &id));
 
-	cl_git_pass(git_oid_from_prefix(&id, "4c0d52da", 8, GIT_OID_SHA256));
-	cl_assert_equal_i(GIT_ENOTFOUND, git_odb_exists_prefix(&id2, odb, &id, 8));
+	cl_git_pass(git3_oid_from_prefix(&id, "4c0d52da", 8, GIT3_OID_SHA256));
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_odb_exists_prefix(&id2, odb, &id, 8));
 
-	git_odb_free(odb);
+	git3_odb_free(odb);
 #endif
 }
 
@@ -203,7 +203,7 @@ void test_odb_loose__simple_reads_sha1(void)
 
 void test_odb_loose__simple_reads_sha256(void)
 {
-#ifndef GIT_EXPERIMENTAL_SHA256
+#ifndef GIT3_EXPERIMENTAL_SHA256
 	cl_skip();
 #else
 	test_read_object(&commit_sha256);
@@ -234,7 +234,7 @@ void test_odb_loose__streaming_reads_sha1(void)
 
 void test_odb_loose__streaming_reads_sha256(void)
 {
-#ifndef GIT_EXPERIMENTAL_SHA256
+#ifndef GIT3_EXPERIMENTAL_SHA256
 	cl_skip();
 #else
 	size_t blocksizes[] = { 1, 2, 4, 16, 99, 1024, 123456789 };
@@ -265,7 +265,7 @@ void test_odb_loose__read_header_sha1(void)
 
 void test_odb_loose__read_header_sha256(void)
 {
-#ifndef GIT_EXPERIMENTAL_SHA256
+#ifndef GIT3_EXPERIMENTAL_SHA256
 	cl_skip();
 #else
 	test_read_header(&commit_sha256);
@@ -282,17 +282,17 @@ static void test_write_object_permission(
 	mode_t dir_mode, mode_t file_mode,
 	mode_t expected_dir_mode, mode_t expected_file_mode)
 {
-	git_odb *odb;
-	git_odb_backend *backend;
-	git_oid oid;
+	git3_odb *odb;
+	git3_odb_backend *backend;
+	git3_oid oid;
 	struct stat statbuf;
 	mode_t mask, os_mask;
-	git_odb_backend_loose_options opts = GIT_ODB_BACKEND_LOOSE_OPTIONS_INIT;
+	git3_odb_backend_loose_options opts = GIT3_ODB_BACKEND_LOOSE_OPTIONS_INIT;
 
 	/* Windows does not return group/user bits from stat,
 	* files are never executable.
 	*/
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	os_mask = 0600;
 #else
 	os_mask = 0777;
@@ -304,10 +304,10 @@ static void test_write_object_permission(
 	opts.dir_mode = dir_mode;
 	opts.file_mode = file_mode;
 
-	cl_git_pass(git_odb_new(&odb));
-	cl_git_pass(git_odb__backend_loose(&backend, "test-objects", &opts));
-	cl_git_pass(git_odb_add_backend(odb, backend, 1));
-	cl_git_pass(git_odb_write(&oid, odb, "Test data\n", 10, GIT_OBJECT_BLOB));
+	cl_git_pass(git3_odb_new(&odb));
+	cl_git_pass(git3_odb__backend_loose(&backend, "test-objects", &opts));
+	cl_git_pass(git3_odb_add_backend(odb, backend, 1));
+	cl_git_pass(git3_odb_write(&oid, odb, "Test data\n", 10, GIT3_OBJECT_BLOB));
 
 	cl_git_pass(p_stat("test-objects/67", &statbuf));
 	cl_assert_equal_i(statbuf.st_mode & os_mask, (expected_dir_mode & ~mask) & os_mask);
@@ -315,12 +315,12 @@ static void test_write_object_permission(
 	cl_git_pass(p_stat("test-objects/67/b808feb36201507a77f85e6d898f0a2836e4a5", &statbuf));
 	cl_assert_equal_i(statbuf.st_mode & os_mask, (expected_file_mode & ~mask) & os_mask);
 
-	git_odb_free(odb);
+	git3_odb_free(odb);
 }
 
 void test_odb_loose__permissions_standard(void)
 {
-	test_write_object_permission(0, 0, GIT_OBJECT_DIR_MODE, GIT_OBJECT_FILE_MODE);
+	test_write_object_permission(0, 0, GIT3_OBJECT_DIR_MODE, GIT3_OBJECT_FILE_MODE);
 }
 
 void test_odb_loose__permissions_readonly(void)
@@ -335,23 +335,23 @@ void test_odb_loose__permissions_readwrite(void)
 
 static void write_object_to_loose_odb(int fsync)
 {
-	git_odb *odb;
-	git_odb_backend *backend;
-	git_oid oid;
-	git_odb_options odb_opts = GIT_ODB_OPTIONS_INIT;
-	git_odb_backend_loose_options backend_opts = GIT_ODB_BACKEND_LOOSE_OPTIONS_INIT;
+	git3_odb *odb;
+	git3_odb_backend *backend;
+	git3_oid oid;
+	git3_odb_options odb_opts = GIT3_ODB_OPTIONS_INIT;
+	git3_odb_backend_loose_options backend_opts = GIT3_ODB_BACKEND_LOOSE_OPTIONS_INIT;
 
 	if (fsync)
-		backend_opts.flags |= GIT_ODB_BACKEND_LOOSE_FSYNC;
+		backend_opts.flags |= GIT3_ODB_BACKEND_LOOSE_FSYNC;
 
 	backend_opts.dir_mode = 0777;
 	backend_opts.file_mode = 0666;
 
-	cl_git_pass(git_odb_new_ext(&odb, &odb_opts));
-	cl_git_pass(git_odb__backend_loose(&backend, "test-objects", &backend_opts));
-	cl_git_pass(git_odb_add_backend(odb, backend, 1));
-	cl_git_pass(git_odb_write(&oid, odb, "Test data\n", 10, GIT_OBJECT_BLOB));
-	git_odb_free(odb);
+	cl_git_pass(git3_odb_new_ext(&odb, &odb_opts));
+	cl_git_pass(git3_odb__backend_loose(&backend, "test-objects", &backend_opts));
+	cl_git_pass(git3_odb_add_backend(odb, backend, 1));
+	cl_git_pass(git3_odb_write(&oid, odb, "Test data\n", 10, GIT3_OBJECT_BLOB));
+	git3_odb_free(odb);
 }
 
 void test_odb_loose__does_not_fsync_by_default(void)
@@ -368,27 +368,27 @@ void test_odb_loose__fsync_obeys_odb_option(void)
 
 void test_odb_loose__fsync_obeys_global_setting(void)
 {
-	cl_git_pass(git_libgit3_opts(GIT_OPT_ENABLE_FSYNC_GITDIR, 1));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_ENABLE_FSYNC_GITDIR, 1));
 	write_object_to_loose_odb(0);
 	cl_assert(p_fsync__cnt > 0);
 }
 
 void test_odb_loose__fsync_obeys_repo_setting(void)
 {
-	git_repository *repo;
-	git_odb *odb;
-	git_oid oid;
+	git3_repository *repo;
+	git3_odb *odb;
+	git3_oid oid;
 
-	cl_git_pass(git_repository_init(&repo, "test-objects", 1));
-	cl_git_pass(git_repository_odb__weakptr(&odb, repo));
-	cl_git_pass(git_odb_write(&oid, odb, "No fsync here\n", 14, GIT_OBJECT_BLOB));
+	cl_git_pass(git3_repository_init(&repo, "test-objects", 1));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, repo));
+	cl_git_pass(git3_odb_write(&oid, odb, "No fsync here\n", 14, GIT3_OBJECT_BLOB));
 	cl_assert(p_fsync__cnt == 0);
-	git_repository_free(repo);
+	git3_repository_free(repo);
 
-	cl_git_pass(git_repository_open(&repo, "test-objects"));
+	cl_git_pass(git3_repository_open(&repo, "test-objects"));
 	cl_repo_set_bool(repo, "core.fsyncObjectFiles", true);
-	cl_git_pass(git_repository_odb__weakptr(&odb, repo));
-	cl_git_pass(git_odb_write(&oid, odb, "Now fsync\n", 10, GIT_OBJECT_BLOB));
+	cl_git_pass(git3_repository_odb__weakptr(&odb, repo));
+	cl_git_pass(git3_odb_write(&oid, odb, "Now fsync\n", 10, GIT3_OBJECT_BLOB));
 	cl_assert(p_fsync__cnt > 0);
-	git_repository_free(repo);
+	git3_repository_free(repo);
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -12,8 +12,8 @@ static void *debugalloc__malloc(size_t len, const char *file, int line)
 	unsigned char *ptr;
 	size_t total = len + sizeof(size_t);
 
-	GIT_UNUSED(file);
-	GIT_UNUSED(line);
+	GIT3_UNUSED(file);
+	GIT3_UNUSED(line);
 
 	if (!len || (ptr = malloc(total)) == NULL)
 		return NULL;
@@ -28,8 +28,8 @@ static void *debugalloc__realloc(void *_ptr, size_t len, const char *file, int l
 	size_t original_len;
 	size_t total = len + sizeof(size_t);
 
-	GIT_UNUSED(file);
-	GIT_UNUSED(line);
+	GIT3_UNUSED(file);
+	GIT3_UNUSED(line);
 
 	if (!len && !ptr)
 		return NULL;
@@ -64,7 +64,7 @@ static void debugalloc__free(void *_ptr)
 	free(ptr - sizeof(size_t));
 }
 
-int git_debugalloc_init_allocator(git_allocator *allocator)
+int git3_debugalloc_init_allocator(git3_allocator *allocator)
 {
 	allocator->gmalloc = debugalloc__malloc;
 	allocator->grealloc = debugalloc__realloc;

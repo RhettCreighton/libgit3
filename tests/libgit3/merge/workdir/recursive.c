@@ -1,11 +1,11 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/repository.h"
 #include "git3/merge.h"
 #include "merge.h"
 #include "../merge_helpers.h"
 #include "../conflict_data.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 #define TEST_REPO_PATH "merge-recursive"
 
@@ -21,9 +21,9 @@ void test_merge_workdir_recursive__cleanup(void)
 
 void test_merge_workdir_recursive__writes_conflict_with_virtual_base(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
-	git_str conflicting_buf = GIT_STR_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
+	git3_str conflicting_buf = GIT3_STR_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -36,25 +36,25 @@ void test_merge_workdir_recursive__writes_conflict_with_virtual_base(void)
 		{ 0100644, "3855170cef875708da06ab9ad7fc6a73b531cda1", 3, "veal.txt" },
 	};
 
-	cl_git_pass(merge_branches(repo, GIT_REFS_HEADS_DIR "branchF-1", GIT_REFS_HEADS_DIR "branchF-2", &opts, NULL));
+	cl_git_pass(merge_branches(repo, GIT3_REFS_HEADS_DIR "branchF-1", GIT3_REFS_HEADS_DIR "branchF-2", &opts, NULL));
 
-	cl_git_pass(git_repository_index(&index, repo));
+	cl_git_pass(git3_repository_index(&index, repo));
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	cl_git_pass(git_futils_readbuffer(&conflicting_buf, "merge-recursive/veal.txt"));
+	cl_git_pass(git3_futils_readbuffer(&conflicting_buf, "merge-recursive/veal.txt"));
 
 	cl_assert_equal_s(CONFLICTING_RECURSIVE_F1_TO_F2, conflicting_buf.ptr);
 
-	git_index_free(index);
-	git_str_dispose(&conflicting_buf);
+	git3_index_free(index);
+	git3_str_dispose(&conflicting_buf);
 }
 
 void test_merge_workdir_recursive__conflicting_merge_base_with_diff3(void)
 {
-	git_index *index;
-	git_merge_options opts = GIT_MERGE_OPTIONS_INIT;
-	git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
-	git_str conflicting_buf = GIT_STR_INIT;
+	git3_index *index;
+	git3_merge_options opts = GIT3_MERGE_OPTIONS_INIT;
+	git3_checkout_options checkout_opts = GIT3_CHECKOUT_OPTIONS_INIT;
+	git3_str conflicting_buf = GIT3_STR_INIT;
 
 	struct merge_index_entry merge_index_entries[] = {
 		{ 0100644, "ffb36e513f5fdf8a6ba850a20142676a2ac4807d", 0, "asparagus.txt" },
@@ -67,18 +67,18 @@ void test_merge_workdir_recursive__conflicting_merge_base_with_diff3(void)
 		{ 0100644, "d604c75019c282144bdbbf3fd3462ba74b240efc", 3, "veal.txt" },
 	};
 
-	opts.file_flags |= GIT_MERGE_FILE_STYLE_DIFF3;
-	checkout_opts.checkout_strategy |= GIT_CHECKOUT_CONFLICT_STYLE_DIFF3;
+	opts.file_flags |= GIT3_MERGE_FILE_STYLE_DIFF3;
+	checkout_opts.checkout_strategy |= GIT3_CHECKOUT_CONFLICT_STYLE_DIFF3;
 
-	cl_git_pass(merge_branches(repo, GIT_REFS_HEADS_DIR "branchH-2", GIT_REFS_HEADS_DIR "branchH-1", &opts, &checkout_opts));
+	cl_git_pass(merge_branches(repo, GIT3_REFS_HEADS_DIR "branchH-2", GIT3_REFS_HEADS_DIR "branchH-1", &opts, &checkout_opts));
 
-	cl_git_pass(git_repository_index(&index, repo));
+	cl_git_pass(git3_repository_index(&index, repo));
 	cl_assert(merge_test_index(index, merge_index_entries, 8));
 
-	cl_git_pass(git_futils_readbuffer(&conflicting_buf, "merge-recursive/veal.txt"));
+	cl_git_pass(git3_futils_readbuffer(&conflicting_buf, "merge-recursive/veal.txt"));
 
 	cl_assert_equal_s(CONFLICTING_RECURSIVE_H2_TO_H1_WITH_DIFF3, conflicting_buf.ptr);
 
-	git_index_free(index);
-	git_str_dispose(&conflicting_buf);
+	git3_index_free(index);
+	git3_str_dispose(&conflicting_buf);
 }

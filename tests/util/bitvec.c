@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "bitvec.h"
 
 #if 0
-static void print_bitvec(git_bitvec *bv)
+static void print_bitvec(git3_bitvec *bv)
 {
 	int b;
 
@@ -17,48 +17,48 @@ static void print_bitvec(git_bitvec *bv)
 }
 #endif
 
-static void set_some_bits(git_bitvec *bv, size_t length)
+static void set_some_bits(git3_bitvec *bv, size_t length)
 {
 	size_t i;
 
 	for (i = 0; i < length; ++i) {
 		if (i % 3 == 0 || i % 7 == 0)
-			git_bitvec_set(bv, i, true);
+			git3_bitvec_set(bv, i, true);
 	}
 }
 
-static void check_some_bits(git_bitvec *bv, size_t length)
+static void check_some_bits(git3_bitvec *bv, size_t length)
 {
 	size_t i;
 
 	for (i = 0; i < length; ++i)
-		cl_assert_equal_b(i % 3 == 0 || i % 7 == 0, git_bitvec_get(bv, i));
+		cl_assert_equal_b(i % 3 == 0 || i % 7 == 0, git3_bitvec_get(bv, i));
 }
 
 void test_bitvec__0(void)
 {
-	git_bitvec bv;
+	git3_bitvec bv;
 
-	cl_git_pass(git_bitvec_init(&bv, 32));
+	cl_git_pass(git3_bitvec_init(&bv, 32));
 	set_some_bits(&bv, 16);
 	check_some_bits(&bv, 16);
-	git_bitvec_clear(&bv);
+	git3_bitvec_clear(&bv);
 	set_some_bits(&bv, 32);
 	check_some_bits(&bv, 32);
-	git_bitvec_clear(&bv);
+	git3_bitvec_clear(&bv);
 	set_some_bits(&bv, 64);
 	check_some_bits(&bv, 64);
-	git_bitvec_free(&bv);
+	git3_bitvec_free(&bv);
 
-	cl_git_pass(git_bitvec_init(&bv, 128));
+	cl_git_pass(git3_bitvec_init(&bv, 128));
 	set_some_bits(&bv, 32);
 	check_some_bits(&bv, 32);
 	set_some_bits(&bv, 128);
 	check_some_bits(&bv, 128);
-	git_bitvec_free(&bv);
+	git3_bitvec_free(&bv);
 
-	cl_git_pass(git_bitvec_init(&bv, 4000));
+	cl_git_pass(git3_bitvec_init(&bv, 4000));
 	set_some_bits(&bv, 4000);
 	check_some_bits(&bv, 4000);
-	git_bitvec_free(&bv);
+	git3_bitvec_free(&bv);
 }

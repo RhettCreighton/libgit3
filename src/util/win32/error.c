@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -9,11 +9,11 @@
 
 #include "utf-conv.h"
 
-#ifdef GIT_HTTPS_WINHTTP
+#ifdef GIT3_HTTPS_WINHTTP
 # include <winhttp.h>
 #endif
 
-char *git_win32_get_error_message(DWORD error_code)
+char *git3_win32_get_error_message(DWORD error_code)
 {
 	LPWSTR lpMsgBuf = NULL;
 	HMODULE hModule = NULL;
@@ -24,14 +24,14 @@ char *git_win32_get_error_message(DWORD error_code)
 	if (!error_code)
 		return NULL;
 
-#ifdef GIT_HTTPS_WINHTTP
+#ifdef GIT3_HTTPS_WINHTTP
 	/* Errors raised by WinHTTP are not in the system resource table */
 	if (error_code >= WINHTTP_ERROR_BASE &&
 		error_code <= WINHTTP_ERROR_LAST)
 		hModule = GetModuleHandleW(L"winhttp");
 #endif
 
-	GIT_UNUSED(hModule);
+	GIT3_UNUSED(hModule);
 
 	if (hModule)
 		dwFlags |= FORMAT_MESSAGE_FROM_HMODULE;
@@ -43,7 +43,7 @@ char *git_win32_get_error_message(DWORD error_code)
 		(LPWSTR)&lpMsgBuf, 0, NULL)) {
 		/* Convert the message to UTF-8. If this fails, we will
 		 * return NULL, which is a condition expected by the caller */
-		if (git_utf8_from_16_alloc(&utf8_msg, lpMsgBuf) < 0)
+		if (git3_utf8_from_16_alloc(&utf8_msg, lpMsgBuf) < 0)
 			utf8_msg = NULL;
 
 		LocalFree(lpMsgBuf);

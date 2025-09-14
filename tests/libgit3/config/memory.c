@@ -1,8 +1,8 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "config_backend.h"
 
-static git_config_backend *backend;
+static git3_config_backend *backend;
 
 void test_config_memory__initialize(void)
 {
@@ -11,14 +11,14 @@ void test_config_memory__initialize(void)
 
 void test_config_memory__cleanup(void)
 {
-	git_config_backend_free(backend);
+	git3_config_backend_free(backend);
 }
 
-static void assert_config_contains(git_config_backend *backend,
+static void assert_config_contains(git3_config_backend *backend,
 	const char *name, const char *value)
 {
-	git_config_entry *entry;
-	cl_git_pass(git_config_backend_get_string(&entry, backend, name));
+	git3_config_entry *entry;
+	cl_git_pass(git3_config_backend_get_string(&entry, backend, name));
 	cl_assert_equal_s(entry->value, value);
 }
 
@@ -28,7 +28,7 @@ struct expected_entry {
 	int seen;
 };
 
-static int contains_all_cb(const git_config_entry *entry, void *payload)
+static int contains_all_cb(const git3_config_entry *entry, void *payload)
 {
 	struct expected_entry *entries = (struct expected_entry *) payload;
 	int i;
@@ -53,12 +53,12 @@ static int contains_all_cb(const git_config_entry *entry, void *payload)
 	return -1;
 }
 
-static void assert_config_contains_all(git_config_backend *backend,
+static void assert_config_contains_all(git3_config_backend *backend,
 	struct expected_entry *entries)
 {
 	int i;
 
-	cl_git_pass(git_config_backend_foreach(backend, contains_all_cb, entries));
+	cl_git_pass(git3_config_backend_foreach(backend, contains_all_cb, entries));
 
 	for (i = 0; entries[i].name; i++)
 		cl_assert(entries[i].seen);
@@ -66,33 +66,33 @@ static void assert_config_contains_all(git_config_backend *backend,
 
 static void setup_backend(const char *cfg)
 {
-	git_config_backend_memory_options opts =
-		GIT_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
+	git3_config_backend_memory_options opts =
+		GIT3_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
 
 	opts.backend_type = "test";
 
-	cl_git_pass(git_config_backend_from_string(&backend, cfg, strlen(cfg), &opts));
-	cl_git_pass(git_config_backend_open(backend, 0, NULL));
+	cl_git_pass(git3_config_backend_from_string(&backend, cfg, strlen(cfg), &opts));
+	cl_git_pass(git3_config_backend_open(backend, 0, NULL));
 }
 
 static void setup_values_backend(const char **values, size_t len)
 {
-	git_config_backend_memory_options opts =
-		GIT_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
+	git3_config_backend_memory_options opts =
+		GIT3_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
 
 	opts.backend_type = "test";
 
-	cl_git_pass(git_config_backend_from_values(&backend, values, len, &opts));
-	cl_git_pass(git_config_backend_open(backend, 0, NULL));
+	cl_git_pass(git3_config_backend_from_values(&backend, values, len, &opts));
+	cl_git_pass(git3_config_backend_open(backend, 0, NULL));
 }
 
 void test_config_memory__write_operations_fail(void)
 {
 	setup_backend("");
-	cl_git_fail(git_config_backend_set_string(backend, "general.foo", "var"));
-	cl_git_fail(git_config_backend_delete(backend, "general.foo"));
-	cl_git_fail(git_config_backend_lock(backend));
-	cl_git_fail(git_config_backend_unlock(backend, 0));
+	cl_git_fail(git3_config_backend_set_string(backend, "general.foo", "var"));
+	cl_git_fail(git3_config_backend_delete(backend, "general.foo"));
+	cl_git_fail(git3_config_backend_lock(backend));
+	cl_git_fail(git3_config_backend_unlock(backend, 0));
 }
 
 void test_config_memory__simple(void)
@@ -110,13 +110,13 @@ void test_config_memory__malformed_fails_to_open(void)
 		"[general\n"
 		"foo=bar\n";
 
-	git_config_backend_memory_options opts =
-		GIT_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
+	git3_config_backend_memory_options opts =
+		GIT3_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
 
 	opts.backend_type = "test";
 
-	cl_git_pass(git_config_backend_from_string(&backend, cfg, strlen(cfg), &opts));
-	cl_git_fail(git_config_backend_open(backend, 0, NULL));
+	cl_git_pass(git3_config_backend_from_string(&backend, cfg, strlen(cfg), &opts));
+	cl_git_fail(git3_config_backend_open(backend, 0, NULL));
 }
 
 void test_config_memory__multiple_vars(void)
@@ -196,11 +196,11 @@ void test_config_memory__valid_values(void)
 		"other.key=value"
 	};
 
-	git_config_backend_memory_options opts =
-		GIT_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
+	git3_config_backend_memory_options opts =
+		GIT3_CONFIG_BACKEND_MEMORY_OPTIONS_INIT;
 
 	opts.backend_type = "test";
 
-	cl_git_pass(git_config_backend_from_values(&backend, values, 3, &opts));
-	cl_git_fail(git_config_backend_open(backend, 0, NULL));
+	cl_git_pass(git3_config_backend_from_values(&backend, values, 3, &opts));
+	cl_git_fail(git3_config_backend_open(backend, 0, NULL));
 }

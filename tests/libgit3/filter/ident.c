@@ -1,7 +1,7 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/filter.h"
 
-static git_repository *g_repo = NULL;
+static git3_repository *g_repo = NULL;
 
 void test_filter_ident__initialize(void)
 {
@@ -15,37 +15,37 @@ void test_filter_ident__cleanup(void)
 
 static void add_blob_and_filter(
 	const char *data,
-	git_filter_list *fl,
+	git3_filter_list *fl,
 	const char *expected)
 {
-	git_oid id;
-	git_blob *blob;
-	git_buf out = { 0 };
+	git3_oid id;
+	git3_blob *blob;
+	git3_buf out = { 0 };
 
 	cl_git_mkfile("crlf/identtest", data);
-	cl_git_pass(git_blob_create_from_workdir(&id, g_repo, "identtest"));
-	cl_git_pass(git_blob_lookup(&blob, g_repo, &id));
+	cl_git_pass(git3_blob_create_from_workdir(&id, g_repo, "identtest"));
+	cl_git_pass(git3_blob_lookup(&blob, g_repo, &id));
 
-	cl_git_pass(git_filter_list_apply_to_blob(&out, fl, blob));
+	cl_git_pass(git3_filter_list_apply_to_blob(&out, fl, blob));
 
 	cl_assert_equal_s(expected, out.ptr);
 
-	git_blob_free(blob);
-	git_buf_dispose(&out);
+	git3_blob_free(blob);
+	git3_buf_dispose(&out);
 }
 
 void test_filter_ident__to_worktree(void)
 {
-	git_filter_list *fl;
-	git_filter *ident;
+	git3_filter_list *fl;
+	git3_filter *ident;
 
-	cl_git_pass(git_filter_list_new(
-		&fl, g_repo, GIT_FILTER_TO_WORKTREE, 0));
+	cl_git_pass(git3_filter_list_new(
+		&fl, g_repo, GIT3_FILTER_TO_WORKTREE, 0));
 
-	ident = git_filter_lookup(GIT_FILTER_IDENT);
+	ident = git3_filter_lookup(GIT3_FILTER_IDENT);
 	cl_assert(ident != NULL);
 
-	cl_git_pass(git_filter_list_push(fl, ident, NULL));
+	cl_git_pass(git3_filter_list_push(fl, ident, NULL));
 
 	add_blob_and_filter(
 		"Hello\n$Id$\nFun stuff\n", fl,
@@ -71,21 +71,21 @@ void test_filter_ident__to_worktree(void)
 	add_blob_and_filter("$I", fl, "$I");
 	add_blob_and_filter("Id$", fl, "Id$");
 
-	git_filter_list_free(fl);
+	git3_filter_list_free(fl);
 }
 
 void test_filter_ident__to_odb(void)
 {
-	git_filter_list *fl;
-	git_filter *ident;
+	git3_filter_list *fl;
+	git3_filter *ident;
 
-	cl_git_pass(git_filter_list_new(
-		&fl, g_repo, GIT_FILTER_TO_ODB, 0));
+	cl_git_pass(git3_filter_list_new(
+		&fl, g_repo, GIT3_FILTER_TO_ODB, 0));
 
-	ident = git_filter_lookup(GIT_FILTER_IDENT);
+	ident = git3_filter_lookup(GIT3_FILTER_IDENT);
 	cl_assert(ident != NULL);
 
-	cl_git_pass(git_filter_list_push(fl, ident, NULL));
+	cl_git_pass(git3_filter_list_push(fl, ident, NULL));
 
 	add_blob_and_filter(
 		"Hello\n$Id$\nFun stuff\n",
@@ -129,5 +129,5 @@ void test_filter_ident__to_odb(void)
 	add_blob_and_filter("$I", fl, "$I");
 	add_blob_and_filter("Id$", fl, "Id$");
 
-	git_filter_list_free(fl);
+	git3_filter_list_free(fl);
 }

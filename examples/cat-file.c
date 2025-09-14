@@ -1,7 +1,7 @@
 /*
- * libgit2 "cat-file" example - shows how to print data from the ODB
+ * libgit3 "cat-file" example - shows how to print data from the ODB
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -14,7 +14,7 @@
 
 #include "common.h"
 
-static void print_signature(const char *header, const git_signature *sig)
+static void print_signature(const char *header, const git3_signature *sig)
 {
 	char sign;
 	int offset, hours, minutes;
@@ -39,67 +39,67 @@ static void print_signature(const char *header, const git_signature *sig)
 }
 
 /** Printing out a blob is simple, get the contents and print */
-static void show_blob(const git_blob *blob)
+static void show_blob(const git3_blob *blob)
 {
 	/* ? Does this need crlf filtering? */
-	fwrite(git_blob_rawcontent(blob), (size_t)git_blob_rawsize(blob), 1, stdout);
+	fwrite(git3_blob_rawcontent(blob), (size_t)git3_blob_rawsize(blob), 1, stdout);
 }
 
 /** Show each entry with its type, id and attributes */
-static void show_tree(const git_tree *tree)
+static void show_tree(const git3_tree *tree)
 {
-	size_t i, max_i = (int)git_tree_entrycount(tree);
-	char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
-	const git_tree_entry *te;
+	size_t i, max_i = (int)git3_tree_entrycount(tree);
+	char oidstr[GIT3_OID_SHA1_HEXSIZE + 1];
+	const git3_tree_entry *te;
 
 	for (i = 0; i < max_i; ++i) {
-		te = git_tree_entry_byindex(tree, i);
+		te = git3_tree_entry_byindex(tree, i);
 
-		git_oid_tostr(oidstr, sizeof(oidstr), git_tree_entry_id(te));
+		git3_oid_tostr(oidstr, sizeof(oidstr), git3_tree_entry_id(te));
 
 		printf("%06o %s %s\t%s\n",
-			git_tree_entry_filemode(te),
-			git_object_type2string(git_tree_entry_type(te)),
-			oidstr, git_tree_entry_name(te));
+			git3_tree_entry_filemode(te),
+			git3_object_type2string(git3_tree_entry_type(te)),
+			oidstr, git3_tree_entry_name(te));
 	}
 }
 
 /**
  * Commits and tags have a few interesting fields in their header.
  */
-static void show_commit(const git_commit *commit)
+static void show_commit(const git3_commit *commit)
 {
 	unsigned int i, max_i;
-	char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
+	char oidstr[GIT3_OID_SHA1_HEXSIZE + 1];
 
-	git_oid_tostr(oidstr, sizeof(oidstr), git_commit_tree_id(commit));
+	git3_oid_tostr(oidstr, sizeof(oidstr), git3_commit_tree_id(commit));
 	printf("tree %s\n", oidstr);
 
-	max_i = (unsigned int)git_commit_parentcount(commit);
+	max_i = (unsigned int)git3_commit_parentcount(commit);
 	for (i = 0; i < max_i; ++i) {
-		git_oid_tostr(oidstr, sizeof(oidstr), git_commit_parent_id(commit, i));
+		git3_oid_tostr(oidstr, sizeof(oidstr), git3_commit_parent_id(commit, i));
 		printf("parent %s\n", oidstr);
 	}
 
-	print_signature("author", git_commit_author(commit));
-	print_signature("committer", git_commit_committer(commit));
+	print_signature("author", git3_commit_author(commit));
+	print_signature("committer", git3_commit_committer(commit));
 
-	if (git_commit_message(commit))
-		printf("\n%s\n", git_commit_message(commit));
+	if (git3_commit_message(commit))
+		printf("\n%s\n", git3_commit_message(commit));
 }
 
-static void show_tag(const git_tag *tag)
+static void show_tag(const git3_tag *tag)
 {
-	char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
+	char oidstr[GIT3_OID_SHA1_HEXSIZE + 1];
 
-	git_oid_tostr(oidstr, sizeof(oidstr), git_tag_target_id(tag));;
+	git3_oid_tostr(oidstr, sizeof(oidstr), git3_tag_target_id(tag));;
 	printf("object %s\n", oidstr);
-	printf("type %s\n", git_object_type2string(git_tag_target_type(tag)));
-	printf("tag %s\n", git_tag_name(tag));
-	print_signature("tagger", git_tag_tagger(tag));
+	printf("type %s\n", git3_object_type2string(git3_tag_target_type(tag)));
+	printf("tag %s\n", git3_tag_name(tag));
+	print_signature("tagger", git3_tag_tagger(tag));
 
-	if (git_tag_message(tag))
-		printf("\n%s\n", git_tag_message(tag));
+	if (git3_tag_message(tag))
+		printf("\n%s\n", git3_tag_message(tag));
 }
 
 typedef enum {
@@ -121,41 +121,41 @@ static void parse_opts(struct catfile_options *o, int argc, char *argv[]);
 
 
 /** Entry point for this command */
-int lg2_cat_file(git_repository *repo, int argc, char *argv[])
+int lg2_cat_file(git3_repository *repo, int argc, char *argv[])
 {
 	struct catfile_options o = { ".", NULL, 0, 0 };
-	git_object *obj = NULL;
-	char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
+	git3_object *obj = NULL;
+	char oidstr[GIT3_OID_SHA1_HEXSIZE + 1];
 
 	parse_opts(&o, argc, argv);
 
-	check_lg2(git_revparse_single(&obj, repo, o.rev),
+	check_lg2(git3_revparse_single(&obj, repo, o.rev),
 			"Could not resolve", o.rev);
 
 	if (o.verbose) {
-		char oidstr[GIT_OID_SHA1_HEXSIZE + 1];
-		git_oid_tostr(oidstr, sizeof(oidstr), git_object_id(obj));
+		char oidstr[GIT3_OID_SHA1_HEXSIZE + 1];
+		git3_oid_tostr(oidstr, sizeof(oidstr), git3_object_id(obj));
 
 		printf("%s %s\n--\n",
-			git_object_type2string(git_object_type(obj)), oidstr);
+			git3_object_type2string(git3_object_type(obj)), oidstr);
 	}
 
 	switch (o.action) {
 	case SHOW_TYPE:
-		printf("%s\n", git_object_type2string(git_object_type(obj)));
+		printf("%s\n", git3_object_type2string(git3_object_type(obj)));
 		break;
 	case SHOW_SIZE: {
-		git_odb *odb;
-		git_odb_object *odbobj;
+		git3_odb *odb;
+		git3_odb_object *odbobj;
 
-		check_lg2(git_repository_odb(&odb, repo), "Could not open ODB", NULL);
-		check_lg2(git_odb_read(&odbobj, odb, git_object_id(obj)),
+		check_lg2(git3_repository_odb(&odb, repo), "Could not open ODB", NULL);
+		check_lg2(git3_odb_read(&odbobj, odb, git3_object_id(obj)),
 			"Could not find obj", NULL);
 
-		printf("%ld\n", (long)git_odb_object_size(odbobj));
+		printf("%ld\n", (long)git3_odb_object_size(odbobj));
 
-		git_odb_object_free(odbobj);
-		git_odb_free(odb);
+		git3_odb_object_free(odbobj);
+		git3_odb_free(odb);
 		}
 		break;
 	case SHOW_NONE:
@@ -163,18 +163,18 @@ int lg2_cat_file(git_repository *repo, int argc, char *argv[])
 		break;
 	case SHOW_PRETTY:
 
-		switch (git_object_type(obj)) {
-		case GIT_OBJECT_BLOB:
-			show_blob((const git_blob *)obj);
+		switch (git3_object_type(obj)) {
+		case GIT3_OBJECT_BLOB:
+			show_blob((const git3_blob *)obj);
 			break;
-		case GIT_OBJECT_COMMIT:
-			show_commit((const git_commit *)obj);
+		case GIT3_OBJECT_COMMIT:
+			show_commit((const git3_commit *)obj);
 			break;
-		case GIT_OBJECT_TREE:
-			show_tree((const git_tree *)obj);
+		case GIT3_OBJECT_TREE:
+			show_tree((const git3_tree *)obj);
 			break;
-		case GIT_OBJECT_TAG:
-			show_tag((const git_tag *)obj);
+		case GIT3_OBJECT_TAG:
+			show_tag((const git3_tag *)obj);
 			break;
 		default:
 			printf("unknown %s\n", oidstr);
@@ -183,7 +183,7 @@ int lg2_cat_file(git_repository *repo, int argc, char *argv[])
 		break;
 	}
 
-	git_object_free(obj);
+	git3_object_free(obj);
 
 	return 0;
 }

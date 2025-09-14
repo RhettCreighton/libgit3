@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_pack_h__
@@ -12,7 +12,7 @@
 #include "indexer.h"
 
 /**
- * @file git2/pack.h
+ * @file git3/pack.h
  * @brief Git pack management routines
  *
  * Packing objects
@@ -21,7 +21,7 @@
  * Creation of packfiles requires two steps:
  *
  * - First, insert all the objects you want to put into the packfile
- *   using `git_packbuilder_insert` and `git_packbuilder_insert_tree`.
+ *   using `git3_packbuilder_insert` and `git3_packbuilder_insert_tree`.
  *   It's important to add the objects in recency order ("in the order
  *   that they are 'reachable' from head").
  *
@@ -32,11 +32,11 @@
  *   _wonderful_ IO patterns." - Linus Torvalds
  *   git.git/Documentation/technical/pack-heuristics.txt
  *
- * - Second, use `git_packbuilder_write` or `git_packbuilder_foreach` to
+ * - Second, use `git3_packbuilder_write` or `git3_packbuilder_foreach` to
  *   write the resulting packfile.
  *
- *   libgit2 will take care of the delta ordering and generation.
- *   `git_packbuilder_set_threads` can be used to adjust the number of
+ *   libgit3 will take care of the delta ordering and generation.
+ *   `git3_packbuilder_set_threads` can be used to adjust the number of
  *   threads used for the process.
  *
  * See tests/pack/packbuilder.c for an example.
@@ -44,15 +44,15 @@
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Stages that are reported by the packbuilder progress callback.
  */
 typedef enum {
-	GIT_PACKBUILDER_ADDING_OBJECTS = 0,
-	GIT_PACKBUILDER_DELTAFICATION = 1
-} git_packbuilder_stage_t;
+	GIT3_PACKBUILDER_ADDING_OBJECTS = 0,
+	GIT3_PACKBUILDER_DELTAFICATION = 1
+} git3_packbuilder_stage_t;
 
 /**
  * Initialize a new packbuilder
@@ -62,20 +62,20 @@ typedef enum {
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_new(git_packbuilder **out, git_repository *repo);
+GIT3_EXTERN(int) git3_packbuilder_new(git3_packbuilder **out, git3_repository *repo);
 
 /**
  * Set number of threads to spawn
  *
- * By default, libgit2 won't spawn any threads at all;
- * when set to 0, libgit2 will autodetect the number of
+ * By default, libgit3 won't spawn any threads at all;
+ * when set to 0, libgit3 will autodetect the number of
  * CPUs.
  *
  * @param pb The packbuilder
  * @param n Number of threads to spawn
  * @return number of actual threads to be used
  */
-GIT_EXTERN(unsigned int) git_packbuilder_set_threads(git_packbuilder *pb, unsigned int n);
+GIT3_EXTERN(unsigned int) git3_packbuilder_set_threads(git3_packbuilder *pb, unsigned int n);
 
 /**
  * Insert a single object
@@ -89,7 +89,7 @@ GIT_EXTERN(unsigned int) git_packbuilder_set_threads(git_packbuilder *pb, unsign
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_insert(git_packbuilder *pb, const git_oid *id, const char *name);
+GIT3_EXTERN(int) git3_packbuilder_insert(git3_packbuilder *pb, const git3_oid *id, const char *name);
 
 /**
  * Insert a root tree object
@@ -101,7 +101,7 @@ GIT_EXTERN(int) git_packbuilder_insert(git_packbuilder *pb, const git_oid *id, c
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_insert_tree(git_packbuilder *pb, const git_oid *id);
+GIT3_EXTERN(int) git3_packbuilder_insert_tree(git3_packbuilder *pb, const git3_oid *id);
 
 /**
  * Insert a commit object
@@ -113,7 +113,7 @@ GIT_EXTERN(int) git_packbuilder_insert_tree(git_packbuilder *pb, const git_oid *
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_insert_commit(git_packbuilder *pb, const git_oid *id);
+GIT3_EXTERN(int) git3_packbuilder_insert_commit(git3_packbuilder *pb, const git3_oid *id);
 
 /**
  * Insert objects as given by the walk
@@ -126,7 +126,7 @@ GIT_EXTERN(int) git_packbuilder_insert_commit(git_packbuilder *pb, const git_oid
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_insert_walk(git_packbuilder *pb, git_revwalk *walk);
+GIT3_EXTERN(int) git3_packbuilder_insert_walk(git3_packbuilder *pb, git3_revwalk *walk);
 
 /**
  * Recursively insert an object and its referenced objects
@@ -138,7 +138,7 @@ GIT_EXTERN(int) git_packbuilder_insert_walk(git_packbuilder *pb, git_revwalk *wa
  * @param name optional name for the object
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_insert_recur(git_packbuilder *pb, const git_oid *id, const char *name);
+GIT3_EXTERN(int) git3_packbuilder_insert_recur(git3_packbuilder *pb, const git3_oid *id, const char *name);
 
 /**
  * Write the contents of the packfile to an in-memory buffer
@@ -150,7 +150,7 @@ GIT_EXTERN(int) git_packbuilder_insert_recur(git_packbuilder *pb, const git_oid 
  * @param pb The packbuilder
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_write_buf(git_buf *buf, git_packbuilder *pb);
+GIT3_EXTERN(int) git3_packbuilder_write_buf(git3_buf *buf, git3_packbuilder *pb);
 
 /**
  * Write the new pack and corresponding index file to path.
@@ -163,25 +163,25 @@ GIT_EXTERN(int) git_packbuilder_write_buf(git_buf *buf, git_packbuilder *pb);
  *
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_write(
-	git_packbuilder *pb,
+GIT3_EXTERN(int) git3_packbuilder_write(
+	git3_packbuilder *pb,
 	const char *path,
 	unsigned int mode,
-	git_indexer_progress_cb progress_cb,
+	git3_indexer_progress_cb progress_cb,
 	void *progress_cb_payload);
 
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 /**
  * Get the packfile's hash
  *
  * A packfile's name is derived from the sorted hashing of all object
  * names. This is only correct after the packfile has been written.
  *
- * @deprecated use git_packbuilder_name
+ * @deprecated use git3_packbuilder_name
  * @param pb The packbuilder object
  * @return 0 or an error code
  */
-GIT_EXTERN(const git_oid *) git_packbuilder_hash(git_packbuilder *pb);
+GIT3_EXTERN(const git3_oid *) git3_packbuilder_hash(git3_packbuilder *pb);
 #endif
 
 /**
@@ -193,19 +193,19 @@ GIT_EXTERN(const git_oid *) git_packbuilder_hash(git_packbuilder *pb);
  * @param pb the packbuilder instance
  * @return a NUL terminated string for the packfile name
  */
-GIT_EXTERN(const char *) git_packbuilder_name(git_packbuilder *pb);
+GIT3_EXTERN(const char *) git3_packbuilder_name(git3_packbuilder *pb);
 
 /**
  * Callback used to iterate over packed objects
  *
- * @see git_packbuilder_foreach
+ * @see git3_packbuilder_foreach
  *
  * @param buf A pointer to the object's data
  * @param size The size of the underlying object
- * @param payload Payload passed to git_packbuilder_foreach
+ * @param payload Payload passed to git3_packbuilder_foreach
  * @return non-zero to terminate the iteration
  */
-typedef int GIT_CALLBACK(git_packbuilder_foreach_cb)(void *buf, size_t size, void *payload);
+typedef int GIT3_CALLBACK(git3_packbuilder_foreach_cb)(void *buf, size_t size, void *payload);
 
 /**
  * Create the new pack and pass each object to the callback
@@ -215,7 +215,7 @@ typedef int GIT_CALLBACK(git_packbuilder_foreach_cb)(void *buf, size_t size, voi
  * @param payload the callback's data
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_foreach(git_packbuilder *pb, git_packbuilder_foreach_cb cb, void *payload);
+GIT3_EXTERN(int) git3_packbuilder_foreach(git3_packbuilder *pb, git3_packbuilder_foreach_cb cb, void *payload);
 
 /**
  * Get the total number of objects the packbuilder will write out
@@ -223,7 +223,7 @@ GIT_EXTERN(int) git_packbuilder_foreach(git_packbuilder *pb, git_packbuilder_for
  * @param pb the packbuilder
  * @return the number of objects in the packfile
  */
-GIT_EXTERN(size_t) git_packbuilder_object_count(git_packbuilder *pb);
+GIT3_EXTERN(size_t) git3_packbuilder_object_count(git3_packbuilder *pb);
 
 /**
  * Get the number of objects the packbuilder has already written out
@@ -231,7 +231,7 @@ GIT_EXTERN(size_t) git_packbuilder_object_count(git_packbuilder *pb);
  * @param pb the packbuilder
  * @return the number of objects which have already been written
  */
-GIT_EXTERN(size_t) git_packbuilder_written(git_packbuilder *pb);
+GIT3_EXTERN(size_t) git3_packbuilder_written(git3_packbuilder *pb);
 
 /**
  * Packbuilder progress notification function.
@@ -242,7 +242,7 @@ GIT_EXTERN(size_t) git_packbuilder_written(git_packbuilder *pb);
  * @param payload the callback payload
  * @return 0 on success or an error code
  */
-typedef int GIT_CALLBACK(git_packbuilder_progress)(
+typedef int GIT3_CALLBACK(git3_packbuilder_progress)(
 	int stage,
 	uint32_t current,
 	uint32_t total,
@@ -261,9 +261,9 @@ typedef int GIT_CALLBACK(git_packbuilder_progress)(
  * @param progress_cb_payload Payload for progress callback.
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_packbuilder_set_callbacks(
-	git_packbuilder *pb,
-	git_packbuilder_progress progress_cb,
+GIT3_EXTERN(int) git3_packbuilder_set_callbacks(
+	git3_packbuilder *pb,
+	git3_packbuilder_progress progress_cb,
 	void *progress_cb_payload);
 
 /**
@@ -271,9 +271,9 @@ GIT_EXTERN(int) git_packbuilder_set_callbacks(
  *
  * @param pb The packbuilder
  */
-GIT_EXTERN(void) git_packbuilder_free(git_packbuilder *pb);
+GIT3_EXTERN(void) git3_packbuilder_free(git3_packbuilder *pb);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

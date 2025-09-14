@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_cherrypick_h__
@@ -12,16 +12,16 @@
 #include "merge.h"
 
 /**
- * @file git2/cherrypick.h
+ * @file git3/cherrypick.h
  * @brief Cherry-pick the contents of an individual commit
- * @defgroup git_cherrypick Git cherry-pick routines
+ * @defgroup git3_cherrypick Git cherry-pick routines
  * @ingroup Git
  *
  * "Cherry-pick" will attempts to re-apply the changes in an
  * individual commit to the current index and working directory.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Cherry-pick options
@@ -32,37 +32,37 @@ typedef struct {
 	/** For merge commits, the "mainline" is treated as the parent. */
 	unsigned int mainline;
 
-	git_merge_options merge_opts; /**< Options for the merging */
-	git_checkout_options checkout_opts; /**< Options for the checkout */
-} git_cherrypick_options;
+	git3_merge_options merge_opts; /**< Options for the merging */
+	git3_checkout_options checkout_opts; /**< Options for the checkout */
+} git3_cherrypick_options;
 
-/** Current version for the `git_cherrypick_options` structure */
-#define GIT_CHERRYPICK_OPTIONS_VERSION 1
+/** Current version for the `git3_cherrypick_options` structure */
+#define GIT3_CHERRYPICK_OPTIONS_VERSION 1
 
-/** Static constructor for `git_cherrypick_options` */
-#define GIT_CHERRYPICK_OPTIONS_INIT { \
-	GIT_CHERRYPICK_OPTIONS_VERSION, 0, \
-	GIT_MERGE_OPTIONS_INIT, GIT_CHECKOUT_OPTIONS_INIT }
+/** Static constructor for `git3_cherrypick_options` */
+#define GIT3_CHERRYPICK_OPTIONS_INIT { \
+	GIT3_CHERRYPICK_OPTIONS_VERSION, 0, \
+	GIT3_MERGE_OPTIONS_INIT, GIT3_CHECKOUT_OPTIONS_INIT }
 
 /**
- * Initialize git_cherrypick_options structure
+ * Initialize git3_cherrypick_options structure
  *
- * Initializes a `git_cherrypick_options` with default values. Equivalent to creating
- * an instance with GIT_CHERRYPICK_OPTIONS_INIT.
+ * Initializes a `git3_cherrypick_options` with default values. Equivalent to creating
+ * an instance with GIT3_CHERRYPICK_OPTIONS_INIT.
  *
- * @param opts The `git_cherrypick_options` struct to initialize.
- * @param version The struct version; pass `GIT_CHERRYPICK_OPTIONS_VERSION`.
+ * @param opts The `git3_cherrypick_options` struct to initialize.
+ * @param version The struct version; pass `GIT3_CHERRYPICK_OPTIONS_VERSION`.
  * @return Zero on success; -1 on failure.
  */
-GIT_EXTERN(int) git_cherrypick_options_init(
-	git_cherrypick_options *opts,
+GIT3_EXTERN(int) git3_cherrypick_options_init(
+	git3_cherrypick_options *opts,
 	unsigned int version);
 
 /**
  * Cherry-picks the given commit against the given "our" commit, producing an
  * index that reflects the result of the cherry-pick.
  *
- * The returned index must be freed explicitly with `git_index_free`.
+ * The returned index must be freed explicitly with `git3_index_free`.
  *
  * @param out pointer to store the index result in
  * @param repo the repository that contains the given commits
@@ -72,13 +72,13 @@ GIT_EXTERN(int) git_cherrypick_options_init(
  * @param merge_options the merge options (or null for defaults)
  * @return zero on success, -1 on failure.
  */
-GIT_EXTERN(int) git_cherrypick_commit(
-	git_index **out,
-	git_repository *repo,
-	git_commit *cherrypick_commit,
-	git_commit *our_commit,
+GIT3_EXTERN(int) git3_cherrypick_commit(
+	git3_index **out,
+	git3_repository *repo,
+	git3_commit *cherrypick_commit,
+	git3_commit *our_commit,
 	unsigned int mainline,
-	const git_merge_options *merge_options);
+	const git3_merge_options *merge_options);
 
 /**
  * Cherry-pick the given commit, producing changes in the index and working directory.
@@ -88,12 +88,12 @@ GIT_EXTERN(int) git_cherrypick_commit(
  * @param cherrypick_options the cherry-pick options (or null for defaults)
  * @return zero on success, -1 on failure.
  */
-GIT_EXTERN(int) git_cherrypick(
-	git_repository *repo,
-	git_commit *commit,
-	const git_cherrypick_options *cherrypick_options);
+GIT3_EXTERN(int) git3_cherrypick(
+	git3_repository *repo,
+	git3_commit *commit,
+	const git3_cherrypick_options *cherrypick_options);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

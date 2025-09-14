@@ -1,11 +1,11 @@
 #include "clar.h"
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #include "commit.h"
 #include "diff.h"
 #include "diff_generate.h"
 
-static git_repository *repo;
+static git3_repository *repo;
 
 void test_diff_format_email__initialize(void)
 {
@@ -17,46 +17,46 @@ void test_diff_format_email__cleanup(void)
 	cl_git_sandbox_cleanup();
 }
 
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 static void assert_email_match(
 	const char *expected,
 	const char *oidstr,
-	git_diff_format_email_options *opts)
+	git3_diff_format_email_options *opts)
 {
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_diff *diff = NULL;
-	git_buf buf = GIT_BUF_INIT;
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_diff *diff = NULL;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	git_oid_from_string(&oid, oidstr, GIT_OID_SHA1);
+	git3_oid_from_string(&oid, oidstr, GIT3_OID_SHA1);
 
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
 
-	opts->id = git_commit_id(commit);
-	opts->author = git_commit_author(commit);
+	opts->id = git3_commit_id(commit);
+	opts->author = git3_commit_author(commit);
 	if (!opts->summary)
-		opts->summary = git_commit_summary(commit);
+		opts->summary = git3_commit_summary(commit);
 
-	cl_git_pass(git_diff__commit(&diff, repo, commit, NULL));
-	cl_git_pass(git_diff_format_email(&buf, diff, opts));
+	cl_git_pass(git3_diff__commit(&diff, repo, commit, NULL));
+	cl_git_pass(git3_diff_format_email(&buf, diff, opts));
 
 	cl_assert_equal_s(expected, buf.ptr);
-	git_buf_dispose(&buf);
+	git3_buf_dispose(&buf);
 
-	cl_git_pass(git_diff_commit_as_email(
+	cl_git_pass(git3_diff_commit_as_email(
 		&buf, repo, commit, 1, 1, opts->flags, NULL));
 	cl_assert_equal_s(expected, buf.ptr);
 
-	git_diff_free(diff);
-	git_commit_free(commit);
-	git_buf_dispose(&buf);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
+	git3_buf_dispose(&buf);
 }
 #endif
 
 void test_diff_format_email__simple(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 9264b96c6d104d0e07ae33d3007b6a48246c6f92 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -93,7 +93,7 @@ void test_diff_format_email__simple(void)
 	"+_file1.txt_\n" \
 	" file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(
@@ -103,8 +103,8 @@ void test_diff_format_email__simple(void)
 
 void test_diff_format_email__with_message(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email = "From 627e7e12d87e07a83fad5b6bfa25e86ead4a5270 Mon Sep 17 00:00:00 2001\n" \
 	"From: Patrick Steinhardt <ps@pks.im>\n" \
 	"Date: Tue, 24 Nov 2015 13:34:39 +0100\n" \
@@ -129,7 +129,7 @@ void test_diff_format_email__with_message(void)
 	" file3\n" \
 	"+file3\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	opts.body = "Modify content of file3.txt by appending a new line. Make this\n" \
@@ -146,12 +146,12 @@ void test_diff_format_email__with_message(void)
 
 void test_diff_format_email__multiple(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_diff *diff = NULL;
- 	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
-	git_buf buf = GIT_BUF_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_diff *diff = NULL;
+ 	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+	git3_buf buf = GIT3_BUF_INIT;
 
 	const char *email =
 	"From 10808fe9c9be5a190c0ba68d1a002233fb363508 Mon Sep 17 00:00:00 2001\n" \
@@ -189,7 +189,7 @@ void test_diff_format_email__multiple(void)
 	"+file3\n" \
 	"+file3\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n" \
 	"From 873806f6f27e631eb0b23e4b56bea2bfac14a373 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -224,51 +224,51 @@ void test_diff_format_email__multiple(void)
 	" file3\n" \
 	" file3\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 
-	git_oid_from_string(&oid, "10808fe9c9be5a190c0ba68d1a002233fb363508", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
+	git3_oid_from_string(&oid, "10808fe9c9be5a190c0ba68d1a002233fb363508", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
 
-	opts.id = git_commit_id(commit);
-	opts.author = git_commit_author(commit);
-	opts.summary = git_commit_summary(commit);
+	opts.id = git3_commit_id(commit);
+	opts.author = git3_commit_author(commit);
+	opts.summary = git3_commit_summary(commit);
 	opts.patch_no = 1;
 	opts.total_patches = 2;
 
-	cl_git_pass(git_diff__commit(&diff, repo, commit, NULL));
-	cl_git_pass(git_diff_format_email(&buf, diff, &opts));
+	cl_git_pass(git3_diff__commit(&diff, repo, commit, NULL));
+	cl_git_pass(git3_diff_format_email(&buf, diff, &opts));
 
-	git_diff_free(diff);
-	git_commit_free(commit);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
 	diff = NULL;
 	commit = NULL;
 
-	git_oid_from_string(&oid, "873806f6f27e631eb0b23e4b56bea2bfac14a373", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
+	git3_oid_from_string(&oid, "873806f6f27e631eb0b23e4b56bea2bfac14a373", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
 
-	opts.id = git_commit_id(commit);
-	opts.author = git_commit_author(commit);
-	opts.summary = git_commit_summary(commit);
+	opts.id = git3_commit_id(commit);
+	opts.author = git3_commit_author(commit);
+	opts.summary = git3_commit_summary(commit);
 	opts.patch_no = 2;
 	opts.total_patches = 2;
 
-	cl_git_pass(git_diff__commit(&diff, repo, commit, NULL));
-	cl_git_pass(git_diff_format_email(&buf, diff, &opts));
+	cl_git_pass(git3_diff__commit(&diff, repo, commit, NULL));
+	cl_git_pass(git3_diff_format_email(&buf, diff, &opts));
 
 	cl_assert_equal_s(email, buf.ptr);
 
-	git_diff_free(diff);
-	git_commit_free(commit);
-	git_buf_dispose(&buf);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
+	git3_buf_dispose(&buf);
 #endif
 }
 
 void test_diff_format_email__exclude_marker(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 9264b96c6d104d0e07ae33d3007b6a48246c6f92 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -305,10 +305,10 @@ void test_diff_format_email__exclude_marker(void)
 	"+_file1.txt_\n" \
 	" file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
-	opts.flags |= GIT_DIFF_FORMAT_EMAIL_EXCLUDE_SUBJECT_PATCH_MARKER;
+	opts.flags |= GIT3_DIFF_FORMAT_EMAIL_EXCLUDE_SUBJECT_PATCH_MARKER;
 
 	assert_email_match(
 		email, "9264b96c6d104d0e07ae33d3007b6a48246c6f92", &opts);
@@ -317,37 +317,37 @@ void test_diff_format_email__exclude_marker(void)
 
 void test_diff_format_email__invalid_no(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_oid oid;
-	git_commit *commit = NULL;
-	git_diff *diff = NULL;
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
-	git_buf buf = GIT_BUF_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_oid oid;
+	git3_commit *commit = NULL;
+	git3_diff *diff = NULL;
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+	git3_buf buf = GIT3_BUF_INIT;
 
-	git_oid_from_string(&oid, "9264b96c6d104d0e07ae33d3007b6a48246c6f92", GIT_OID_SHA1);
+	git3_oid_from_string(&oid, "9264b96c6d104d0e07ae33d3007b6a48246c6f92", GIT3_OID_SHA1);
 
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
 
-	opts.id = git_commit_id(commit);
-	opts.author = git_commit_author(commit);
-	opts.summary = git_commit_summary(commit);
+	opts.id = git3_commit_id(commit);
+	opts.author = git3_commit_author(commit);
+	opts.summary = git3_commit_summary(commit);
 	opts.patch_no = 2;
 	opts.total_patches = 1;
 
-	cl_git_pass(git_diff__commit(&diff, repo, commit, NULL));
-	cl_git_fail(git_diff_format_email(&buf, diff, &opts));
-	cl_git_fail(git_diff_commit_as_email(&buf, repo, commit, 2, 1, 0, NULL));
+	cl_git_pass(git3_diff__commit(&diff, repo, commit, NULL));
+	cl_git_fail(git3_diff_format_email(&buf, diff, &opts));
+	cl_git_fail(git3_diff_commit_as_email(&buf, repo, commit, 2, 1, 0, NULL));
 
-	git_diff_free(diff);
-	git_commit_free(commit);
-	git_buf_dispose(&buf);
+	git3_diff_free(diff);
+	git3_commit_free(commit);
+	git3_buf_dispose(&buf);
 #endif
 }
 
 void test_diff_format_email__mode_change(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 7ade76dd34bba4733cf9878079f9fd4a456a9189 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -363,7 +363,7 @@ void test_diff_format_email__mode_change(void)
 	"old mode 100644\n" \
 	"new mode 100755\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(
@@ -373,8 +373,8 @@ void test_diff_format_email__mode_change(void)
 
 void test_diff_format_email__rename_add_remove(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 6e05acc5a5dab507d91a0a0cc0fb05a3dd98892d Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -435,7 +435,7 @@ void test_diff_format_email__rename_add_remove(void)
 	"+_file1.txt_\n" \
 	"+file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	assert_email_match(
@@ -445,8 +445,8 @@ void test_diff_format_email__rename_add_remove(void)
 
 void test_diff_format_email__multiline_summary(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 9264b96c6d104d0e07ae33d3007b6a48246c6f92 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -483,7 +483,7 @@ void test_diff_format_email__multiline_summary(void)
 	"+_file1.txt_\n" \
 	" file1.txt\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	opts.summary = "Modify some content\nSome extra stuff here";
@@ -495,8 +495,8 @@ void test_diff_format_email__multiline_summary(void)
 
 void test_diff_format_email__binary(void)
 {
-#ifndef GIT_DEPRECATE_HARD
-	git_diff_format_email_options opts = GIT_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
+#ifndef GIT3_DEPRECATE_HARD
+	git3_diff_format_email_options opts = GIT3_DIFF_FORMAT_EMAIL_OPTIONS_INIT;
 	const char *email =
 	"From 8d7523f6fcb2404257889abe0d96f093d9f524f9 Mon Sep 17 00:00:00 2001\n" \
 	"From: Jacques Germishuys <jacquesg@striata.com>\n" \
@@ -511,7 +511,7 @@ void test_diff_format_email__binary(void)
 	"index bd474b2..9ac35ff 100644\n" \
 	"Binary files a/binary.bin and b/binary.bin differ\n" \
 	"--\n" \
-	"libgit2 " LIBGIT2_VERSION "\n" \
+	"libgit3 " LIBGIT3_VERSION "\n" \
 	"\n";
 
 	opts.summary = "Modified binary file";

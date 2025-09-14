@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_branch_h__
@@ -12,9 +12,9 @@
 #include "types.h"
 
 /**
- * @file git2/branch.h
+ * @file git3/branch.h
  * @brief Branch creation and handling
- * @defgroup git_branch Git branch management
+ * @defgroup git3_branch Git branch management
  * @ingroup Git
  *
  * A branch is a specific type of reference, at any particular time,
@@ -24,7 +24,7 @@
  * commit. The checked out branch is indicated by the `HEAD` meta-ref.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Create a new branch pointing at a target commit
@@ -36,7 +36,7 @@ GIT_BEGIN_DECL
  * The returned reference must be freed by the user.
  *
  * The branch name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * @param out Pointer where to store the underlying reference.
  * @param repo the repository to create the branch in.
@@ -46,21 +46,21 @@ GIT_BEGIN_DECL
  * @param target Commit to which this branch should point. This object
  *   must belong to the given `repo`.
  * @param force Overwrite existing branch.
- * @return 0, GIT_EINVALIDSPEC or an error code.
+ * @return 0, GIT3_EINVALIDSPEC or an error code.
  * A proper reference is written in the refs/heads namespace
  * pointing to the provided target commit.
  */
-GIT_EXTERN(int) git_branch_create(
-	git_reference **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_branch_create(
+	git3_reference **out,
+	git3_repository *repo,
 	const char *branch_name,
-	const git_commit *target,
+	const git3_commit *target,
 	int force);
 
 /**
  * Create a new branch pointing at a target commit
  *
- * This behaves like `git_branch_create()` but takes an annotated
+ * This behaves like `git3_branch_create()` but takes an annotated
  * commit, which lets you specify which extended sha syntax string was
  * specified by a user, allowing for more exact reflog messages.
  *
@@ -72,13 +72,13 @@ GIT_EXTERN(int) git_branch_create(
  * @param target Annotated commit to which this branch should point. This
  *   object must belong to the given `repo`.
  * @param force Overwrite existing branch.
- * @return 0, GIT_EINVALIDSPEC or an error code.
+ * @return 0, GIT3_EINVALIDSPEC or an error code.
  */
-GIT_EXTERN(int) git_branch_create_from_annotated(
-	git_reference **ref_out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_branch_create_from_annotated(
+	git3_reference **ref_out,
+	git3_repository *repo,
 	const char *branch_name,
-	const git_annotated_commit *target,
+	const git3_annotated_commit *target,
 	int force);
 
 /**
@@ -86,15 +86,15 @@ GIT_EXTERN(int) git_branch_create_from_annotated(
  *
  * Note that if the deletion succeeds, the reference object will not
  * be valid anymore, and should be freed immediately by the user using
- * `git_reference_free()`.
+ * `git3_reference_free()`.
  *
  * @param branch A valid reference representing a branch
  * @return 0 on success, or an error code.
  */
-GIT_EXTERN(int) git_branch_delete(git_reference *branch);
+GIT3_EXTERN(int) git3_branch_delete(git3_reference *branch);
 
 /** Iterator type for branches */
-typedef struct git_branch_iterator git_branch_iterator;
+typedef struct git3_branch_iterator git3_branch_iterator;
 
 /**
  * Create an iterator which loops over the requested branches.
@@ -102,15 +102,15 @@ typedef struct git_branch_iterator git_branch_iterator;
  * @param out the iterator
  * @param repo Repository where to find the branches.
  * @param list_flags Filtering flags for the branch
- * listing. Valid values are GIT_BRANCH_LOCAL, GIT_BRANCH_REMOTE
- * or GIT_BRANCH_ALL.
+ * listing. Valid values are GIT3_BRANCH_LOCAL, GIT3_BRANCH_REMOTE
+ * or GIT3_BRANCH_ALL.
  *
  * @return 0 on success  or an error code
  */
-GIT_EXTERN(int) git_branch_iterator_new(
-	git_branch_iterator **out,
-	git_repository *repo,
-	git_branch_t list_flags);
+GIT3_EXTERN(int) git3_branch_iterator_new(
+	git3_branch_iterator **out,
+	git3_repository *repo,
+	git3_branch_t list_flags);
 
 /**
  * Retrieve the next branch from the iterator
@@ -118,26 +118,26 @@ GIT_EXTERN(int) git_branch_iterator_new(
  * @param out the reference
  * @param out_type the type of branch (local or remote-tracking)
  * @param iter the branch iterator
- * @return 0 on success, GIT_ITEROVER if there are no more branches or an error code.
+ * @return 0 on success, GIT3_ITEROVER if there are no more branches or an error code.
  */
-GIT_EXTERN(int) git_branch_next(git_reference **out, git_branch_t *out_type, git_branch_iterator *iter);
+GIT3_EXTERN(int) git3_branch_next(git3_reference **out, git3_branch_t *out_type, git3_branch_iterator *iter);
 
 /**
  * Free a branch iterator
  *
  * @param iter the iterator to free
  */
-GIT_EXTERN(void) git_branch_iterator_free(git_branch_iterator *iter);
+GIT3_EXTERN(void) git3_branch_iterator_free(git3_branch_iterator *iter);
 
 /**
  * Move/rename an existing local branch reference.
  *
  * The new branch name will be checked for validity.
- * See `git_tag_create()` for rules about valid names.
+ * See `git3_tag_create()` for rules about valid names.
  *
  * Note that if the move succeeds, the old reference object will not
  * be valid anymore, and should be freed immediately by the user using
- * `git_reference_free()`.
+ * `git3_reference_free()`.
  *
  * @param out New reference object for the updated name.
  *
@@ -148,11 +148,11 @@ GIT_EXTERN(void) git_branch_iterator_free(git_branch_iterator *iter);
  *
  * @param force Overwrite existing branch.
  *
- * @return 0 on success, GIT_EINVALIDSPEC or an error code.
+ * @return 0 on success, GIT3_EINVALIDSPEC or an error code.
  */
-GIT_EXTERN(int) git_branch_move(
-	git_reference **out,
-	git_reference *branch,
+GIT3_EXTERN(int) git3_branch_move(
+	git3_reference **out,
+	git3_reference *branch,
 	const char *new_branch_name,
 	int force);
 
@@ -162,23 +162,23 @@ GIT_EXTERN(int) git_branch_move(
  * The generated reference must be freed by the user.
  * The branch name will be checked for validity.
  *
- * @see git_tag_create for rules about valid names.
+ * @see git3_tag_create for rules about valid names.
  *
  * @param out pointer to the looked-up branch reference
  * @param repo the repository to look up the branch
  * @param branch_name Name of the branch to be looked-up;
  * this name is validated for consistency.
  * @param branch_type Type of the considered branch. This should
- * be valued with either GIT_BRANCH_LOCAL or GIT_BRANCH_REMOTE.
+ * be valued with either GIT3_BRANCH_LOCAL or GIT3_BRANCH_REMOTE.
  *
- * @return 0 on success; GIT_ENOTFOUND when no matching branch
- * exists, GIT_EINVALIDSPEC, otherwise an error code.
+ * @return 0 on success; GIT3_ENOTFOUND when no matching branch
+ * exists, GIT3_EINVALIDSPEC, otherwise an error code.
  */
-GIT_EXTERN(int) git_branch_lookup(
-	git_reference **out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_branch_lookup(
+	git3_reference **out,
+	git3_repository *repo,
 	const char *branch_name,
-	git_branch_t branch_type);
+	git3_branch_t branch_type);
 
 /**
  * Get the branch name
@@ -192,12 +192,12 @@ GIT_EXTERN(int) git_branch_lookup(
  *
  * @param ref A reference object, ideally pointing to a branch
  *
- * @return 0 on success; GIT_EINVALID if the reference isn't either a local or
+ * @return 0 on success; GIT3_EINVALID if the reference isn't either a local or
  *         remote branch, otherwise an error code.
  */
-GIT_EXTERN(int) git_branch_name(
+GIT3_EXTERN(int) git3_branch_name(
 		const char **out,
-		const git_reference *ref);
+		const git3_reference *ref);
 
 /**
  * Get the upstream of a branch
@@ -205,17 +205,17 @@ GIT_EXTERN(int) git_branch_name(
  * Given a reference, this will return a new reference object corresponding
  * to its remote tracking branch. The reference must be a local branch.
  *
- * @see git_branch_upstream_name for details on the resolution.
+ * @see git3_branch_upstream_name for details on the resolution.
  *
  * @param out Pointer where to store the retrieved reference.
  * @param branch Current underlying reference of the branch.
  *
- * @return 0 on success; GIT_ENOTFOUND when no remote tracking
+ * @return 0 on success; GIT3_ENOTFOUND when no remote tracking
  *         reference exists, otherwise an error code.
  */
-GIT_EXTERN(int) git_branch_upstream(
-	git_reference **out,
-	const git_reference *branch);
+GIT3_EXTERN(int) git3_branch_upstream(
+	git3_reference **out,
+	const git3_reference *branch);
 
 /**
  * Set a branch's upstream branch
@@ -229,11 +229,11 @@ GIT_EXTERN(int) git_branch_upstream(
  * @param branch the branch to configure
  * @param branch_name remote-tracking or local branch to set as upstream.
  *
- * @return @type git_error_t 0 on success; GIT_ENOTFOUND if there's no branch named `branch_name`
+ * @return @type git3_error_t 0 on success; GIT3_ENOTFOUND if there's no branch named `branch_name`
  *         or an error code
  */
-GIT_EXTERN(int) git_branch_set_upstream(
-	git_reference *branch,
+GIT3_EXTERN(int) git3_branch_set_upstream(
+	git3_reference *branch,
 	const char *branch_name);
 
 /**
@@ -247,12 +247,12 @@ GIT_EXTERN(int) git_branch_set_upstream(
  * @param repo the repository where the branches live.
  * @param refname reference name of the local branch.
  *
- * @return 0 on success, GIT_ENOTFOUND when no remote tracking reference exists,
+ * @return 0 on success, GIT3_ENOTFOUND when no remote tracking reference exists,
  *         or an error code.
  */
-GIT_EXTERN(int) git_branch_upstream_name(
-	git_buf *out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_branch_upstream_name(
+	git3_buf *out,
+	git3_repository *repo,
 	const char *refname);
 
 /**
@@ -263,8 +263,8 @@ GIT_EXTERN(int) git_branch_upstream_name(
  * @return 1 if HEAD points at the branch, 0 if it isn't, or a negative value
  * 		   as an error code.
  */
-GIT_EXTERN(int) git_branch_is_head(
-	const git_reference *branch);
+GIT3_EXTERN(int) git3_branch_is_head(
+	const git3_reference *branch);
 
 /**
  * Determine if any HEAD points to the current branch
@@ -276,8 +276,8 @@ GIT_EXTERN(int) git_branch_is_head(
  *
  * @return 1 if branch is checked out, 0 if it isn't, an error code otherwise.
  */
-GIT_EXTERN(int) git_branch_is_checked_out(
-	const git_reference *branch);
+GIT3_EXTERN(int) git3_branch_is_checked_out(
+	const git3_reference *branch);
 
 /**
  * Find the remote name of a remote-tracking branch
@@ -285,19 +285,19 @@ GIT_EXTERN(int) git_branch_is_checked_out(
  * This will return the name of the remote whose fetch refspec is matching
  * the given branch. E.g. given a branch "refs/remotes/test/master", it will
  * extract the "test" part. If refspecs from multiple remotes match,
- * the function will return GIT_EAMBIGUOUS.
+ * the function will return GIT3_EAMBIGUOUS.
  *
  * @param out The buffer into which the name will be written.
  * @param repo The repository where the branch lives.
  * @param refname complete name of the remote tracking branch.
  *
- * @return 0 on success, GIT_ENOTFOUND when no matching remote was found,
- *         GIT_EAMBIGUOUS when the branch maps to several remotes,
+ * @return 0 on success, GIT3_ENOTFOUND when no matching remote was found,
+ *         GIT3_EAMBIGUOUS when the branch maps to several remotes,
  *         otherwise an error code.
  */
-GIT_EXTERN(int) git_branch_remote_name(
-	git_buf *out,
-	git_repository *repo,
+GIT3_EXTERN(int) git3_branch_remote_name(
+	git3_buf *out,
+	git3_repository *repo,
 	const char *refname);
 
 /**
@@ -311,7 +311,7 @@ GIT_EXTERN(int) git_branch_remote_name(
  * @param refname the full name of the branch
  * @return 0 or an error code
  */
- GIT_EXTERN(int) git_branch_upstream_remote(git_buf *buf, git_repository *repo, const char *refname);
+ GIT3_EXTERN(int) git3_branch_upstream_remote(git3_buf *buf, git3_repository *repo, const char *refname);
 
 /**
  * Retrieve the upstream merge of a local branch
@@ -324,7 +324,7 @@ GIT_EXTERN(int) git_branch_remote_name(
  * @param refname the full name of the branch
  * @return 0 or an error code
  */
- GIT_EXTERN(int) git_branch_upstream_merge(git_buf *buf, git_repository *repo, const char *refname);
+ GIT3_EXTERN(int) git3_branch_upstream_merge(git3_buf *buf, git3_repository *repo, const char *refname);
 
 /**
  * Determine whether a branch name is valid, meaning that (when prefixed
@@ -336,8 +336,8 @@ GIT_EXTERN(int) git_branch_remote_name(
  * @param name a branch name to test
  * @return 0 on success or an error code
  */
-GIT_EXTERN(int) git_branch_name_is_valid(int *valid, const char *name);
+GIT3_EXTERN(int) git3_branch_name_is_valid(int *valid, const char *name);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 #endif

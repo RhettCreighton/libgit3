@@ -1,4 +1,4 @@
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -14,7 +14,7 @@
 
 #include <io.h>
 #include <direct.h>
-#ifdef GIT_THREADS
+#ifdef GIT3_THREADS
  #include "win32/thread.h"
 #endif
 

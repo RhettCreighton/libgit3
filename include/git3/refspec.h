@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_refspec_h__
@@ -13,13 +13,13 @@
 #include "buffer.h"
 
 /**
- * @file git2/refspec.h
+ * @file git3/refspec.h
  * @brief Refspecs map local references to remote references
- * @defgroup git_refspec Refspecs map local references to remote references
+ * @defgroup git3_refspec Refspecs map local references to remote references
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
  * Parse a given refspec string
@@ -29,14 +29,14 @@ GIT_BEGIN_DECL
  * @param is_fetch is this a refspec for a fetch
  * @return 0 if the refspec string could be parsed, -1 otherwise
  */
-GIT_EXTERN(int) git_refspec_parse(git_refspec **refspec, const char *input, int is_fetch);
+GIT3_EXTERN(int) git3_refspec_parse(git3_refspec **refspec, const char *input, int is_fetch);
 
 /**
- * Free a refspec object which has been created by git_refspec_parse
+ * Free a refspec object which has been created by git3_refspec_parse
  *
  * @param refspec the refspec object
  */
-GIT_EXTERN(void) git_refspec_free(git_refspec *refspec);
+GIT3_EXTERN(void) git3_refspec_free(git3_refspec *refspec);
 
 /**
  * Get the source specifier
@@ -44,7 +44,7 @@ GIT_EXTERN(void) git_refspec_free(git_refspec *refspec);
  * @param refspec the refspec
  * @return the refspec's source specifier
  */
-GIT_EXTERN(const char *) git_refspec_src(const git_refspec *refspec);
+GIT3_EXTERN(const char *) git3_refspec_src(const git3_refspec *refspec);
 
 /**
  * Get the destination specifier
@@ -52,7 +52,7 @@ GIT_EXTERN(const char *) git_refspec_src(const git_refspec *refspec);
  * @param refspec the refspec
  * @return the refspec's destination specifier
  */
-GIT_EXTERN(const char *) git_refspec_dst(const git_refspec *refspec);
+GIT3_EXTERN(const char *) git3_refspec_dst(const git3_refspec *refspec);
 
 /**
  * Get the refspec's string
@@ -60,7 +60,7 @@ GIT_EXTERN(const char *) git_refspec_dst(const git_refspec *refspec);
  * @param refspec the refspec
  * @return the refspec's original string
  */
-GIT_EXTERN(const char *) git_refspec_string(const git_refspec *refspec);
+GIT3_EXTERN(const char *) git3_refspec_string(const git3_refspec *refspec);
 
 /**
  * Get the force update setting
@@ -68,15 +68,15 @@ GIT_EXTERN(const char *) git_refspec_string(const git_refspec *refspec);
  * @param refspec the refspec
  * @return 1 if force update has been set, 0 otherwise
  */
-GIT_EXTERN(int) git_refspec_force(const git_refspec *refspec);
+GIT3_EXTERN(int) git3_refspec_force(const git3_refspec *refspec);
 
 /**
  * Get the refspec's direction.
  *
  * @param spec refspec
- * @return GIT_DIRECTION_FETCH or GIT_DIRECTION_PUSH
+ * @return GIT3_DIRECTION_FETCH or GIT3_DIRECTION_PUSH
  */
-GIT_EXTERN(git_direction) git_refspec_direction(const git_refspec *spec);
+GIT3_EXTERN(git3_direction) git3_refspec_direction(const git3_refspec *spec);
 
 /**
  * Check if a refspec's source descriptor matches a negative reference
@@ -85,7 +85,7 @@ GIT_EXTERN(git_direction) git_refspec_direction(const git_refspec *spec);
  * @param refname the name of the reference to check
  * @return 1 if the refspec matches, 0 otherwise
  */
-GIT_EXTERN(int) git_refspec_src_matches_negative(const git_refspec *refspec, const char *refname);
+GIT3_EXTERN(int) git3_refspec_src_matches_negative(const git3_refspec *refspec, const char *refname);
 
 /**
  * Check if a refspec's source descriptor matches a reference
@@ -94,7 +94,7 @@ GIT_EXTERN(int) git_refspec_src_matches_negative(const git_refspec *refspec, con
  * @param refname the name of the reference to check
  * @return 1 if the refspec matches, 0 otherwise
  */
-GIT_EXTERN(int) git_refspec_src_matches(const git_refspec *refspec, const char *refname);
+GIT3_EXTERN(int) git3_refspec_src_matches(const git3_refspec *refspec, const char *refname);
 
 /**
  * Check if a refspec's destination descriptor matches a reference
@@ -103,7 +103,7 @@ GIT_EXTERN(int) git_refspec_src_matches(const git_refspec *refspec, const char *
  * @param refname the name of the reference to check
  * @return 1 if the refspec matches, 0 otherwise
  */
-GIT_EXTERN(int) git_refspec_dst_matches(const git_refspec *refspec, const char *refname);
+GIT3_EXTERN(int) git3_refspec_dst_matches(const git3_refspec *refspec, const char *refname);
 
 /**
  * Transform a reference to its target following the refspec's rules
@@ -111,9 +111,9 @@ GIT_EXTERN(int) git_refspec_dst_matches(const git_refspec *refspec, const char *
  * @param out where to store the target name
  * @param spec the refspec
  * @param name the name of the reference to transform
- * @return 0, GIT_EBUFS or another error
+ * @return 0, GIT3_EBUFS or another error
  */
-GIT_EXTERN(int) git_refspec_transform(git_buf *out, const git_refspec *spec, const char *name);
+GIT3_EXTERN(int) git3_refspec_transform(git3_buf *out, const git3_refspec *spec, const char *name);
 
 /**
  * Transform a target reference to its source reference following the refspec's rules
@@ -121,11 +121,11 @@ GIT_EXTERN(int) git_refspec_transform(git_buf *out, const git_refspec *spec, con
  * @param out where to store the source reference name
  * @param spec the refspec
  * @param name the name of the reference to transform
- * @return 0, GIT_EBUFS or another error
+ * @return 0, GIT3_EBUFS or another error
  */
-GIT_EXTERN(int) git_refspec_rtransform(git_buf *out, const git_refspec *spec, const char *name);
+GIT3_EXTERN(int) git3_refspec_rtransform(git3_buf *out, const git3_refspec *spec, const char *name);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

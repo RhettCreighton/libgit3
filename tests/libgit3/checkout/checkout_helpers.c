@@ -1,53 +1,53 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "checkout_helpers.h"
 #include "refs.h"
 #include "futils.h"
 #include "index.h"
 
-void assert_on_branch(git_repository *repo, const char *branch)
+void assert_on_branch(git3_repository *repo, const char *branch)
 {
-	git_reference *head;
-	git_str bname = GIT_STR_INIT;
+	git3_reference *head;
+	git3_str bname = GIT3_STR_INIT;
 
-	cl_git_pass(git_reference_lookup(&head, repo, GIT_HEAD_FILE));
-	cl_assert_(git_reference_type(head) == GIT_REFERENCE_SYMBOLIC, branch);
+	cl_git_pass(git3_reference_lookup(&head, repo, GIT3_HEAD_FILE));
+	cl_assert_(git3_reference_type(head) == GIT3_REFERENCE_SYMBOLIC, branch);
 
-	cl_git_pass(git_str_joinpath(&bname, "refs/heads", branch));
-	cl_assert_equal_s(bname.ptr, git_reference_symbolic_target(head));
+	cl_git_pass(git3_str_joinpath(&bname, "refs/heads", branch));
+	cl_assert_equal_s(bname.ptr, git3_reference_symbolic_target(head));
 
-	git_reference_free(head);
-	git_str_dispose(&bname);
+	git3_reference_free(head);
+	git3_str_dispose(&bname);
 }
 
-void reset_index_to_treeish(git_object *treeish)
+void reset_index_to_treeish(git3_object *treeish)
 {
-	git_object *tree;
-	git_index *index;
-	git_repository *repo = git_object_owner(treeish);
+	git3_object *tree;
+	git3_index *index;
+	git3_repository *repo = git3_object_owner(treeish);
 
-	cl_git_pass(git_object_peel(&tree, treeish, GIT_OBJECT_TREE));
+	cl_git_pass(git3_object_peel(&tree, treeish, GIT3_OBJECT_TREE));
 
-	cl_git_pass(git_repository_index(&index, repo));
-	cl_git_pass(git_index_read_tree(index, (git_tree *)tree));
-	cl_git_pass(git_index_write(index));
+	cl_git_pass(git3_repository_index(&index, repo));
+	cl_git_pass(git3_index_read_tree(index, (git3_tree *)tree));
+	cl_git_pass(git3_index_write(index));
 
-	git_object_free(tree);
-	git_index_free(index);
+	git3_object_free(tree);
+	git3_index_free(index);
 }
 
 int checkout_count_callback(
-	git_checkout_notify_t why,
+	git3_checkout_notify_t why,
 	const char *path,
-	const git_diff_file *baseline,
-	const git_diff_file *target,
-	const git_diff_file *workdir,
+	const git3_diff_file *baseline,
+	const git3_diff_file *target,
+	const git3_diff_file *workdir,
 	void *payload)
 {
 	checkout_counts *ct = payload;
 
-	GIT_UNUSED(baseline); GIT_UNUSED(target); GIT_UNUSED(workdir);
+	GIT3_UNUSED(baseline); GIT3_UNUSED(target); GIT3_UNUSED(workdir);
 
-	if (why & GIT_CHECKOUT_NOTIFY_CONFLICT) {
+	if (why & GIT3_CHECKOUT_NOTIFY_CONFLICT) {
 		ct->n_conflicts++;
 
 		if (ct->debug) {
@@ -84,7 +84,7 @@ int checkout_count_callback(
 		}
 	}
 
-	if (why & GIT_CHECKOUT_NOTIFY_DIRTY) {
+	if (why & GIT3_CHECKOUT_NOTIFY_DIRTY) {
 		ct->n_dirty++;
 
 		if (ct->debug) {
@@ -95,7 +95,7 @@ int checkout_count_callback(
 		}
 	}
 
-	if (why & GIT_CHECKOUT_NOTIFY_UPDATED) {
+	if (why & GIT3_CHECKOUT_NOTIFY_UPDATED) {
 		ct->n_updates++;
 
 		if (ct->debug) {
@@ -113,14 +113,14 @@ int checkout_count_callback(
 		}
 	}
 
-	if (why & GIT_CHECKOUT_NOTIFY_UNTRACKED) {
+	if (why & GIT3_CHECKOUT_NOTIFY_UNTRACKED) {
 		ct->n_untracked++;
 
 		if (ct->debug)
 			fprintf(stderr, "? %s\n", path);
 	}
 
-	if (why & GIT_CHECKOUT_NOTIFY_IGNORED) {
+	if (why & GIT3_CHECKOUT_NOTIFY_IGNORED) {
 		ct->n_ignored++;
 
 		if (ct->debug)
@@ -130,15 +130,15 @@ int checkout_count_callback(
 	return 0;
 }
 
-void tick_index(git_index *index)
+void tick_index(git3_index *index)
 {
 	struct timespec ts;
 	struct p_timeval times[2];
 
 	cl_assert(index->on_disk);
-	cl_assert(git_index_path(index));
+	cl_assert(git3_index_path(index));
 
-	cl_git_pass(git_index_read(index, true));
+	cl_git_pass(git3_index_read(index, true));
 	ts = index->stamp.mtime;
 
 	times[0].tv_sec = ts.tv_sec;
@@ -146,6 +146,6 @@ void tick_index(git_index *index)
 	times[1].tv_sec = ts.tv_sec + 5;
 	times[1].tv_usec = ts.tv_nsec / 1000;
 
-	cl_git_pass(p_utimes(git_index_path(index), times));
-	cl_git_pass(git_index_read(index, true));
+	cl_git_pass(p_utimes(git3_index_path(index), times));
+	cl_git_pass(git3_index_read(index, true));
 }

@@ -1,19 +1,19 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "git3/sys/odb_backend.h"
 #include "backend_helpers.h"
 
-static int search_object(const fake_object **out, fake_backend *fake, const git_oid *oid, size_t len)
+static int search_object(const fake_object **out, fake_backend *fake, const git3_oid *oid, size_t len)
 {
 	const fake_object *obj = fake->objects, *found = NULL;
 
 	while (obj && obj->oid) {
-		git_oid current_oid;
+		git3_oid current_oid;
 
-		git_oid_from_string(&current_oid, obj->oid, GIT_OID_SHA1);
+		git3_oid_from_string(&current_oid, obj->oid, GIT3_OID_SHA1);
 
-		if (git_oid_ncmp(&current_oid, oid, len) == 0) {
+		if (git3_oid_ncmp(&current_oid, oid, len) == 0) {
 			if (found)
-				return GIT_EAMBIGUOUS;
+				return GIT3_EAMBIGUOUS;
 			found = obj;
 		}
 
@@ -23,10 +23,10 @@ static int search_object(const fake_object **out, fake_backend *fake, const git_
 	if (found && out)
 		*out = found;
 
-	return found ? GIT_OK : GIT_ENOTFOUND;
+	return found ? GIT3_OK : GIT3_ENOTFOUND;
 }
 
-static int fake_backend__exists(git_odb_backend *backend, const git_oid *oid)
+static int fake_backend__exists(git3_odb_backend *backend, const git3_oid *oid)
 {
 	fake_backend *fake;
 
@@ -34,11 +34,11 @@ static int fake_backend__exists(git_odb_backend *backend, const git_oid *oid)
 
 	fake->exists_calls++;
 
-	return search_object(NULL, fake, oid, GIT_OID_SHA1_HEXSIZE) == GIT_OK;
+	return search_object(NULL, fake, oid, GIT3_OID_SHA1_HEXSIZE) == GIT3_OK;
 }
 
 static int fake_backend__exists_prefix(
-	git_oid *out, git_odb_backend *backend, const git_oid *oid, size_t len)
+	git3_oid *out, git3_odb_backend *backend, const git3_oid *oid, size_t len)
 {
 	const fake_object *obj;
 	fake_backend *fake;
@@ -52,14 +52,14 @@ static int fake_backend__exists_prefix(
 		return error;
 
 	if (out)
-		git_oid_from_string(out, obj->oid, GIT_OID_SHA1);
+		git3_oid_from_string(out, obj->oid, GIT3_OID_SHA1);
 
 	return 0;
 }
 
 static int fake_backend__read(
-	void **buffer_p, size_t *len_p, git_object_t *type_p,
-	git_odb_backend *backend, const git_oid *oid)
+	void **buffer_p, size_t *len_p, git3_object_t *type_p,
+	git3_odb_backend *backend, const git3_oid *oid)
 {
 	const fake_object *obj;
 	fake_backend *fake;
@@ -69,19 +69,19 @@ static int fake_backend__read(
 
 	fake->read_calls++;
 
-	if ((error = search_object(&obj, fake, oid, GIT_OID_SHA1_HEXSIZE)) < 0)
+	if ((error = search_object(&obj, fake, oid, GIT3_OID_SHA1_HEXSIZE)) < 0)
 		return error;
 
 	*len_p = strlen(obj->content);
-	*buffer_p = git__strdup(obj->content);
-	*type_p = GIT_OBJECT_BLOB;
+	*buffer_p = git3__strdup(obj->content);
+	*type_p = GIT3_OBJECT_BLOB;
 
 	return 0;
 }
 
 static int fake_backend__read_header(
-	size_t *len_p, git_object_t *type_p,
-	git_odb_backend *backend, const git_oid *oid)
+	size_t *len_p, git3_object_t *type_p,
+	git3_odb_backend *backend, const git3_oid *oid)
 {
 	const fake_object *obj;
 	fake_backend *fake;
@@ -91,18 +91,18 @@ static int fake_backend__read_header(
 
 	fake->read_header_calls++;
 
-	if ((error = search_object(&obj, fake, oid, GIT_OID_SHA1_HEXSIZE)) < 0)
+	if ((error = search_object(&obj, fake, oid, GIT3_OID_SHA1_HEXSIZE)) < 0)
 		return error;
 
 	*len_p = strlen(obj->content);
-	*type_p = GIT_OBJECT_BLOB;
+	*type_p = GIT3_OBJECT_BLOB;
 
 	return 0;
 }
 
 static int fake_backend__read_prefix(
-	git_oid *out_oid, void **buffer_p, size_t *len_p, git_object_t *type_p,
-	git_odb_backend *backend, const git_oid *short_oid, size_t len)
+	git3_oid *out_oid, void **buffer_p, size_t *len_p, git3_object_t *type_p,
+	git3_odb_backend *backend, const git3_oid *short_oid, size_t len)
 {
 	const fake_object *obj;
 	fake_backend *fake;
@@ -115,15 +115,15 @@ static int fake_backend__read_prefix(
 	if ((error = search_object(&obj, fake, short_oid, len)) < 0)
 		return error;
 
-	git_oid_from_string(out_oid, obj->oid, GIT_OID_SHA1);
+	git3_oid_from_string(out_oid, obj->oid, GIT3_OID_SHA1);
 	*len_p = strlen(obj->content);
-	*buffer_p = git__strdup(obj->content);
-	*type_p = GIT_OBJECT_BLOB;
+	*buffer_p = git3__strdup(obj->content);
+	*type_p = GIT3_OBJECT_BLOB;
 
 	return 0;
 }
 
-static int fake_backend__refresh(git_odb_backend *backend)
+static int fake_backend__refresh(git3_odb_backend *backend)
 {
 	fake_backend *fake;
 
@@ -135,26 +135,26 @@ static int fake_backend__refresh(git_odb_backend *backend)
 }
 
 
-static void fake_backend__free(git_odb_backend *_backend)
+static void fake_backend__free(git3_odb_backend *_backend)
 {
 	fake_backend *backend;
 
 	backend = (fake_backend *)_backend;
 
-	git__free(backend);
+	git3__free(backend);
 }
 
 int build_fake_backend(
-	git_odb_backend **out,
+	git3_odb_backend **out,
 	const fake_object *objects,
 	bool support_refresh)
 {
 	fake_backend *backend;
 
-	backend = git__calloc(1, sizeof(fake_backend));
-	GIT_ERROR_CHECK_ALLOC(backend);
+	backend = git3__calloc(1, sizeof(fake_backend));
+	GIT3_ERROR_CHECK_ALLOC(backend);
 
-	backend->parent.version = GIT_ODB_BACKEND_VERSION;
+	backend->parent.version = GIT3_ODB_BACKEND_VERSION;
 
 	backend->objects = objects;
 
@@ -166,7 +166,7 @@ int build_fake_backend(
 	backend->parent.exists_prefix = fake_backend__exists_prefix;
 	backend->parent.free = &fake_backend__free;
 
-	*out = (git_odb_backend *)backend;
+	*out = (git3_odb_backend *)backend;
 
 	return 0;
 }

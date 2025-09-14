@@ -1,17 +1,17 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "reset_helpers.h"
 #include "path.h"
 
-static git_repository *_repo;
-static git_object *_target;
-static git_strarray _pathspecs;
-static git_index *_index;
+static git3_repository *_repo;
+static git3_object *_target;
+static git3_strarray _pathspecs;
+static git3_index *_index;
 
 static void initialize(const char *repo_name)
 {
 	_repo = cl_git_sandbox_init(repo_name);
-	cl_git_pass(git_repository_index(&_index, _repo));
+	cl_git_pass(git3_repository_index(&_index, _repo));
 
 	_target = NULL;
 
@@ -25,40 +25,40 @@ void test_reset_default__initialize(void)
 
 void test_reset_default__cleanup(void)
 {
-	git_object_free(_target);
+	git3_object_free(_target);
 	_target = NULL;
 
-	git_index_free(_index);
+	git3_index_free(_index);
 	_index = NULL;
 
 	cl_git_sandbox_cleanup();
 }
 
 static void assert_content_in_index(
-	git_strarray *pathspecs,
+	git3_strarray *pathspecs,
 	bool should_exist,
-	git_strarray *expected_shas)
+	git3_strarray *expected_shas)
 {
 	size_t i, pos;
 	int error;
 
 	for (i = 0; i < pathspecs->count; i++) {
-		error = git_index_find(&pos, _index, pathspecs->strings[i]);
+		error = git3_index_find(&pos, _index, pathspecs->strings[i]);
 
 		if (should_exist) {
-			const git_index_entry *entry;
+			const git3_index_entry *entry;
 
-			cl_assert(error != GIT_ENOTFOUND);
+			cl_assert(error != GIT3_ENOTFOUND);
 
-			entry = git_index_get_byindex(_index, pos);
+			entry = git3_index_get_byindex(_index, pos);
 			cl_assert(entry != NULL);
 
 			if (!expected_shas)
 				continue;
 
-			cl_git_pass(git_oid_streq(&entry->id, expected_shas->strings[i]));
+			cl_git_pass(git3_oid_streq(&entry->id, expected_shas->strings[i]));
 		} else
-			cl_assert_equal_i(should_exist, error != GIT_ENOTFOUND);
+			cl_assert_equal_i(should_exist, error != GIT3_ENOTFOUND);
 	}
 }
 
@@ -73,7 +73,7 @@ void test_reset_default__resetting_filepaths_against_a_null_target_removes_them_
 
 	assert_content_in_index(&_pathspecs, true, NULL);
 
-	cl_git_pass(git_reset_default(_repo, NULL, &_pathspecs));
+	cl_git_pass(git3_reset_default(_repo, NULL, &_pathspecs));
 
 	assert_content_in_index(&_pathspecs, false, NULL);
 }
@@ -95,7 +95,7 @@ void test_reset_default__resetting_filepaths_against_a_null_target_removes_them_
  */
 void test_reset_default__resetting_filepaths_replaces_their_corresponding_index_entries(void)
 {
-	git_strarray before, after;
+	git3_strarray before, after;
 
 	char *paths[] = { "staged_changes", "staged_changes_file_deleted" };
 	char *before_shas[] = { "55d316c9ba708999f1918e9677d01dfcae69c6b9",
@@ -112,10 +112,10 @@ void test_reset_default__resetting_filepaths_replaces_their_corresponding_index_
 	after.strings = after_shas;
 	after.count = 2;
 
-	cl_git_pass(git_revparse_single(&_target, _repo, "0017bd4"));
+	cl_git_pass(git3_revparse_single(&_target, _repo, "0017bd4"));
 	assert_content_in_index(&_pathspecs, true, &before);
 
-	cl_git_pass(git_reset_default(_repo, _target, &_pathspecs));
+	cl_git_pass(git3_reset_default(_repo, _target, &_pathspecs));
 
 	assert_content_in_index(&_pathspecs, true, &after);
 }
@@ -136,8 +136,8 @@ void test_reset_default__resetting_filepaths_replaces_their_corresponding_index_
  */
 void test_reset_default__resetting_filepaths_clears_previous_conflicts(void)
 {
-	const git_index_entry *conflict_entry[3];
-	git_strarray after;
+	const git3_index_entry *conflict_entry[3];
+	git3_strarray after;
 
 	char *paths[] = { "conflicts-one.txt" };
 	char *after_shas[] = { "1f85ca51b8e0aac893a621b61a9c2661d6aa6d81" };
@@ -149,15 +149,15 @@ void test_reset_default__resetting_filepaths_clears_previous_conflicts(void)
 	after.strings = after_shas;
 	after.count = 1;
 
-	cl_git_pass(git_index_conflict_get(&conflict_entry[0], &conflict_entry[1],
+	cl_git_pass(git3_index_conflict_get(&conflict_entry[0], &conflict_entry[1],
 		&conflict_entry[2], _index, "conflicts-one.txt"));
 
-	cl_git_pass(git_revparse_single(&_target, _repo, "9a05ccb"));
-	cl_git_pass(git_reset_default(_repo, _target, &_pathspecs));
+	cl_git_pass(git3_revparse_single(&_target, _repo, "9a05ccb"));
+	cl_git_pass(git3_reset_default(_repo, _target, &_pathspecs));
 
 	assert_content_in_index(&_pathspecs, true, &after);
 
-	cl_assert_equal_i(GIT_ENOTFOUND, git_index_conflict_get(&conflict_entry[0],
+	cl_assert_equal_i(GIT3_ENOTFOUND, git3_index_conflict_get(&conflict_entry[0],
 		&conflict_entry[1], &conflict_entry[2], _index, "conflicts-one.txt"));
 }
 
@@ -177,36 +177,36 @@ void test_reset_default__resetting_unknown_filepaths_does_not_fail(void)
 
 	assert_content_in_index(&_pathspecs, false, NULL);
 
-	cl_git_pass(git_revparse_single(&_target, _repo, "HEAD"));
-	cl_git_pass(git_reset_default(_repo, _target, &_pathspecs));
+	cl_git_pass(git3_revparse_single(&_target, _repo, "HEAD"));
+	cl_git_pass(git3_reset_default(_repo, _target, &_pathspecs));
 
 	assert_content_in_index(&_pathspecs, false, NULL);
 }
 
 void test_reset_default__staged_rename_reset_delete(void)
 {
-	git_index_entry entry;
-	const git_index_entry *existing;
+	git3_index_entry entry;
+	const git3_index_entry *existing;
 	char *paths[] = { "new.txt" };
 
 	initialize("testrepo2");
 
-	existing = git_index_get_bypath(_index, "new.txt", 0);
+	existing = git3_index_get_bypath(_index, "new.txt", 0);
 	cl_assert(existing);
 	memcpy(&entry, existing, sizeof(entry));
 
-	cl_git_pass(git_index_remove_bypath(_index, "new.txt"));
+	cl_git_pass(git3_index_remove_bypath(_index, "new.txt"));
 
 	entry.path = "renamed.txt";
-	cl_git_pass(git_index_add(_index, &entry));
+	cl_git_pass(git3_index_add(_index, &entry));
 
 	_pathspecs.strings = paths;
 	_pathspecs.count = 1;
 
 	assert_content_in_index(&_pathspecs, false, NULL);
 
-	cl_git_pass(git_revparse_single(&_target, _repo, "HEAD"));
-	cl_git_pass(git_reset_default(_repo, _target, &_pathspecs));
+	cl_git_pass(git3_revparse_single(&_target, _repo, "HEAD"));
+	cl_git_pass(git3_reset_default(_repo, _target, &_pathspecs));
 
 	assert_content_in_index(&_pathspecs, true, NULL);
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_push_h__
@@ -14,10 +14,10 @@
 #include "remote.h"
 
 typedef struct push_spec {
-	struct git_refspec refspec;
+	struct git3_refspec refspec;
 
-	git_oid loid;
-	git_oid roid;
+	git3_oid loid;
+	git3_oid roid;
 } push_spec;
 
 typedef struct push_status {
@@ -27,22 +27,22 @@ typedef struct push_status {
 	char *msg;
 } push_status;
 
-struct git_push {
-	git_repository *repo;
-	git_packbuilder *pb;
-	git_remote *remote;
-	git_vector specs;
-	git_vector updates;
+struct git3_push {
+	git3_repository *repo;
+	git3_packbuilder *pb;
+	git3_remote *remote;
+	git3_vector specs;
+	git3_vector updates;
 	bool report_status;
-	git_vector remote_push_options;
+	git3_vector remote_push_options;
 
 	/* report-status */
 	bool unpack_ok;
-	git_vector status;
+	git3_vector status;
 
 	/* options */
 	unsigned pb_parallelism;
-	git_remote_callbacks callbacks;
+	git3_remote_callbacks callbacks;
 };
 
 /**
@@ -50,7 +50,7 @@ struct git_push {
  *
  * @param status The push status object
  */
-void git_push_status_free(push_status *status);
+void git3_push_status_free(push_status *status);
 
 /**
  * Create a new push object
@@ -61,7 +61,7 @@ void git_push_status_free(push_status *status);
  *
  * @return 0 or an error code
  */
-int git_push_new(git_push **out, git_remote *remote, const git_push_options *opts);
+int git3_push_new(git3_push **out, git3_remote *remote, const git3_push_options *opts);
 
 /**
  * Add a refspec to be pushed
@@ -71,7 +71,7 @@ int git_push_new(git_push **out, git_remote *remote, const git_push_options *opt
  *
  * @return 0 or an error code
  */
-int git_push_add_refspec(git_push *push, const char *refspec);
+int git3_push_add_refspec(git3_push *push, const char *refspec);
 
 /**
  * Update remote tips after a push
@@ -81,7 +81,7 @@ int git_push_add_refspec(git_push *push, const char *refspec);
  *
  * @return 0 or an error code
  */
-int git_push_update_tips(git_push *push, const git_remote_callbacks *callbacks);
+int git3_push_update_tips(git3_push *push, const git3_remote_callbacks *callbacks);
 
 /**
  * Perform the push
@@ -90,14 +90,14 @@ int git_push_update_tips(git_push *push, const git_remote_callbacks *callbacks);
  * the server being unable to unpack the data we sent.
  *
  * The return value does not reflect whether the server accepted or
- * refused any reference updates. Use `git_push_status_foreach()` in
+ * refused any reference updates. Use `git3_push_status_foreach()` in
  * order to find out which updates were accepted or rejected.
  *
  * @param push The push object
  *
  * @return 0 or an error code
  */
-int git_push_finish(git_push *push);
+int git3_push_finish(git3_push *push);
 
 /**
  * Invoke callback `cb' on each status entry
@@ -115,7 +115,7 @@ int git_push_finish(git_push *push);
  *
  * @return 0 on success, non-zero callback return value, or error code
  */
-int git_push_status_foreach(git_push *push,
+int git3_push_status_foreach(git3_push *push,
 			int (*cb)(const char *ref, const char *msg, void *data),
 			void *data);
 
@@ -124,6 +124,6 @@ int git_push_status_foreach(git_push *push,
  *
  * @param push The push object
  */
-void git_push_free(git_push *push);
+void git3_push_free(git3_push *push);
 
 #endif

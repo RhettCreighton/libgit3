@@ -1,11 +1,11 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
-#include "clar_libgit2_alloc.h"
+#include "clar_libgit3_alloc.h"
 
 static size_t bytes_available;
 
@@ -23,8 +23,8 @@ static size_t bytes_available;
  * the tandem of `cl__malloc` and `cl__free`, as otherwise the
  * code is going to crash hard. This is considered to be a
  * feature, as it helps e.g. in finding cases where by accident
- * malloc(3P) and free(3P) were used instead of git__malloc and
- * git__free, respectively.
+ * malloc(3P) and free(3P) were used instead of git3__malloc and
+ * git3__free, respectively.
  *
  * The downside is obviously that each allocation grows by
  * sizeof(size_t) bytes. As the allocator is for testing purposes
@@ -37,13 +37,13 @@ static void *cl__malloc(size_t len, const char *file, int line)
 	char *ptr = NULL;
 	size_t alloclen;
 
-	GIT_UNUSED(file);
-	GIT_UNUSED(line);
+	GIT3_UNUSED(file);
+	GIT3_UNUSED(line);
 
 	if (len > bytes_available)
 		goto out;
 
-	if (GIT_ADD_SIZET_OVERFLOW(&alloclen, len, sizeof(size_t)) ||
+	if (GIT3_ADD_SIZET_OVERFLOW(&alloclen, len, sizeof(size_t)) ||
 	    (ptr = malloc(alloclen)) == NULL)
 		goto out;
 	memcpy(ptr, &len, sizeof(size_t));
@@ -91,18 +91,18 @@ out:
 
 void cl_alloc_limit(size_t bytes)
 {
-	git_allocator alloc;
+	git3_allocator alloc;
 
 	alloc.gmalloc = cl__malloc;
 	alloc.grealloc = cl__realloc;
 	alloc.gfree = cl__free;
 
-	git_allocator_setup(&alloc);
+	git3_allocator_setup(&alloc);
 
 	bytes_available = bytes;
 }
 
 void cl_alloc_reset(void)
 {
-	git_allocator_setup(NULL);
+	git3_allocator_setup(NULL);
 }

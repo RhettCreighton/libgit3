@@ -1,7 +1,7 @@
 /*
-* Copyright (C) the libgit2 contributors. All rights reserved.
+* Copyright (C) the libgit3 contributors. All rights reserved.
 *
-* This file is part of libgit2, distributed under the GNU GPL v2 with
+* This file is part of libgit3, distributed under the GNU GPL v2 with
 * a Linking Exception. For full terms see the included COPYING file.
 */
 
@@ -14,7 +14,7 @@
 * It was formerly included in the Windows 2000 SDK and remains defined in
 * MinGW, so we must define it with a silly name to avoid conflicting.
 */
-typedef struct _GIT_REPARSE_DATA_BUFFER {
+typedef struct _GIT3_REPARSE_DATA_BUFFER {
 	ULONG  ReparseTag;
 	USHORT ReparseDataLength;
 	USHORT Reserved;
@@ -38,7 +38,7 @@ typedef struct _GIT_REPARSE_DATA_BUFFER {
 			UCHAR DataBuffer[1];
 		} Generic;
 	} ReparseBuffer;
-} GIT_REPARSE_DATA_BUFFER;
+} GIT3_REPARSE_DATA_BUFFER;
 
 #define REPARSE_DATA_HEADER_SIZE			8
 #define REPARSE_DATA_MOUNTPOINT_HEADER_SIZE	8

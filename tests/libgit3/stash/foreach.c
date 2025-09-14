@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "stash_helpers.h"
 
@@ -8,16 +8,16 @@ struct callback_data
 	int invokes;
 };
 
-static git_repository *repo;
-static git_signature *signature;
-static git_oid stash_tip_oid;
+static git3_repository *repo;
+static git3_signature *signature;
+static git3_oid stash_tip_oid;
 struct callback_data data;
 
 #define REPO_NAME "stash"
 
 void test_stash_foreach__initialize(void)
 {
-	cl_git_pass(git_signature_new(
+	cl_git_pass(git3_signature_new(
 		&signature,
 		"nulltoken",
 		"emeric.fermas@gmail.com",
@@ -28,27 +28,27 @@ void test_stash_foreach__initialize(void)
 
 void test_stash_foreach__cleanup(void)
 {
-	git_signature_free(signature);
+	git3_signature_free(signature);
 	signature = NULL;
 
-	git_repository_free(repo);
+	git3_repository_free(repo);
 	repo = NULL;
 
-	cl_git_pass(git_futils_rmdir_r(REPO_NAME, NULL, GIT_RMDIR_REMOVE_FILES));
+	cl_git_pass(git3_futils_rmdir_r(REPO_NAME, NULL, GIT3_RMDIR_REMOVE_FILES));
 }
 
 static int callback_cb(
 	size_t index,
 	const char* message,
-	const git_oid *stash_oid,
+	const git3_oid *stash_oid,
 	void *payload)
 {
 	struct callback_data *data = (struct callback_data *)payload;
 
-	GIT_UNUSED(index);
-	GIT_UNUSED(message);
+	GIT3_UNUSED(index);
+	GIT3_UNUSED(message);
 
-	cl_assert_equal_i(0, git_oid_streq(stash_oid, data->oids[data->invokes++]));
+	cl_assert_equal_i(0, git3_oid_streq(stash_oid, data->oids[data->invokes++]));
 
 	return 0;
 }
@@ -59,9 +59,9 @@ void test_stash_foreach__enumerating_a_empty_repository_doesnt_fail(void)
 
 	data.oids = oids;
 
-	cl_git_pass(git_repository_init(&repo, REPO_NAME, 0));
+	cl_git_pass(git3_repository_init(&repo, REPO_NAME, 0));
 
-	cl_git_pass(git_stash_foreach(repo, callback_cb, &data));
+	cl_git_pass(git3_stash_foreach(repo, callback_cb, &data));
 
 	cl_assert_equal_i(0, data.invokes);
 }
@@ -80,47 +80,47 @@ void test_stash_foreach__can_enumerate_a_repository(void)
 		"7f89a8b15c878809c5c54d1ff8f8c9674154017b",
 		"493568b7a2681187aaac8a58d3f1eab1527cba84", NULL };
 
-	cl_git_pass(git_repository_init(&repo, REPO_NAME, 0));
+	cl_git_pass(git3_repository_init(&repo, REPO_NAME, 0));
 
 	setup_stash(repo, signature);
 
-	cl_git_pass(git_stash_save(
+	cl_git_pass(git3_stash_save(
 		&stash_tip_oid,
 		repo,
 		signature,
 		NULL,
-		GIT_STASH_DEFAULT));
+		GIT3_STASH_DEFAULT));
 
 	data.oids = oids_default;
 
-	cl_git_pass(git_stash_foreach(repo, callback_cb, &data));
+	cl_git_pass(git3_stash_foreach(repo, callback_cb, &data));
 	cl_assert_equal_i(1, data.invokes);
 
 	/* ensure stash_foreach operates with INCLUDE_UNTRACKED */
-	cl_git_pass(git_stash_save(
+	cl_git_pass(git3_stash_save(
 		&stash_tip_oid,
 		repo,
 		signature,
 		NULL,
-		GIT_STASH_INCLUDE_UNTRACKED));
+		GIT3_STASH_INCLUDE_UNTRACKED));
 
 	data.oids = oids_untracked;
 	data.invokes = 0;
 
-	cl_git_pass(git_stash_foreach(repo, callback_cb, &data));
+	cl_git_pass(git3_stash_foreach(repo, callback_cb, &data));
 	cl_assert_equal_i(2, data.invokes);
 
 	/* ensure stash_foreach operates with INCLUDE_IGNORED */
-	cl_git_pass(git_stash_save(
+	cl_git_pass(git3_stash_save(
 		&stash_tip_oid,
 		repo,
 		signature,
 		NULL,
-		GIT_STASH_INCLUDE_IGNORED));
+		GIT3_STASH_INCLUDE_IGNORED));
 
 	data.oids = oids_ignored;
 	data.invokes = 0;
 
-	cl_git_pass(git_stash_foreach(repo, callback_cb, &data));
+	cl_git_pass(git3_stash_foreach(repo, callback_cb, &data));
 	cl_assert_equal_i(3, data.invokes);
 }

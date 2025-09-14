@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  *
  * Do shell-style pattern matching for ?, \, [], and * characters.
@@ -18,25 +18,25 @@
 
 #include "wildmatch.h"
 
-#define GIT_SPACE 0x01
-#define GIT_DIGIT 0x02
-#define GIT_ALPHA 0x04
-#define GIT_GLOB_SPECIAL 0x08
-#define GIT_REGEX_SPECIAL 0x10
-#define GIT_PATHSPEC_MAGIC 0x20
-#define GIT_CNTRL 0x40
-#define GIT_PUNCT 0x80
+#define GIT3_SPACE 0x01
+#define GIT3_DIGIT 0x02
+#define GIT3_ALPHA 0x04
+#define GIT3_GLOB_SPECIAL 0x08
+#define GIT3_REGEX_SPECIAL 0x10
+#define GIT3_PATHSPEC_MAGIC 0x20
+#define GIT3_CNTRL 0x40
+#define GIT3_PUNCT 0x80
 
 enum {
-	S = GIT_SPACE,
-	A = GIT_ALPHA,
-	D = GIT_DIGIT,
-	G = GIT_GLOB_SPECIAL,	/* *, ?, [, \\ */
-	R = GIT_REGEX_SPECIAL,	/* $, (, ), +, ., ^, {, | */
-	P = GIT_PATHSPEC_MAGIC, /* other non-alnum, except for ] and } */
-	X = GIT_CNTRL,
-	U = GIT_PUNCT,
-	Z = GIT_CNTRL | GIT_SPACE
+	S = GIT3_SPACE,
+	A = GIT3_ALPHA,
+	D = GIT3_DIGIT,
+	G = GIT3_GLOB_SPECIAL,	/* *, ?, [, \\ */
+	R = GIT3_REGEX_SPECIAL,	/* $, (, ), +, ., ^, {, | */
+	P = GIT3_PATHSPEC_MAGIC, /* other non-alnum, except for ] and } */
+	X = GIT3_CNTRL,
+	U = GIT3_PUNCT,
+	Z = GIT3_CNTRL | GIT3_SPACE
 };
 
 static const unsigned char sane_ctype[256] = {
@@ -52,7 +52,7 @@ static const unsigned char sane_ctype[256] = {
 };
 
 #define sane_istest(x,mask) ((sane_ctype[(unsigned char)(x)] & (mask)) != 0)
-#define is_glob_special(x) sane_istest(x,GIT_GLOB_SPECIAL)
+#define is_glob_special(x) sane_istest(x,GIT3_GLOB_SPECIAL)
 
 typedef unsigned char uchar;
 

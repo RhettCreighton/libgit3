@@ -1,26 +1,26 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "refs.h"
 
-static git_repository *repo;
-static git_reference *fake_remote;
+static git3_repository *repo;
+static git3_reference *fake_remote;
 
 void test_refs_foreachglob__initialize(void)
 {
-	git_oid id;
+	git3_oid id;
 
 	cl_fixture_sandbox("testrepo.git");
-	cl_git_pass(git_repository_open(&repo, "testrepo.git"));
+	cl_git_pass(git3_repository_open(&repo, "testrepo.git"));
 
-	cl_git_pass(git_oid_from_string(&id, "be3563ae3f795b2b4353bcce3a527ad0a4f7f644", GIT_OID_SHA1));
-	cl_git_pass(git_reference_create(&fake_remote, repo, "refs/remotes/nulltoken/master", &id, 0, NULL));
+	cl_git_pass(git3_oid_from_string(&id, "be3563ae3f795b2b4353bcce3a527ad0a4f7f644", GIT3_OID_SHA1));
+	cl_git_pass(git3_reference_create(&fake_remote, repo, "refs/remotes/nulltoken/master", &id, 0, NULL));
 }
 
 void test_refs_foreachglob__cleanup(void)
 {
-	git_reference_free(fake_remote);
+	git3_reference_free(fake_remote);
 	fake_remote = NULL;
 
-	git_repository_free(repo);
+	git3_repository_free(repo);
 	repo = NULL;
 
 	cl_fixture_cleanup("testrepo.git");
@@ -30,7 +30,7 @@ static int count_cb(const char *reference_name, void *payload)
 {
 	int *count = (int *)payload;
 
-	GIT_UNUSED(reference_name);
+	GIT3_UNUSED(reference_name);
 
 	(*count)++;
 
@@ -41,7 +41,7 @@ static void assert_retrieval(const char *glob, int expected_count)
 {
 	int count = 0;
 
-	cl_git_pass(git_reference_foreach_glob(repo, glob, count_cb, &count));
+	cl_git_pass(git3_reference_foreach_glob(repo, glob, count_cb, &count));
 
 	cl_assert_equal_i(expected_count, count);
 }
@@ -82,7 +82,7 @@ static int interrupt_cb(const char *reference_name, void *payload)
 {
 	int *count = (int *)payload;
 
-	GIT_UNUSED(reference_name);
+	GIT3_UNUSED(reference_name);
 
 	(*count)++;
 
@@ -93,7 +93,7 @@ void test_refs_foreachglob__can_cancel(void)
 {
 	int count = 0;
 
-	cl_assert_equal_i(-1000, git_reference_foreach_glob(
+	cl_assert_equal_i(-1000, git3_reference_foreach_glob(
 		repo, "*", interrupt_cb, &count) );
 
 	cl_assert_equal_i(11, count);

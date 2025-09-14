@@ -1,7 +1,7 @@
 /*
- * libgit2 "describe" example - shows how to describe commits
+ * libgit3 "describe" example - shows how to describe commits
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -40,8 +40,8 @@
 struct describe_options {
 	const char **commits;
 	size_t commit_count;
-	git_describe_options describe_options;
-	git_describe_format_options format_options;
+	git3_describe_options describe_options;
+	git3_describe_format_options format_options;
 };
 
 static void opts_add_commit(struct describe_options *opts, const char *commit)
@@ -55,30 +55,30 @@ static void opts_add_commit(struct describe_options *opts, const char *commit)
 	opts->commits[opts->commit_count - 1] = commit;
 }
 
-static void do_describe_single(git_repository *repo, struct describe_options *opts, const char *rev)
+static void do_describe_single(git3_repository *repo, struct describe_options *opts, const char *rev)
 {
-	git_object *commit;
-	git_describe_result *describe_result;
-	git_buf buf = { 0 };
+	git3_object *commit;
+	git3_describe_result *describe_result;
+	git3_buf buf = { 0 };
 
 	if (rev) {
-		check_lg2(git_revparse_single(&commit, repo, rev),
+		check_lg2(git3_revparse_single(&commit, repo, rev),
 			"Failed to lookup rev", rev);
 
-		check_lg2(git_describe_commit(&describe_result, commit, &opts->describe_options),
+		check_lg2(git3_describe_commit(&describe_result, commit, &opts->describe_options),
 			"Failed to describe rev", rev);
 	}
 	else
-		check_lg2(git_describe_workdir(&describe_result, repo, &opts->describe_options),
+		check_lg2(git3_describe_workdir(&describe_result, repo, &opts->describe_options),
 			"Failed to describe workdir", NULL);
 
-	check_lg2(git_describe_format(&buf, describe_result, &opts->format_options),
+	check_lg2(git3_describe_format(&buf, describe_result, &opts->format_options),
 			"Failed to format describe rev", rev);
 
 	printf("%s\n", buf.ptr);
 }
 
-static void do_describe(git_repository *repo, struct describe_options *opts)
+static void do_describe(git3_repository *repo, struct describe_options *opts)
 {
 	if (opts->commit_count == 0)
 		do_describe_single(repo, opts, NULL);
@@ -107,9 +107,9 @@ static void parse_options(struct describe_options *opts, int argc, char **argv)
 		if (curr[0] != '-') {
 			opts_add_commit(opts, curr);
 		} else if (!strcmp(curr, "--all")) {
-			opts->describe_options.describe_strategy = GIT_DESCRIBE_ALL;
+			opts->describe_options.describe_strategy = GIT3_DESCRIBE_ALL;
 		} else if (!strcmp(curr, "--tags")) {
-			opts->describe_options.describe_strategy = GIT_DESCRIBE_TAGS;
+			opts->describe_options.describe_strategy = GIT3_DESCRIBE_TAGS;
 		} else if (!strcmp(curr, "--exact-match")) {
 			opts->describe_options.max_candidates_tags = 0;
 		} else if (!strcmp(curr, "--long")) {
@@ -145,11 +145,11 @@ static void describe_options_init(struct describe_options *opts)
 
 	opts->commits = NULL;
 	opts->commit_count = 0;
-	git_describe_options_init(&opts->describe_options, GIT_DESCRIBE_OPTIONS_VERSION);
-	git_describe_format_options_init(&opts->format_options, GIT_DESCRIBE_FORMAT_OPTIONS_VERSION);
+	git3_describe_options_init(&opts->describe_options, GIT3_DESCRIBE_OPTIONS_VERSION);
+	git3_describe_format_options_init(&opts->format_options, GIT3_DESCRIBE_FORMAT_OPTIONS_VERSION);
 }
 
-int lg2_describe(git_repository *repo, int argc, char **argv)
+int lg2_describe(git3_repository *repo, int argc, char **argv)
 {
 	struct describe_options opts;
 

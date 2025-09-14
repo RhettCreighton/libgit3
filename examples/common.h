@@ -1,7 +1,7 @@
 /*
- * Utilities library for libgit2 examples
+ * Utilities library for libgit3 examples
  *
- * Written by the libgit2 contributors
+ * Written by the libgit3 contributors
  *
  * To the extent possible under law, the author(s) have dedicated all copyright
  * and related and neighboring rights to this software to the public domain
@@ -54,35 +54,35 @@
 
 #include "args.h"
 
-extern int lg2_add(git_repository *repo, int argc, char **argv);
-extern int lg2_blame(git_repository *repo, int argc, char **argv);
-extern int lg2_cat_file(git_repository *repo, int argc, char **argv);
-extern int lg2_checkout(git_repository *repo, int argc, char **argv);
-extern int lg2_clone(git_repository *repo, int argc, char **argv);
-extern int lg2_commit(git_repository *repo, int argc, char **argv);
-extern int lg2_config(git_repository *repo, int argc, char **argv);
-extern int lg2_describe(git_repository *repo, int argc, char **argv);
-extern int lg2_diff(git_repository *repo, int argc, char **argv);
-extern int lg2_fetch(git_repository *repo, int argc, char **argv);
-extern int lg2_for_each_ref(git_repository *repo, int argc, char **argv);
-extern int lg2_general(git_repository *repo, int argc, char **argv);
-extern int lg2_index_pack(git_repository *repo, int argc, char **argv);
-extern int lg2_init(git_repository *repo, int argc, char **argv);
-extern int lg2_log(git_repository *repo, int argc, char **argv);
-extern int lg2_ls_files(git_repository *repo, int argc, char **argv);
-extern int lg2_ls_remote(git_repository *repo, int argc, char **argv);
-extern int lg2_merge(git_repository *repo, int argc, char **argv);
-extern int lg2_push(git_repository *repo, int argc, char **argv);
-extern int lg2_remote(git_repository *repo, int argc, char **argv);
-extern int lg2_rev_list(git_repository *repo, int argc, char **argv);
-extern int lg2_rev_parse(git_repository *repo, int argc, char **argv);
-extern int lg2_show_index(git_repository *repo, int argc, char **argv);
-extern int lg2_stash(git_repository *repo, int argc, char **argv);
-extern int lg2_status(git_repository *repo, int argc, char **argv);
-extern int lg2_tag(git_repository *repo, int argc, char **argv);
+extern int lg2_add(git3_repository *repo, int argc, char **argv);
+extern int lg2_blame(git3_repository *repo, int argc, char **argv);
+extern int lg2_cat_file(git3_repository *repo, int argc, char **argv);
+extern int lg2_checkout(git3_repository *repo, int argc, char **argv);
+extern int lg2_clone(git3_repository *repo, int argc, char **argv);
+extern int lg2_commit(git3_repository *repo, int argc, char **argv);
+extern int lg2_config(git3_repository *repo, int argc, char **argv);
+extern int lg2_describe(git3_repository *repo, int argc, char **argv);
+extern int lg2_diff(git3_repository *repo, int argc, char **argv);
+extern int lg2_fetch(git3_repository *repo, int argc, char **argv);
+extern int lg2_for_each_ref(git3_repository *repo, int argc, char **argv);
+extern int lg2_general(git3_repository *repo, int argc, char **argv);
+extern int lg2_index_pack(git3_repository *repo, int argc, char **argv);
+extern int lg2_init(git3_repository *repo, int argc, char **argv);
+extern int lg2_log(git3_repository *repo, int argc, char **argv);
+extern int lg2_ls_files(git3_repository *repo, int argc, char **argv);
+extern int lg2_ls_remote(git3_repository *repo, int argc, char **argv);
+extern int lg2_merge(git3_repository *repo, int argc, char **argv);
+extern int lg2_push(git3_repository *repo, int argc, char **argv);
+extern int lg2_remote(git3_repository *repo, int argc, char **argv);
+extern int lg2_rev_list(git3_repository *repo, int argc, char **argv);
+extern int lg2_rev_parse(git3_repository *repo, int argc, char **argv);
+extern int lg2_show_index(git3_repository *repo, int argc, char **argv);
+extern int lg2_stash(git3_repository *repo, int argc, char **argv);
+extern int lg2_status(git3_repository *repo, int argc, char **argv);
+extern int lg2_tag(git3_repository *repo, int argc, char **argv);
 
 /**
- * Check libgit2 error code, printing error to stderr on failure and
+ * Check libgit3 error code, printing error to stderr on failure and
  * exiting the program.
  */
 extern void check_lg2(int error, const char *message, const char *extra);
@@ -105,14 +105,14 @@ extern void fatal(const char *message, const char *extra);
  * Pass `FILE*` such as `stdout` or `stderr` as payload (or NULL == `stdout`)
  */
 extern int diff_output(
-	const git_diff_delta*, const git_diff_hunk*, const git_diff_line*, void*);
+	const git3_diff_delta*, const git3_diff_hunk*, const git3_diff_line*, void*);
 
 /**
  * Convert a treeish argument to an actual tree; this will call check_lg2
  * and exit the program if `treeish` cannot be resolved to a tree
  */
 extern void treeish_to_tree(
-	git_tree **out, git_repository *repo, const char *treeish);
+	git3_tree **out, git3_repository *repo, const char *treeish);
 
 /**
  * A realloc that exits on failure
@@ -122,12 +122,12 @@ extern void *xrealloc(void *oldp, size_t newsz);
 /**
  * Convert a refish to an annotated commit.
  */
-extern int resolve_refish(git_annotated_commit **commit, git_repository *repo, const char *refish);
+extern int resolve_refish(git3_annotated_commit **commit, git3_repository *repo, const char *refish);
 
 /**
  * Acquire credentials via command line
  */
-extern int cred_acquire_cb(git_credential **out,
+extern int cred_acquire_cb(git3_credential **out,
 		const char *url,
 		const char *username_from_url,
 		unsigned int allowed_types,

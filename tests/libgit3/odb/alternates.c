@@ -1,20 +1,20 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "odb.h"
 #include "filebuf.h"
 
-static git_str destpath, filepath;
+static git3_str destpath, filepath;
 static const char *paths[] = {
 	"A.git", "B.git", "C.git", "D.git", "E.git", "F.git", "G.git"
 };
-static git_filebuf file;
-static git_repository *repo;
+static git3_filebuf file;
+static git3_repository *repo;
 
 void test_odb_alternates__cleanup(void)
 {
 	size_t i;
 
-	git_str_dispose(&destpath);
-	git_str_dispose(&filepath);
+	git3_str_dispose(&destpath);
+	git3_str_dispose(&filepath);
 
 	for (i = 0; i < ARRAY_SIZE(paths); i++)
 		cl_fixture_cleanup(paths[i]);
@@ -22,27 +22,27 @@ void test_odb_alternates__cleanup(void)
 
 static void init_linked_repo(const char *path, const char *alternate)
 {
-	git_str_clear(&destpath);
-	git_str_clear(&filepath);
+	git3_str_clear(&destpath);
+	git3_str_clear(&filepath);
 
-	cl_git_pass(git_repository_init(&repo, path, 1));
-	cl_git_pass(git_fs_path_prettify(&destpath, alternate, NULL));
-	cl_git_pass(git_str_joinpath(&destpath, destpath.ptr, "objects"));
-	cl_git_pass(git_str_joinpath(&filepath, git_repository_path(repo), "objects/info"));
-	cl_git_pass(git_futils_mkdir(filepath.ptr, 0755, GIT_MKDIR_PATH));
-	cl_git_pass(git_str_joinpath(&filepath, filepath.ptr , "alternates"));
+	cl_git_pass(git3_repository_init(&repo, path, 1));
+	cl_git_pass(git3_fs_path_prettify(&destpath, alternate, NULL));
+	cl_git_pass(git3_str_joinpath(&destpath, destpath.ptr, "objects"));
+	cl_git_pass(git3_str_joinpath(&filepath, git3_repository_path(repo), "objects/info"));
+	cl_git_pass(git3_futils_mkdir(filepath.ptr, 0755, GIT3_MKDIR_PATH));
+	cl_git_pass(git3_str_joinpath(&filepath, filepath.ptr , "alternates"));
 
-	cl_git_pass(git_filebuf_open(&file, git_str_cstr(&filepath), 0, 0666));
-	git_filebuf_printf(&file, "%s\n", git_str_cstr(&destpath));
-	cl_git_pass(git_filebuf_commit(&file));
+	cl_git_pass(git3_filebuf_open(&file, git3_str_cstr(&filepath), 0, 0666));
+	git3_filebuf_printf(&file, "%s\n", git3_str_cstr(&destpath));
+	cl_git_pass(git3_filebuf_commit(&file));
 
-	git_repository_free(repo);
+	git3_repository_free(repo);
 }
 
 void test_odb_alternates__chained(void)
 {
-	git_commit *commit;
-	git_oid oid;
+	git3_commit *commit;
+	git3_oid oid;
 
 	/* Set the alternate A -> testrepo.git */
 	init_linked_repo(paths[0], cl_fixture("testrepo.git"));
@@ -51,17 +51,17 @@ void test_odb_alternates__chained(void)
 	init_linked_repo(paths[1], paths[0]);
 
 	/* Now load B and see if we can find an object from testrepo.git */
-	cl_git_pass(git_repository_open(&repo, paths[1]));
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	git_commit_free(commit);
-	git_repository_free(repo);
+	cl_git_pass(git3_repository_open(&repo, paths[1]));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	git3_commit_free(commit);
+	git3_repository_free(repo);
 }
 
 void test_odb_alternates__long_chain(void)
 {
-	git_commit *commit;
-	git_oid oid;
+	git3_commit *commit;
+	git3_oid oid;
 	size_t i;
 
 	/* Set the alternate A -> testrepo.git */
@@ -73,16 +73,16 @@ void test_odb_alternates__long_chain(void)
 	}
 
 	/* Now load the last one and see if we can find an object from testrepo.git */
-	cl_git_pass(git_repository_open(&repo, paths[ARRAY_SIZE(paths)-1]));
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_fail(git_commit_lookup(&commit, repo, &oid));
-	git_repository_free(repo);
+	cl_git_pass(git3_repository_open(&repo, paths[ARRAY_SIZE(paths)-1]));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_fail(git3_commit_lookup(&commit, repo, &oid));
+	git3_repository_free(repo);
 }
 
 void test_odb_alternates__relative(void)
 {
-	git_commit *commit;
-	git_oid oid;
+	git3_commit *commit;
+	git3_oid oid;
 
 	/* Set the alternate A -> testrepo.git */
 	init_linked_repo(paths[0], cl_fixture("testrepo.git"));
@@ -93,24 +93,24 @@ void test_odb_alternates__relative(void)
 	init_linked_repo(paths[2], paths[1]);
 
 	/* Use a relative alternates path for B -> A */
-	cl_git_pass(git_fs_path_prettify(&filepath, paths[1], NULL));
-	cl_git_pass(git_str_joinpath(&filepath, filepath.ptr, "objects/info/alternates"));
+	cl_git_pass(git3_fs_path_prettify(&filepath, paths[1], NULL));
+	cl_git_pass(git3_str_joinpath(&filepath, filepath.ptr, "objects/info/alternates"));
 
-	cl_git_pass(git_filebuf_open(&file, git_str_cstr(&filepath), 0, 0666));
-	git_filebuf_printf(&file, "../../%s/objects\n", paths[0]);
-	cl_git_pass(git_filebuf_commit(&file));
+	cl_git_pass(git3_filebuf_open(&file, git3_str_cstr(&filepath), 0, 0666));
+	git3_filebuf_printf(&file, "../../%s/objects\n", paths[0]);
+	cl_git_pass(git3_filebuf_commit(&file));
 
 	/* Now load B and see if we can find an object from testrepo.git */
-	cl_git_pass(git_repository_open(&repo, paths[1]));
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	git_commit_free(commit);
-	git_repository_free(repo);
+	cl_git_pass(git3_repository_open(&repo, paths[1]));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	git3_commit_free(commit);
+	git3_repository_free(repo);
 
 	/* Now load C and see if we can find an object from testrepo.git */
-	cl_git_pass(git_repository_open(&repo, paths[2]));
-	git_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT_OID_SHA1);
-	cl_git_pass(git_commit_lookup(&commit, repo, &oid));
-	git_commit_free(commit);
-	git_repository_free(repo);
+	cl_git_pass(git3_repository_open(&repo, paths[2]));
+	git3_oid_from_string(&oid, "a65fedf39aefe402d3bb6e24df4d4f5fe4547750", GIT3_OID_SHA1);
+	cl_git_pass(git3_commit_lookup(&commit, repo, &oid));
+	git3_commit_free(commit);
+	git3_repository_free(repo);
 }

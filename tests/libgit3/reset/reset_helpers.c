@@ -1,20 +1,20 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "reset_helpers.h"
 
-void reflog_check(git_repository *repo, const char *refname,
+void reflog_check(git3_repository *repo, const char *refname,
 		size_t exp_count, const char *exp_email, const char *exp_msg)
 {
-	git_reflog *log;
-	const git_reflog_entry *entry;
+	git3_reflog *log;
+	const git3_reflog_entry *entry;
 
-	GIT_UNUSED(exp_email);
+	GIT3_UNUSED(exp_email);
 
-	cl_git_pass(git_reflog_read(&log, repo, refname));
-	cl_assert_equal_i(exp_count, git_reflog_entrycount(log));
-	entry = git_reflog_entry_byindex(log, 0);
+	cl_git_pass(git3_reflog_read(&log, repo, refname));
+	cl_assert_equal_i(exp_count, git3_reflog_entrycount(log));
+	entry = git3_reflog_entry_byindex(log, 0);
 
 	if (exp_msg)
-		cl_assert_equal_s(exp_msg, git_reflog_entry_message(entry));
+		cl_assert_equal_s(exp_msg, git3_reflog_entry_message(entry));
 
-	git_reflog_free(log);
+	git3_reflog_free(log);
 }

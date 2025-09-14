@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -90,8 +90,8 @@ int main(int argc, char **argv)
 	cli_opt opt;
 	int ret = 0;
 
-	if (git_libgit3_init() < 0) {
-		cli_error("failed to initialize libgit2");
+	if (git3_libgit3_init() < 0) {
+		cli_error("failed to initialize libgit3");
 		exit(CLI_EXIT_GIT);
 	}
 
@@ -137,6 +137,6 @@ int main(int argc, char **argv)
 	ret = cmd->fn(argc - 1, &argv[1]);
 
 done:
-	git_libgit3_shutdown();
+	git3_libgit3_shutdown();
 	return ret;
 }

@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_posix_h__
 #define INCLUDE_posix_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 #include <stdlib.h>
 #include <fcntl.h>
@@ -79,9 +79,9 @@
  * because the descriptor is blocked.
  */
 #if defined(EWOULDBLOCK)
-#define GIT_ISBLOCKED(e) ((e) == EAGAIN || (e) == EWOULDBLOCK)
+#define GIT3_ISBLOCKED(e) ((e) == EAGAIN || (e) == EWOULDBLOCK)
 #else
-#define GIT_ISBLOCKED(e) ((e) == EAGAIN)
+#define GIT3_ISBLOCKED(e) ((e) == EAGAIN)
 #endif
 
 /* define some standard errnos that the runtime may be missing.  for example,
@@ -110,7 +110,7 @@ typedef long long off64_t;
 typedef int64_t off64_t;
 #endif
 
-typedef int git_file;
+typedef int git3_file;
 
 /**
  * Standard POSIX Methods
@@ -125,8 +125,8 @@ typedef int git_file;
  * Use your manpages to check the docs on these.
  */
 
-extern ssize_t p_read(git_file fd, void *buf, size_t cnt);
-extern int p_write(git_file fd, const void *buf, size_t cnt);
+extern ssize_t p_read(git3_file fd, void *buf, size_t cnt);
+extern int p_write(git3_file fd, const void *buf, size_t cnt);
 
 extern ssize_t p_pread(int fd, void *data, size_t size, off64_t offset);
 extern ssize_t p_pwrite(int fd, const void *data, size_t size, off64_t offset);
@@ -139,8 +139,8 @@ extern int p_creat(const char *path, mode_t mode);
 extern int p_getcwd(char *buffer_out, size_t size);
 extern int p_rename(const char *from, const char *to);
 
-extern int git__page_size(size_t *page_size);
-extern int git__mmap_alignment(size_t *page_size);
+extern int git3__page_size(size_t *page_size);
+extern int git3__mmap_alignment(size_t *page_size);
 
 /* The number of times `p_fsync` has been called.  Note that this is for
  * test code only; it it not necessarily thread-safe and should not be
@@ -151,7 +151,7 @@ extern size_t p_fsync__cnt;
 /**
  * Platform-dependent methods
  */
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 #	include "win32/posix.h"
 #else
 #	include "unix/posix.h"
@@ -160,9 +160,9 @@ extern size_t p_fsync__cnt;
 #include "strnlen.h"
 
 #ifdef NO_READDIR_R
-GIT_INLINE(int) p_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
+GIT3_INLINE(int) p_readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 {
-	GIT_UNUSED(entry);
+	GIT3_UNUSED(entry);
 	*result = readdir(dirp);
 	return 0;
 }
@@ -195,10 +195,10 @@ extern const char *p_gai_strerror(int ret);
 #	define p_gai_strerror(c) gai_strerror(c)
 #endif /* NO_ADDRINFO */
 
-#ifdef GIT_IO_POLL
+#ifdef GIT3_IO_POLL
 # include <poll.h>
 # define p_poll poll
-#elif GIT_IO_WSAPOLL
+#elif GIT3_IO_WSAPOLL
 # include <winsock2.h>
 # define p_poll WSAPoll
 #else

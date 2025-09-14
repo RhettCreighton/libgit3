@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_trace_h__
@@ -12,38 +12,38 @@
 #include <git3/trace.h>
 #include "str.h"
 
-struct git_trace_data {
-	git_trace_level_t level;
-	git_trace_cb callback;
+struct git3_trace_data {
+	git3_trace_level_t level;
+	git3_trace_cb callback;
 };
 
-extern struct git_trace_data git_trace__data;
+extern struct git3_trace_data git3_trace__data;
 
-GIT_INLINE(void) git_trace__write_fmt(
-	git_trace_level_t level,
+GIT3_INLINE(void) git3_trace__write_fmt(
+	git3_trace_level_t level,
 	const char *fmt,
 	va_list ap)
 {
-	git_trace_cb callback = git_trace__data.callback;
-	git_str message = GIT_STR_INIT;
+	git3_trace_cb callback = git3_trace__data.callback;
+	git3_str message = GIT3_STR_INIT;
 
-	git_str_vprintf(&message, fmt, ap);
+	git3_str_vprintf(&message, fmt, ap);
 
-	callback(level, git_str_cstr(&message));
+	callback(level, git3_str_cstr(&message));
 
-	git_str_dispose(&message);
+	git3_str_dispose(&message);
 }
 
-#define git_trace_level()	(git_trace__data.level)
+#define git3_trace_level()	(git3_trace__data.level)
 
-GIT_INLINE(void) git_trace(git_trace_level_t level, const char *fmt, ...)
+GIT3_INLINE(void) git3_trace(git3_trace_level_t level, const char *fmt, ...)
 {
-	if (git_trace__data.level >= level &&
-	    git_trace__data.callback != NULL) {
+	if (git3_trace__data.level >= level &&
+	    git3_trace__data.callback != NULL) {
 		va_list ap;
 
 		va_start(ap, fmt);
-		git_trace__write_fmt(level, fmt, ap);
+		git3_trace__write_fmt(level, fmt, ap);
 		va_end(ap);
 	}
 }

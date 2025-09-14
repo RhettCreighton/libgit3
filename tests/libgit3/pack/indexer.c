@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include <git3.h>
 #include "futils.h"
 #include "hash.h"
@@ -97,105 +97,105 @@ static const unsigned int base_obj_len = 2;
 
 void test_pack_indexer__out_of_order(void)
 {
-	git_indexer *idx = 0;
-	git_indexer_progress stats = { 0 };
+	git3_indexer *idx = 0;
+	git3_indexer_progress stats = { 0 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", NULL));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", NULL));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, NULL));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, NULL));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, out_of_order_pack, out_of_order_pack_len, &stats));
-	cl_git_pass(git_indexer_commit(idx, &stats));
+	cl_git_pass(git3_indexer_commit(idx, &stats));
 
 	cl_assert_equal_i(stats.total_objects, 3);
 	cl_assert_equal_i(stats.received_objects, 3);
 	cl_assert_equal_i(stats.indexed_objects, 3);
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 }
 
 void test_pack_indexer__missing_trailer(void)
 {
-	git_indexer *idx = 0;
-	git_indexer_progress stats = { 0 };
+	git3_indexer *idx = 0;
+	git3_indexer_progress stats = { 0 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", NULL));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", NULL));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, NULL));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, NULL));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, missing_trailer_pack, missing_trailer_pack_len, &stats));
-	cl_git_fail(git_indexer_commit(idx, &stats));
+	cl_git_fail(git3_indexer_commit(idx, &stats));
 
-	cl_assert(git_error_last() != NULL);
-	cl_assert_equal_i(git_error_last()->klass, GIT_ERROR_INDEXER);
+	cl_assert(git3_error_last() != NULL);
+	cl_assert_equal_i(git3_error_last()->klass, GIT3_ERROR_INDEXER);
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 }
 
 void test_pack_indexer__leaky(void)
 {
-	git_indexer *idx = 0;
-	git_indexer_progress stats = { 0 };
+	git3_indexer *idx = 0;
+	git3_indexer_progress stats = { 0 };
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", NULL));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", NULL));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, NULL));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, NULL));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, leaky_pack, leaky_pack_len, &stats));
-	cl_git_fail(git_indexer_commit(idx, &stats));
+	cl_git_fail(git3_indexer_commit(idx, &stats));
 
-	cl_assert(git_error_last() != NULL);
-	cl_assert_equal_i(git_error_last()->klass, GIT_ERROR_INDEXER);
+	cl_assert(git3_error_last() != NULL);
+	cl_assert_equal_i(git3_error_last()->klass, GIT3_ERROR_INDEXER);
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 }
 
 void test_pack_indexer__fix_thin(void)
 {
-	git_indexer *idx = NULL;
-	git_indexer_progress stats = { 0 };
-	git_repository *repo;
-	git_odb *odb;
-	git_oid id, should_id;
-	git_indexer_options opts = GIT_INDEXER_OPTIONS_INIT;
+	git3_indexer *idx = NULL;
+	git3_indexer_progress stats = { 0 };
+	git3_repository *repo;
+	git3_odb *odb;
+	git3_oid id, should_id;
+	git3_indexer_options opts = GIT3_INDEXER_OPTIONS_INIT;
 
-	cl_git_pass(git_repository_init(&repo, "thin.git", true));
-	cl_git_pass(git_repository_odb(&odb, repo));
+	cl_git_pass(git3_repository_init(&repo, "thin.git", true));
+	cl_git_pass(git3_repository_odb(&odb, repo));
 
 	/* Store the missing base into your ODB so the indexer can fix the pack */
-	cl_git_pass(git_odb_write(&id, odb, base_obj, base_obj_len, GIT_OBJECT_BLOB));
-	git_oid_from_string(&should_id, "e68fe8129b546b101aee9510c5328e7f21ca1d18", GIT_OID_SHA1);
+	cl_git_pass(git3_odb_write(&id, odb, base_obj, base_obj_len, GIT3_OBJECT_BLOB));
+	git3_oid_from_string(&should_id, "e68fe8129b546b101aee9510c5328e7f21ca1d18", GIT3_OID_SHA1);
 	cl_assert_equal_oid(&should_id, &id);
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	opts.odb = odb;
-	cl_git_pass(git_indexer_new(&idx, ".", &opts));
+	cl_git_pass(git3_indexer_new(&idx, ".", &opts));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, odb, &opts));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, odb, &opts));
 #endif
 
-	cl_git_pass(git_indexer_append(idx, thin_pack, thin_pack_len, &stats));
-	cl_git_pass(git_indexer_commit(idx, &stats));
+	cl_git_pass(git3_indexer_append(idx, thin_pack, thin_pack_len, &stats));
+	cl_git_pass(git3_indexer_commit(idx, &stats));
 
 	cl_assert_equal_i(stats.total_objects, 2);
 	cl_assert_equal_i(stats.received_objects, 2);
 	cl_assert_equal_i(stats.indexed_objects, 2);
 	cl_assert_equal_i(stats.local_objects, 1);
 
-	cl_assert_equal_s("fefdb2d740a3a6b6c03a0c7d6ce431c6d5810e13", git_indexer_name(idx));
+	cl_assert_equal_s("fefdb2d740a3a6b6c03a0c7d6ce431c6d5810e13", git3_indexer_name(idx));
 
-	git_indexer_free(idx);
-	git_odb_free(odb);
-	git_repository_free(repo);
+	git3_indexer_free(idx);
+	git3_odb_free(odb);
+	git3_repository_free(repo);
 
 	/*
 	 * The pack's name/hash only tells us what objects there are,
@@ -214,157 +214,157 @@ void test_pack_indexer__fix_thin(void)
 
 		cl_git_pass(p_stat(name, &st));
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-		cl_git_pass(git_indexer_new(&idx, ".", NULL));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+		cl_git_pass(git3_indexer_new(&idx, ".", NULL));
 #else
-		cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, NULL));
+		cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, NULL));
 #endif
 
 		read = p_read(fd, buffer, sizeof(buffer));
 		cl_assert(read != -1);
 		p_close(fd);
 
-		cl_git_pass(git_indexer_append(idx, buffer, read, &stats));
-		cl_git_pass(git_indexer_commit(idx, &stats));
+		cl_git_pass(git3_indexer_append(idx, buffer, read, &stats));
+		cl_git_pass(git3_indexer_commit(idx, &stats));
 
 		cl_assert_equal_i(stats.total_objects, 3);
 		cl_assert_equal_i(stats.received_objects, 3);
 		cl_assert_equal_i(stats.indexed_objects, 3);
 		cl_assert_equal_i(stats.local_objects, 0);
 
-		git_indexer_free(idx);
+		git3_indexer_free(idx);
 	}
 }
 
 void test_pack_indexer__corrupt_length(void)
 {
-	git_indexer *idx = NULL;
-	git_indexer_progress stats = { 0 };
-	git_repository *repo;
-	git_odb *odb;
-	git_oid id, should_id;
-	git_indexer_options opts = GIT_INDEXER_OPTIONS_INIT;
+	git3_indexer *idx = NULL;
+	git3_indexer_progress stats = { 0 };
+	git3_repository *repo;
+	git3_odb *odb;
+	git3_oid id, should_id;
+	git3_indexer_options opts = GIT3_INDEXER_OPTIONS_INIT;
 
-	cl_git_pass(git_repository_init(&repo, "thin.git", true));
-	cl_git_pass(git_repository_odb(&odb, repo));
+	cl_git_pass(git3_repository_init(&repo, "thin.git", true));
+	cl_git_pass(git3_repository_odb(&odb, repo));
 
 	/* Store the missing base into your ODB so the indexer can fix the pack */
-	cl_git_pass(git_odb_write(&id, odb, base_obj, base_obj_len, GIT_OBJECT_BLOB));
-	git_oid_from_string(&should_id, "e68fe8129b546b101aee9510c5328e7f21ca1d18", GIT_OID_SHA1);
+	cl_git_pass(git3_odb_write(&id, odb, base_obj, base_obj_len, GIT3_OBJECT_BLOB));
+	git3_oid_from_string(&should_id, "e68fe8129b546b101aee9510c5328e7f21ca1d18", GIT3_OID_SHA1);
 	cl_assert_equal_oid(&should_id, &id);
 
-#ifdef GIT_EXPERIMENTAL_SHA256
+#ifdef GIT3_EXPERIMENTAL_SHA256
 	opts.odb = odb;
-	opts.oid_type = GIT_OID_SHA1;
-	cl_git_pass(git_indexer_new(&idx, ".", &opts));
+	opts.oid_type = GIT3_OID_SHA1;
+	cl_git_pass(git3_indexer_new(&idx, ".", &opts));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, odb, &opts));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, odb, &opts));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, corrupt_thin_pack, corrupt_thin_pack_len, &stats));
-	cl_git_fail(git_indexer_commit(idx, &stats));
+	cl_git_fail(git3_indexer_commit(idx, &stats));
 
-	cl_assert(git_error_last() != NULL);
-	cl_assert_equal_i(git_error_last()->klass, GIT_ERROR_ZLIB);
+	cl_assert(git3_error_last() != NULL);
+	cl_assert_equal_i(git3_error_last()->klass, GIT3_ERROR_ZLIB);
 
-	git_indexer_free(idx);
-	git_odb_free(odb);
-	git_repository_free(repo);
+	git3_indexer_free(idx);
+	git3_odb_free(odb);
+	git3_repository_free(repo);
 }
 
 void test_pack_indexer__incomplete_pack_fails_with_strict(void)
 {
-	git_indexer_options opts = GIT_INDEXER_OPTIONS_INIT;
-	git_indexer *idx = 0;
-	git_indexer_progress stats = { 0 };
+	git3_indexer_options opts = GIT3_INDEXER_OPTIONS_INIT;
+	git3_indexer *idx = 0;
+	git3_indexer_progress stats = { 0 };
 
 	opts.verify = 1;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", &opts));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", &opts));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, &opts));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, &opts));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, incomplete_pack, incomplete_pack_len, &stats));
-	cl_git_fail(git_indexer_commit(idx, &stats));
+	cl_git_fail(git3_indexer_commit(idx, &stats));
 
 	cl_assert_equal_i(stats.total_objects, 2);
 	cl_assert_equal_i(stats.received_objects, 2);
 	cl_assert_equal_i(stats.indexed_objects, 2);
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 }
 
 void test_pack_indexer__out_of_order_with_connectivity_checks(void)
 {
-	git_indexer_options opts = GIT_INDEXER_OPTIONS_INIT;
-	git_indexer *idx = 0;
-	git_indexer_progress stats = { 0 };
+	git3_indexer_options opts = GIT3_INDEXER_OPTIONS_INIT;
+	git3_indexer *idx = 0;
+	git3_indexer_progress stats = { 0 };
 
 	opts.verify = 1;
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", &opts));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", &opts));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, &opts));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, &opts));
 #endif
 
-	cl_git_pass(git_indexer_append(
+	cl_git_pass(git3_indexer_append(
 		idx, out_of_order_pack, out_of_order_pack_len, &stats));
-	cl_git_pass(git_indexer_commit(idx, &stats));
+	cl_git_pass(git3_indexer_commit(idx, &stats));
 
 	cl_assert_equal_i(stats.total_objects, 3);
 	cl_assert_equal_i(stats.received_objects, 3);
 	cl_assert_equal_i(stats.indexed_objects, 3);
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 }
 
-static int find_tmp_file_recurs(void *opaque, git_str *path)
+static int find_tmp_file_recurs(void *opaque, git3_str *path)
 {
 	int error = 0;
-	git_str *first_tmp_file = opaque;
+	git3_str *first_tmp_file = opaque;
 	struct stat st;
 
 	if ((error = p_lstat_posixly(path->ptr, &st)) < 0)
 		return error;
 
 	if (S_ISDIR(st.st_mode))
-		return git_fs_path_direach(path, 0, find_tmp_file_recurs, opaque);
+		return git3_fs_path_direach(path, 0, find_tmp_file_recurs, opaque);
 
-	/* This is the template that's used in git_futils_mktmp. */
-	if (strstr(git_str_cstr(path), "_git2_") != NULL)
-		return git_str_sets(first_tmp_file, git_str_cstr(path));
+	/* This is the template that's used in git3_futils_mktmp. */
+	if (strstr(git3_str_cstr(path), "_git2_") != NULL)
+		return git3_str_sets(first_tmp_file, git3_str_cstr(path));
 
 	return 0;
 }
 
 void test_pack_indexer__no_tmp_files(void)
 {
-	git_indexer *idx = NULL;
-	git_str path = GIT_STR_INIT;
-	git_str first_tmp_file = GIT_STR_INIT;
+	git3_indexer *idx = NULL;
+	git3_str path = GIT3_STR_INIT;
+	git3_str first_tmp_file = GIT3_STR_INIT;
 
 	/* Precondition: there are no temporary files. */
-	cl_git_pass(git_str_sets(&path, clar_sandbox_path()));
+	cl_git_pass(git3_str_sets(&path, clar_sandbox_path()));
 	cl_git_pass(find_tmp_file_recurs(&first_tmp_file, &path));
-	git_str_dispose(&path);
-	cl_assert(git_str_len(&first_tmp_file) == 0);
+	git3_str_dispose(&path);
+	cl_assert(git3_str_len(&first_tmp_file) == 0);
 
-#ifdef GIT_EXPERIMENTAL_SHA256
-	cl_git_pass(git_indexer_new(&idx, ".", NULL));
+#ifdef GIT3_EXPERIMENTAL_SHA256
+	cl_git_pass(git3_indexer_new(&idx, ".", NULL));
 #else
-	cl_git_pass(git_indexer_new(&idx, ".", 0, NULL, NULL));
+	cl_git_pass(git3_indexer_new(&idx, ".", 0, NULL, NULL));
 #endif
 
-	git_indexer_free(idx);
+	git3_indexer_free(idx);
 
-	cl_git_pass(git_str_sets(&path, clar_sandbox_path()));
+	cl_git_pass(git3_str_sets(&path, clar_sandbox_path()));
 	cl_git_pass(find_tmp_file_recurs(&first_tmp_file, &path));
-	git_str_dispose(&path);
-	cl_assert(git_str_len(&first_tmp_file) == 0);
-	git_str_dispose(&first_tmp_file);
+	git3_str_dispose(&path);
+	cl_assert(git3_str_len(&first_tmp_file) == 0);
+	git3_str_dispose(&first_tmp_file);
 }

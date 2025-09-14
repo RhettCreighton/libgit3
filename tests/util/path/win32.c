@@ -1,27 +1,27 @@
 
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 #include "win32/path_w32.h"
 #endif
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 static void test_utf8_to_utf16(const char *utf8_in, const wchar_t *utf16_expected)
 {
-	git_win32_path path_utf16;
+	git3_win32_path path_utf16;
 	int path_utf16len;
 
-	cl_assert((path_utf16len = git_win32_path_from_utf8(path_utf16, utf8_in)) >= 0);
+	cl_assert((path_utf16len = git3_win32_path_from_utf8(path_utf16, utf8_in)) >= 0);
 	cl_assert_equal_wcs(utf16_expected, path_utf16);
 	cl_assert_equal_i(wcslen(utf16_expected), path_utf16len);
 }
 
 static void test_utf8_to_utf16_relative(const char* utf8_in, const wchar_t* utf16_expected)
 {
-	git_win32_path path_utf16;
+	git3_win32_path path_utf16;
 	int path_utf16len;
 
-	cl_assert((path_utf16len = git_win32_path_relative_from_utf8(path_utf16, utf8_in)) >= 0);
+	cl_assert((path_utf16len = git3_win32_path_relative_from_utf8(path_utf16, utf8_in)) >= 0);
 	cl_assert_equal_wcs(utf16_expected, path_utf16);
 	cl_assert_equal_i(wcslen(utf16_expected), path_utf16len);
 }
@@ -29,7 +29,7 @@ static void test_utf8_to_utf16_relative(const char* utf8_in, const wchar_t* utf1
 
 void test_path_win32__utf8_to_utf16(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("C:\\", L"\\\\?\\C:\\");
 	test_utf8_to_utf16("c:\\", L"\\\\?\\c:\\");
 	test_utf8_to_utf16("C:/", L"\\\\?\\C:\\");
@@ -39,7 +39,7 @@ void test_path_win32__utf8_to_utf16(void)
 
 void test_path_win32__removes_trailing_slash(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("C:\\Foo\\", L"\\\\?\\C:\\Foo");
 	test_utf8_to_utf16("C:\\Foo\\\\", L"\\\\?\\C:\\Foo");
 	test_utf8_to_utf16("C:\\Foo\\\\", L"\\\\?\\C:\\Foo");
@@ -50,7 +50,7 @@ void test_path_win32__removes_trailing_slash(void)
 
 void test_path_win32__squashes_multiple_slashes(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("C:\\\\Foo\\Bar\\\\Foobar", L"\\\\?\\C:\\Foo\\Bar\\Foobar");
 	test_utf8_to_utf16("C://Foo/Bar///Foobar", L"\\\\?\\C:\\Foo\\Bar\\Foobar");
 #endif
@@ -58,7 +58,7 @@ void test_path_win32__squashes_multiple_slashes(void)
 
 void test_path_win32__unc(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("\\\\server\\c$\\unc\\path", L"\\\\?\\UNC\\server\\c$\\unc\\path");
 	test_utf8_to_utf16("//server/git/style/unc/path", L"\\\\?\\UNC\\server\\git\\style\\unc\\path");
 #endif
@@ -66,20 +66,20 @@ void test_path_win32__unc(void)
 
 void test_path_win32__honors_max_path(void)
 {
-#ifdef GIT_WIN32
-	git_win32_path path_utf16;
+#ifdef GIT3_WIN32
+	git3_win32_path path_utf16;
 
 	test_utf8_to_utf16("C:\\This path is 261 characters which is fine for our path handling functions which cope with paths longer than MAX_PATH\\0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghijk",
 		L"\\\\?\\C:\\This path is 261 characters which is fine for our path handling functions which cope with paths longer than MAX_PATH\\0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghijk");
 
-	cl_check_fail(git_win32_path_from_utf8(path_utf16, "C:\\This path is 4097 chars and exceeds our maximum path length on Windows which is limited to 4096 characters\\alas\\0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij01"));
+	cl_check_fail(git3_win32_path_from_utf8(path_utf16, "C:\\This path is 4097 chars and exceeds our maximum path length on Windows which is limited to 4096 characters\\alas\\0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij0123456789abcdefghij01"));
 
 #endif
 }
 
 void test_path_win32__dot_and_dotdot(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("C:\\Foo\\..\\Foobar", L"\\\\?\\C:\\Foobar");
 	test_utf8_to_utf16("C:\\Foo\\Bar\\..\\Foobar", L"\\\\?\\C:\\Foo\\Foobar");
 	test_utf8_to_utf16("C:\\Foo\\Bar\\..\\Foobar\\..", L"\\\\?\\C:\\Foo");
@@ -100,7 +100,7 @@ void test_path_win32__dot_and_dotdot(void)
 
 void test_path_win32__absolute_from_no_drive_letter(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_utf8_to_utf16("\\Foo", L"\\\\?\\C:\\Foo");
 	test_utf8_to_utf16("\\Foo\\Bar", L"\\\\?\\C:\\Foo\\Bar");
 	test_utf8_to_utf16("/Foo/Bar", L"\\\\?\\C:\\Foo\\Bar");
@@ -109,7 +109,7 @@ void test_path_win32__absolute_from_no_drive_letter(void)
 
 void test_path_win32__absolute_from_relative(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	char cwd_backup[MAX_PATH];
 
 	cl_must_pass(p_getcwd(cwd_backup, MAX_PATH));
@@ -135,7 +135,7 @@ void test_path_win32__absolute_from_relative(void)
 
 void test_path_win32__keeps_relative(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	/* Relative paths stay relative */
 	test_utf8_to_utf16_relative("Foo", L"Foo");
 	test_utf8_to_utf16_relative("..\\..\\Foo", L"..\\..\\Foo");
@@ -158,32 +158,32 @@ void test_path_win32__keeps_relative(void)
 #endif
 }
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 static void test_canonicalize(const wchar_t *in, const wchar_t *expected)
 {
-	git_win32_path canonical;
+	git3_win32_path canonical;
 
 	cl_assert(wcslen(in) < MAX_PATH);
 	wcscpy(canonical, in);
 
-	cl_must_pass(git_win32_path_canonicalize(canonical));
+	cl_must_pass(git3_win32_path_canonicalize(canonical));
 	cl_assert_equal_wcs(expected, canonical);
 }
 #endif
 
 static void test_remove_namespace(const wchar_t *in, const wchar_t *expected)
 {
-#ifdef GIT_WIN32
-	git_win32_path canonical;
+#ifdef GIT3_WIN32
+	git3_win32_path canonical;
 
 	cl_assert(wcslen(in) < MAX_PATH);
 	wcscpy(canonical, in);
 
-	git_win32_path_remove_namespace(canonical, wcslen(in));
+	git3_win32_path_remove_namespace(canonical, wcslen(in));
 	cl_assert_equal_wcs(expected, canonical);
 #else
-	GIT_UNUSED(in);
-	GIT_UNUSED(expected);
+	GIT3_UNUSED(in);
+	GIT3_UNUSED(expected);
 #endif
 }
 
@@ -222,7 +222,7 @@ void test_path_win32__remove_namespace(void)
 
 void test_path_win32__canonicalize(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	test_canonicalize(L"C:\\Foo\\Bar", L"C:\\Foo\\Bar");
 	test_canonicalize(L"C:\\Foo\\", L"C:\\Foo");
 	test_canonicalize(L"C:\\Foo\\\\", L"C:\\Foo");
@@ -256,28 +256,28 @@ void test_path_win32__canonicalize(void)
 
 void test_path_win32__8dot3_name(void)
 {
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	char *shortname;
 
 	if (!cl_sandbox_supports_8dot3())
 		clar__skip();
 
 	/* Some guaranteed short names */
-	cl_assert_equal_s("PROGRA~1", (shortname = git_win32_path_8dot3_name("C:\\Program Files")));
-	git__free(shortname);
+	cl_assert_equal_s("PROGRA~1", (shortname = git3_win32_path_8dot3_name("C:\\Program Files")));
+	git3__free(shortname);
 
-	cl_assert_equal_s("WINDOWS", (shortname = git_win32_path_8dot3_name("C:\\WINDOWS")));
-	git__free(shortname);
+	cl_assert_equal_s("WINDOWS", (shortname = git3_win32_path_8dot3_name("C:\\WINDOWS")));
+	git3__free(shortname);
 
 	/* Create some predictable short names */
 	cl_must_pass(p_mkdir(".foo", 0777));
-	cl_assert_equal_s("FOO~1", (shortname = git_win32_path_8dot3_name(".foo")));
-	git__free(shortname);
+	cl_assert_equal_s("FOO~1", (shortname = git3_win32_path_8dot3_name(".foo")));
+	git3__free(shortname);
 
 	cl_git_write2file("bar~1", "foobar\n", 7, O_RDWR|O_CREAT, 0666);
 	cl_must_pass(p_mkdir(".bar", 0777));
-	cl_assert_equal_s("BAR~2", (shortname = git_win32_path_8dot3_name(".bar")));
-	git__free(shortname);
+	cl_assert_equal_s("BAR~2", (shortname = git3_win32_path_8dot3_name(".bar")));
+	git3__free(shortname);
 
 	p_rmdir(".foo");
 	p_rmdir(".bar");
@@ -287,19 +287,19 @@ void test_path_win32__8dot3_name(void)
 
 void test_path_win32__realpath(void)
 {
-#ifdef GIT_WIN32
-	git_str expected = GIT_STR_INIT;
-	char result[GIT_PATH_MAX];
+#ifdef GIT3_WIN32
+	git3_str expected = GIT3_STR_INIT;
+	char result[GIT3_PATH_MAX];
 
 	/* Ensure relative paths become absolute */
-	cl_must_pass(git_str_joinpath(&expected, clar_sandbox_path(), "abcdef"));
+	cl_must_pass(git3_str_joinpath(&expected, clar_sandbox_path(), "abcdef"));
 	cl_must_pass(p_mkdir("abcdef", 0777));
 	cl_assert(p_realpath("./abcdef", result) != NULL);
 	cl_assert_equal_s(expected.ptr, result);
 
 	/* Ensure case is canonicalized */
-	git_str_clear(&expected);
-	cl_must_pass(git_str_joinpath(&expected, clar_sandbox_path(), "FOO"));
+	git3_str_clear(&expected);
+	cl_must_pass(git3_str_joinpath(&expected, clar_sandbox_path(), "FOO"));
 	cl_must_pass(p_mkdir("FOO", 0777));
 	cl_assert(p_realpath("foo", result) != NULL);
 	cl_assert_equal_s(expected.ptr, result);
@@ -307,7 +307,7 @@ void test_path_win32__realpath(void)
 	cl_assert(p_realpath("nonexistent", result) == NULL);
 	cl_assert_equal_i(ENOENT, errno);
 
-	git_str_dispose(&expected);
+	git3_str_dispose(&expected);
 
 	p_rmdir("abcdef");
 	p_rmdir("FOO");

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "posix.h"
 #include "fs_path.h"
 #include "futils.h"
@@ -8,7 +8,7 @@ void cl_git_report_failure(
 	int error, int expected, const char *file, const char *func, int line, const char *fncall)
 {
 	char msg[4096];
-	const git_error *last = git_error_last();
+	const git3_error *last = git3_error_last();
 
 	if (expected)
 		p_snprintf(msg, 4096, "error %d (expected %d) - %s",
@@ -69,33 +69,33 @@ void cl_git_rmfile(const char *filename)
 
 char *cl_getenv(const char *name)
 {
-	git_str out = GIT_STR_INIT;
-	int error = git__getenv(&out, name);
+	git3_str out = GIT3_STR_INIT;
+	int error = git3__getenv(&out, name);
 
-	cl_assert(error >= 0 || error == GIT_ENOTFOUND);
+	cl_assert(error >= 0 || error == GIT3_ENOTFOUND);
 
-	if (error == GIT_ENOTFOUND)
+	if (error == GIT3_ENOTFOUND)
 		return NULL;
 
 	if (out.size == 0) {
-		char *dup = git__strdup("");
+		char *dup = git3__strdup("");
 		cl_assert(dup);
 
 		return dup;
 	}
 
-	return git_str_detach(&out);
+	return git3_str_detach(&out);
 }
 
 bool cl_is_env_set(const char *name)
 {
 	char *env = cl_getenv(name);
 	bool result = (env != NULL);
-	git__free(env);
+	git3__free(env);
 	return result;
 }
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 
 #include "win32/utf-conv.h"
 
@@ -103,10 +103,10 @@ int cl_setenv(const char *name, const char *value)
 {
 	wchar_t *wide_name, *wide_value = NULL;
 
-	cl_assert(git_utf8_to_16_alloc(&wide_name, name) >= 0);
+	cl_assert(git3_utf8_to_16_alloc(&wide_name, name) >= 0);
 
 	if (value) {
-		cl_assert(git_utf8_to_16_alloc(&wide_value, value) >= 0);
+		cl_assert(git3_utf8_to_16_alloc(&wide_value, value) >= 0);
 		cl_assert(SetEnvironmentVariableW(wide_name, wide_value));
 	} else {
 		/* Windows XP returns 0 (failed) when passing NULL for lpValue when
@@ -116,8 +116,8 @@ int cl_setenv(const char *name, const char *value)
 		SetEnvironmentVariableW(wide_name, NULL);
 	}
 
-	git__free(wide_name);
-	git__free(wide_value);
+	git3__free(wide_name);
+	git3__free(wide_value);
 	return 0;
 }
 
@@ -127,12 +127,12 @@ int cl_setenv(const char *name, const char *value)
  * the source is a directory, a child of the source). */
 int cl_rename(const char *source, const char *dest)
 {
-	git_win32_path source_utf16;
-	git_win32_path dest_utf16;
+	git3_win32_path source_utf16;
+	git3_win32_path dest_utf16;
 	unsigned retries = 1;
 
-	cl_assert(git_win32_path_from_utf8(source_utf16, source) >= 0);
-	cl_assert(git_win32_path_from_utf8(dest_utf16, dest) >= 0);
+	cl_assert(git3_win32_path_from_utf8(source_utf16, source) >= 0);
+	cl_assert(git3_win32_path_from_utf8(dest_utf16, dest) >= 0);
 
 	while (!MoveFileW(source_utf16, dest_utf16)) {
 		/* Only retry if the error is ERROR_ACCESS_DENIED;
@@ -168,9 +168,9 @@ int cl_rename(const char *source, const char *dest)
 #endif
 
 static const char *_cl_sandbox = NULL;
-static git_repository *_cl_repo = NULL;
+static git3_repository *_cl_repo = NULL;
 
-git_repository *cl_git_sandbox_init(const char *sandbox)
+git3_repository *cl_git_sandbox_init(const char *sandbox)
 {
 	/* Get the name of the sandbox folder which will be created */
 	const char *basename = cl_fixture_basename(sandbox);
@@ -185,14 +185,14 @@ git_repository *cl_git_sandbox_init(const char *sandbox)
 
 	/* If this is not a bare repo, then rename `sandbox/.gitted` to
 	 * `sandbox/.git` which must be done since we cannot store a folder
-	 * named `.git` inside the fixtures folder of our libgit2 repo.
+	 * named `.git` inside the fixtures folder of our libgit3 repo.
 	 */
 	if (p_access(".gitted", F_OK) == 0)
 		cl_git_pass(cl_rename(".gitted", ".git"));
 
 	/* If we have `gitattributes`, rename to `.gitattributes`.  This may
 	 * be necessary if we don't want the attributes to be applied in the
-	 * libgit2 repo, but just during testing.
+	 * libgit3 repo, but just during testing.
 	 */
 	if (p_access("gitattributes", F_OK) == 0)
 		cl_git_pass(cl_rename("gitattributes", ".gitattributes"));
@@ -204,29 +204,29 @@ git_repository *cl_git_sandbox_init(const char *sandbox)
 	cl_git_pass(p_chdir(".."));
 
 	/* Now open the sandbox repository and make it available for tests */
-	cl_git_pass(git_repository_open(&_cl_repo, basename));
+	cl_git_pass(git3_repository_open(&_cl_repo, basename));
 
 	/* Adjust configs after copying to new filesystem */
-	cl_git_pass(git_repository_reinit_filesystem(_cl_repo, 0));
+	cl_git_pass(git3_repository_reinit_filesystem(_cl_repo, 0));
 
 	return _cl_repo;
 }
 
-git_repository *cl_git_sandbox_init_new(const char *sandbox)
+git3_repository *cl_git_sandbox_init_new(const char *sandbox)
 {
-	cl_git_pass(git_repository_init(&_cl_repo, sandbox, false));
+	cl_git_pass(git3_repository_init(&_cl_repo, sandbox, false));
 	_cl_sandbox = sandbox;
 
 	return _cl_repo;
 }
 
-git_repository *cl_git_sandbox_reopen(void)
+git3_repository *cl_git_sandbox_reopen(void)
 {
 	if (_cl_repo) {
-		git_repository_free(_cl_repo);
+		git3_repository_free(_cl_repo);
 		_cl_repo = NULL;
 
-		cl_git_pass(git_repository_open(
+		cl_git_pass(git3_repository_open(
 			&_cl_repo, cl_fixture_basename(_cl_sandbox)));
 	}
 
@@ -236,7 +236,7 @@ git_repository *cl_git_sandbox_reopen(void)
 void cl_git_sandbox_cleanup(void)
 {
 	if (_cl_repo) {
-		git_repository_free(_cl_repo);
+		git3_repository_free(_cl_repo);
 		_cl_repo = NULL;
 	}
 	if (_cl_sandbox) {
@@ -279,13 +279,13 @@ const char* cl_git_path_url(const char *path)
 	static char url[4096 + 1];
 
 	const char *in_buf;
-	git_str path_buf = GIT_STR_INIT;
-	git_str url_buf = GIT_STR_INIT;
+	git3_str path_buf = GIT3_STR_INIT;
+	git3_str url_buf = GIT3_STR_INIT;
 
-	cl_git_pass(git_fs_path_prettify_dir(&path_buf, path, NULL));
-	cl_git_pass(git_str_puts(&url_buf, "file://"));
+	cl_git_pass(git3_fs_path_prettify_dir(&path_buf, path, NULL));
+	cl_git_pass(git3_str_puts(&url_buf, "file://"));
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	/*
 	 * A FILE uri matches the following format: file://[host]/path
 	 * where "host" can be empty and "path" is an absolute path to the resource.
@@ -295,57 +295,57 @@ const char* cl_git_path_url(const char *path)
 	 * *nix: file:///usr/home/...
 	 * Windows: file:///C:/Users/...
 	 */
-	cl_git_pass(git_str_putc(&url_buf, '/'));
+	cl_git_pass(git3_str_putc(&url_buf, '/'));
 #endif
 
-	in_buf = git_str_cstr(&path_buf);
+	in_buf = git3_str_cstr(&path_buf);
 
 	/*
 	 * A very hacky Url encoding that only takes care of escaping the spaces
 	 */
 	while (*in_buf) {
 		if (*in_buf == ' ')
-			cl_git_pass(git_str_puts(&url_buf, "%20"));
+			cl_git_pass(git3_str_puts(&url_buf, "%20"));
 		else
-			cl_git_pass(git_str_putc(&url_buf, *in_buf));
+			cl_git_pass(git3_str_putc(&url_buf, *in_buf));
 
 		in_buf++;
 	}
 
 	cl_assert(url_buf.size < sizeof(url) - 1);
 
-	strncpy(url, git_str_cstr(&url_buf), sizeof(url) - 1);
+	strncpy(url, git3_str_cstr(&url_buf), sizeof(url) - 1);
 	url[sizeof(url) - 1] = '\0';
-	git_str_dispose(&url_buf);
-	git_str_dispose(&path_buf);
+	git3_str_dispose(&url_buf);
+	git3_str_dispose(&path_buf);
 	return url;
 }
 
 const char *cl_git_sandbox_path(int is_dir, ...)
 {
 	const char *path = NULL;
-	static char _temp[GIT_PATH_MAX];
-	git_str buf = GIT_STR_INIT;
+	static char _temp[GIT3_PATH_MAX];
+	git3_str buf = GIT3_STR_INIT;
 	va_list arg;
 
-	cl_git_pass(git_str_sets(&buf, clar_sandbox_path()));
+	cl_git_pass(git3_str_sets(&buf, clar_sandbox_path()));
 
 	va_start(arg, is_dir);
 
 	while ((path = va_arg(arg, const char *)) != NULL) {
-		cl_git_pass(git_str_joinpath(&buf, buf.ptr, path));
+		cl_git_pass(git3_str_joinpath(&buf, buf.ptr, path));
 	}
 	va_end(arg);
 
-	cl_git_pass(git_fs_path_prettify(&buf, buf.ptr, NULL));
+	cl_git_pass(git3_fs_path_prettify(&buf, buf.ptr, NULL));
 	if (is_dir)
-		git_fs_path_to_dir(&buf);
+		git3_fs_path_to_dir(&buf);
 
 	/* make sure we won't truncate */
-	cl_assert(git_str_len(&buf) < sizeof(_temp));
-	git_str_copy_cstr(_temp, sizeof(_temp), &buf);
+	cl_assert(git3_str_len(&buf) < sizeof(_temp));
+	git3_str_copy_cstr(_temp, sizeof(_temp), &buf);
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
 	return _temp;
 }
@@ -355,13 +355,13 @@ typedef struct {
 	size_t filename_len;
 } remove_data;
 
-static int remove_placeholders_recurs(void *_data, git_str *path)
+static int remove_placeholders_recurs(void *_data, git3_str *path)
 {
 	remove_data *data = (remove_data *)_data;
 	size_t pathlen;
 
-	if (git_fs_path_isdir(path->ptr) == true)
-		return git_fs_path_direach(path, 0, remove_placeholders_recurs, data);
+	if (git3_fs_path_isdir(path->ptr) == true)
+		return git3_fs_path_direach(path, 0, remove_placeholders_recurs, data);
 
 	pathlen = path->size;
 
@@ -381,12 +381,12 @@ int cl_git_remove_placeholders(const char *directory_path, const char *filename)
 {
 	int error;
 	remove_data data;
-	git_str buffer = GIT_STR_INIT;
+	git3_str buffer = GIT3_STR_INIT;
 
-	if (git_fs_path_isdir(directory_path) == false)
+	if (git3_fs_path_isdir(directory_path) == false)
 		return -1;
 
-	if (git_str_sets(&buffer, directory_path) < 0)
+	if (git3_str_sets(&buffer, directory_path) < 0)
 		return -1;
 
 	data.filename = filename;
@@ -394,117 +394,117 @@ int cl_git_remove_placeholders(const char *directory_path, const char *filename)
 
 	error = remove_placeholders_recurs(&data, &buffer);
 
-	git_str_dispose(&buffer);
+	git3_str_dispose(&buffer);
 
 	return error;
 }
 
 #define CL_COMMIT_NAME "Libgit2 Tester"
-#define CL_COMMIT_EMAIL "libgit2-test@github.com"
+#define CL_COMMIT_EMAIL "libgit3-test@github.com"
 #define CL_COMMIT_MSG "Test commit of tree "
 
 void cl_repo_commit_from_index(
-	git_oid *out,
-	git_repository *repo,
-	git_signature *sig,
-	git_time_t time,
+	git3_oid *out,
+	git3_repository *repo,
+	git3_signature *sig,
+	git3_time_t time,
 	const char *msg)
 {
-	git_index *index;
-	git_oid commit_id, tree_id;
-	git_object *parent = NULL;
-	git_reference *ref = NULL;
-	git_tree *tree = NULL;
+	git3_index *index;
+	git3_oid commit_id, tree_id;
+	git3_object *parent = NULL;
+	git3_reference *ref = NULL;
+	git3_tree *tree = NULL;
 	char buf[128];
 	int free_sig = (sig == NULL);
 
 	/* it is fine if looking up HEAD fails - we make this the first commit */
-	git_revparse_ext(&parent, &ref, repo, "HEAD");
+	git3_revparse_ext(&parent, &ref, repo, "HEAD");
 
 	/* write the index content as a tree */
-	cl_git_pass(git_repository_index(&index, repo));
-	cl_git_pass(git_index_write_tree(&tree_id, index));
-	cl_git_pass(git_index_write(index));
-	git_index_free(index);
+	cl_git_pass(git3_repository_index(&index, repo));
+	cl_git_pass(git3_index_write_tree(&tree_id, index));
+	cl_git_pass(git3_index_write(index));
+	git3_index_free(index);
 
-	cl_git_pass(git_tree_lookup(&tree, repo, &tree_id));
+	cl_git_pass(git3_tree_lookup(&tree, repo, &tree_id));
 
 	if (sig)
 		cl_assert(sig->name && sig->email);
 	else if (!time)
-		cl_git_pass(git_signature_now(&sig, CL_COMMIT_NAME, CL_COMMIT_EMAIL));
+		cl_git_pass(git3_signature_now(&sig, CL_COMMIT_NAME, CL_COMMIT_EMAIL));
 	else
-		cl_git_pass(git_signature_new(
+		cl_git_pass(git3_signature_new(
 			&sig, CL_COMMIT_NAME, CL_COMMIT_EMAIL, time, 0));
 
 	if (!msg) {
 		strcpy(buf, CL_COMMIT_MSG);
-		git_oid_tostr(buf + strlen(CL_COMMIT_MSG),
+		git3_oid_tostr(buf + strlen(CL_COMMIT_MSG),
 			sizeof(buf) - strlen(CL_COMMIT_MSG), &tree_id);
 		msg = buf;
 	}
 
-	cl_git_pass(git_commit_create_v(
-		&commit_id, repo, ref ? git_reference_name(ref) : "HEAD",
+	cl_git_pass(git3_commit_create_v(
+		&commit_id, repo, ref ? git3_reference_name(ref) : "HEAD",
 		sig, sig, NULL, msg, tree, parent ? 1 : 0, parent));
 
 	if (out)
-		git_oid_cpy(out, &commit_id);
+		git3_oid_cpy(out, &commit_id);
 
-	git_object_free(parent);
-	git_reference_free(ref);
+	git3_object_free(parent);
+	git3_reference_free(ref);
 	if (free_sig)
-		git_signature_free(sig);
-	git_tree_free(tree);
+		git3_signature_free(sig);
+	git3_tree_free(tree);
 }
 
-void cl_repo_set_bool(git_repository *repo, const char *cfg, int value)
+void cl_repo_set_bool(git3_repository *repo, const char *cfg, int value)
 {
-	git_config *config;
-	cl_git_pass(git_repository_config(&config, repo));
-	cl_git_pass(git_config_set_bool(config, cfg, value != 0));
-	git_config_free(config);
+	git3_config *config;
+	cl_git_pass(git3_repository_config(&config, repo));
+	cl_git_pass(git3_config_set_bool(config, cfg, value != 0));
+	git3_config_free(config);
 }
 
-int cl_repo_get_bool(git_repository *repo, const char *cfg)
+int cl_repo_get_bool(git3_repository *repo, const char *cfg)
 {
 	int val = 0;
-	git_config *config;
-	cl_git_pass(git_repository_config(&config, repo));
-	if (git_config_get_bool(&val, config, cfg) < 0)
-		git_error_clear();
-	git_config_free(config);
+	git3_config *config;
+	cl_git_pass(git3_repository_config(&config, repo));
+	if (git3_config_get_bool(&val, config, cfg) < 0)
+		git3_error_clear();
+	git3_config_free(config);
 	return val;
 }
 
-void cl_repo_set_int(git_repository *repo, const char *cfg, int value)
+void cl_repo_set_int(git3_repository *repo, const char *cfg, int value)
 {
-	git_config *config;
-	cl_git_pass(git_repository_config(&config, repo));
-	cl_git_pass(git_config_set_int32(config, cfg, value));
-	git_config_free(config);
+	git3_config *config;
+	cl_git_pass(git3_repository_config(&config, repo));
+	cl_git_pass(git3_config_set_int32(config, cfg, value));
+	git3_config_free(config);
 }
 
-int cl_repo_get_int(git_repository *repo, const char *cfg)
+int cl_repo_get_int(git3_repository *repo, const char *cfg)
 {
 	int val = 0;
-	git_config *config;
-	cl_git_pass(git_repository_config(&config, repo));
-	if (git_config_get_int32(&val, config, cfg) < 0)
-		git_error_clear();
-	git_config_free(config);
+	git3_config *config;
+	cl_git_pass(git3_repository_config(&config, repo));
+	if (git3_config_get_int32(&val, config, cfg) < 0)
+		git3_error_clear();
+	git3_config_free(config);
 	return val;
 }
 
-void cl_repo_set_string(git_repository *repo, const char *cfg, const char *value)
+void cl_repo_set_string(git3_repository *repo, const char *cfg, const char *value)
 {
-	git_config *config;
-	cl_git_pass(git_repository_config(&config, repo));
-	cl_git_pass(git_config_set_string(config, cfg, value));
-	git_config_free(config);
+	git3_config *config;
+	cl_git_pass(git3_repository_config(&config, repo));
+	cl_git_pass(git3_config_set_string(config, cfg, value));
+	git3_config_free(config);
 }
 
-/* this is essentially the code from git__unescape modified slightly */
+/* this is essentially the code from git3__unescape modified slightly */
 static size_t strip_cr_from_buf(char *start, size_t len)
 {
 	char *scan, *trail, *end = start + len;
@@ -570,139 +570,139 @@ void clar__assert_equal_file(
 
 #define FAKE_HOMEDIR_NAME "cl_fake_home"
 
-static git_buf _cl_restore_homedir = GIT_BUF_INIT;
+static git3_buf _cl_restore_homedir = GIT3_BUF_INIT;
 
 void cl_fake_homedir_cleanup(void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	if (_cl_restore_homedir.ptr) {
-		cl_git_pass(git_futils_rmdir_r(FAKE_HOMEDIR_NAME, NULL, GIT_RMDIR_REMOVE_FILES));
+		cl_git_pass(git3_futils_rmdir_r(FAKE_HOMEDIR_NAME, NULL, GIT3_RMDIR_REMOVE_FILES));
 
-		cl_git_pass(git_libgit3_opts(GIT_OPT_SET_HOMEDIR, _cl_restore_homedir.ptr));
-		git_buf_dispose(&_cl_restore_homedir);
+		cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_HOMEDIR, _cl_restore_homedir.ptr));
+		git3_buf_dispose(&_cl_restore_homedir);
 	}
 }
 
-void cl_fake_homedir(git_str *out)
+void cl_fake_homedir(git3_str *out)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
-	cl_git_pass(git_libgit3_opts(
-		GIT_OPT_GET_HOMEDIR, &_cl_restore_homedir));
+	cl_git_pass(git3_libgit3_opts(
+		GIT3_OPT_GET_HOMEDIR, &_cl_restore_homedir));
 
 	cl_set_cleanup(cl_fake_homedir_cleanup, NULL);
 
 	/* TOC/TOU but merely attempts to prevent accidental cleanup. */
-	cl_assert(!git_fs_path_exists(FAKE_HOMEDIR_NAME));
+	cl_assert(!git3_fs_path_exists(FAKE_HOMEDIR_NAME));
 	cl_must_pass(p_mkdir(FAKE_HOMEDIR_NAME, 0777));
-	cl_git_pass(git_fs_path_prettify(&path, FAKE_HOMEDIR_NAME, NULL));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_HOMEDIR, path.ptr));
+	cl_git_pass(git3_fs_path_prettify(&path, FAKE_HOMEDIR_NAME, NULL));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_HOMEDIR, path.ptr));
 
 	if (out)
-		git_str_swap(out, &path);
+		git3_str_swap(out, &path);
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 #define FAKE_GLOBALCONFIG_NAME "cl_fake_global"
 
-static git_buf _cl_restore_globalconfig = GIT_BUF_INIT;
+static git3_buf _cl_restore_globalconfig = GIT3_BUF_INIT;
 
 void cl_fake_globalconfig_cleanup(void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 
 	if (_cl_restore_globalconfig.ptr) {
-		cl_git_pass(git_futils_rmdir_r(FAKE_GLOBALCONFIG_NAME, NULL, GIT_RMDIR_REMOVE_FILES));
+		cl_git_pass(git3_futils_rmdir_r(FAKE_GLOBALCONFIG_NAME, NULL, GIT3_RMDIR_REMOVE_FILES));
 
-		cl_git_pass(git_libgit3_opts(GIT_OPT_SET_HOMEDIR, _cl_restore_globalconfig.ptr));
-		git_buf_dispose(&_cl_restore_globalconfig);
+		cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_HOMEDIR, _cl_restore_globalconfig.ptr));
+		git3_buf_dispose(&_cl_restore_globalconfig);
 	}
 }
 
-void cl_fake_globalconfig(git_str *out)
+void cl_fake_globalconfig(git3_str *out)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
-	cl_git_pass(git_libgit3_opts(
-		GIT_OPT_GET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, &_cl_restore_globalconfig));
+	cl_git_pass(git3_libgit3_opts(
+		GIT3_OPT_GET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, &_cl_restore_globalconfig));
 
 	cl_set_cleanup(cl_fake_globalconfig_cleanup, NULL);
 
 	/* TOC/TOU but merely attempts to prevent accidental cleanup. */
-	cl_assert(!git_fs_path_exists(FAKE_GLOBALCONFIG_NAME));
+	cl_assert(!git3_fs_path_exists(FAKE_GLOBALCONFIG_NAME));
 	cl_must_pass(p_mkdir(FAKE_GLOBALCONFIG_NAME, 0777));
-	cl_git_pass(git_fs_path_prettify(&path, FAKE_GLOBALCONFIG_NAME, NULL));
-	cl_git_pass(git_libgit3_opts(GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, path.ptr));
+	cl_git_pass(git3_fs_path_prettify(&path, FAKE_GLOBALCONFIG_NAME, NULL));
+	cl_git_pass(git3_libgit3_opts(GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, path.ptr));
 
 	if (out)
-		git_str_swap(out, &path);
+		git3_str_swap(out, &path);
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 void cl_sandbox_set_homedir(const char *home)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
 	if (home) {
-		git_libgit3_opts(GIT_OPT_SET_HOMEDIR, home);
+		git3_libgit3_opts(GIT3_OPT_SET_HOMEDIR, home);
 	} else {
-		git_str_joinpath(&path, clar_tempdir_path(), "__home");
+		git3_str_joinpath(&path, clar_tempdir_path(), "__home");
 
-		if (!git_fs_path_exists(path.ptr))
+		if (!git3_fs_path_exists(path.ptr))
 			cl_must_pass(p_mkdir(path.ptr, 0777));
 
-		git_libgit3_opts(GIT_OPT_SET_HOMEDIR, path.ptr);
+		git3_libgit3_opts(GIT3_OPT_SET_HOMEDIR, path.ptr);
 	}
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 void cl_sandbox_set_search_path_defaults(void)
 {
-	git_str path = GIT_STR_INIT;
+	git3_str path = GIT3_STR_INIT;
 
-	git_str_joinpath(&path, clar_tempdir_path(), "__config");
+	git3_str_joinpath(&path, clar_tempdir_path(), "__config");
 
-	if (!git_fs_path_exists(path.ptr))
+	if (!git3_fs_path_exists(path.ptr))
 		cl_must_pass(p_mkdir(path.ptr, 0777));
 
-	git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_GLOBAL, path.ptr);
-	git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_XDG, path.ptr);
-	git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_SYSTEM, path.ptr);
-	git_libgit3_opts(
-		GIT_OPT_SET_SEARCH_PATH, GIT_CONFIG_LEVEL_PROGRAMDATA, path.ptr);
+	git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_GLOBAL, path.ptr);
+	git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_XDG, path.ptr);
+	git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_SYSTEM, path.ptr);
+	git3_libgit3_opts(
+		GIT3_OPT_SET_SEARCH_PATH, GIT3_CONFIG_LEVEL_PROGRAMDATA, path.ptr);
 
-	git_str_dispose(&path);
+	git3_str_dispose(&path);
 }
 
 void cl_sandbox_disable_ownership_validation(void)
 {
-	git_libgit3_opts(GIT_OPT_SET_OWNER_VALIDATION, 0);
+	git3_libgit3_opts(GIT3_OPT_SET_OWNER_VALIDATION, 0);
 }
 
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 bool cl_sandbox_supports_8dot3(void)
 {
-	git_str longpath = GIT_STR_INIT;
+	git3_str longpath = GIT3_STR_INIT;
 	char *shortname;
 	bool supported;
 
 	cl_git_pass(
-		git_str_joinpath(&longpath, clar_sandbox_path(), "longer_than_8dot3"));
+		git3_str_joinpath(&longpath, clar_sandbox_path(), "longer_than_8dot3"));
 
 	cl_git_write2file(longpath.ptr, "", 0, O_RDWR|O_CREAT, 0666);
-	shortname = git_win32_path_8dot3_name(longpath.ptr);
+	shortname = git3_win32_path_8dot3_name(longpath.ptr);
 
 	supported = (shortname != NULL);
 
-	git__free(shortname);
-	git_str_dispose(&longpath);
+	git3__free(shortname);
+	git3_str_dispose(&longpath);
 
 	return supported;
 }

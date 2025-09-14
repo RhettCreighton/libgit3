@@ -1,5 +1,5 @@
-#ifndef __CLAR_LIBGIT2_TIMER__
-#define __CLAR_LIBGIT2_TIMER__
+#ifndef __CLAR_LIBGIT3_TIMER__
+#define __CLAR_LIBGIT3_TIMER__
 
 struct cl_perf_timer
 {
@@ -32,4 +32,4 @@ uint64_t cl_perf_timer__last(const cl_perf_timer *t);
  */
 uint64_t cl_perf_timer__sum(const cl_perf_timer *t);
 
-#endif /* __CLAR_LIBGIT2_TIMER__ */
+#endif /* __CLAR_LIBGIT3_TIMER__ */

@@ -1,15 +1,15 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "diff_helpers.h"
 
-static git_repository *g_repo = NULL;
-static git_diff_options opts;
-static git_diff *diff;
-static git_tree *a, *b;
+static git3_repository *g_repo = NULL;
+static git3_diff_options opts;
+static git3_diff *diff;
+static git3_tree *a, *b;
 static diff_expects expect;
 
 void test_diff_tree__initialize(void)
 {
-	cl_git_pass(git_diff_options_init(&opts, GIT_DIFF_OPTIONS_VERSION));
+	cl_git_pass(git3_diff_options_init(&opts, GIT3_DIFF_OPTIONS_VERSION));
 
 	memset(&expect, 0, sizeof(expect));
 
@@ -20,9 +20,9 @@ void test_diff_tree__initialize(void)
 
 void test_diff_tree__cleanup(void)
 {
-	git_diff_free(diff);
-	git_tree_free(a);
-	git_tree_free(b);
+	git3_diff_free(diff);
+	git3_tree_free(a);
+	git3_tree_free(b);
 
 	cl_git_sandbox_cleanup();
 
@@ -34,7 +34,7 @@ void test_diff_tree__0(void)
 	const char *a_commit = "605812a";
 	const char *b_commit = "370fe9ec22";
 	const char *c_commit = "f5b0af1fb4f5c";
-	git_tree *c;
+	git3_tree *c;
 
 	g_repo = cl_git_sandbox_init("attr");
 
@@ -46,15 +46,15 @@ void test_diff_tree__0(void)
 	opts.interhunk_lines = 1;
 
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(5, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_MODIFIED]);
 
 	cl_assert_equal_i(5, expect.hunks);
 
@@ -63,20 +63,20 @@ void test_diff_tree__0(void)
 	cl_assert_equal_i(24 + 1 + 5 + 5, expect.line_adds);
 	cl_assert_equal_i(7 + 1, expect.line_dels);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 	diff = NULL;
 
 	memset(&expect, 0, sizeof(expect));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, c, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, c, b, &opts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(2, expect.files);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_MODIFIED]);
 
 	cl_assert_equal_i(2, expect.hunks);
 
@@ -85,11 +85,11 @@ void test_diff_tree__0(void)
 	cl_assert_equal_i(1, expect.line_adds);
 	cl_assert_equal_i(7 + 14, expect.line_dels);
 
-	git_tree_free(c);
+	git3_tree_free(c);
 }
 
 #define DIFF_OPTS(FLAGS, CTXT) \
-	{GIT_DIFF_OPTIONS_VERSION, (FLAGS), GIT_SUBMODULE_IGNORE_UNSPECIFIED, \
+	{GIT3_DIFF_OPTIONS_VERSION, (FLAGS), GIT3_SUBMODULE_IGNORE_UNSPECIFIED, \
 	{NULL,0}, NULL, NULL, NULL, (CTXT), 1}
 
 void test_diff_tree__options(void)
@@ -99,21 +99,21 @@ void test_diff_tree__options(void)
 	const char *b_commit = "605812ab7fe421fdd";
 	const char *c_commit = "f5b0af1fb4f5";
 	const char *d_commit = "a97cc019851";
-	git_tree *c, *d;
+	git3_tree *c, *d;
 	diff_expects actual;
 	int test_ab_or_cd[] = { 0, 0, 0, 0, 1, 1, 1, 1, 1 };
-	git_diff_options test_options[] = {
+	git3_diff_options test_options[] = {
 		/* a vs b tests */
-		DIFF_OPTS(GIT_DIFF_NORMAL, 1),
-		DIFF_OPTS(GIT_DIFF_NORMAL, 3),
-		DIFF_OPTS(GIT_DIFF_REVERSE, 2),
-		DIFF_OPTS(GIT_DIFF_FORCE_TEXT, 2),
+		DIFF_OPTS(GIT3_DIFF_NORMAL, 1),
+		DIFF_OPTS(GIT3_DIFF_NORMAL, 3),
+		DIFF_OPTS(GIT3_DIFF_REVERSE, 2),
+		DIFF_OPTS(GIT3_DIFF_FORCE_TEXT, 2),
 		/* c vs d tests */
-		DIFF_OPTS(GIT_DIFF_NORMAL, 3),
-		DIFF_OPTS(GIT_DIFF_IGNORE_WHITESPACE, 3),
-		DIFF_OPTS(GIT_DIFF_IGNORE_WHITESPACE_CHANGE, 3),
-		DIFF_OPTS(GIT_DIFF_IGNORE_WHITESPACE_EOL, 3),
-		DIFF_OPTS(GIT_DIFF_IGNORE_WHITESPACE | GIT_DIFF_REVERSE, 1),
+		DIFF_OPTS(GIT3_DIFF_NORMAL, 3),
+		DIFF_OPTS(GIT3_DIFF_IGNORE_WHITESPACE, 3),
+		DIFF_OPTS(GIT3_DIFF_IGNORE_WHITESPACE_CHANGE, 3),
+		DIFF_OPTS(GIT3_DIFF_IGNORE_WHITESPACE_EOL, 3),
+		DIFF_OPTS(GIT3_DIFF_IGNORE_WHITESPACE | GIT3_DIFF_REVERSE, 1),
 	};
 
 	/* to generate these values:
@@ -153,16 +153,16 @@ void test_diff_tree__options(void)
 		opts = test_options[i];
 
 		if (test_ab_or_cd[i] == 0)
-			cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+			cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 		else
-			cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, c, d, &opts));
+			cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, c, d, &opts));
 
-		cl_git_pass(git_diff_foreach(
+		cl_git_pass(git3_diff_foreach(
 			diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &actual));
 
 		expected = &test_expects[i];
 		cl_assert_equal_i(actual.files,     expected->files);
-		for (j = GIT_DELTA_UNMODIFIED; j <= GIT_DELTA_TYPECHANGE; ++j)
+		for (j = GIT3_DELTA_UNMODIFIED; j <= GIT3_DELTA_TYPECHANGE; ++j)
 			cl_assert_equal_i(expected->file_status[j], actual.file_status[j]);
 		cl_assert_equal_i(actual.hunks,     expected->hunks);
 		cl_assert_equal_i(actual.lines,     expected->lines);
@@ -170,12 +170,12 @@ void test_diff_tree__options(void)
 		cl_assert_equal_i(actual.line_adds, expected->line_adds);
 		cl_assert_equal_i(actual.line_dels, expected->line_dels);
 
-		git_diff_free(diff);
+		git3_diff_free(diff);
 		diff = NULL;
 	}
 
-	git_tree_free(c);
-	git_tree_free(d);
+	git3_tree_free(c);
+	git3_tree_free(d);
 }
 
 void test_diff_tree__bare(void)
@@ -191,15 +191,15 @@ void test_diff_tree__bare(void)
 	opts.context_lines = 1;
 	opts.interhunk_lines = 1;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(3, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_MODIFIED]);
 
 	cl_assert_equal_i(3, expect.hunks);
 
@@ -215,8 +215,8 @@ void test_diff_tree__merge(void)
 	const char *a_commit = "605812a";
 	const char *b_commit = "370fe9ec22";
 	const char *c_commit = "f5b0af1fb4f5c";
-	git_tree *c;
-	git_diff *diff1 = NULL, *diff2 = NULL;
+	git3_tree *c;
+	git3_diff *diff1 = NULL, *diff2 = NULL;
 
 	g_repo = cl_git_sandbox_init("attr");
 
@@ -224,23 +224,23 @@ void test_diff_tree__merge(void)
 	cl_assert((b = resolve_commit_oid_to_tree(g_repo, b_commit)) != NULL);
 	cl_assert((c = resolve_commit_oid_to_tree(g_repo, c_commit)) != NULL);
 
-	cl_git_pass(git_diff_tree_to_tree(&diff1, g_repo, a, b, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff1, g_repo, a, b, NULL));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff2, g_repo, c, b, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff2, g_repo, c, b, NULL));
 
-	git_tree_free(c);
+	git3_tree_free(c);
 
-	cl_git_pass(git_diff_merge(diff1, diff2));
+	cl_git_pass(git3_diff_merge(diff1, diff2));
 
-	git_diff_free(diff2);
+	git3_diff_free(diff2);
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff1, diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(6, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(3, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(3, expect.file_status[GIT3_DELTA_MODIFIED]);
 
 	cl_assert_equal_i(6, expect.hunks);
 
@@ -249,7 +249,7 @@ void test_diff_tree__merge(void)
 	cl_assert_equal_i(36, expect.line_adds);
 	cl_assert_equal_i(22, expect.line_dels);
 
-	git_diff_free(diff1);
+	git3_diff_free(diff1);
 }
 
 void test_diff_tree__larger_hunks(void)
@@ -257,9 +257,9 @@ void test_diff_tree__larger_hunks(void)
 	const char *a_commit = "d70d245ed97ed2aa596dd1af6536e4bfdb047b69";
 	const char *b_commit = "7a9e0b02e63179929fed24f0a3e0f19168114d10";
 	size_t d, num_d, h, num_h, l, num_l;
-	git_patch *patch;
-	const git_diff_hunk *hunk;
-	const git_diff_line *line;
+	git3_patch *patch;
+	const git3_diff_hunk *hunk;
+	const git3_diff_line *line;
 
 	g_repo = cl_git_sandbox_init("diff");
 
@@ -269,31 +269,31 @@ void test_diff_tree__larger_hunks(void)
 	opts.context_lines = 1;
 	opts.interhunk_lines = 0;
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 
-	num_d = git_diff_num_deltas(diff);
+	num_d = git3_diff_num_deltas(diff);
 	for (d = 0; d < num_d; ++d) {
-		cl_git_pass(git_patch_from_diff(&patch, diff, d));
+		cl_git_pass(git3_patch_from_diff(&patch, diff, d));
 		cl_assert(patch);
 
-		num_h = git_patch_num_hunks(patch);
+		num_h = git3_patch_num_hunks(patch);
 		for (h = 0; h < num_h; h++) {
-			cl_git_pass(git_patch_get_hunk(&hunk, &num_l, patch, h));
+			cl_git_pass(git3_patch_get_hunk(&hunk, &num_l, patch, h));
 
 			for (l = 0; l < num_l; ++l) {
-				cl_git_pass(git_patch_get_line_in_hunk(&line, patch, h, l));
+				cl_git_pass(git3_patch_get_line_in_hunk(&line, patch, h, l));
 				cl_assert(line);
 			}
 
-			cl_git_fail(git_patch_get_line_in_hunk(&line, patch, h, num_l));
+			cl_git_fail(git3_patch_get_line_in_hunk(&line, patch, h, num_l));
 		}
 
-		cl_git_fail(git_patch_get_hunk(&hunk, &num_l, patch, num_h));
+		cl_git_fail(git3_patch_get_hunk(&hunk, &num_l, patch, num_h));
 
-		git_patch_free(patch);
+		git3_patch_free(patch);
 	}
 
-	cl_git_fail(git_patch_from_diff(&patch, diff, num_d));
+	cl_git_fail(git3_patch_from_diff(&patch, diff, num_d));
 
 	cl_assert_equal_i(2, (int)num_d);
 }
@@ -302,7 +302,7 @@ void test_diff_tree__checks_options_version(void)
 {
 	const char *a_commit = "8496071c1b46c85";
 	const char *b_commit = "be3563ae3f79";
-	const git_error *err;
+	const git3_error *err;
 
 	g_repo = cl_git_sandbox_init("testrepo.git");
 
@@ -310,14 +310,14 @@ void test_diff_tree__checks_options_version(void)
 	cl_assert((b = resolve_commit_oid_to_tree(g_repo, b_commit)) != NULL);
 
 	opts.version = 0;
-	cl_git_fail(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
-	err = git_error_last();
-	cl_assert_equal_i(GIT_ERROR_INVALID, err->klass);
+	cl_git_fail(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	err = git3_error_last();
+	cl_assert_equal_i(GIT3_ERROR_INVALID, err->klass);
 
-	git_error_clear();
+	git3_error_clear();
 	opts.version = 1024;
-	cl_git_fail(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
-	err = git_error_last();
+	cl_git_fail(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	err = git3_error_last();
 }
 
 static void process_tree_to_tree_diffing(
@@ -329,9 +329,9 @@ static void process_tree_to_tree_diffing(
 	cl_assert((a = resolve_commit_oid_to_tree(g_repo, old_commit)) != NULL);
 	cl_assert((b = resolve_commit_oid_to_tree(g_repo, new_commit)) != NULL);
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 
-	cl_git_pass(git_diff_foreach(
+	cl_git_pass(git3_diff_foreach(
 		diff, diff_file_cb, NULL, NULL, NULL, &expect));
 }
 
@@ -366,10 +366,10 @@ void test_diff_tree__symlink_blob_mode_changed_to_regular_file(void)
 	process_tree_to_tree_diffing("7fccd7", "806999");
 
 	cl_assert_equal_i(3, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_TYPECHANGE]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_TYPECHANGE]);
 }
 
 void test_diff_tree__symlink_blob_mode_changed_to_regular_file_as_typechange(void)
@@ -400,14 +400,14 @@ void test_diff_tree__symlink_blob_mode_changed_to_regular_file_as_typechange(voi
 	 * -awesome content
 	*/
 
-	opts.flags = GIT_DIFF_INCLUDE_TYPECHANGE;
+	opts.flags = GIT3_DIFF_INCLUDE_TYPECHANGE;
 	process_tree_to_tree_diffing("7fccd7", "a8595c");
 
 	cl_assert_equal_i(2, expect.files);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_TYPECHANGE]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_TYPECHANGE]);
 }
 
 void test_diff_tree__regular_blob_mode_changed_to_executable_file(void)
@@ -422,10 +422,10 @@ void test_diff_tree__regular_blob_mode_changed_to_executable_file(void)
 	process_tree_to_tree_diffing("806999", "a8595c");
 
 	cl_assert_equal_i(1, expect.files);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_TYPECHANGE]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_TYPECHANGE]);
 }
 
 void test_diff_tree__issue_1397(void)
@@ -439,25 +439,25 @@ void test_diff_tree__issue_1397(void)
 	cl_assert((a = resolve_commit_oid_to_tree(g_repo, "8a7ef04")) != NULL);
 	cl_assert((b = resolve_commit_oid_to_tree(g_repo, "7f483a7")) != NULL);
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, &opts));
 
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_foreach(diff,
 		diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(1, expect.files);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_DELETED]);
-	cl_assert_equal_i(1, expect.file_status[GIT_DELTA_MODIFIED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_ADDED]);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_TYPECHANGE]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_DELETED]);
+	cl_assert_equal_i(1, expect.file_status[GIT3_DELTA_MODIFIED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_ADDED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_TYPECHANGE]);
 }
 
-static void set_config_int(git_repository *repo, const char *name, int value)
+static void set_config_int(git3_repository *repo, const char *name, int value)
 {
-	git_config *cfg;
+	git3_config *cfg;
 
-	cl_git_pass(git_repository_config(&cfg, repo));
-	cl_git_pass(git_config_set_int32(cfg, name, value));
-	git_config_free(cfg);
+	cl_git_pass(git3_repository_config(&cfg, repo));
+	cl_git_pass(git3_config_set_int32(cfg, name, value));
+	git3_config_free(cfg);
 }
 
 void test_diff_tree__diff_configs(void)
@@ -470,40 +470,40 @@ void test_diff_tree__diff_configs(void)
 	cl_assert((a = resolve_commit_oid_to_tree(g_repo, a_commit)) != NULL);
 	cl_assert((b = resolve_commit_oid_to_tree(g_repo, b_commit)) != NULL);
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
 
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_foreach(diff,
 		diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(2, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_MODIFIED]);
 	cl_assert_equal_i(6, expect.hunks);
 	cl_assert_equal_i(55, expect.lines);
 	cl_assert_equal_i(33, expect.line_ctxt);
 	cl_assert_equal_i(7, expect.line_adds);
 	cl_assert_equal_i(15, expect.line_dels);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 	diff = NULL;
 
 	set_config_int(g_repo, "diff.context", 1);
 
 	memset(&expect, 0, sizeof(expect));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
 
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_foreach(diff,
 		diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(2, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_MODIFIED]);
 	cl_assert_equal_i(7, expect.hunks);
 	cl_assert_equal_i(34, expect.lines);
 	cl_assert_equal_i(12, expect.line_ctxt);
 	cl_assert_equal_i(7, expect.line_adds);
 	cl_assert_equal_i(15, expect.line_dels);
 
-	git_diff_free(diff);
+	git3_diff_free(diff);
 	diff = NULL;
 
 	set_config_int(g_repo, "diff.context", 0);
@@ -511,13 +511,13 @@ void test_diff_tree__diff_configs(void)
 
 	memset(&expect, 0, sizeof(expect));
 
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
 
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_foreach(diff,
 		diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 
 	cl_assert_equal_i(2, expect.files);
-	cl_assert_equal_i(2, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(2, expect.file_status[GIT3_DELTA_MODIFIED]);
 	cl_assert_equal_i(7, expect.hunks);
 	cl_assert_equal_i(22, expect.lines);
 	cl_assert_equal_i(0, expect.line_ctxt);
@@ -528,35 +528,35 @@ void test_diff_tree__diff_configs(void)
 void test_diff_tree__diff_tree_with_empty_dir_entry_succeeds(void)
 {
 	const char *content = "This is a blob\n";
-	const git_diff_delta *delta;
-	git_oid empty_tree, invalid_tree, blob;
-	git_buf patch = GIT_BUF_INIT;
-	git_treebuilder *builder;
+	const git3_diff_delta *delta;
+	git3_oid empty_tree, invalid_tree, blob;
+	git3_buf patch = GIT3_BUF_INIT;
+	git3_treebuilder *builder;
 
 	g_repo = cl_git_sandbox_init("empty_standard_repo");
 
-	cl_git_pass(git_blob_create_from_buffer(&blob, g_repo, content, strlen(content)));
-	cl_git_pass(git_treebuilder_new(&builder, g_repo, NULL));
-	cl_git_pass(git_treebuilder_write(&empty_tree, builder));
-	cl_git_pass(git_treebuilder_insert(NULL, builder, "empty_tree", &empty_tree, GIT_FILEMODE_TREE));
-	cl_git_pass(git_treebuilder_insert(NULL, builder, "blob", &blob, GIT_FILEMODE_BLOB));
-	cl_git_pass(git_treebuilder_write(&invalid_tree, builder));
+	cl_git_pass(git3_blob_create_from_buffer(&blob, g_repo, content, strlen(content)));
+	cl_git_pass(git3_treebuilder_new(&builder, g_repo, NULL));
+	cl_git_pass(git3_treebuilder_write(&empty_tree, builder));
+	cl_git_pass(git3_treebuilder_insert(NULL, builder, "empty_tree", &empty_tree, GIT3_FILEMODE_TREE));
+	cl_git_pass(git3_treebuilder_insert(NULL, builder, "blob", &blob, GIT3_FILEMODE_BLOB));
+	cl_git_pass(git3_treebuilder_write(&invalid_tree, builder));
 
-	cl_git_pass(git_tree_lookup(&a, g_repo, &empty_tree));
-	cl_git_pass(git_tree_lookup(&b, g_repo, &invalid_tree));
-	cl_git_pass(git_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
+	cl_git_pass(git3_tree_lookup(&a, g_repo, &empty_tree));
+	cl_git_pass(git3_tree_lookup(&b, g_repo, &invalid_tree));
+	cl_git_pass(git3_diff_tree_to_tree(&diff, g_repo, a, b, NULL));
 
-	cl_git_pass(git_diff_foreach(diff,
+	cl_git_pass(git3_diff_foreach(diff,
 		diff_file_cb, diff_binary_cb, diff_hunk_cb, diff_line_cb, &expect));
 	cl_assert_equal_i(1, expect.files);
-	cl_assert_equal_i(0, expect.file_status[GIT_DELTA_MODIFIED]);
+	cl_assert_equal_i(0, expect.file_status[GIT3_DELTA_MODIFIED]);
 	cl_assert_equal_i(1, expect.hunks);
 	cl_assert_equal_i(1, expect.lines);
 	cl_assert_equal_i(0, expect.line_ctxt);
 	cl_assert_equal_i(1, expect.line_adds);
 	cl_assert_equal_i(0, expect.line_dels);
 
-	cl_git_pass(git_diff_to_buf(&patch, diff, GIT_DIFF_FORMAT_PATCH));
+	cl_git_pass(git3_diff_to_buf(&patch, diff, GIT3_DIFF_FORMAT_PATCH));
 	cl_assert_equal_s(patch.ptr,
 		"diff --git a/blob b/blob\n"
 		"new file mode 100644\n"
@@ -566,10 +566,10 @@ void test_diff_tree__diff_tree_with_empty_dir_entry_succeeds(void)
 		"@@ -0,0 +1 @@\n"
 		"+This is a blob\n");
 
-	cl_assert_equal_i(git_diff_num_deltas(diff), 1);
-	delta = git_diff_get_delta(diff, 0);
+	cl_assert_equal_i(git3_diff_num_deltas(diff), 1);
+	delta = git3_diff_get_delta(diff, 0);
 	cl_assert_equal_s(delta->new_file.path, "blob");
 
-	git_treebuilder_free(builder);
-	git_buf_dispose(&patch);
+	git3_treebuilder_free(builder);
+	git3_buf_dispose(&patch);
 }

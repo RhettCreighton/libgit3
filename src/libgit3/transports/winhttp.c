@@ -1,13 +1,13 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #include "common.h"
 
-#ifdef GIT_HTTPS_WINHTTP
+#ifdef GIT3_HTTPS_WINHTTP
 
 #include "git3.h"
 #include "git3/transport.h"
@@ -63,7 +63,7 @@
 # define DWORD_MAX 0xffffffff
 #endif
 
-bool git_http__expect_continue = false;
+bool git3_http__expect_continue = false;
 
 static const char *prefix_https = "https://";
 static const char *upload_pack_service = "upload-pack";
@@ -95,14 +95,14 @@ static const IID IID_IInternetSecurityManager_mingw =
 #define OWNING_SUBTRANSPORT(s) ((winhttp_subtransport *)(s)->parent.subtransport)
 
 typedef enum {
-	GIT_WINHTTP_AUTH_BASIC = 1,
-	GIT_WINHTTP_AUTH_NTLM = 2,
-	GIT_WINHTTP_AUTH_NEGOTIATE = 4,
-	GIT_WINHTTP_AUTH_DIGEST = 8
+	GIT3_WINHTTP_AUTH_BASIC = 1,
+	GIT3_WINHTTP_AUTH_NTLM = 2,
+	GIT3_WINHTTP_AUTH_NEGOTIATE = 4,
+	GIT3_WINHTTP_AUTH_DIGEST = 8
 } winhttp_authmechanism_t;
 
 typedef struct {
-	git_smart_subtransport_stream parent;
+	git3_smart_subtransport_stream parent;
 	const char *service;
 	const char *service_url;
 	const wchar_t *verb;
@@ -119,14 +119,14 @@ typedef struct {
 } winhttp_stream;
 
 typedef struct {
-	git_net_url url;
-	git_credential *cred;
+	git3_net_url url;
+	git3_credential *cred;
 	int auth_mechanisms;
 	bool url_cred_presented;
 } winhttp_server;
 
 typedef struct {
-	git_smart_subtransport parent;
+	git3_smart_subtransport parent;
 	transport_smart *owner;
 
 	winhttp_server server;
@@ -136,47 +136,47 @@ typedef struct {
 	HINTERNET connection;
 } winhttp_subtransport;
 
-static int apply_userpass_credentials(HINTERNET request, DWORD target, int mechanisms, git_credential *cred)
+static int apply_userpass_credentials(HINTERNET request, DWORD target, int mechanisms, git3_credential *cred)
 {
-	git_credential_userpass_plaintext *c = (git_credential_userpass_plaintext *)cred;
+	git3_credential_userpass_plaintext *c = (git3_credential_userpass_plaintext *)cred;
 	wchar_t *user = NULL, *pass = NULL;
 	int user_len = 0, pass_len = 0, error = 0;
 	DWORD native_scheme;
 
-	if (mechanisms & GIT_WINHTTP_AUTH_NEGOTIATE) {
+	if (mechanisms & GIT3_WINHTTP_AUTH_NEGOTIATE) {
 		native_scheme = WINHTTP_AUTH_SCHEME_NEGOTIATE;
-	} else if (mechanisms & GIT_WINHTTP_AUTH_NTLM) {
+	} else if (mechanisms & GIT3_WINHTTP_AUTH_NTLM) {
 		native_scheme = WINHTTP_AUTH_SCHEME_NTLM;
-	} else if (mechanisms & GIT_WINHTTP_AUTH_DIGEST) {
+	} else if (mechanisms & GIT3_WINHTTP_AUTH_DIGEST) {
 		native_scheme = WINHTTP_AUTH_SCHEME_DIGEST;
-	} else if (mechanisms & GIT_WINHTTP_AUTH_BASIC) {
+	} else if (mechanisms & GIT3_WINHTTP_AUTH_BASIC) {
 		native_scheme = WINHTTP_AUTH_SCHEME_BASIC;
 	} else {
-		git_error_set(GIT_ERROR_HTTP, "invalid authentication scheme");
-		error = GIT_EAUTH;
+		git3_error_set(GIT3_ERROR_HTTP, "invalid authentication scheme");
+		error = GIT3_EAUTH;
 		goto done;
 	}
 
-	if ((error = user_len = git_utf8_to_16_alloc(&user, c->username)) < 0)
+	if ((error = user_len = git3_utf8_to_16_alloc(&user, c->username)) < 0)
 		goto done;
 
-	if ((error = pass_len = git_utf8_to_16_alloc(&pass, c->password)) < 0)
+	if ((error = pass_len = git3_utf8_to_16_alloc(&pass, c->password)) < 0)
 		goto done;
 
 	if (!WinHttpSetCredentials(request, target, native_scheme, user, pass, NULL)) {
-		git_error_set(GIT_ERROR_OS, "failed to set credentials");
+		git3_error_set(GIT3_ERROR_OS, "failed to set credentials");
 		error = -1;
 	}
 
 done:
 	if (user_len > 0)
-		git__memzero(user, user_len * sizeof(wchar_t));
+		git3__memzero(user, user_len * sizeof(wchar_t));
 
 	if (pass_len > 0)
-		git__memzero(pass, pass_len * sizeof(wchar_t));
+		git3__memzero(pass, pass_len * sizeof(wchar_t));
 
-	git__free(user);
-	git__free(pass);
+	git3__free(user);
+	git3__free(pass);
 
 	return error;
 }
@@ -186,13 +186,13 @@ static int apply_default_credentials(HINTERNET request, DWORD target, int mechan
 	DWORD autologon_level = WINHTTP_AUTOLOGON_SECURITY_LEVEL_LOW;
 	DWORD native_scheme = 0;
 
-	if ((mechanisms & GIT_WINHTTP_AUTH_NEGOTIATE) != 0) {
+	if ((mechanisms & GIT3_WINHTTP_AUTH_NEGOTIATE) != 0) {
 		native_scheme = WINHTTP_AUTH_SCHEME_NEGOTIATE;
-	} else if ((mechanisms & GIT_WINHTTP_AUTH_NTLM) != 0) {
+	} else if ((mechanisms & GIT3_WINHTTP_AUTH_NTLM) != 0) {
 		native_scheme = WINHTTP_AUTH_SCHEME_NTLM;
 	} else {
-		git_error_set(GIT_ERROR_HTTP, "invalid authentication scheme");
-		return GIT_EAUTH;
+		git3_error_set(GIT3_ERROR_HTTP, "invalid authentication scheme");
+		return GIT3_EAUTH;
 	}
 
 	/*
@@ -200,12 +200,12 @@ static int apply_default_credentials(HINTERNET request, DWORD target, int mechan
 	 * This is safe as the user has explicitly requested it.
 	 */
 	if (!WinHttpSetOption(request, WINHTTP_OPTION_AUTOLOGON_POLICY, &autologon_level, sizeof(DWORD))) {
-		git_error_set(GIT_ERROR_OS, "could not configure logon policy");
+		git3_error_set(GIT3_ERROR_OS, "could not configure logon policy");
 		return -1;
 	}
 
 	if (!WinHttpSetCredentials(request, target, native_scheme, NULL, NULL, NULL)) {
-		git_error_set(GIT_ERROR_OS, "could not configure credentials");
+		git3_error_set(GIT3_ERROR_OS, "could not configure credentials");
 		return -1;
 	}
 
@@ -213,22 +213,22 @@ static int apply_default_credentials(HINTERNET request, DWORD target, int mechan
 }
 
 static int acquire_url_cred(
-	git_credential **cred,
+	git3_credential **cred,
 	unsigned int allowed_types,
 	const char *username,
 	const char *password)
 {
-	if (allowed_types & GIT_CREDENTIAL_USERPASS_PLAINTEXT)
-		return git_credential_userpass_plaintext_new(cred, username, password);
+	if (allowed_types & GIT3_CREDENTIAL_USERPASS_PLAINTEXT)
+		return git3_credential_userpass_plaintext_new(cred, username, password);
 
-	if ((allowed_types & GIT_CREDENTIAL_DEFAULT) && *username == '\0' && *password == '\0')
-		return git_credential_default_new(cred);
+	if ((allowed_types & GIT3_CREDENTIAL_DEFAULT) && *username == '\0' && *password == '\0')
+		return git3_credential_default_new(cred);
 
 	return 1;
 }
 
 static int acquire_fallback_cred(
-	git_credential **cred,
+	git3_credential **cred,
 	const char *url,
 	unsigned int allowed_types)
 {
@@ -236,13 +236,13 @@ static int acquire_fallback_cred(
 
 	/* If the target URI supports integrated Windows authentication
 	 * as an authentication mechanism */
-	if (GIT_CREDENTIAL_DEFAULT & allowed_types) {
+	if (GIT3_CREDENTIAL_DEFAULT & allowed_types) {
 		wchar_t *wide_url;
 		HRESULT hCoInitResult;
 
 		/* Convert URL to wide characters */
-		if (git_utf8_to_16_alloc(&wide_url, url) < 0) {
-			git_error_set(GIT_ERROR_OS, "failed to convert string to wide form");
+		if (git3_utf8_to_16_alloc(&wide_url, url) < 0) {
+			git3_error_set(GIT3_ERROR_OS, "failed to convert string to wide form");
 			return -1;
 		}
 
@@ -260,13 +260,13 @@ static int acquire_fallback_cred(
 					(URLZONE_LOCAL_MACHINE == dwZone ||
 					URLZONE_INTRANET == dwZone ||
 					URLZONE_TRUSTED == dwZone)) {
-					git_credential *existing = *cred;
+					git3_credential *existing = *cred;
 
 					if (existing)
 						existing->free(existing);
 
 					/* Then use default Windows credentials to authenticate this request */
-					error = git_credential_default_new(cred);
+					error = git3_credential_default_new(cred);
 				}
 
 				pISM->lpVtbl->Release(pISM);
@@ -277,7 +277,7 @@ static int acquire_fallback_cred(
 				CoUninitialize();
 		}
 
-		git__free(wide_url);
+		git3__free(wide_url);
 	}
 
 	return error;
@@ -289,36 +289,36 @@ static int certificate_check(winhttp_stream *s, int valid)
 	winhttp_subtransport *t = OWNING_SUBTRANSPORT(s);
 	PCERT_CONTEXT cert_ctx;
 	DWORD cert_ctx_size = sizeof(cert_ctx);
-	git_cert_x509 cert;
+	git3_cert_x509 cert;
 
 	/* If there is no override, we should fail if WinHTTP doesn't think it's fine */
 	if (t->owner->connect_opts.callbacks.certificate_check == NULL && !valid) {
-		if (git_error_last()->klass == GIT_ERROR_NONE)
-			git_error_set(GIT_ERROR_HTTP, "unknown certificate check failure");
+		if (git3_error_last()->klass == GIT3_ERROR_NONE)
+			git3_error_set(GIT3_ERROR_HTTP, "unknown certificate check failure");
 
-		return GIT_ECERTIFICATE;
+		return GIT3_ECERTIFICATE;
 	}
 
-	if (t->owner->connect_opts.callbacks.certificate_check == NULL || git__strcmp(t->server.url.scheme, "https") != 0)
+	if (t->owner->connect_opts.callbacks.certificate_check == NULL || git3__strcmp(t->server.url.scheme, "https") != 0)
 		return 0;
 
 	if (!WinHttpQueryOption(s->request, WINHTTP_OPTION_SERVER_CERT_CONTEXT, &cert_ctx, &cert_ctx_size)) {
-		git_error_set(GIT_ERROR_OS, "failed to get server certificate");
+		git3_error_set(GIT3_ERROR_OS, "failed to get server certificate");
 		return -1;
 	}
 
-	git_error_clear();
-	cert.parent.cert_type = GIT_CERT_X509;
+	git3_error_clear();
+	cert.parent.cert_type = GIT3_CERT_X509;
 	cert.data = cert_ctx->pbCertEncoded;
 	cert.len = cert_ctx->cbCertEncoded;
-	error = t->owner->connect_opts.callbacks.certificate_check((git_cert *) &cert, valid, t->server.url.host, t->owner->connect_opts.callbacks.payload);
+	error = t->owner->connect_opts.callbacks.certificate_check((git3_cert *) &cert, valid, t->server.url.host, t->owner->connect_opts.callbacks.payload);
 	CertFreeCertificateContext(cert_ctx);
 
-	if (error == GIT_PASSTHROUGH)
-		error = valid ? 0 : GIT_ECERTIFICATE;
+	if (error == GIT3_PASSTHROUGH)
+		error = valid ? 0 : GIT3_ECERTIFICATE;
 
-	if (error < 0 && git_error_last()->klass == GIT_ERROR_NONE)
-		git_error_set(GIT_ERROR_HTTP, "user cancelled certificate check");
+	if (error < 0 && git3_error_last()->klass == GIT3_ERROR_NONE)
+		git3_error_set(GIT3_ERROR_HTTP, "user cancelled certificate check");
 
 	return error;
 }
@@ -326,7 +326,7 @@ static int certificate_check(winhttp_stream *s, int valid)
 static void winhttp_stream_close(winhttp_stream *s)
 {
 	if (s->chunk_buffer) {
-		git__free(s->chunk_buffer);
+		git3__free(s->chunk_buffer);
 		s->chunk_buffer = NULL;
 	}
 
@@ -336,7 +336,7 @@ static void winhttp_stream_close(winhttp_stream *s)
 	}
 
 	if (s->request_uri) {
-		git__free(s->request_uri);
+		git3__free(s->request_uri);
 		s->request_uri = NULL;
 	}
 
@@ -350,19 +350,19 @@ static void winhttp_stream_close(winhttp_stream *s)
 
 static int apply_credentials(
 	HINTERNET request,
-	git_net_url *url,
+	git3_net_url *url,
 	int target,
-	git_credential *creds,
+	git3_credential *creds,
 	int mechanisms)
 {
 	int error = 0;
 
-	GIT_UNUSED(url);
+	GIT3_UNUSED(url);
 
 	/* If we have creds, just apply them */
-	if (creds && creds->credtype == GIT_CREDENTIAL_USERPASS_PLAINTEXT)
+	if (creds && creds->credtype == GIT3_CREDENTIAL_USERPASS_PLAINTEXT)
 		error = apply_userpass_credentials(request, target, mechanisms, creds);
-	else if (creds && creds->credtype == GIT_CREDENTIAL_DEFAULT)
+	else if (creds && creds->credtype == GIT3_CREDENTIAL_DEFAULT)
 		error = apply_default_credentials(request, target, mechanisms);
 
 	return error;
@@ -371,7 +371,7 @@ static int apply_credentials(
 static int winhttp_stream_connect(winhttp_stream *s)
 {
 	winhttp_subtransport *t = OWNING_SUBTRANSPORT(s);
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 	char *proxy_url = NULL;
 	wchar_t ct[MAX_CONTENT_TYPE_LEN];
 	LPCWSTR types[] = { L"*/*", NULL };
@@ -384,20 +384,20 @@ static int winhttp_stream_connect(winhttp_stream *s)
 
 	const char *service_url = s->service_url;
 	size_t i;
-	const git_proxy_options *proxy_opts;
+	const git3_proxy_options *proxy_opts;
 
 	/* If path already ends in /, remove the leading slash from service_url */
-	if ((git__suffixcmp(t->server.url.path, "/") == 0) && (git__prefixcmp(service_url, "/") == 0))
+	if ((git3__suffixcmp(t->server.url.path, "/") == 0) && (git3__prefixcmp(service_url, "/") == 0))
 		service_url++;
 	/* Prepare URL */
-	git_str_printf(&buf, "%s%s", t->server.url.path, service_url);
+	git3_str_printf(&buf, "%s%s", t->server.url.path, service_url);
 
-	if (git_str_oom(&buf))
+	if (git3_str_oom(&buf))
 		return -1;
 
 	/* Convert URL to wide characters */
-	if (git_utf8_to_16_alloc(&s->request_uri, git_str_cstr(&buf)) < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to convert string to wide form");
+	if (git3_utf8_to_16_alloc(&s->request_uri, git3_str_cstr(&buf)) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "failed to convert string to wide form");
 		goto on_error;
 	}
 
@@ -409,10 +409,10 @@ static int winhttp_stream_connect(winhttp_stream *s)
 			NULL,
 			WINHTTP_NO_REFERER,
 			types,
-			git__strcmp(t->server.url.scheme, "https") == 0 ? WINHTTP_FLAG_SECURE : 0);
+			git3__strcmp(t->server.url.scheme, "https") == 0 ? WINHTTP_FLAG_SECURE : 0);
 
 	if (!s->request) {
-		git_error_set(GIT_ERROR_OS, "failed to open request");
+		git3_error_set(GIT3_ERROR_OS, "failed to open request");
 		goto on_error;
 	}
 
@@ -421,59 +421,59 @@ static int winhttp_stream_connect(winhttp_stream *s)
 		return -1;
 
 	if (!WinHttpSetTimeouts(s->request, default_timeout, default_connect_timeout, default_timeout, default_timeout)) {
-		git_error_set(GIT_ERROR_OS, "failed to set timeouts for WinHTTP");
+		git3_error_set(GIT3_ERROR_OS, "failed to set timeouts for WinHTTP");
 		goto on_error;
 	}
 
 	proxy_opts = &t->owner->connect_opts.proxy_opts;
-	if (proxy_opts->type == GIT_PROXY_AUTO) {
+	if (proxy_opts->type == GIT3_PROXY_AUTO) {
 		/* Set proxy if necessary */
-		if (git_remote__http_proxy(&proxy_url, t->owner->owner, &t->server.url) < 0)
+		if (git3_remote__http_proxy(&proxy_url, t->owner->owner, &t->server.url) < 0)
 			goto on_error;
 	}
-	else if (proxy_opts->type == GIT_PROXY_SPECIFIED) {
-		proxy_url = git__strdup(proxy_opts->url);
-		GIT_ERROR_CHECK_ALLOC(proxy_url);
+	else if (proxy_opts->type == GIT3_PROXY_SPECIFIED) {
+		proxy_url = git3__strdup(proxy_opts->url);
+		GIT3_ERROR_CHECK_ALLOC(proxy_url);
 	}
 
 	if (proxy_url && *proxy_url) {
-		git_str processed_url = GIT_STR_INIT;
+		git3_str processed_url = GIT3_STR_INIT;
 		WINHTTP_PROXY_INFO proxy_info;
 		wchar_t *proxy_wide;
 
-		git_net_url_dispose(&t->proxy.url);
+		git3_net_url_dispose(&t->proxy.url);
 
-		if ((error = git_net_url_parse_http(&t->proxy.url, proxy_url)) < 0)
+		if ((error = git3_net_url_parse_http(&t->proxy.url, proxy_url)) < 0)
 			goto on_error;
 
-		if (!git_net_url_valid(&t->proxy.url)) {
-			git_error_set(GIT_ERROR_HTTP, "invalid URL: '%s'", proxy_url);
+		if (!git3_net_url_valid(&t->proxy.url)) {
+			git3_error_set(GIT3_ERROR_HTTP, "invalid URL: '%s'", proxy_url);
 			error = -1;
 			goto on_error;
 		}
 
-		git_str_puts(&processed_url, t->proxy.url.scheme);
-		git_str_PUTS(&processed_url, "://");
+		git3_str_puts(&processed_url, t->proxy.url.scheme);
+		git3_str_PUTS(&processed_url, "://");
 
-		if (git_net_url_is_ipv6(&t->proxy.url))
-			git_str_putc(&processed_url, '[');
+		if (git3_net_url_is_ipv6(&t->proxy.url))
+			git3_str_putc(&processed_url, '[');
 
-		git_str_puts(&processed_url, t->proxy.url.host);
+		git3_str_puts(&processed_url, t->proxy.url.host);
 
-		if (git_net_url_is_ipv6(&t->proxy.url))
-			git_str_putc(&processed_url, ']');
+		if (git3_net_url_is_ipv6(&t->proxy.url))
+			git3_str_putc(&processed_url, ']');
 
-		if (!git_net_url_is_default_port(&t->proxy.url))
-			git_str_printf(&processed_url, ":%s", t->proxy.url.port);
+		if (!git3_net_url_is_default_port(&t->proxy.url))
+			git3_str_printf(&processed_url, ":%s", t->proxy.url.port);
 
-		if (git_str_oom(&processed_url)) {
+		if (git3_str_oom(&processed_url)) {
 			error = -1;
 			goto on_error;
 		}
 
 		/* Convert URL to wide characters */
-		error = git_utf8_to_16_alloc(&proxy_wide, processed_url.ptr);
-		git_str_dispose(&processed_url);
+		error = git3_utf8_to_16_alloc(&proxy_wide, processed_url.ptr);
+		git3_str_dispose(&processed_url);
 		if (error < 0)
 			goto on_error;
 
@@ -485,12 +485,12 @@ static int winhttp_stream_connect(winhttp_stream *s)
 			WINHTTP_OPTION_PROXY,
 			&proxy_info,
 			sizeof(WINHTTP_PROXY_INFO))) {
-			git_error_set(GIT_ERROR_OS, "failed to set proxy");
-			git__free(proxy_wide);
+			git3_error_set(GIT3_ERROR_OS, "failed to set proxy");
+			git3__free(proxy_wide);
 			goto on_error;
 		}
 
-		git__free(proxy_wide);
+		git3__free(proxy_wide);
 
 		if ((error = apply_credentials(s->request, &t->proxy.url, WINHTTP_AUTH_TARGET_PROXY, t->proxy.cred, t->proxy.auth_mechanisms)) < 0)
 			goto on_error;
@@ -503,7 +503,7 @@ static int winhttp_stream_connect(winhttp_stream *s)
 		WINHTTP_OPTION_DISABLE_FEATURE,
 		&disable_redirects,
 		sizeof(disable_redirects))) {
-			git_error_set(GIT_ERROR_OS, "failed to disable redirects");
+			git3_error_set(GIT3_ERROR_OS, "failed to disable redirects");
 			error = -1;
 			goto on_error;
 	}
@@ -518,43 +518,43 @@ static int winhttp_stream_connect(winhttp_stream *s)
 
 	/* Send Pragma: no-cache header */
 	if (!WinHttpAddRequestHeaders(s->request, pragma_nocache, (ULONG) -1L, WINHTTP_ADDREQ_FLAG_ADD)) {
-		git_error_set(GIT_ERROR_OS, "failed to add a header to the request");
+		git3_error_set(GIT3_ERROR_OS, "failed to add a header to the request");
 		goto on_error;
 	}
 
 	if (post_verb == s->verb) {
 		/* Send Content-Type and Accept headers -- only necessary on a POST */
-		git_str_clear(&buf);
-		if (git_str_printf(&buf,
+		git3_str_clear(&buf);
+		if (git3_str_printf(&buf,
 			"Content-Type: application/x-git-%s-request",
 			s->service) < 0)
 			goto on_error;
 
-		if (git_utf8_to_16(ct, MAX_CONTENT_TYPE_LEN, git_str_cstr(&buf)) < 0) {
-			git_error_set(GIT_ERROR_OS, "failed to convert content-type to wide characters");
+		if (git3_utf8_to_16(ct, MAX_CONTENT_TYPE_LEN, git3_str_cstr(&buf)) < 0) {
+			git3_error_set(GIT3_ERROR_OS, "failed to convert content-type to wide characters");
 			goto on_error;
 		}
 
 		if (!WinHttpAddRequestHeaders(s->request, ct, (ULONG)-1L,
 			WINHTTP_ADDREQ_FLAG_ADD | WINHTTP_ADDREQ_FLAG_REPLACE)) {
-			git_error_set(GIT_ERROR_OS, "failed to add a header to the request");
+			git3_error_set(GIT3_ERROR_OS, "failed to add a header to the request");
 			goto on_error;
 		}
 
-		git_str_clear(&buf);
-		if (git_str_printf(&buf,
+		git3_str_clear(&buf);
+		if (git3_str_printf(&buf,
 			"Accept: application/x-git-%s-result",
 			s->service) < 0)
 			goto on_error;
 
-		if (git_utf8_to_16(ct, MAX_CONTENT_TYPE_LEN, git_str_cstr(&buf)) < 0) {
-			git_error_set(GIT_ERROR_OS, "failed to convert accept header to wide characters");
+		if (git3_utf8_to_16(ct, MAX_CONTENT_TYPE_LEN, git3_str_cstr(&buf)) < 0) {
+			git3_error_set(GIT3_ERROR_OS, "failed to convert accept header to wide characters");
 			goto on_error;
 		}
 
 		if (!WinHttpAddRequestHeaders(s->request, ct, (ULONG)-1L,
 			WINHTTP_ADDREQ_FLAG_ADD | WINHTTP_ADDREQ_FLAG_REPLACE)) {
-			git_error_set(GIT_ERROR_OS, "failed to add a header to the request");
+			git3_error_set(GIT3_ERROR_OS, "failed to add a header to the request");
 			goto on_error;
 		}
 	}
@@ -563,21 +563,21 @@ static int winhttp_stream_connect(winhttp_stream *s)
 		if (t->owner->connect_opts.custom_headers.strings[i]) {
 			wchar_t *custom_header_wide = NULL;
 
-			git_str_clear(&buf);
-			git_str_puts(&buf, t->owner->connect_opts.custom_headers.strings[i]);
+			git3_str_clear(&buf);
+			git3_str_puts(&buf, t->owner->connect_opts.custom_headers.strings[i]);
 
 			/* Convert header to wide characters */
-			if ((error = git_utf8_to_16_alloc(&custom_header_wide, git_str_cstr(&buf))) < 0)
+			if ((error = git3_utf8_to_16_alloc(&custom_header_wide, git3_str_cstr(&buf))) < 0)
 				goto on_error;
 
 			if (!WinHttpAddRequestHeaders(s->request, custom_header_wide, (ULONG)-1L,
 				WINHTTP_ADDREQ_FLAG_ADD | WINHTTP_ADDREQ_FLAG_REPLACE)) {
-				git_error_set(GIT_ERROR_OS, "failed to add a header to the request");
-				git__free(custom_header_wide);
+				git3_error_set(GIT3_ERROR_OS, "failed to add a header to the request");
+				git3__free(custom_header_wide);
 				goto on_error;
 			}
 
-			git__free(custom_header_wide);
+			git3__free(custom_header_wide);
 		}
 	}
 
@@ -592,8 +592,8 @@ on_error:
 	if (error < 0)
 		winhttp_stream_close(s);
 
-	git__free(proxy_url);
-	git_str_dispose(&buf);
+	git3__free(proxy_url);
+	git3_str_dispose(&buf);
 	return error;
 }
 
@@ -611,29 +611,29 @@ static int parse_unauthorized_response(
 	 * We can assume this was already done, since we know we are unauthorized.
 	 */
 	if (!WinHttpQueryAuthSchemes(request, &supported, &first, &target)) {
-		git_error_set(GIT_ERROR_OS, "failed to parse supported auth schemes");
-		return GIT_EAUTH;
+		git3_error_set(GIT3_ERROR_OS, "failed to parse supported auth schemes");
+		return GIT3_EAUTH;
 	}
 
 	if (WINHTTP_AUTH_SCHEME_NTLM & supported) {
-		*allowed_types |= GIT_CREDENTIAL_USERPASS_PLAINTEXT;
-		*allowed_types |= GIT_CREDENTIAL_DEFAULT;
-		*allowed_mechanisms |= GIT_WINHTTP_AUTH_NTLM;
+		*allowed_types |= GIT3_CREDENTIAL_USERPASS_PLAINTEXT;
+		*allowed_types |= GIT3_CREDENTIAL_DEFAULT;
+		*allowed_mechanisms |= GIT3_WINHTTP_AUTH_NTLM;
 	}
 
 	if (WINHTTP_AUTH_SCHEME_NEGOTIATE & supported) {
-		*allowed_types |= GIT_CREDENTIAL_DEFAULT;
-		*allowed_mechanisms |= GIT_WINHTTP_AUTH_NEGOTIATE;
+		*allowed_types |= GIT3_CREDENTIAL_DEFAULT;
+		*allowed_mechanisms |= GIT3_WINHTTP_AUTH_NEGOTIATE;
 	}
 
 	if (WINHTTP_AUTH_SCHEME_BASIC & supported) {
-		*allowed_types |= GIT_CREDENTIAL_USERPASS_PLAINTEXT;
-		*allowed_mechanisms |= GIT_WINHTTP_AUTH_BASIC;
+		*allowed_types |= GIT3_CREDENTIAL_USERPASS_PLAINTEXT;
+		*allowed_mechanisms |= GIT3_WINHTTP_AUTH_BASIC;
 	}
 
 	if (WINHTTP_AUTH_SCHEME_DIGEST & supported) {
-		*allowed_types |= GIT_CREDENTIAL_USERPASS_PLAINTEXT;
-		*allowed_mechanisms |= GIT_WINHTTP_AUTH_DIGEST;
+		*allowed_types |= GIT3_CREDENTIAL_USERPASS_PLAINTEXT;
+		*allowed_mechanisms |= GIT3_WINHTTP_AUTH_DIGEST;
 	}
 
 	return 0;
@@ -642,29 +642,29 @@ static int parse_unauthorized_response(
 static int write_chunk(HINTERNET request, const char *buffer, size_t len)
 {
 	DWORD bytes_written;
-	git_str buf = GIT_STR_INIT;
+	git3_str buf = GIT3_STR_INIT;
 
 	/* Chunk header */
-	git_str_printf(&buf, "%"PRIXZ"\r\n", len);
+	git3_str_printf(&buf, "%"PRIXZ"\r\n", len);
 
-	if (git_str_oom(&buf))
+	if (git3_str_oom(&buf))
 		return -1;
 
 	if (!WinHttpWriteData(request,
-		git_str_cstr(&buf),	(DWORD)git_str_len(&buf),
+		git3_str_cstr(&buf),	(DWORD)git3_str_len(&buf),
 		&bytes_written)) {
-		git_str_dispose(&buf);
-		git_error_set(GIT_ERROR_OS, "failed to write chunk header");
+		git3_str_dispose(&buf);
+		git3_error_set(GIT3_ERROR_OS, "failed to write chunk header");
 		return -1;
 	}
 
-	git_str_dispose(&buf);
+	git3_str_dispose(&buf);
 
 	/* Chunk body */
 	if (!WinHttpWriteData(request,
 		buffer, (DWORD)len,
 		&bytes_written)) {
-		git_error_set(GIT_ERROR_OS, "failed to write chunk");
+		git3_error_set(GIT3_ERROR_OS, "failed to write chunk");
 		return -1;
 	}
 
@@ -672,7 +672,7 @@ static int write_chunk(HINTERNET request, const char *buffer, size_t len)
 	if (!WinHttpWriteData(request,
 		"\r\n", 2,
 		&bytes_written)) {
-		git_error_set(GIT_ERROR_OS, "failed to write chunk footer");
+		git3_error_set(GIT3_ERROR_OS, "failed to write chunk footer");
 		return -1;
 	}
 
@@ -685,7 +685,7 @@ static int winhttp_close_connection(winhttp_subtransport *t)
 
 	if (t->connection) {
 		if (!WinHttpCloseHandle(t->connection)) {
-			git_error_set(GIT_ERROR_OS, "unable to close connection");
+			git3_error_set(GIT3_ERROR_OS, "unable to close connection");
 			ret = -1;
 		}
 
@@ -694,7 +694,7 @@ static int winhttp_close_connection(winhttp_subtransport *t)
 
 	if (t->session) {
 		if (!WinHttpCloseHandle(t->session)) {
-			git_error_set(GIT_ERROR_OS, "unable to close session");
+			git3_error_set(GIT3_ERROR_OS, "unable to close session");
 			ret = -1;
 		}
 
@@ -713,29 +713,29 @@ static void CALLBACK winhttp_status(
 {
 	DWORD status;
 
-	GIT_UNUSED(connection);
-	GIT_UNUSED(info_len);
+	GIT3_UNUSED(connection);
+	GIT3_UNUSED(info_len);
 
 	switch (code) {
 		case WINHTTP_CALLBACK_STATUS_SECURE_FAILURE:
 			status = *((DWORD *)info);
 
 			if ((status & WINHTTP_CALLBACK_STATUS_FLAG_CERT_CN_INVALID))
-				git_error_set(GIT_ERROR_HTTP, "SSL certificate issued for different common name");
+				git3_error_set(GIT3_ERROR_HTTP, "SSL certificate issued for different common name");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_CERT_DATE_INVALID))
-				git_error_set(GIT_ERROR_HTTP, "SSL certificate has expired");
+				git3_error_set(GIT3_ERROR_HTTP, "SSL certificate has expired");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CA))
-				git_error_set(GIT_ERROR_HTTP, "SSL certificate signed by unknown CA");
+				git3_error_set(GIT3_ERROR_HTTP, "SSL certificate signed by unknown CA");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_INVALID_CERT))
-				git_error_set(GIT_ERROR_HTTP, "SSL certificate is invalid");
+				git3_error_set(GIT3_ERROR_HTTP, "SSL certificate is invalid");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_CERT_REV_FAILED))
-				git_error_set(GIT_ERROR_HTTP, "certificate revocation check failed");
+				git3_error_set(GIT3_ERROR_HTTP, "certificate revocation check failed");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_CERT_REVOKED))
-				git_error_set(GIT_ERROR_HTTP, "SSL certificate was revoked");
+				git3_error_set(GIT3_ERROR_HTTP, "SSL certificate was revoked");
 			else if ((status & WINHTTP_CALLBACK_STATUS_FLAG_SECURITY_CHANNEL_ERROR))
-				git_error_set(GIT_ERROR_HTTP, "security libraries could not be loaded");
+				git3_error_set(GIT3_ERROR_HTTP, "security libraries could not be loaded");
 			else
-				git_error_set(GIT_ERROR_HTTP, "unknown security error %lu", status);
+				git3_error_set(GIT3_ERROR_HTTP, "unknown security error %lu", status);
 
 			break;
 
@@ -746,27 +746,27 @@ static void CALLBACK winhttp_status(
 	}
 }
 
-static int user_agent(bool *exists, git_str *out)
+static int user_agent(bool *exists, git3_str *out)
 {
-	const char *product = git_settings__user_agent_product();
-	const char *comment = git_settings__user_agent();
+	const char *product = git3_settings__user_agent_product();
+	const char *comment = git3_settings__user_agent();
 
-	GIT_ASSERT(product && comment);
+	GIT3_ASSERT(product && comment);
 
 	if (!*product) {
 		*exists = false;
 		return 0;
 	}
 
-	git_str_puts(out, product);
+	git3_str_puts(out, product);
 
 	if (*comment) {
-		git_str_puts(out, " (");
-		git_str_puts(out, comment);
-		git_str_puts(out, ")");
+		git3_str_puts(out, " (");
+		git3_str_puts(out, comment);
+		git3_str_puts(out, ")");
 	}
 
-	if (git_str_oom(out))
+	if (git3_str_oom(out))
 		return -1;
 
 	*exists = true;
@@ -779,7 +779,7 @@ static int winhttp_connect(
 	wchar_t *wide_host = NULL;
 	int32_t port;
 	wchar_t *wide_ua = NULL;
-	git_str ipv6 = GIT_STR_INIT, ua = GIT_STR_INIT;
+	git3_str ipv6 = GIT3_STR_INIT, ua = GIT3_STR_INIT;
 	const char *host;
 	int error = -1;
 	int default_timeout = TIMEOUT_INFINITE;
@@ -795,13 +795,13 @@ static int winhttp_connect(
 	t->connection = NULL;
 
 	/* Prepare port */
-	if (git__strntol32(&port, t->server.url.port,
+	if (git3__strntol32(&port, t->server.url.port,
 			   strlen(t->server.url.port), NULL, 10) < 0)
 		goto on_error;
 
 	/* IPv6? Add braces around the host. */
-	if (git_net_url_is_ipv6(&t->server.url)) {
-		if (git_str_printf(&ipv6, "[%s]", t->server.url.host) < 0)
+	if (git3_net_url_is_ipv6(&t->server.url)) {
+		if (git3_str_printf(&ipv6, "[%s]", t->server.url.host) < 0)
 			goto on_error;
 
 		host = ipv6.ptr;
@@ -810,8 +810,8 @@ static int winhttp_connect(
 	}
 
 	/* Prepare host */
-	if (git_utf8_to_16_alloc(&wide_host, host) < 0) {
-		git_error_set(GIT_ERROR_OS, "unable to convert host to wide characters");
+	if (git3_utf8_to_16_alloc(&wide_host, host) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "unable to convert host to wide characters");
 		goto on_error;
 	}
 
@@ -819,8 +819,8 @@ static int winhttp_connect(
 		goto on_error;
 
 	if (has_ua &&
-	    git_utf8_to_16_alloc(&wide_ua, git_str_cstr(&ua)) < 0) {
-		git_error_set(GIT_ERROR_OS, "unable to convert host to wide characters");
+	    git3_utf8_to_16_alloc(&wide_ua, git3_str_cstr(&ua)) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "unable to convert host to wide characters");
 		goto on_error;
 	}
 
@@ -833,7 +833,7 @@ static int winhttp_connect(
 		0);
 
 	if (!t->session) {
-		git_error_set(GIT_ERROR_OS, "failed to init WinHTTP");
+		git3_error_set(GIT3_ERROR_OS, "failed to init WinHTTP");
 		goto on_error;
 	}
 
@@ -854,7 +854,7 @@ static int winhttp_connect(
 	}
 
 	if (!WinHttpSetTimeouts(t->session, default_timeout, default_connect_timeout, default_timeout, default_timeout)) {
-		git_error_set(GIT_ERROR_OS, "failed to set timeouts for WinHTTP");
+		git3_error_set(GIT3_ERROR_OS, "failed to set timeouts for WinHTTP");
 		goto on_error;
 	}
 
@@ -867,7 +867,7 @@ static int winhttp_connect(
 		0);
 
 	if (!t->connection) {
-		git_error_set(GIT_ERROR_OS, "failed to connect to host");
+		git3_error_set(GIT3_ERROR_OS, "failed to connect to host");
 		goto on_error;
 	}
 
@@ -877,7 +877,7 @@ static int winhttp_connect(
 			WINHTTP_CALLBACK_FLAG_SECURE_FAILURE | WINHTTP_CALLBACK_FLAG_SEND_REQUEST,
 			0
 		) == WINHTTP_INVALID_STATUS_CALLBACK) {
-		git_error_set(GIT_ERROR_OS, "failed to set status callback");
+		git3_error_set(GIT3_ERROR_OS, "failed to set status callback");
 		goto on_error;
 	}
 
@@ -887,10 +887,10 @@ on_error:
 	if (error < 0)
 		winhttp_close_connection(t);
 
-	git_str_dispose(&ua);
-	git_str_dispose(&ipv6);
-	git__free(wide_host);
-	git__free(wide_ua);
+	git3_str_dispose(&ua);
+	git3_str_dispose(&ipv6);
+	git3__free(wide_host);
+	git3__free(wide_ua);
 
 	return error;
 }
@@ -930,7 +930,7 @@ static int send_request(winhttp_stream *s, size_t len, bool chunked)
 	int request_failed = 1, error, attempts = 0;
 	DWORD ignore_flags, send_request_error;
 
-	git_error_clear();
+	git3_error_clear();
 
 	while (request_failed && attempts++ < 3) {
 		int cert_valid = 1;
@@ -947,7 +947,7 @@ static int send_request(winhttp_stream *s, size_t len, bool chunked)
 					client_cert_requested = 1;
 					break;
 				default:
-					git_error_set(GIT_ERROR_OS, "failed to send request");
+					git3_error_set(GIT3_ERROR_OS, "failed to send request");
 					return -1;
 			}
 		}
@@ -959,10 +959,10 @@ static int send_request(winhttp_stream *s, size_t len, bool chunked)
 		 */
 		if (!cert_valid ||
 			(!request_failed && s->status_sending_request_reached)) {
-			git_error_clear();
+			git3_error_clear();
 			if ((error = certificate_check(s, cert_valid)) < 0) {
-				if (git_error_last()->klass == GIT_ERROR_NONE)
-					git_error_set(GIT_ERROR_OS, "user cancelled certificate check");
+				if (git3_error_last()->klass == GIT3_ERROR_NONE)
+					git3_error_set(GIT3_ERROR_OS, "user cancelled certificate check");
 
 				return error;
 			}
@@ -975,7 +975,7 @@ static int send_request(winhttp_stream *s, size_t len, bool chunked)
 		if (!cert_valid) {
 			ignore_flags = no_check_cert_flags;
 			if (!WinHttpSetOption(s->request, WINHTTP_OPTION_SECURITY_FLAGS, &ignore_flags, sizeof(ignore_flags))) {
-				git_error_set(GIT_ERROR_OS, "failed to set security options");
+				git3_error_set(GIT3_ERROR_OS, "failed to set security options");
 				return -1;
 			}
 		}
@@ -986,7 +986,7 @@ static int send_request(winhttp_stream *s, size_t len, bool chunked)
 			 * (it's possible a client certificate was requested but is not required)
 			 */
 			if (!WinHttpSetOption(s->request, WINHTTP_OPTION_CLIENT_CERT_CONTEXT, WINHTTP_NO_CLIENT_CERT_CONTEXT, 0)) {
-				git_error_set(GIT_ERROR_OS, "failed to set client cert context");
+				git3_error_set(GIT3_ERROR_OS, "failed to set client cert context");
 				return -1;
 			}
 		}
@@ -999,7 +999,7 @@ static int acquire_credentials(
 	HINTERNET request,
 	winhttp_server *server,
 	const char *url_str,
-	git_credential_acquire_cb cred_cb,
+	git3_credential_acquire_cb cred_cb,
 	void *cred_cb_payload)
 {
 	int allowed_types;
@@ -1009,7 +1009,7 @@ static int acquire_credentials(
 		return -1;
 
 	if (allowed_types) {
-		git_credential_free(server->cred);
+		git3_credential_free(server->cred);
 		server->cred = NULL;
 
 		/* Start with URL-specified credentials, if there were any. */
@@ -1025,8 +1025,8 @@ static int acquire_credentials(
 		if (error > 0 && cred_cb) {
 			error = cred_cb(&server->cred, url_str, server->url.username, allowed_types, cred_cb_payload);
 
-			/* Treat GIT_PASSTHROUGH as though git_credential_acquire_cb isn't set */
-			if (error == GIT_PASSTHROUGH)
+			/* Treat GIT3_PASSTHROUGH as though git3_credential_acquire_cb isn't set */
+			if (error == GIT3_PASSTHROUGH)
 				error = 1;
 			else if (error < 0)
 				return error;
@@ -1049,7 +1049,7 @@ static int acquire_credentials(
 }
 
 static int winhttp_stream_read(
-	git_smart_subtransport_stream *stream,
+	git3_smart_subtransport_stream *stream,
 	char *buffer,
 	size_t buf_size,
 	size_t *bytes_read)
@@ -1062,9 +1062,9 @@ static int winhttp_stream_read(
 
 replay:
 	/* Enforce a reasonable cap on the number of replays */
-	if (replay_count++ >= GIT_HTTP_REPLAY_MAX) {
-		git_error_set(GIT_ERROR_HTTP, "too many redirects or authentication replays");
-		return GIT_ERROR; /* not GIT_EAUTH because the exact cause is not clear */
+	if (replay_count++ >= GIT3_HTTP_REPLAY_MAX) {
+		git3_error_set(GIT3_ERROR_HTTP, "too many redirects or authentication replays");
+		return GIT3_ERROR; /* not GIT3_EAUTH because the exact cause is not clear */
 	}
 
 	/* Connect if necessary */
@@ -1085,7 +1085,7 @@ replay:
 		}
 
 		if (s->chunked) {
-			GIT_ASSERT(s->verb == post_verb);
+			GIT3_ASSERT(s->verb == post_verb);
 
 			/* Flush, if necessary */
 			if (s->chunk_buffer_len > 0 &&
@@ -1098,7 +1098,7 @@ replay:
 			if (!WinHttpWriteData(s->request,
 				"0\r\n\r\n", 5,
 				&bytes_written)) {
-				git_error_set(GIT_ERROR_OS, "failed to write final chunk");
+				git3_error_set(GIT3_ERROR_OS, "failed to write final chunk");
 				return -1;
 			}
 		}
@@ -1109,12 +1109,12 @@ replay:
 			if (INVALID_SET_FILE_POINTER == SetFilePointer(s->post_body,
 					0, 0, FILE_BEGIN) &&
 				NO_ERROR != GetLastError()) {
-				git_error_set(GIT_ERROR_OS, "failed to reset file pointer");
+				git3_error_set(GIT3_ERROR_OS, "failed to reset file pointer");
 				return -1;
 			}
 
-			buffer = git__malloc(CACHED_POST_BODY_BUF_SIZE);
-			GIT_ERROR_CHECK_ALLOC(buffer);
+			buffer = git3__malloc(CACHED_POST_BODY_BUF_SIZE);
+			GIT3_ERROR_CHECK_ALLOC(buffer);
 
 			while (len > 0) {
 				DWORD bytes_written;
@@ -1123,23 +1123,23 @@ replay:
 					min(CACHED_POST_BODY_BUF_SIZE, len),
 					&bytes_read, NULL) ||
 					!bytes_read) {
-					git__free(buffer);
-					git_error_set(GIT_ERROR_OS, "failed to read from temp file");
+					git3__free(buffer);
+					git3_error_set(GIT3_ERROR_OS, "failed to read from temp file");
 					return -1;
 				}
 
 				if (!WinHttpWriteData(s->request, buffer,
 					bytes_read, &bytes_written)) {
-					git__free(buffer);
-					git_error_set(GIT_ERROR_OS, "failed to write data");
+					git3__free(buffer);
+					git3_error_set(GIT3_ERROR_OS, "failed to write data");
 					return -1;
 				}
 
 				len -= bytes_read;
-				GIT_ASSERT(bytes_read == bytes_written);
+				GIT3_ASSERT(bytes_read == bytes_written);
 			}
 
-			git__free(buffer);
+			git3__free(buffer);
 
 			/* Eagerly close the temp file */
 			CloseHandle(s->post_body);
@@ -1147,7 +1147,7 @@ replay:
 		}
 
 		if (!WinHttpReceiveResponse(s->request, 0)) {
-			git_error_set(GIT_ERROR_OS, "failed to receive response");
+			git3_error_set(GIT3_ERROR_OS, "failed to receive response");
 			return -1;
 		}
 
@@ -1159,7 +1159,7 @@ replay:
 			WINHTTP_HEADER_NAME_BY_INDEX,
 			&status_code, &status_code_length,
 			WINHTTP_NO_HEADER_INDEX)) {
-				git_error_set(GIT_ERROR_OS, "failed to retrieve status code");
+				git3_error_set(GIT3_ERROR_OS, "failed to retrieve status code");
 				return -1;
 		}
 
@@ -1190,12 +1190,12 @@ replay:
 				&location_length,
 				WINHTTP_NO_HEADER_INDEX) ||
 				GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-				git_error_set(GIT_ERROR_OS, "failed to read Location header");
+				git3_error_set(GIT3_ERROR_OS, "failed to read Location header");
 				return -1;
 			}
 
-			location = git__malloc(location_length);
-			GIT_ERROR_CHECK_ALLOC(location);
+			location = git3__malloc(location_length);
+			GIT3_ERROR_CHECK_ALLOC(location);
 
 			if (!WinHttpQueryHeaders(s->request,
 				WINHTTP_QUERY_LOCATION,
@@ -1203,29 +1203,29 @@ replay:
 				location,
 				&location_length,
 				WINHTTP_NO_HEADER_INDEX)) {
-				git_error_set(GIT_ERROR_OS, "failed to read Location header");
-				git__free(location);
+				git3_error_set(GIT3_ERROR_OS, "failed to read Location header");
+				git3__free(location);
 				return -1;
 			}
 
 			/* Convert the Location header to UTF-8 */
-			if (git_utf8_from_16_alloc(&location8, location) < 0) {
-				git_error_set(GIT_ERROR_OS, "failed to convert Location header to UTF-8");
-				git__free(location);
+			if (git3_utf8_from_16_alloc(&location8, location) < 0) {
+				git3_error_set(GIT3_ERROR_OS, "failed to convert Location header to UTF-8");
+				git3__free(location);
 				return -1;
 			}
 
-			git__free(location);
+			git3__free(location);
 
 			/* Replay the request */
 			winhttp_stream_close(s);
 
-			if (!git__prefixcmp_icase(location8, prefix_https)) {
-				bool follow = (t->owner->connect_opts.follow_redirects != GIT_REMOTE_REDIRECT_NONE);
+			if (!git3__prefixcmp_icase(location8, prefix_https)) {
+				bool follow = (t->owner->connect_opts.follow_redirects != GIT3_REMOTE_REDIRECT_NONE);
 
 				/* Upgrade to secure connection; disconnect and start over */
-				if (git_net_url_apply_redirect(&t->server.url, location8, follow, s->service_url) < 0) {
-					git__free(location8);
+				if (git3_net_url_apply_redirect(&t->server.url, location8, follow, s->service_url) < 0) {
+					git3__free(location8);
 					return -1;
 				}
 
@@ -1235,7 +1235,7 @@ replay:
 					return -1;
 			}
 
-			git__free(location8);
+			git3__free(location8);
 			goto replay;
 		}
 
@@ -1250,7 +1250,7 @@ replay:
 			if (error < 0) {
 				return error;
 			} else if (!error) {
-				GIT_ASSERT(t->server.cred);
+				GIT3_ASSERT(t->server.cred);
 				winhttp_stream_close(s);
 				goto replay;
 			}
@@ -1264,14 +1264,14 @@ replay:
 			if (error < 0) {
 				return error;
 			} else if (!error) {
-				GIT_ASSERT(t->proxy.cred);
+				GIT3_ASSERT(t->proxy.cred);
 				winhttp_stream_close(s);
 				goto replay;
 			}
 		}
 
 		if (HTTP_STATUS_OK != status_code) {
-			git_error_set(GIT_ERROR_HTTP, "request failed with status code: %lu", status_code);
+			git3_error_set(GIT3_ERROR_HTTP, "request failed with status code: %lu", status_code);
 			return -1;
 		}
 
@@ -1281,8 +1281,8 @@ replay:
 		else
 			p_snprintf(expected_content_type_8, MAX_CONTENT_TYPE_LEN, "application/x-git-%s-advertisement", s->service);
 
-		if (git_utf8_to_16(expected_content_type, MAX_CONTENT_TYPE_LEN, expected_content_type_8) < 0) {
-			git_error_set(GIT_ERROR_OS, "failed to convert expected content-type to wide characters");
+		if (git3_utf8_to_16(expected_content_type, MAX_CONTENT_TYPE_LEN, expected_content_type_8) < 0) {
+			git3_error_set(GIT3_ERROR_OS, "failed to convert expected content-type to wide characters");
 			return -1;
 		}
 
@@ -1293,12 +1293,12 @@ replay:
 			WINHTTP_HEADER_NAME_BY_INDEX,
 			&content_type, &content_type_length,
 			WINHTTP_NO_HEADER_INDEX)) {
-				git_error_set(GIT_ERROR_OS, "failed to retrieve response content-type");
+				git3_error_set(GIT3_ERROR_OS, "failed to retrieve response content-type");
 				return -1;
 		}
 
 		if (wcscmp(expected_content_type, content_type)) {
-			git_error_set(GIT_ERROR_HTTP, "received unexpected content-type");
+			git3_error_set(GIT3_ERROR_HTTP, "received unexpected content-type");
 			return -1;
 		}
 
@@ -1310,7 +1310,7 @@ replay:
 		(DWORD)buf_size,
 		&dw_bytes_read))
 	{
-		git_error_set(GIT_ERROR_OS, "failed to read data");
+		git3_error_set(GIT3_ERROR_OS, "failed to read data");
 		return -1;
 	}
 
@@ -1320,7 +1320,7 @@ replay:
 }
 
 static int winhttp_stream_write_single(
-	git_smart_subtransport_stream *stream,
+	git3_smart_subtransport_stream *stream,
 	const char *buffer,
 	size_t len)
 {
@@ -1333,7 +1333,7 @@ static int winhttp_stream_write_single(
 
 	/* This implementation of write permits only a single call. */
 	if (s->sent_request) {
-		git_error_set(GIT_ERROR_HTTP, "subtransport configured for only one write");
+		git3_error_set(GIT3_ERROR_HTTP, "subtransport configured for only one write");
 		return -1;
 	}
 
@@ -1346,11 +1346,11 @@ static int winhttp_stream_write_single(
 			(LPCVOID)buffer,
 			(DWORD)len,
 			&bytes_written)) {
-		git_error_set(GIT_ERROR_OS, "failed to write data");
+		git3_error_set(GIT3_ERROR_OS, "failed to write data");
 		return -1;
 	}
 
-	GIT_ASSERT((DWORD)len == bytes_written);
+	GIT3_ASSERT((DWORD)len == bytes_written);
 
 	return 0;
 }
@@ -1364,12 +1364,12 @@ static int put_uuid_string(LPWSTR buffer, size_t buffer_len_cch)
 	if (RPC_S_OK != status &&
 		RPC_S_UUID_LOCAL_ONLY != status &&
 		RPC_S_UUID_NO_ADDRESS != status) {
-		git_error_set(GIT_ERROR_HTTP, "unable to generate name for temp file");
+		git3_error_set(GIT3_ERROR_HTTP, "unable to generate name for temp file");
 		return -1;
 	}
 
 	if (buffer_len_cch < UUID_LENGTH_CCH + 1) {
-		git_error_set(GIT_ERROR_HTTP, "buffer too small for name of temp file");
+		git3_error_set(GIT3_ERROR_HTTP, "buffer too small for name of temp file");
 		return -1;
 	}
 
@@ -1384,7 +1384,7 @@ static int put_uuid_string(LPWSTR buffer, size_t buffer_len_cch)
 		uuid.Data4[4], uuid.Data4[5], uuid.Data4[6], uuid.Data4[7]);
 
 	if (result < UUID_LENGTH_CCH) {
-		git_error_set(GIT_ERROR_OS, "unable to generate name for temp file");
+		git3_error_set(GIT3_ERROR_OS, "unable to generate name for temp file");
 		return -1;
 	}
 
@@ -1396,7 +1396,7 @@ static int get_temp_file(LPWSTR buffer, DWORD buffer_len_cch)
 	size_t len;
 
 	if (!GetTempPathW(buffer_len_cch, buffer)) {
-		git_error_set(GIT_ERROR_OS, "failed to get temp path");
+		git3_error_set(GIT3_ERROR_OS, "failed to get temp path");
 		return -1;
 	}
 
@@ -1412,7 +1412,7 @@ static int get_temp_file(LPWSTR buffer, DWORD buffer_len_cch)
 }
 
 static int winhttp_stream_write_buffered(
-	git_smart_subtransport_stream *stream,
+	git3_smart_subtransport_stream *stream,
 	const char *buffer,
 	size_t len)
 {
@@ -1439,17 +1439,17 @@ static int winhttp_stream_write_buffered(
 
 		if (INVALID_HANDLE_VALUE == s->post_body) {
 			s->post_body = NULL;
-			git_error_set(GIT_ERROR_OS, "failed to create temporary file");
+			git3_error_set(GIT3_ERROR_OS, "failed to create temporary file");
 			return -1;
 		}
 	}
 
 	if (!WriteFile(s->post_body, buffer, (DWORD)len, &bytes_written, NULL)) {
-		git_error_set(GIT_ERROR_OS, "failed to write to temporary file");
+		git3_error_set(GIT3_ERROR_OS, "failed to write to temporary file");
 		return -1;
 	}
 
-	GIT_ASSERT((DWORD)len == bytes_written);
+	GIT3_ASSERT((DWORD)len == bytes_written);
 
 	s->post_body_len += bytes_written;
 
@@ -1457,7 +1457,7 @@ static int winhttp_stream_write_buffered(
 }
 
 static int winhttp_stream_write_chunked(
-	git_smart_subtransport_stream *stream,
+	git3_smart_subtransport_stream *stream,
 	const char *buffer,
 	size_t len)
 {
@@ -1472,7 +1472,7 @@ static int winhttp_stream_write_chunked(
 		if (!WinHttpAddRequestHeaders(s->request,
 			transfer_encoding, (ULONG) -1L,
 			WINHTTP_ADDREQ_FLAG_ADD)) {
-			git_error_set(GIT_ERROR_OS, "failed to add a header to the request");
+			git3_error_set(GIT3_ERROR_OS, "failed to add a header to the request");
 			return -1;
 		}
 
@@ -1500,8 +1500,8 @@ static int winhttp_stream_write_chunked(
 		int count = (int)min(CACHED_POST_BODY_BUF_SIZE - s->chunk_buffer_len, len);
 
 		if (!s->chunk_buffer) {
-			s->chunk_buffer = git__malloc(CACHED_POST_BODY_BUF_SIZE);
-			GIT_ERROR_CHECK_ALLOC(s->chunk_buffer);
+			s->chunk_buffer = git3__malloc(CACHED_POST_BODY_BUF_SIZE);
+			GIT3_ERROR_CHECK_ALLOC(s->chunk_buffer);
 		}
 
 		memcpy(s->chunk_buffer + s->chunk_buffer_len, buffer, count);
@@ -1527,12 +1527,12 @@ static int winhttp_stream_write_chunked(
 	return 0;
 }
 
-static void winhttp_stream_free(git_smart_subtransport_stream *stream)
+static void winhttp_stream_free(git3_smart_subtransport_stream *stream)
 {
 	winhttp_stream *s = (winhttp_stream *)stream;
 
 	winhttp_stream_close(s);
-	git__free(s);
+	git3__free(s);
 }
 
 static int winhttp_stream_alloc(winhttp_subtransport *t, winhttp_stream **stream)
@@ -1542,8 +1542,8 @@ static int winhttp_stream_alloc(winhttp_subtransport *t, winhttp_stream **stream
 	if (!stream)
 		return -1;
 
-	s = git__calloc(1, sizeof(winhttp_stream));
-	GIT_ERROR_CHECK_ALLOC(s);
+	s = git3__calloc(1, sizeof(winhttp_stream));
+	GIT3_ERROR_CHECK_ALLOC(s);
 
 	s->parent.subtransport = &t->parent;
 	s->parent.read = winhttp_stream_read;
@@ -1559,7 +1559,7 @@ static int winhttp_uploadpack_ls(
 	winhttp_subtransport *t,
 	winhttp_stream *s)
 {
-	GIT_UNUSED(t);
+	GIT3_UNUSED(t);
 
 	s->service = upload_pack_service;
 	s->service_url = upload_pack_ls_service_url;
@@ -1572,7 +1572,7 @@ static int winhttp_uploadpack(
 	winhttp_subtransport *t,
 	winhttp_stream *s)
 {
-	GIT_UNUSED(t);
+	GIT3_UNUSED(t);
 
 	s->service = upload_pack_service;
 	s->service_url = upload_pack_service_url;
@@ -1585,7 +1585,7 @@ static int winhttp_receivepack_ls(
 	winhttp_subtransport *t,
 	winhttp_stream *s)
 {
-	GIT_UNUSED(t);
+	GIT3_UNUSED(t);
 
 	s->service = receive_pack_service;
 	s->service_url = receive_pack_ls_service_url;
@@ -1598,11 +1598,11 @@ static int winhttp_receivepack(
 	winhttp_subtransport *t,
 	winhttp_stream *s)
 {
-	GIT_UNUSED(t);
+	GIT3_UNUSED(t);
 
 	/* WinHTTP only supports Transfer-Encoding: chunked
 	 * on Windows Vista (NT 6.0) and higher. */
-	s->chunked = git_has_win32_version(6, 0, 0);
+	s->chunked = git3_has_win32_version(6, 0, 0);
 
 	if (s->chunked)
 		s->parent.write = winhttp_stream_write_chunked;
@@ -1617,17 +1617,17 @@ static int winhttp_receivepack(
 }
 
 static int winhttp_action(
-	git_smart_subtransport_stream **stream,
-	git_smart_subtransport *subtransport,
+	git3_smart_subtransport_stream **stream,
+	git3_smart_subtransport *subtransport,
 	const char *url,
-	git_smart_service_t action)
+	git3_smart_service_t action)
 {
 	winhttp_subtransport *t = (winhttp_subtransport *)subtransport;
 	winhttp_stream *s;
 	int ret = -1;
 
 	if (!t->connection)
-		if ((ret = git_net_url_parse(&t->server.url, url)) < 0 ||
+		if ((ret = git3_net_url_parse(&t->server.url, url)) < 0 ||
 			 (ret = winhttp_connect(t)) < 0)
 			return ret;
 
@@ -1639,24 +1639,24 @@ static int winhttp_action(
 
 	switch (action)
 	{
-		case GIT_SERVICE_UPLOADPACK_LS:
+		case GIT3_SERVICE_UPLOADPACK_LS:
 			ret = winhttp_uploadpack_ls(t, s);
 			break;
 
-		case GIT_SERVICE_UPLOADPACK:
+		case GIT3_SERVICE_UPLOADPACK:
 			ret = winhttp_uploadpack(t, s);
 			break;
 
-		case GIT_SERVICE_RECEIVEPACK_LS:
+		case GIT3_SERVICE_RECEIVEPACK_LS:
 			ret = winhttp_receivepack_ls(t, s);
 			break;
 
-		case GIT_SERVICE_RECEIVEPACK:
+		case GIT3_SERVICE_RECEIVEPACK:
 			ret = winhttp_receivepack(t, s);
 			break;
 
 		default:
-			GIT_ASSERT(0);
+			GIT3_ASSERT(0);
 	}
 
 	if (!ret)
@@ -1665,12 +1665,12 @@ static int winhttp_action(
 	return ret;
 }
 
-static int winhttp_close(git_smart_subtransport *subtransport)
+static int winhttp_close(git3_smart_subtransport *subtransport)
 {
 	winhttp_subtransport *t = (winhttp_subtransport *)subtransport;
 
-	git_net_url_dispose(&t->server.url);
-	git_net_url_dispose(&t->proxy.url);
+	git3_net_url_dispose(&t->server.url);
+	git3_net_url_dispose(&t->proxy.url);
 
 	if (t->server.cred) {
 		t->server.cred->free(t->server.cred);
@@ -1685,34 +1685,34 @@ static int winhttp_close(git_smart_subtransport *subtransport)
 	return winhttp_close_connection(t);
 }
 
-static void winhttp_free(git_smart_subtransport *subtransport)
+static void winhttp_free(git3_smart_subtransport *subtransport)
 {
 	winhttp_subtransport *t = (winhttp_subtransport *)subtransport;
 
 	winhttp_close(subtransport);
 
-	git__free(t);
+	git3__free(t);
 }
 
-int git_smart_subtransport_http(git_smart_subtransport **out, git_transport *owner, void *param)
+int git3_smart_subtransport_http(git3_smart_subtransport **out, git3_transport *owner, void *param)
 {
 	winhttp_subtransport *t;
 
-	GIT_UNUSED(param);
+	GIT3_UNUSED(param);
 
 	if (!out)
 		return -1;
 
-	t = git__calloc(1, sizeof(winhttp_subtransport));
-	GIT_ERROR_CHECK_ALLOC(t);
+	t = git3__calloc(1, sizeof(winhttp_subtransport));
+	GIT3_ERROR_CHECK_ALLOC(t);
 
 	t->owner = (transport_smart *)owner;
 	t->parent.action = winhttp_action;
 	t->parent.close = winhttp_close;
 	t->parent.free = winhttp_free;
 
-	*out = (git_smart_subtransport *) t;
+	*out = (git3_smart_subtransport *) t;
 	return 0;
 }
 
-#endif /* GIT_HTTPS_WINHTTP */
+#endif /* GIT3_HTTPS_WINHTTP */

@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -15,66 +15,66 @@
 #include "streams/stransport.h"
 #include "streams/schannel.h"
 
-int git_tls_stream_new(git_stream **out, const char *host, const char *port)
+int git3_tls_stream_new(git3_stream **out, const char *host, const char *port)
 {
-	int (*init)(git_stream **, const char *, const char *) = NULL;
-	git_stream_registration custom = {0};
+	int (*init)(git3_stream **, const char *, const char *) = NULL;
+	git3_stream_registration custom = {0};
 	int error;
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(host);
-	GIT_ASSERT_ARG(port);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(host);
+	GIT3_ASSERT_ARG(port);
 
-	if ((error = git_stream_registry_lookup(&custom, GIT_STREAM_TLS)) == 0) {
+	if ((error = git3_stream_registry_lookup(&custom, GIT3_STREAM_TLS)) == 0) {
 		init = custom.init;
-	} else if (error == GIT_ENOTFOUND) {
-#if defined(GIT_HTTPS_SECURETRANSPORT)
-		init = git_stransport_stream_new;
-#elif defined(GIT_HTTPS_OPENSSL) || \
-      defined(GIT_HTTPS_OPENSSL_DYNAMIC)
-		init = git_openssl_stream_new;
-#elif defined(GIT_HTTPS_MBEDTLS)
-		init = git_mbedtls_stream_new;
-#elif defined(GIT_HTTPS_SCHANNEL)
-		init = git_schannel_stream_new;
+	} else if (error == GIT3_ENOTFOUND) {
+#if defined(GIT3_HTTPS_SECURETRANSPORT)
+		init = git3_stransport_stream_new;
+#elif defined(GIT3_HTTPS_OPENSSL) || \
+      defined(GIT3_HTTPS_OPENSSL_DYNAMIC)
+		init = git3_openssl_stream_new;
+#elif defined(GIT3_HTTPS_MBEDTLS)
+		init = git3_mbedtls_stream_new;
+#elif defined(GIT3_HTTPS_SCHANNEL)
+		init = git3_schannel_stream_new;
 #endif
 	} else {
 		return error;
 	}
 
 	if (!init) {
-		git_error_set(GIT_ERROR_SSL, "there is no TLS stream available");
+		git3_error_set(GIT3_ERROR_SSL, "there is no TLS stream available");
 		return -1;
 	}
 
 	return init(out, host, port);
 }
 
-int git_tls_stream_wrap(git_stream **out, git_stream *in, const char *host)
+int git3_tls_stream_wrap(git3_stream **out, git3_stream *in, const char *host)
 {
-	int (*wrap)(git_stream **, git_stream *, const char *) = NULL;
-	git_stream_registration custom = {0};
+	int (*wrap)(git3_stream **, git3_stream *, const char *) = NULL;
+	git3_stream_registration custom = {0};
 
-	GIT_ASSERT_ARG(out);
-	GIT_ASSERT_ARG(in);
+	GIT3_ASSERT_ARG(out);
+	GIT3_ASSERT_ARG(in);
 
-	if (git_stream_registry_lookup(&custom, GIT_STREAM_TLS) == 0) {
+	if (git3_stream_registry_lookup(&custom, GIT3_STREAM_TLS) == 0) {
 		wrap = custom.wrap;
 	} else {
-#if defined(GIT_HTTPS_SECURETRANSPORT)
-		wrap = git_stransport_stream_wrap;
-#elif defined(GIT_HTTPS_OPENSSL) || \
-      defined(GIT_HTTPS_OPENSSL_DYNAMIC)
-		wrap = git_openssl_stream_wrap;
-#elif defined(GIT_HTTPS_MBEDTLS)
-		wrap = git_mbedtls_stream_wrap;
-#elif defined(GIT_HTTPS_SCHANNEL)
-		wrap = git_schannel_stream_wrap;
+#if defined(GIT3_HTTPS_SECURETRANSPORT)
+		wrap = git3_stransport_stream_wrap;
+#elif defined(GIT3_HTTPS_OPENSSL) || \
+      defined(GIT3_HTTPS_OPENSSL_DYNAMIC)
+		wrap = git3_openssl_stream_wrap;
+#elif defined(GIT3_HTTPS_MBEDTLS)
+		wrap = git3_mbedtls_stream_wrap;
+#elif defined(GIT3_HTTPS_SCHANNEL)
+		wrap = git3_schannel_stream_wrap;
 #endif
 	}
 
 	if (!wrap) {
-		git_error_set(GIT_ERROR_SSL, "there is no TLS stream available");
+		git3_error_set(GIT3_ERROR_SSL, "there is no TLS stream available");
 		return -1;
 	}
 

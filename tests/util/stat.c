@@ -1,17 +1,17 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "futils.h"
 #include "posix.h"
 
 void test_stat__initialize(void)
 {
-	cl_git_pass(git_futils_mkdir("root/d1/d2", 0755, GIT_MKDIR_PATH));
+	cl_git_pass(git3_futils_mkdir("root/d1/d2", 0755, GIT3_MKDIR_PATH));
 	cl_git_mkfile("root/file", "whatever\n");
 	cl_git_mkfile("root/d1/file", "whatever\n");
 }
 
 void test_stat__cleanup(void)
 {
-	git_futils_rmdir_r("root", NULL, GIT_RMDIR_REMOVE_FILES);
+	git3_futils_rmdir_r("root", NULL, GIT3_RMDIR_REMOVE_FILES);
 }
 
 #define cl_assert_error(val) \
@@ -68,7 +68,7 @@ void test_stat__0(void)
 	cl_assert_error(ENOTDIR);
 
 	cl_assert(p_lstat("root/file/invalid", &st) < 0);
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_assert_error(ENOENT);
 #else
 	cl_assert_error(ENOTDIR);
@@ -78,7 +78,7 @@ void test_stat__0(void)
 	cl_assert_error(ENOTDIR);
 
 	cl_assert(p_lstat("root/file/invalid/deeper_path", &st) < 0);
-#ifdef GIT_WIN32
+#ifdef GIT3_WIN32
 	cl_assert_error(ENOENT);
 #else
 	cl_assert_error(ENOTDIR);
@@ -97,17 +97,17 @@ void test_stat__0(void)
 void test_stat__root(void)
 {
 	const char *sandbox = clar_sandbox_path();
-	git_str root = GIT_STR_INIT;
+	git3_str root = GIT3_STR_INIT;
 	int root_len;
 	struct stat st;
 
-	root_len = git_fs_path_root(sandbox);
+	root_len = git3_fs_path_root(sandbox);
 	cl_assert(root_len >= 0);
 
-	git_str_set(&root, sandbox, root_len+1);
+	git3_str_set(&root, sandbox, root_len+1);
 
 	cl_must_pass(p_stat(root.ptr, &st));
 	cl_assert(S_ISDIR(st.st_mode));
 
-	git_str_dispose(&root);
+	git3_str_dispose(&root);
 }

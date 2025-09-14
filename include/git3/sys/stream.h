@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_sys_git_stream_h__
@@ -12,29 +12,29 @@
 #include "git3/proxy.h"
 
 /**
- * @file git2/sys/stream.h
+ * @file git3/sys/stream.h
  * @brief Streaming file I/O functionality
- * @defgroup git_stream Streaming file I/O functionality
+ * @defgroup git3_stream Streaming file I/O functionality
  * @ingroup Git
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
-/** Current version for the `git_stream` structures */
-#define GIT_STREAM_VERSION 1
+/** Current version for the `git3_stream` structures */
+#define GIT3_STREAM_VERSION 1
 
 /**
  * Every stream must have this struct as its first element, so the
  * API can talk to it. You'd define your stream as
  *
  *     struct my_stream {
- *             git_stream parent;
+ *             git3_stream parent;
  *             ...
  *     }
  *
  * and fill the functions
  */
-typedef struct git_stream {
+typedef struct git3_stream {
 	int version;
 
 	unsigned int encrypted : 1,
@@ -53,17 +53,17 @@ typedef struct git_stream {
 	 */
 	int connect_timeout;
 
-	int GIT_CALLBACK(connect)(struct git_stream *);
-	int GIT_CALLBACK(certificate)(git_cert **, struct git_stream *);
-	int GIT_CALLBACK(set_proxy)(struct git_stream *, const git_proxy_options *proxy_opts);
-	ssize_t GIT_CALLBACK(read)(struct git_stream *, void *, size_t);
-	ssize_t GIT_CALLBACK(write)(struct git_stream *, const char *, size_t, int);
-	int GIT_CALLBACK(close)(struct git_stream *);
-	void GIT_CALLBACK(free)(struct git_stream *);
-} git_stream;
+	int GIT3_CALLBACK(connect)(struct git3_stream *);
+	int GIT3_CALLBACK(certificate)(git3_cert **, struct git3_stream *);
+	int GIT3_CALLBACK(set_proxy)(struct git3_stream *, const git3_proxy_options *proxy_opts);
+	ssize_t GIT3_CALLBACK(read)(struct git3_stream *, void *, size_t);
+	ssize_t GIT3_CALLBACK(write)(struct git3_stream *, const char *, size_t, int);
+	int GIT3_CALLBACK(close)(struct git3_stream *);
+	void GIT3_CALLBACK(free)(struct git3_stream *);
+} git3_stream;
 
 typedef struct {
-	/** The `version` field should be set to `GIT_STREAM_VERSION`. */
+	/** The `version` field should be set to `GIT3_STREAM_VERSION`. */
 	int version;
 
 	/**
@@ -76,7 +76,7 @@ typedef struct {
 	 *             service name
 	 * @return 0 or an error code
 	 */
-	int GIT_CALLBACK(init)(git_stream **out, const char *host, const char *port);
+	int GIT3_CALLBACK(init)(git3_stream **out, const char *host, const char *port);
 
 	/**
 	 * Called to create a new connection on top of the given stream.  If
@@ -90,19 +90,19 @@ typedef struct {
 	 *             for certificate validation
 	 * @return 0 or an error code
 	 */
-	int GIT_CALLBACK(wrap)(git_stream **out, git_stream *in, const char *host);
-} git_stream_registration;
+	int GIT3_CALLBACK(wrap)(git3_stream **out, git3_stream *in, const char *host);
+} git3_stream_registration;
 
 /**
  * The type of stream to register.
  */
 typedef enum {
 	/** A standard (non-TLS) socket. */
-	GIT_STREAM_STANDARD = 1,
+	GIT3_STREAM_STANDARD = 1,
 
 	/** A TLS-encrypted socket. */
-	GIT_STREAM_TLS = 2
-} git_stream_t;
+	GIT3_STREAM_TLS = 2
+} git3_stream_t;
 
 /**
  * Register stream constructors for the library to use
@@ -117,10 +117,10 @@ typedef enum {
  * @param registration the registration data
  * @return 0 or an error code
  */
-GIT_EXTERN(int) git_stream_register(
-	git_stream_t type, git_stream_registration *registration);
+GIT3_EXTERN(int) git3_stream_register(
+	git3_stream_t type, git3_stream_registration *registration);
 
-#ifndef GIT_DEPRECATE_HARD
+#ifndef GIT3_DEPRECATE_HARD
 
 /** @name Deprecated TLS Stream Registration Functions
  *
@@ -133,29 +133,29 @@ GIT_EXTERN(int) git_stream_register(
 /**@{*/
 
 /**
- * @deprecated Provide a git_stream_registration to git_stream_register
- * @see git_stream_registration
+ * @deprecated Provide a git3_stream_registration to git3_stream_register
+ * @see git3_stream_registration
  */
-typedef int GIT_CALLBACK(git_stream_cb)(git_stream **out, const char *host, const char *port);
+typedef int GIT3_CALLBACK(git3_stream_cb)(git3_stream **out, const char *host, const char *port);
 
 /**
  * Register a TLS stream constructor for the library to use.  This stream
  * will not support HTTP CONNECT proxies.  This internally calls
- * `git_stream_register` and is preserved for backward compatibility.
+ * `git3_stream_register` and is preserved for backward compatibility.
  *
  * This function is deprecated, but there is no plan to remove this
  * function at this time.
  *
- * @deprecated Provide a git_stream_registration to git_stream_register
- * @see git_stream_register
+ * @deprecated Provide a git3_stream_registration to git3_stream_register
+ * @see git3_stream_register
  */
-GIT_EXTERN(int) git_stream_register_tls(git_stream_cb ctor);
+GIT3_EXTERN(int) git3_stream_register_tls(git3_stream_cb ctor);
 
 /**@}*/
 
 #endif
 
 /**@}*/
-GIT_END_DECL
+GIT3_END_DECL
 
 #endif

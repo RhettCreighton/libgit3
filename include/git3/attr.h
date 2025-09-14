@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_git_attr_h__
@@ -11,9 +11,9 @@
 #include "types.h"
 
 /**
- * @file git2/attr.h
+ * @file git3/attr.h
  * @brief Attribute management routines
- * @defgroup git_attr Git attribute management routines
+ * @defgroup git3_attr Git attribute management routines
  * @ingroup Git
  *
  * Attributes specify additional information about how git should
@@ -21,10 +21,10 @@
  * a particular filter is applied, like LFS or line ending conversions.
  * @{
  */
-GIT_BEGIN_DECL
+GIT3_BEGIN_DECL
 
 /**
- * GIT_ATTR_TRUE checks if an attribute is set on.  In core git
+ * GIT3_ATTR_TRUE checks if an attribute is set on.  In core git
  * parlance, this the value for "Set" attributes.
  *
  * For example, if the attribute file contains:
@@ -32,12 +32,12 @@ GIT_BEGIN_DECL
  *    *.c foo
  *
  * Then for file `xyz.c` looking up attribute "foo" gives a value for
- * which `GIT_ATTR_TRUE(value)` is true.
+ * which `GIT3_ATTR_TRUE(value)` is true.
  */
-#define GIT_ATTR_IS_TRUE(attr)	(git_attr_value(attr) == GIT_ATTR_VALUE_TRUE)
+#define GIT3_ATTR_IS_TRUE(attr)	(git3_attr_value(attr) == GIT3_ATTR_VALUE_TRUE)
 
 /**
- * GIT_ATTR_FALSE checks if an attribute is set off.  In core git
+ * GIT3_ATTR_FALSE checks if an attribute is set off.  In core git
  * parlance, this is the value for attributes that are "Unset" (not to
  * be confused with values that a "Unspecified").
  *
@@ -46,12 +46,12 @@ GIT_BEGIN_DECL
  *    *.h -foo
  *
  * Then for file `zyx.h` looking up attribute "foo" gives a value for
- * which `GIT_ATTR_FALSE(value)` is true.
+ * which `GIT3_ATTR_FALSE(value)` is true.
  */
-#define GIT_ATTR_IS_FALSE(attr) (git_attr_value(attr) == GIT_ATTR_VALUE_FALSE)
+#define GIT3_ATTR_IS_FALSE(attr) (git3_attr_value(attr) == GIT3_ATTR_VALUE_FALSE)
 
 /**
- * GIT_ATTR_UNSPECIFIED checks if an attribute is unspecified.  This
+ * GIT3_ATTR_UNSPECIFIED checks if an attribute is unspecified.  This
  * may be due to the attribute not being mentioned at all or because
  * the attribute was explicitly set unspecified via the `!` operator.
  *
@@ -62,33 +62,33 @@ GIT_BEGIN_DECL
  *    onefile.c !foo
  *
  * Then for `onefile.c` looking up attribute "foo" yields a value with
- * `GIT_ATTR_UNSPECIFIED(value)` of true.  Also, looking up "foo" on
+ * `GIT3_ATTR_UNSPECIFIED(value)` of true.  Also, looking up "foo" on
  * file `onefile.rb` or looking up "bar" on any file will all give
- * `GIT_ATTR_UNSPECIFIED(value)` of true.
+ * `GIT3_ATTR_UNSPECIFIED(value)` of true.
  */
-#define GIT_ATTR_IS_UNSPECIFIED(attr) (git_attr_value(attr) == GIT_ATTR_VALUE_UNSPECIFIED)
+#define GIT3_ATTR_IS_UNSPECIFIED(attr) (git3_attr_value(attr) == GIT3_ATTR_VALUE_UNSPECIFIED)
 
 /**
- * GIT_ATTR_HAS_VALUE checks if an attribute is set to a value (as
+ * GIT3_ATTR_HAS_VALUE checks if an attribute is set to a value (as
  * opposed to TRUE, FALSE or UNSPECIFIED).  This would be the case if
  * for a file with something like:
  *
  *    *.txt eol=lf
  *
  * Given this, looking up "eol" for `onefile.txt` will give back the
- * string "lf" and `GIT_ATTR_SET_TO_VALUE(attr)` will return true.
+ * string "lf" and `GIT3_ATTR_SET_TO_VALUE(attr)` will return true.
  */
-#define GIT_ATTR_HAS_VALUE(attr) (git_attr_value(attr) == GIT_ATTR_VALUE_STRING)
+#define GIT3_ATTR_HAS_VALUE(attr) (git3_attr_value(attr) == GIT3_ATTR_VALUE_STRING)
 
 /**
  * Possible states for an attribute
  */
 typedef enum {
-	GIT_ATTR_VALUE_UNSPECIFIED = 0, /**< The attribute has been left unspecified */
-	GIT_ATTR_VALUE_TRUE,   /**< The attribute has been set */
-	GIT_ATTR_VALUE_FALSE,  /**< The attribute has been unset */
-	GIT_ATTR_VALUE_STRING  /**< This attribute has a value */
-} git_attr_value_t;
+	GIT3_ATTR_VALUE_UNSPECIFIED = 0, /**< The attribute has been left unspecified */
+	GIT3_ATTR_VALUE_TRUE,   /**< The attribute has been set */
+	GIT3_ATTR_VALUE_FALSE,  /**< The attribute has been unset */
+	GIT3_ATTR_VALUE_STRING  /**< This attribute has a value */
+} git3_attr_value_t;
 
 /**
  * Return the value type for a given attribute.
@@ -103,7 +103,7 @@ typedef enum {
  * @param attr The attribute
  * @return the value type for the attribute
  */
-GIT_EXTERN(git_attr_value_t) git_attr_value(const char *attr);
+GIT3_EXTERN(git3_attr_value_t) git3_attr_value(const char *attr);
 
 /**
  * Check attribute flags: Reading values from index and working directory.
@@ -120,33 +120,33 @@ GIT_EXTERN(git_attr_value_t) git_attr_value(const char *attr);
  */
 
 /** Examine attribute in working directory, then index */
-#define GIT_ATTR_CHECK_FILE_THEN_INDEX	0
+#define GIT3_ATTR_CHECK_FILE_THEN_INDEX	0
 /** Examine attribute in index, then working directory */
-#define GIT_ATTR_CHECK_INDEX_THEN_FILE	1
+#define GIT3_ATTR_CHECK_INDEX_THEN_FILE	1
 /** Examine attributes only in the index */
-#define GIT_ATTR_CHECK_INDEX_ONLY	2
+#define GIT3_ATTR_CHECK_INDEX_ONLY	2
 
 /**
  * Check attribute flags: controlling extended attribute behavior.
  *
  * Normally, attribute checks include looking in the /etc (or system
  * equivalent) directory for a `gitattributes` file.  Passing the
- * `GIT_ATTR_CHECK_NO_SYSTEM` flag will cause attribute checks to
+ * `GIT3_ATTR_CHECK_NO_SYSTEM` flag will cause attribute checks to
  * ignore that file.
  *
- * Passing the `GIT_ATTR_CHECK_INCLUDE_HEAD` flag will use attributes
+ * Passing the `GIT3_ATTR_CHECK_INCLUDE_HEAD` flag will use attributes
  * from a `.gitattributes` file in the repository at the HEAD revision.
  *
- * Passing the `GIT_ATTR_CHECK_INCLUDE_COMMIT` flag will use attributes
+ * Passing the `GIT3_ATTR_CHECK_INCLUDE_COMMIT` flag will use attributes
  * from a `.gitattributes` file in a specific commit.
  */
 
 /** Ignore system attributes */
-#define GIT_ATTR_CHECK_NO_SYSTEM        (1 << 2)
+#define GIT3_ATTR_CHECK_NO_SYSTEM        (1 << 2)
 /** Honor `.gitattributes` in the HEAD revision */
-#define GIT_ATTR_CHECK_INCLUDE_HEAD     (1 << 3)
+#define GIT3_ATTR_CHECK_INCLUDE_HEAD     (1 << 3)
 /** Honor `.gitattributes` in a specific commit */
-#define GIT_ATTR_CHECK_INCLUDE_COMMIT   (1 << 4)
+#define GIT3_ATTR_CHECK_INCLUDE_COMMIT   (1 << 4)
 
 /**
 * An options structure for querying attributes.
@@ -154,37 +154,37 @@ GIT_EXTERN(git_attr_value_t) git_attr_value(const char *attr);
 typedef struct {
 	unsigned int version;
 
-	/** A combination of GIT_ATTR_CHECK flags */
+	/** A combination of GIT3_ATTR_CHECK flags */
 	unsigned int flags;
 
-#ifdef GIT_DEPRECATE_HARD
+#ifdef GIT3_DEPRECATE_HARD
 	void *reserved;
 #else
-	git_oid *commit_id;
+	git3_oid *commit_id;
 #endif
 
 	/**
 	 * The commit to load attributes from, when
-	 * `GIT_ATTR_CHECK_INCLUDE_COMMIT` is specified.
+	 * `GIT3_ATTR_CHECK_INCLUDE_COMMIT` is specified.
 	 */
-	git_oid attr_commit_id;
-} git_attr_options;
+	git3_oid attr_commit_id;
+} git3_attr_options;
 
-/** Current version for the `git_attr_options` structure */
-#define GIT_ATTR_OPTIONS_VERSION 1
+/** Current version for the `git3_attr_options` structure */
+#define GIT3_ATTR_OPTIONS_VERSION 1
 
-/** Static constructor for `git_attr_options` */
-#define GIT_ATTR_OPTIONS_INIT {GIT_ATTR_OPTIONS_VERSION}
+/** Static constructor for `git3_attr_options` */
+#define GIT3_ATTR_OPTIONS_INIT {GIT3_ATTR_OPTIONS_VERSION}
 
 /**
  * Look up the value of one git attribute for path.
  *
- * @param value_out Output of the value of the attribute.  Use the GIT_ATTR_...
+ * @param value_out Output of the value of the attribute.  Use the GIT3_ATTR_...
  *             macros to test for TRUE, FALSE, UNSPECIFIED, etc. or just
  *             use the string value for attributes set to a value.  You
  *             should NOT modify or free this value.
  * @param repo The repository containing the path.
- * @param flags A combination of GIT_ATTR_CHECK... flags.
+ * @param flags A combination of GIT3_ATTR_CHECK... flags.
  * @param path The path to check for attributes.  Relative paths are
  *             interpreted relative to the repo root.  The file does
  *             not have to exist, but if it does not, then it will be
@@ -192,9 +192,9 @@ typedef struct {
  * @param name The name of the attribute to look up.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_attr_get(
+GIT3_EXTERN(int) git3_attr_get(
 	const char **value_out,
-	git_repository *repo,
+	git3_repository *repo,
 	uint32_t flags,
 	const char *path,
 	const char *name);
@@ -202,12 +202,12 @@ GIT_EXTERN(int) git_attr_get(
 /**
  * Look up the value of one git attribute for path with extended options.
  *
- * @param value_out Output of the value of the attribute.  Use the GIT_ATTR_...
+ * @param value_out Output of the value of the attribute.  Use the GIT3_ATTR_...
  *             macros to test for TRUE, FALSE, UNSPECIFIED, etc. or just
  *             use the string value for attributes set to a value.  You
  *             should NOT modify or free this value.
  * @param repo The repository containing the path.
- * @param opts The `git_attr_options` to use when querying these attributes.
+ * @param opts The `git3_attr_options` to use when querying these attributes.
  * @param path The path to check for attributes.  Relative paths are
  *             interpreted relative to the repo root.  The file does
  *             not have to exist, but if it does not, then it will be
@@ -215,10 +215,10 @@ GIT_EXTERN(int) git_attr_get(
  * @param name The name of the attribute to look up.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_attr_get_ext(
+GIT3_EXTERN(int) git3_attr_get_ext(
 	const char **value_out,
-	git_repository *repo,
-	git_attr_options *opts,
+	git3_repository *repo,
+	git3_attr_options *opts,
 	const char *path,
 	const char *name);
 
@@ -227,13 +227,13 @@ GIT_EXTERN(int) git_attr_get_ext(
  *
  * Use this if you have a known list of attributes that you want to
  * look up in a single call.  This is somewhat more efficient than
- * calling `git_attr_get()` multiple times.
+ * calling `git3_attr_get()` multiple times.
  *
  * For example, you might write:
  *
  *     const char *attrs[] = { "crlf", "diff", "foo" };
  *     const char **values[3];
- *     git_attr_get_many(values, repo, 0, "my/fun/file.c", 3, attrs);
+ *     git3_attr_get_many(values, repo, 0, "my/fun/file.c", 3, attrs);
  *
  * Then you could loop through the 3 values to get the settings for
  * the three attributes you asked about.
@@ -244,7 +244,7 @@ GIT_EXTERN(int) git_attr_get_ext(
  *             into this array (although of course, you should free the
  *             array itself if you allocated it).
  * @param repo The repository containing the path.
- * @param flags A combination of GIT_ATTR_CHECK... flags.
+ * @param flags A combination of GIT3_ATTR_CHECK... flags.
  * @param path The path inside the repo to check attributes.  This
  *             does not have to exist, but if it does not, then
  *             it will be treated as a plain file (i.e. not a directory).
@@ -252,9 +252,9 @@ GIT_EXTERN(int) git_attr_get_ext(
  * @param names An array of num_attr strings containing attribute names.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_attr_get_many(
+GIT3_EXTERN(int) git3_attr_get_many(
 	const char **values_out,
-	git_repository *repo,
+	git3_repository *repo,
 	uint32_t flags,
 	const char *path,
 	size_t num_attr,
@@ -269,7 +269,7 @@ GIT_EXTERN(int) git_attr_get_many(
  *             into this array (although of course, you should free the
  *             array itself if you allocated it).
  * @param repo The repository containing the path.
- * @param opts The `git_attr_options` to use when querying these attributes.
+ * @param opts The `git3_attr_options` to use when querying these attributes.
  * @param path The path inside the repo to check attributes.  This
  *             does not have to exist, but if it does not, then
  *             it will be treated as a plain file (i.e. not a directory).
@@ -277,70 +277,70 @@ GIT_EXTERN(int) git_attr_get_many(
  * @param names An array of num_attr strings containing attribute names.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_attr_get_many_ext(
+GIT3_EXTERN(int) git3_attr_get_many_ext(
 	const char **values_out,
-	git_repository *repo,
-	git_attr_options *opts,
+	git3_repository *repo,
+	git3_attr_options *opts,
 	const char *path,
 	size_t num_attr,
 	const char **names);
 
 /**
- * The callback used with git_attr_foreach.
+ * The callback used with git3_attr_foreach.
  *
  * This callback will be invoked only once per attribute name, even if there
  * are multiple rules for a given file. The highest priority rule will be
  * used.
  *
- * @see git_attr_foreach.
+ * @see git3_attr_foreach.
  *
  * @param name The attribute name.
  * @param value The attribute value. May be NULL if the attribute is explicitly
  *              set to UNSPECIFIED using the '!' sign.
  * @param payload A user-specified pointer.
  * @return 0 to continue looping, non-zero to stop. This value will be returned
- *         from git_attr_foreach.
+ *         from git3_attr_foreach.
  */
-typedef int GIT_CALLBACK(git_attr_foreach_cb)(const char *name, const char *value, void *payload);
+typedef int GIT3_CALLBACK(git3_attr_foreach_cb)(const char *name, const char *value, void *payload);
 
 /**
  * Loop over all the git attributes for a path.
  *
  * @param repo The repository containing the path.
- * @param flags A combination of GIT_ATTR_CHECK... flags.
+ * @param flags A combination of GIT3_ATTR_CHECK... flags.
  * @param path Path inside the repo to check attributes.  This does not have
  *             to exist, but if it does not, then it will be treated as a
  *             plain file (i.e. not a directory).
  * @param callback Function to invoke on each attribute name and value.
- *                 See git_attr_foreach_cb.
+ *                 See git3_attr_foreach_cb.
  * @param payload Passed on as extra parameter to callback function.
  * @return 0 on success, non-zero callback return value, or error code
  */
-GIT_EXTERN(int) git_attr_foreach(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_attr_foreach(
+	git3_repository *repo,
 	uint32_t flags,
 	const char *path,
-	git_attr_foreach_cb callback,
+	git3_attr_foreach_cb callback,
 	void *payload);
 
 /**
  * Loop over all the git attributes for a path with extended options.
  *
  * @param repo The repository containing the path.
- * @param opts The `git_attr_options` to use when querying these attributes.
+ * @param opts The `git3_attr_options` to use when querying these attributes.
  * @param path Path inside the repo to check attributes.  This does not have
  *             to exist, but if it does not, then it will be treated as a
  *             plain file (i.e. not a directory).
  * @param callback Function to invoke on each attribute name and value.
- *                 See git_attr_foreach_cb.
+ *                 See git3_attr_foreach_cb.
  * @param payload Passed on as extra parameter to callback function.
  * @return 0 on success, non-zero callback return value, or error code
  */
-GIT_EXTERN(int) git_attr_foreach_ext(
-	git_repository *repo,
-	git_attr_options *opts,
+GIT3_EXTERN(int) git3_attr_foreach_ext(
+	git3_repository *repo,
+	git3_attr_options *opts,
 	const char *path,
-	git_attr_foreach_cb callback,
+	git3_attr_foreach_cb callback,
 	void *payload);
 
 /**
@@ -354,8 +354,8 @@ GIT_EXTERN(int) git_attr_foreach_ext(
  * @param repo The repository containing the gitattributes cache
  * @return 0 on success, or an error code
  */
-GIT_EXTERN(int) git_attr_cache_flush(
-	git_repository *repo);
+GIT3_EXTERN(int) git3_attr_cache_flush(
+	git3_repository *repo);
 
 /**
  * Add a macro definition.
@@ -365,19 +365,19 @@ GIT_EXTERN(int) git_attr_cache_flush(
  * function allows you to add others.  For example, to add the default
  * macro, you would call:
  *
- *     git_attr_add_macro(repo, "binary", "-diff -crlf");
+ *     git3_attr_add_macro(repo, "binary", "-diff -crlf");
  *
  * @param repo The repository to add the macro in.
  * @param name The name of the macro.
  * @param values The value for the macro.
  * @return 0 or an error code.
  */
-GIT_EXTERN(int) git_attr_add_macro(
-	git_repository *repo,
+GIT3_EXTERN(int) git3_attr_add_macro(
+	git3_repository *repo,
 	const char *name,
 	const char *values);
 
 /** @} */
-GIT_END_DECL
+GIT3_END_DECL
 #endif
 

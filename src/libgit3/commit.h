@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 #ifndef INCLUDE_commit_h__
@@ -16,14 +16,14 @@
 
 #include <time.h>
 
-struct git_commit {
-	git_object object;
+struct git3_commit {
+	git3_object object;
 
-	git_array_t(git_oid) parent_ids;
-	git_oid tree_id;
+	git3_array_t(git3_oid) parent_ids;
+	git3_oid tree_id;
 
-	git_signature *author;
-	git_signature *committer;
+	git3_signature *author;
+	git3_signature *committer;
 
 	char *message_encoding;
 	char *raw_message;
@@ -34,54 +34,54 @@ struct git_commit {
 };
 
 typedef struct {
-	git_oid_t oid_type;
+	git3_oid_t oid_type;
 	unsigned int flags;
-} git_commit__parse_options;
+} git3_commit__parse_options;
 
 typedef enum {
 	/** Only parse parents and committer info */
-	GIT_COMMIT_PARSE_QUICK = (1 << 0)
-} git_commit__parse_flags;
+	GIT3_COMMIT_PARSE_QUICK = (1 << 0)
+} git3_commit__parse_flags;
 
-int git_commit__header_field(
-	git_str *out,
-	const git_commit *commit,
+int git3_commit__header_field(
+	git3_str *out,
+	const git3_commit *commit,
 	const char *field);
 
-int git_commit__extract_signature(
-	git_str *signature,
-	git_str *signed_data,
-	git_repository *repo,
-	git_oid *commit_id,
+int git3_commit__extract_signature(
+	git3_str *signature,
+	git3_str *signed_data,
+	git3_repository *repo,
+	git3_oid *commit_id,
 	const char *field);
 
-int git_commit__create_buffer(
-	git_str *out,
-	git_repository *repo,
-	const git_signature *author,
-	const git_signature *committer,
+int git3_commit__create_buffer(
+	git3_str *out,
+	git3_repository *repo,
+	const git3_signature *author,
+	const git3_signature *committer,
 	const char *message_encoding,
 	const char *message,
-	const git_tree *tree,
+	const git3_tree *tree,
 	size_t parent_count,
-	const git_commit *parents[]);
+	const git3_commit *parents[]);
 
-int git_commit__parse(
+int git3_commit__parse(
 	void *commit,
-	git_odb_object *obj,
-	git_oid_t oid_type);
+	git3_odb_object *obj,
+	git3_oid_t oid_type);
 
-int git_commit__parse_raw(
+int git3_commit__parse_raw(
 	void *commit,
 	const char *data,
 	size_t size,
-	git_oid_t oid_type);
+	git3_oid_t oid_type);
 
-int git_commit__parse_ext(
-	git_commit *commit,
-	git_odb_object *odb_obj,
-	git_commit__parse_options *parse_opts);
+int git3_commit__parse_ext(
+	git3_commit *commit,
+	git3_odb_object *odb_obj,
+	git3_commit__parse_options *parse_opts);
 
-void git_commit__free(void *commit);
+void git3_commit__free(void *commit);
 
 #endif

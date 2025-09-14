@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 #include "worktree_helpers.h"
 #include "submodule/submodule_helpers.h"
 
@@ -22,46 +22,46 @@ void test_worktree_repository__cleanup(void)
 
 void test_worktree_repository__head(void)
 {
-	git_reference *ref, *head;
+	git3_reference *ref, *head;
 
-	cl_git_pass(git_reference_lookup(&ref, fixture.repo, "refs/heads/testrepo-worktree"));
-	cl_git_pass(git_repository_head_for_worktree(&head, fixture.repo, "testrepo-worktree"));
-	cl_assert(git_reference_cmp(ref, head) == 0);
-	cl_assert(git_reference_owner(ref) == fixture.repo);
+	cl_git_pass(git3_reference_lookup(&ref, fixture.repo, "refs/heads/testrepo-worktree"));
+	cl_git_pass(git3_repository_head_for_worktree(&head, fixture.repo, "testrepo-worktree"));
+	cl_assert(git3_reference_cmp(ref, head) == 0);
+	cl_assert(git3_reference_owner(ref) == fixture.repo);
 
-	git_reference_free(ref);
-	git_reference_free(head);
+	git3_reference_free(ref);
+	git3_reference_free(head);
 }
 
 void test_worktree_repository__head_fails_for_invalid_worktree(void)
 {
-	git_reference *head = NULL;
+	git3_reference *head = NULL;
 
-	cl_git_fail(git_repository_head_for_worktree(&head, fixture.repo, "invalid"));
+	cl_git_fail(git3_repository_head_for_worktree(&head, fixture.repo, "invalid"));
 	cl_assert(head == NULL);
 }
 
 void test_worktree_repository__head_detached(void)
 {
-	git_reference *ref, *head;
+	git3_reference *ref, *head;
 
-	cl_git_pass(git_reference_lookup(&ref, fixture.repo, "refs/heads/testrepo-worktree"));
-	cl_git_pass(git_repository_set_head_detached(fixture.worktree, &ref->target.oid));
+	cl_git_pass(git3_reference_lookup(&ref, fixture.repo, "refs/heads/testrepo-worktree"));
+	cl_git_pass(git3_repository_set_head_detached(fixture.worktree, &ref->target.oid));
 
-	cl_assert(git_repository_head_detached(fixture.worktree));
-	cl_assert(git_repository_head_detached_for_worktree(fixture.repo, "testrepo-worktree"));
-	cl_git_pass(git_repository_head_for_worktree(&head, fixture.repo, "testrepo-worktree"));
+	cl_assert(git3_repository_head_detached(fixture.worktree));
+	cl_assert(git3_repository_head_detached_for_worktree(fixture.repo, "testrepo-worktree"));
+	cl_git_pass(git3_repository_head_for_worktree(&head, fixture.repo, "testrepo-worktree"));
 
 	cl_assert_equal_oid(&ref->target.oid, &head->target.oid);
 
-	git_reference_free(ref);
-	git_reference_free(head);
+	git3_reference_free(ref);
+	git3_reference_free(head);
 }
 
 void test_worktree_repository__head_detached_fails_for_invalid_worktree(void)
 {
-	git_reference *head = NULL;
+	git3_reference *head = NULL;
 
-	cl_git_fail(git_repository_head_detached_for_worktree(fixture.repo, "invalid"));
+	cl_git_fail(git3_repository_head_detached_for_worktree(fixture.repo, "invalid"));
 	cl_assert(head == NULL);
 }

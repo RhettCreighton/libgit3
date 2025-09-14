@@ -1,19 +1,19 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
 #ifndef INCLUDE_win32_leakcheck_h__
 #define INCLUDE_win32_leakcheck_h__
 
-#include "git2_util.h"
+#include "git3_util.h"
 
 /* Initialize the win32 leak checking system. */
-int git_win32_leakcheck_global_init(void);
+int git3_win32_leakcheck_global_init(void);
 
-#if defined(GIT_DEBUG_LEAKCHECK_WIN32)
+#if defined(GIT3_DEBUG_LEAKCHECK_WIN32)
 
 #include <stdlib.h>
 #include <crtdbg.h>
@@ -21,7 +21,7 @@ int git_win32_leakcheck_global_init(void);
 #include "git3/errors.h"
 #include "strnlen.h"
 
-bool git_win32_leakcheck_has_leaks(void);
+bool git3_win32_leakcheck_has_leaks(void);
 
 /* Stack frames (for stack tracing, below) */
 
@@ -37,7 +37,7 @@ bool git_win32_leakcheck_has_leaks(void);
  * (de-duped at the C# layer) stacktrace.  "aux_id" 0 is reserved
  * to mean no aux stacktrace data.
  */
-typedef void (*git_win32_leakcheck_stack_aux_cb_alloc)(unsigned int *aux_id);
+typedef void (*git3_win32_leakcheck_stack_aux_cb_alloc)(unsigned int *aux_id);
 
 /**
  * This type defines a callback to be used to augment the output of
@@ -51,7 +51,7 @@ typedef void (*git_win32_leakcheck_stack_aux_cb_alloc)(unsigned int *aux_id);
  * @param aux_msg A buffer where a formatted message should be written.
  * @param aux_msg_len The size of the buffer.
  */
-typedef void (*git_win32_leakcheck_stack_aux_cb_lookup)(unsigned int aux_id, char *aux_msg, size_t aux_msg_len);
+typedef void (*git3_win32_leakcheck_stack_aux_cb_lookup)(unsigned int aux_id, char *aux_msg, size_t aux_msg_len);
 
 /**
  * Register an "aux" data provider to augment our C stacktrace data.
@@ -63,15 +63,15 @@ typedef void (*git_win32_leakcheck_stack_aux_cb_lookup)(unsigned int aux_id, cha
  * If you choose to use this feature, it should be registered during
  * initialization and not changed for the duration of the process.
  */
-int git_win32_leakcheck_stack_set_aux_cb(
-	git_win32_leakcheck_stack_aux_cb_alloc cb_alloc,
-	git_win32_leakcheck_stack_aux_cb_lookup cb_lookup);
+int git3_win32_leakcheck_stack_set_aux_cb(
+	git3_win32_leakcheck_stack_aux_cb_alloc cb_alloc,
+	git3_win32_leakcheck_stack_aux_cb_lookup cb_lookup);
 
 /**
  * Maximum number of stackframes to record for a
  * single stacktrace.
  */
-#define GIT_WIN32_LEAKCHECK_STACK_MAX_FRAMES 30
+#define GIT3_WIN32_LEAKCHECK_STACK_MAX_FRAMES 30
 
 /**
  * Wrapper containing the raw unprocessed stackframe
@@ -85,8 +85,8 @@ int git_win32_leakcheck_stack_set_aux_cb(
 typedef struct {
 	unsigned int aux_id;
 	unsigned int nr_frames;
-	void *frames[GIT_WIN32_LEAKCHECK_STACK_MAX_FRAMES];
-} git_win32_leakcheck_stack_raw_data;
+	void *frames[GIT3_WIN32_LEAKCHECK_STACK_MAX_FRAMES];
+} git3_win32_leakcheck_stack_raw_data;
 
 /**
  * Capture raw stack trace data for the current process/thread.
@@ -95,16 +95,16 @@ typedef struct {
  * begin with the caller of this routine. Pass 1 to begin
  * with its caller.  And so on.
  */
-int git_win32_leakcheck_stack_capture(git_win32_leakcheck_stack_raw_data *pdata, int skip);
+int git3_win32_leakcheck_stack_capture(git3_win32_leakcheck_stack_raw_data *pdata, int skip);
 
 /**
  * Compare 2 raw stacktraces with the usual -1,0,+1 result.
  * This includes any "aux_id" values in the comparison, so that
  * our de-dup is also "aux" context relative.
  */
-int git_win32_leakcheck_stack_compare(
-	git_win32_leakcheck_stack_raw_data *d1,
-	git_win32_leakcheck_stack_raw_data *d2);
+int git3_win32_leakcheck_stack_compare(
+	git3_win32_leakcheck_stack_raw_data *d1,
+	git3_win32_leakcheck_stack_raw_data *d2);
 
 /**
  * Format raw stacktrace data into buffer WITHOUT using any mallocs.
@@ -112,9 +112,9 @@ int git_win32_leakcheck_stack_compare(
  * @param prefix String written before each frame; defaults to "\t".
  * @param suffix String written after each frame; defaults to "\n".
  */
-int git_win32_leakcheck_stack_format(
+int git3_win32_leakcheck_stack_format(
 	char *pbuf, size_t buf_len,
-	const git_win32_leakcheck_stack_raw_data *pdata,
+	const git3_win32_leakcheck_stack_raw_data *pdata,
 	const char *prefix, const char *suffix);
 
 /**
@@ -128,7 +128,7 @@ int git_win32_leakcheck_stack_format(
  * @param prefix String written before each frame; defaults to "\t".
  * @param suffix String written after each frame; defaults to "\n".
  */
-int git_win32_leakcheck_stack(
+int git3_win32_leakcheck_stack(
 	char * pbuf, size_t buf_len,
 	int skip,
 	const char *prefix, const char *suffix);
@@ -138,18 +138,18 @@ int git_win32_leakcheck_stack(
 /* MSVC CRTDBG memory leak reporting.
  *
  * We DO NOT use the "_CRTDBG_MAP_ALLOC" macro described in the MSVC
- * documentation because all allocs/frees in libgit2 already go through
- * the "git__" routines defined in this file.  Simply using the normal
+ * documentation because all allocs/frees in libgit3 already go through
+ * the "git3__" routines defined in this file.  Simply using the normal
  * reporting mechanism causes all leaks to be attributed to a routine
  * here in util.h (ie, the actual call to calloc()) rather than the
- * caller of git__calloc().
+ * caller of git3__calloc().
  *
- * Therefore, we declare a set of "git__crtdbg__" routines to replace
- * the corresponding "git__" routines and re-define the "git__" symbols
+ * Therefore, we declare a set of "git3__crtdbg__" routines to replace
+ * the corresponding "git3__" routines and re-define the "git3__" symbols
  * as macros.  This allows us to get and report the file:line info of
  * the real caller.
  *
- * We DO NOT replace the "git__free" routine because it needs to remain
+ * We DO NOT replace the "git3__free" routine because it needs to remain
  * a function pointer because it is used as a function argument when
  * setting up various structure "destructors".
  *
@@ -164,11 +164,11 @@ int git_win32_leakcheck_stack(
 /**
  * Checkpoint options.
  */
-typedef enum git_win32_leakcheck_stacktrace_options {
+typedef enum git3_win32_leakcheck_stacktrace_options {
 	/**
 	 * Set checkpoint marker.
 	 */
-	GIT_WIN32_LEAKCHECK_STACKTRACE_SET_MARK         = (1 << 0),
+	GIT3_WIN32_LEAKCHECK_STACKTRACE_SET_MARK         = (1 << 0),
 
 	/**
 	 * Dump leaks since last checkpoint marker.
@@ -180,21 +180,21 @@ typedef enum git_win32_leakcheck_stacktrace_options {
 	 * around a region of interest, also check the final (at exit)
 	 * dump before digging into leaks reported here.
 	 */
-	GIT_WIN32_LEAKCHECK_STACKTRACE_LEAKS_SINCE_MARK = (1 << 1),
+	GIT3_WIN32_LEAKCHECK_STACKTRACE_LEAKS_SINCE_MARK = (1 << 1),
 
 	/**
 	 * Dump leaks since init.  May not be combined
 	 * with _LEAKS_SINCE_MARK.
 	 */
-	GIT_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL      = (1 << 2),
+	GIT3_WIN32_LEAKCHECK_STACKTRACE_LEAKS_TOTAL      = (1 << 2),
 
 	/**
 	 * Suppress printing during dumps.
 	 * Just return leak count.
 	 */
-	GIT_WIN32_LEAKCHECK_STACKTRACE_QUIET            = (1 << 3),
+	GIT3_WIN32_LEAKCHECK_STACKTRACE_QUIET            = (1 << 3),
 
-} git_win32_leakcheck_stacktrace_options;
+} git3_win32_leakcheck_stacktrace_options;
 
 /**
  * Checkpoint memory state and/or dump unique stack traces of
@@ -203,8 +203,8 @@ typedef enum git_win32_leakcheck_stacktrace_options {
  * @return number of unique leaks (relative to requested starting
  * point) or error.
  */
-int git_win32_leakcheck_stacktrace_dump(
-	git_win32_leakcheck_stacktrace_options opt,
+int git3_win32_leakcheck_stacktrace_dump(
+	git3_win32_leakcheck_stacktrace_options opt,
 	const char *label);
 
 /**
@@ -216,7 +216,7 @@ int git_win32_leakcheck_stacktrace_dump(
  * This should ONLY be called by our internal memory allocations
  * routines.
  */
-const char *git_win32_leakcheck_stacktrace(int skip, const char *file);
+const char *git3_win32_leakcheck_stacktrace(int skip, const char *file);
 
 #endif
 #endif

@@ -1,4 +1,4 @@
-#include "clar_libgit2.h"
+#include "clar_libgit3.h"
 
 #define assert_sorted(a, cmp) \
 	_assert_sorted(a, ARRAY_SIZE(a), sizeof(*a), cmp)
@@ -7,11 +7,11 @@ struct big_entries {
 	char c[311];
 };
 
-static void _assert_sorted(void *els, size_t n, size_t elsize, git__sort_r_cmp cmp)
+static void _assert_sorted(void *els, size_t n, size_t elsize, git3__sort_r_cmp cmp)
 {
 	int8_t *p = els;
 
-	git__qsort_r(p, n, elsize, cmp, NULL);
+	git3__qsort_r(p, n, elsize, cmp, NULL);
 	while (n-- > 1) {
 		cl_assert(cmp(p, p + elsize, NULL) <= 0);
 		p += elsize;
@@ -21,20 +21,20 @@ static void _assert_sorted(void *els, size_t n, size_t elsize, git__sort_r_cmp c
 static int cmp_big(const void *_a, const void *_b, void *payload)
 {
 	const struct big_entries *a = (const struct big_entries *)_a, *b = (const struct big_entries *)_b;
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 	return (a->c[0] < b->c[0]) ? -1 : (a->c[0] > b->c[0]) ? +1 : 0;
 }
 
 static int cmp_int(const void *_a, const void *_b, void *payload)
 {
 	int a = *(const int *)_a, b = *(const int *)_b;
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 	return (a < b) ? -1 : (a > b) ? +1 : 0;
 }
 
 static int cmp_str(const void *_a, const void *_b, void *payload)
 {
-	GIT_UNUSED(payload);
+	GIT3_UNUSED(payload);
 	return strcmp((const char *) _a, (const char *) _b);
 }
 

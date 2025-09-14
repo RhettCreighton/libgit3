@@ -1,7 +1,7 @@
 /*
- * Copyright (C) the libgit2 contributors. All rights reserved.
+ * Copyright (C) the libgit3 contributors. All rights reserved.
  *
- * This file is part of libgit2, distributed under the GNU GPL v2 with
+ * This file is part of libgit3, distributed under the GNU GPL v2 with
  * a Linking Exception. For full terms see the included COPYING file.
  */
 
@@ -24,78 +24,78 @@
 /* default is unlimited */
 #define DEFAULT_FILE_LIMIT 0
 
-size_t git_mwindow__window_size = DEFAULT_WINDOW_SIZE;
-size_t git_mwindow__mapped_limit = DEFAULT_MAPPED_LIMIT;
-size_t git_mwindow__file_limit = DEFAULT_FILE_LIMIT;
+size_t git3_mwindow__window_size = DEFAULT_WINDOW_SIZE;
+size_t git3_mwindow__mapped_limit = DEFAULT_MAPPED_LIMIT;
+size_t git3_mwindow__file_limit = DEFAULT_FILE_LIMIT;
 
-/* Mutex to control access to `git_mwindow__mem_ctl` and `git_mwindow__pack_cache`. */
-git_mutex git_mwindow__mutex;
+/* Mutex to control access to `git3_mwindow__mem_ctl` and `git3_mwindow__pack_cache`. */
+git3_mutex git3_mwindow__mutex;
 
-/* Whenever you want to read or modify this, grab `git_mwindow__mutex` */
-git_mwindow_ctl git_mwindow__mem_ctl;
+/* Whenever you want to read or modify this, grab `git3_mwindow__mutex` */
+git3_mwindow_ctl git3_mwindow__mem_ctl;
 
 /* Global list of mwindow files, to open packs once across repos */
-GIT_HASHMAP_STR_FUNCTIONS(git_mwindow_packmap, , struct git_pack_file *);
-git_mwindow_packmap git_mwindow__pack_cache;
+GIT3_HASHMAP_STR_FUNCTIONS(git3_mwindow_packmap, , struct git3_pack_file *);
+git3_mwindow_packmap git3_mwindow__pack_cache;
 
-static void git_mwindow_global_shutdown(void)
+static void git3_mwindow_global_shutdown(void)
 {
-	git_mutex_free(&git_mwindow__mutex);
-	git_mwindow_packmap_dispose(&git_mwindow__pack_cache);
+	git3_mutex_free(&git3_mwindow__mutex);
+	git3_mwindow_packmap_dispose(&git3_mwindow__pack_cache);
 }
 
-int git_mwindow_global_init(void)
+int git3_mwindow_global_init(void)
 {
 	int error;
 
-	if ((error = git_mutex_init(&git_mwindow__mutex)) < 0)
+	if ((error = git3_mutex_init(&git3_mwindow__mutex)) < 0)
 	    return error;
 
-	return git_runtime_shutdown_register(git_mwindow_global_shutdown);
+	return git3_runtime_shutdown_register(git3_mwindow_global_shutdown);
 }
 
-int git_mwindow_get_pack(
-	struct git_pack_file **out,
+int git3_mwindow_get_pack(
+	struct git3_pack_file **out,
 	const char *path,
-	git_oid_t oid_type)
+	git3_oid_t oid_type)
 {
-	struct git_pack_file *pack;
+	struct git3_pack_file *pack;
 	char *packname;
 	int error;
 
-	if ((error = git_packfile__name(&packname, path)) < 0)
+	if ((error = git3_packfile__name(&packname, path)) < 0)
 		return error;
 
-	if (git_mutex_lock(&git_mwindow__mutex) < 0) {
-		git_error_set(GIT_ERROR_OS, "failed to lock mwindow mutex");
+	if (git3_mutex_lock(&git3_mwindow__mutex) < 0) {
+		git3_error_set(GIT3_ERROR_OS, "failed to lock mwindow mutex");
 		return -1;
 	}
 
-	error = git_mwindow_packmap_get(&pack, &git_mwindow__pack_cache, packname);
-	git__free(packname);
+	error = git3_mwindow_packmap_get(&pack, &git3_mwindow__pack_cache, packname);
+	git3__free(packname);
 
 	if (error == 0) {
-		git_atomic32_inc(&pack->refcount);
-		git_mutex_unlock(&git_mwindow__mutex);
+		git3_atomic32_inc(&pack->refcount);
+		git3_mutex_unlock(&git3_mwindow__mutex);
 		*out = pack;
 		return 0;
-	} else if (error != GIT_ENOTFOUND) {
+	} else if (error != GIT3_ENOTFOUND) {
 		return error;
 	}
 
 	/* If we didn't find it, we need to create it */
-	if ((error = git_packfile_alloc(&pack, path, oid_type)) < 0) {
-		git_mutex_unlock(&git_mwindow__mutex);
+	if ((error = git3_packfile_alloc(&pack, path, oid_type)) < 0) {
+		git3_mutex_unlock(&git3_mwindow__mutex);
 		return error;
 	}
 
-	git_atomic32_inc(&pack->refcount);
+	git3_atomic32_inc(&pack->refcount);
 
-	error = git_mwindow_packmap_put(&git_mwindow__pack_cache, pack->pack_name, pack);
-	git_mutex_unlock(&git_mwindow__mutex);
+	error = git3_mwindow_packmap_put(&git3_mwindow__pack_cache, pack->pack_name, pack);
+	git3_mutex_unlock(&git3_mwindow__mutex);
 
 	if (error < 0) {
-		git_packfile_free(pack, false);
+		git3_packfile_free(pack, false);
 		return error;
 	}
 
@@ -103,80 +103,80 @@ int git_mwindow_get_pack(
 	return 0;
 }
 
-int git_mwindow_put_pack(struct git_pack_file *pack)
+int git3_mwindow_put_pack(struct git3_pack_file *pack)
 {
 	int count, error;
-	struct git_pack_file *pack_to_delete = NULL;
+	struct git3_pack_file *pack_to_delete = NULL;
 
-	if ((error = git_mutex_lock(&git_mwindow__mutex)) < 0)
+	if ((error = git3_mutex_lock(&git3_mwindow__mutex)) < 0)
 		return error;
 
 	/* if we cannot find it, the state is corrupted */
-	GIT_ASSERT(git_mwindow_packmap_contains(&git_mwindow__pack_cache, pack->pack_name));
+	GIT3_ASSERT(git3_mwindow_packmap_contains(&git3_mwindow__pack_cache, pack->pack_name));
 
-	count = git_atomic32_dec(&pack->refcount);
+	count = git3_atomic32_dec(&pack->refcount);
 	if (count == 0) {
-		git_mwindow_packmap_remove(&git_mwindow__pack_cache, pack->pack_name);
+		git3_mwindow_packmap_remove(&git3_mwindow__pack_cache, pack->pack_name);
 		pack_to_delete = pack;
 	}
-	git_mutex_unlock(&git_mwindow__mutex);
-	git_packfile_free(pack_to_delete, false);
+	git3_mutex_unlock(&git3_mwindow__mutex);
+	git3_packfile_free(pack_to_delete, false);
 
 	return 0;
 }
 
 /*
  * Free all the windows in a sequence, typically because we're done
- * with the file. Needs to hold the git_mwindow__mutex.
+ * with the file. Needs to hold the git3_mwindow__mutex.
  */
-static int git_mwindow_free_all_locked(git_mwindow_file *mwf)
+static int git3_mwindow_free_all_locked(git3_mwindow_file *mwf)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
 	size_t i;
 
 	/*
 	 * Remove these windows from the global list
 	 */
 	for (i = 0; i < ctl->windowfiles.length; ++i){
-		if (git_vector_get(&ctl->windowfiles, i) == mwf) {
-			git_vector_remove(&ctl->windowfiles, i);
+		if (git3_vector_get(&ctl->windowfiles, i) == mwf) {
+			git3_vector_remove(&ctl->windowfiles, i);
 			break;
 		}
 	}
 
 	if (ctl->windowfiles.length == 0) {
-		git_vector_dispose(&ctl->windowfiles);
+		git3_vector_dispose(&ctl->windowfiles);
 		ctl->windowfiles.contents = NULL;
 	}
 
 	while (mwf->windows) {
-		git_mwindow *w = mwf->windows;
-		GIT_ASSERT(w->inuse_cnt == 0);
+		git3_mwindow *w = mwf->windows;
+		GIT3_ASSERT(w->inuse_cnt == 0);
 
 		ctl->mapped -= w->window_map.len;
 		ctl->open_windows--;
 
-		git_futils_mmap_free(&w->window_map);
+		git3_futils_mmap_free(&w->window_map);
 
 		mwf->windows = w->next;
-		git__free(w);
+		git3__free(w);
 	}
 
 	return 0;
 }
 
-int git_mwindow_free_all(git_mwindow_file *mwf)
+int git3_mwindow_free_all(git3_mwindow_file *mwf)
 {
 	int error;
 
-	if (git_mutex_lock(&git_mwindow__mutex)) {
-		git_error_set(GIT_ERROR_THREAD, "unable to lock mwindow mutex");
+	if (git3_mutex_lock(&git3_mwindow__mutex)) {
+		git3_error_set(GIT3_ERROR_THREAD, "unable to lock mwindow mutex");
 		return -1;
 	}
 
-	error = git_mwindow_free_all_locked(mwf);
+	error = git3_mwindow_free_all_locked(mwf);
 
-	git_mutex_unlock(&git_mwindow__mutex);
+	git3_mutex_unlock(&git3_mwindow__mutex);
 
 	return error;
 }
@@ -187,15 +187,15 @@ int git_mwindow_free_all(git_mwindow_file *mwf)
  * 'extra' is the size of the hash we're using as we always want to make sure
  * that it's contained.
  */
-int git_mwindow_contains(git_mwindow *win, off64_t offset, off64_t extra)
+int git3_mwindow_contains(git3_mwindow *win, off64_t offset, off64_t extra)
 {
 	off64_t win_off = win->offset;
 	return win_off <= offset
 		&& (offset + extra) <= (off64_t)(win_off + win->window_map.len);
 }
 
-#define GIT_MWINDOW__LRU -1
-#define GIT_MWINDOW__MRU 1
+#define GIT3_MWINDOW__LRU -1
+#define GIT3_MWINDOW__MRU 1
 
 /*
  * Find the least- or most-recently-used window in a file that is not currently
@@ -205,19 +205,19 @@ int git_mwindow_contains(git_mwindow *win, off64_t offset, off64_t extra)
  *
  * Returns whether such a window was found in the file.
  */
-static bool git_mwindow_scan_recently_used(
-		git_mwindow_file *mwf,
-		git_mwindow **out_window,
-		git_mwindow **out_last,
+static bool git3_mwindow_scan_recently_used(
+		git3_mwindow_file *mwf,
+		git3_mwindow **out_window,
+		git3_mwindow **out_last,
 		bool only_unused,
 		int comparison_sign)
 {
-	git_mwindow *w, *w_last;
-	git_mwindow *lru_window = NULL, *lru_last = NULL;
+	git3_mwindow *w, *w_last;
+	git3_mwindow *lru_window = NULL, *lru_last = NULL;
 	bool found = false;
 
-	GIT_ASSERT_ARG(mwf);
-	GIT_ASSERT_ARG(out_window);
+	GIT3_ASSERT_ARG(mwf);
+	GIT3_ASSERT_ARG(out_window);
 
 	lru_window = *out_window;
 	if (out_last)
@@ -256,34 +256,34 @@ static bool git_mwindow_scan_recently_used(
  * Close the least recently used window (that is currently not being used) out
  * of all the files. Called under lock from new_window_locked.
  */
-static int git_mwindow_close_lru_window_locked(void)
+static int git3_mwindow_close_lru_window_locked(void)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
-	git_mwindow_file *cur;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
+	git3_mwindow_file *cur;
 	size_t i;
-	git_mwindow *lru_window = NULL, *lru_last = NULL, **list = NULL;
+	git3_mwindow *lru_window = NULL, *lru_last = NULL, **list = NULL;
 
-	git_vector_foreach(&ctl->windowfiles, i, cur) {
-		if (git_mwindow_scan_recently_used(
-				cur, &lru_window, &lru_last, false, GIT_MWINDOW__LRU)) {
+	git3_vector_foreach(&ctl->windowfiles, i, cur) {
+		if (git3_mwindow_scan_recently_used(
+				cur, &lru_window, &lru_last, false, GIT3_MWINDOW__LRU)) {
 			list = &cur->windows;
 		}
 	}
 
 	if (!lru_window) {
-		git_error_set(GIT_ERROR_OS, "failed to close memory window; couldn't find LRU");
+		git3_error_set(GIT3_ERROR_OS, "failed to close memory window; couldn't find LRU");
 		return -1;
 	}
 
 	ctl->mapped -= lru_window->window_map.len;
-	git_futils_mmap_free(&lru_window->window_map);
+	git3_futils_mmap_free(&lru_window->window_map);
 
 	if (lru_last)
 		lru_last->next = lru_window->next;
 	else
 		*list = lru_window->next;
 
-	git__free(lru_window);
+	git3__free(lru_window);
 	ctl->open_windows--;
 
 	return 0;
@@ -296,17 +296,17 @@ static int git_mwindow_close_lru_window_locked(void)
  *
  * Called under lock from new_window_locked.
  */
-static int git_mwindow_find_lru_file_locked(git_mwindow_file **out)
+static int git3_mwindow_find_lru_file_locked(git3_mwindow_file **out)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
-	git_mwindow_file *lru_file = NULL, *current_file = NULL;
-	git_mwindow *lru_window = NULL;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
+	git3_mwindow_file *lru_file = NULL, *current_file = NULL;
+	git3_mwindow *lru_window = NULL;
 	size_t i;
 
-	git_vector_foreach(&ctl->windowfiles, i, current_file) {
-		git_mwindow *mru_window = NULL;
-		if (!git_mwindow_scan_recently_used(
-				current_file, &mru_window, NULL, true, GIT_MWINDOW__MRU)) {
+	git3_vector_foreach(&ctl->windowfiles, i, current_file) {
+		git3_mwindow *mru_window = NULL;
+		if (!git3_mwindow_scan_recently_used(
+				current_file, &mru_window, NULL, true, GIT3_MWINDOW__MRU)) {
 			continue;
 		}
 		if (!lru_window || lru_window->last_used > mru_window->last_used) {
@@ -316,7 +316,7 @@ static int git_mwindow_find_lru_file_locked(git_mwindow_file **out)
 	}
 
 	if (!lru_file) {
-		git_error_set(GIT_ERROR_OS, "failed to close memory window file; couldn't find LRU");
+		git3_error_set(GIT3_ERROR_OS, "failed to close memory window file; couldn't find LRU");
 		return -1;
 	}
 
@@ -324,18 +324,18 @@ static int git_mwindow_find_lru_file_locked(git_mwindow_file **out)
 	return 0;
 }
 
-/* This gets called under lock from git_mwindow_open */
-static git_mwindow *new_window_locked(
-	git_file fd,
+/* This gets called under lock from git3_mwindow_open */
+static git3_mwindow *new_window_locked(
+	git3_file fd,
 	off64_t size,
 	off64_t offset)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
-	size_t walign = git_mwindow__window_size / 2;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
+	size_t walign = git3_mwindow__window_size / 2;
 	off64_t len;
-	git_mwindow *w;
+	git3_mwindow *w;
 
-	w = git__calloc(1, sizeof(*w));
+	w = git3__calloc(1, sizeof(*w));
 
 	if (w == NULL)
 		return NULL;
@@ -343,13 +343,13 @@ static git_mwindow *new_window_locked(
 	w->offset = (offset / walign) * walign;
 
 	len = size - w->offset;
-	if (len > (off64_t)git_mwindow__window_size)
-		len = (off64_t)git_mwindow__window_size;
+	if (len > (off64_t)git3_mwindow__window_size)
+		len = (off64_t)git3_mwindow__window_size;
 
 	ctl->mapped += (size_t)len;
 
-	while (git_mwindow__mapped_limit < ctl->mapped &&
-			git_mwindow_close_lru_window_locked() == 0) /* nop */;
+	while (git3_mwindow__mapped_limit < ctl->mapped &&
+			git3_mwindow_close_lru_window_locked() == 0) /* nop */;
 
 	/*
 	 * We treat `mapped_limit` as a soft limit. If we can't find a
@@ -357,17 +357,17 @@ static git_mwindow *new_window_locked(
 	 * window.
 	 */
 
-	if (git_futils_mmap_ro(&w->window_map, fd, w->offset, (size_t)len) < 0) {
+	if (git3_futils_mmap_ro(&w->window_map, fd, w->offset, (size_t)len) < 0) {
 		/*
 		 * The first error might be down to memory fragmentation even if
 		 * we're below our soft limits, so free up what we can and try again.
 		 */
 
-		while (git_mwindow_close_lru_window_locked() == 0)
+		while (git3_mwindow_close_lru_window_locked() == 0)
 			/* nop */;
 
-		if (git_futils_mmap_ro(&w->window_map, fd, w->offset, (size_t)len) < 0) {
-			git__free(w);
+		if (git3_futils_mmap_ro(&w->window_map, fd, w->offset, (size_t)len) < 0) {
+			git3__free(w);
 			return NULL;
 		}
 	}
@@ -388,28 +388,28 @@ static git_mwindow *new_window_locked(
  * Open a new window, closing the least recenty used until we have
  * enough space. Don't forget to add it to your list
  */
-unsigned char *git_mwindow_open(
-	git_mwindow_file *mwf,
-	git_mwindow **cursor,
+unsigned char *git3_mwindow_open(
+	git3_mwindow_file *mwf,
+	git3_mwindow **cursor,
 	off64_t offset,
 	size_t extra,
 	unsigned int *left)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
-	git_mwindow *w = *cursor;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
+	git3_mwindow *w = *cursor;
 
-	if (git_mutex_lock(&git_mwindow__mutex)) {
-		git_error_set(GIT_ERROR_THREAD, "unable to lock mwindow mutex");
+	if (git3_mutex_lock(&git3_mwindow__mutex)) {
+		git3_error_set(GIT3_ERROR_THREAD, "unable to lock mwindow mutex");
 		return NULL;
 	}
 
-	if (!w || !(git_mwindow_contains(w, offset, extra))) {
+	if (!w || !(git3_mwindow_contains(w, offset, extra))) {
 		if (w) {
 			w->inuse_cnt--;
 		}
 
 		for (w = mwf->windows; w; w = w->next) {
-			if (git_mwindow_contains(w, offset, extra))
+			if (git3_mwindow_contains(w, offset, extra))
 				break;
 		}
 
@@ -420,7 +420,7 @@ unsigned char *git_mwindow_open(
 		if (!w) {
 			w = new_window_locked(mwf->fd, mwf->size, offset);
 			if (w == NULL) {
-				git_mutex_unlock(&git_mwindow__mutex);
+				git3_mutex_unlock(&git3_mwindow__mutex);
 				return NULL;
 			}
 			w->next = mwf->windows;
@@ -440,46 +440,46 @@ unsigned char *git_mwindow_open(
 	if (left)
 		*left = (unsigned int)(w->window_map.len - offset);
 
-	git_mutex_unlock(&git_mwindow__mutex);
+	git3_mutex_unlock(&git3_mwindow__mutex);
 	return (unsigned char *) w->window_map.data + offset;
 }
 
-int git_mwindow_file_register(git_mwindow_file *mwf)
+int git3_mwindow_file_register(git3_mwindow_file *mwf)
 {
-	git_vector closed_files = GIT_VECTOR_INIT;
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
+	git3_vector closed_files = GIT3_VECTOR_INIT;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
 	int error;
 	size_t i;
-	git_mwindow_file *closed_file = NULL;
+	git3_mwindow_file *closed_file = NULL;
 
-	if (git_mutex_lock(&git_mwindow__mutex)) {
-		git_error_set(GIT_ERROR_THREAD, "unable to lock mwindow mutex");
+	if (git3_mutex_lock(&git3_mwindow__mutex)) {
+		git3_error_set(GIT3_ERROR_THREAD, "unable to lock mwindow mutex");
 		return -1;
 	}
 
 	if (ctl->windowfiles.length == 0 &&
-	    (error = git_vector_init(&ctl->windowfiles, 8, NULL)) < 0) {
-		git_mutex_unlock(&git_mwindow__mutex);
+	    (error = git3_vector_init(&ctl->windowfiles, 8, NULL)) < 0) {
+		git3_mutex_unlock(&git3_mwindow__mutex);
 		goto cleanup;
 	}
 
-	if (git_mwindow__file_limit) {
-		git_mwindow_file *lru_file;
-		while (git_mwindow__file_limit <= ctl->windowfiles.length &&
-				git_mwindow_find_lru_file_locked(&lru_file) == 0) {
-			if ((error = git_vector_insert(&closed_files, lru_file)) < 0) {
+	if (git3_mwindow__file_limit) {
+		git3_mwindow_file *lru_file;
+		while (git3_mwindow__file_limit <= ctl->windowfiles.length &&
+				git3_mwindow_find_lru_file_locked(&lru_file) == 0) {
+			if ((error = git3_vector_insert(&closed_files, lru_file)) < 0) {
 				/*
 				 * Exceeding the file limit seems preferable to being open to
 				 * data races that can end up corrupting the heap.
 				 */
 				break;
 			}
-			git_mwindow_free_all_locked(lru_file);
+			git3_mwindow_free_all_locked(lru_file);
 		}
 	}
 
-	error = git_vector_insert(&ctl->windowfiles, mwf);
-	git_mutex_unlock(&git_mwindow__mutex);
+	error = git3_vector_insert(&ctl->windowfiles, mwf);
+	git3_mutex_unlock(&git3_mwindow__mutex);
 	if (error < 0)
 		goto cleanup;
 
@@ -488,50 +488,50 @@ int git_mwindow_file_register(git_mwindow_file *mwf)
 	 * individual file. Before doing so, acquire that file's lock to avoid
 	 * closing a file that is currently being used.
 	 */
-	git_vector_foreach(&closed_files, i, closed_file) {
-		error = git_mutex_lock(&closed_file->lock);
+	git3_vector_foreach(&closed_files, i, closed_file) {
+		error = git3_mutex_lock(&closed_file->lock);
 		if (error < 0)
 			continue;
 		p_close(closed_file->fd);
 		closed_file->fd = -1;
-		git_mutex_unlock(&closed_file->lock);
+		git3_mutex_unlock(&closed_file->lock);
 	}
 
 cleanup:
-	git_vector_dispose(&closed_files);
+	git3_vector_dispose(&closed_files);
 	return error;
 }
 
-void git_mwindow_file_deregister(git_mwindow_file *mwf)
+void git3_mwindow_file_deregister(git3_mwindow_file *mwf)
 {
-	git_mwindow_ctl *ctl = &git_mwindow__mem_ctl;
-	git_mwindow_file *cur;
+	git3_mwindow_ctl *ctl = &git3_mwindow__mem_ctl;
+	git3_mwindow_file *cur;
 	size_t i;
 
-	if (git_mutex_lock(&git_mwindow__mutex))
+	if (git3_mutex_lock(&git3_mwindow__mutex))
 		return;
 
-	git_vector_foreach(&ctl->windowfiles, i, cur) {
+	git3_vector_foreach(&ctl->windowfiles, i, cur) {
 		if (cur == mwf) {
-			git_vector_remove(&ctl->windowfiles, i);
-			git_mutex_unlock(&git_mwindow__mutex);
+			git3_vector_remove(&ctl->windowfiles, i);
+			git3_mutex_unlock(&git3_mwindow__mutex);
 			return;
 		}
 	}
-	git_mutex_unlock(&git_mwindow__mutex);
+	git3_mutex_unlock(&git3_mwindow__mutex);
 }
 
-void git_mwindow_close(git_mwindow **window)
+void git3_mwindow_close(git3_mwindow **window)
 {
-	git_mwindow *w = *window;
+	git3_mwindow *w = *window;
 	if (w) {
-		if (git_mutex_lock(&git_mwindow__mutex)) {
-			git_error_set(GIT_ERROR_THREAD, "unable to lock mwindow mutex");
+		if (git3_mutex_lock(&git3_mwindow__mutex)) {
+			git3_error_set(GIT3_ERROR_THREAD, "unable to lock mwindow mutex");
 			return;
 		}
 
 		w->inuse_cnt--;
-		git_mutex_unlock(&git_mwindow__mutex);
+		git3_mutex_unlock(&git3_mwindow__mutex);
 		*window = NULL;
 	}
 }
