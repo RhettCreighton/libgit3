@@ -94,14 +94,8 @@
 /* Git3 is libgit3 with SHA3-256 as the default hash */
 /* All git3_ functions work as git3_ functions */
 
-/* Verify that SHA3-256 is being used */
-static inline int git3_verify_sha3(void) {
-    return (GIT3_OID_DEFAULT == GIT3_OID_SHA3_256) ? 0 : -1;
-}
-
-/* Get git3 version string */
-static inline const char* git3_version(void) {
-    return "libgit3 " GIT3_VERSION " (SHA3-256)";
-}
+/* Function prototypes for git3 utilities */
+int git3_verify_sha3(void);
+const char* git3_version(void);
 
 #endif /* INCLUDE_git3_h__ */
